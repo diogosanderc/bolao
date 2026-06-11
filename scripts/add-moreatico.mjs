@@ -7,19 +7,25 @@ const dbPath = join(__dirname, '../data/db.json')
 
 const db = JSON.parse(readFileSync(dbPath, 'utf-8'))
 
-if (db.participants.find(p => p.name === 'MOREATICO')) {
-  console.log('MOREATICO já existe no banco.')
-  process.exit(0)
+// Remove palpites de mata-mata do MOREATICO se existirem
+db.matchPredictions = db.matchPredictions.filter(p => {
+  if (p.participantId !== 'moreatico-001') return true
+  return p.matchId.startsWith('G') // mantém só fase de grupos
+})
+
+if (!db.participants.find(p => p.name === 'MOREATICO')) {
+  db.participants.push({
+    id: 'moreatico-001',
+    name: 'MOREATICO',
+    email: '',
+    passwordHash: '',
+    token: 'c7f3a291be04d18e',
+    createdAt: '2026-06-11T14:00:00.000Z'
+  })
 }
 
-db.participants.push({
-  id: 'moreatico-001',
-  name: 'MOREATICO',
-  email: '',
-  passwordHash: '',
-  token: 'c7f3a291be04d18e',
-  createdAt: '2026-06-11T14:00:00.000Z'
-})
+// Remove palpites de grupos existentes para evitar duplicatas
+db.matchPredictions = db.matchPredictions.filter(p => p.participantId !== 'moreatico-001')
 
 const predictions = [
   { matchId: 'GA1', score1: 2, score2: 0 }, { matchId: 'GA2', score1: 0, score2: 1 },
@@ -58,22 +64,6 @@ const predictions = [
   { matchId: 'GL1', score1: 1, score2: 1 }, { matchId: 'GL2', score1: 1, score2: 0 },
   { matchId: 'GL3', score1: 1, score2: 0 }, { matchId: 'GL4', score1: 2, score2: 0 },
   { matchId: 'GL5', score1: 1, score2: 0 }, { matchId: 'GL6', score1: 2, score2: 0 },
-  { matchId: 'R32_1',  score1: 1, score2: 0 }, { matchId: 'R32_2',  score1: 1, score2: 0 },
-  { matchId: 'R32_3',  score1: 1, score2: 0 }, { matchId: 'R32_4',  score1: 1, score2: 0 },
-  { matchId: 'R32_5',  score1: 1, score2: 0 }, { matchId: 'R32_6',  score1: 1, score2: 0 },
-  { matchId: 'R32_7',  score1: 1, score2: 0 }, { matchId: 'R32_8',  score1: 1, score2: 0 },
-  { matchId: 'R32_9',  score1: 1, score2: 0 }, { matchId: 'R32_10', score1: 1, score2: 0 },
-  { matchId: 'R32_11', score1: 0, score2: 1 }, { matchId: 'R32_12', score1: 1, score2: 0 },
-  { matchId: 'R32_13', score1: 1, score2: 0 }, { matchId: 'R32_14', score1: 1, score2: 0 },
-  { matchId: 'R32_15', score1: 1, score2: 0 }, { matchId: 'R32_16', score1: 1, score2: 0 },
-  { matchId: 'R16_1', score1: 1, score2: 0 }, { matchId: 'R16_2', score1: 0, score2: 1 },
-  { matchId: 'R16_3', score1: 1, score2: 0 }, { matchId: 'R16_4', score1: 0, score2: 1 },
-  { matchId: 'R16_5', score1: 0, score2: 1 }, { matchId: 'R16_6', score1: 0, score2: 1 },
-  { matchId: 'R16_7', score1: 2, score2: 0 }, { matchId: 'R16_8', score1: 0, score2: 1 },
-  { matchId: 'QF_1', score1: 1, score2: 0 }, { matchId: 'QF_2', score1: 1, score2: 0 },
-  { matchId: 'QF_3', score1: 2, score2: 0 }, { matchId: 'QF_4', score1: 1, score2: 0 },
-  { matchId: 'SF_1', score1: 1, score2: 1 }, { matchId: 'SF_2', score1: 1, score2: 1 },
-  { matchId: 'TP_1', score1: 2, score2: 0 }, { matchId: 'F_1',  score1: 0, score2: 1 },
 ]
 
 for (const p of predictions) {
@@ -81,4 +71,4 @@ for (const p of predictions) {
 }
 
 writeFileSync(dbPath, JSON.stringify(db, null, 2))
-console.log(`MOREATICO adicionado com ${predictions.length} palpites.`)
+console.log(`MOREATICO atualizado com ${predictions.length} palpites (somente fase de grupos).`)
