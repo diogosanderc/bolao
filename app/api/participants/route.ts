@@ -17,6 +17,8 @@ export async function POST(req: NextRequest) {
   const participant: Participant = {
     id: randomUUID(),
     name: name.trim(),
+    email: '',
+    passwordHash: '',
     token: randomUUID().replace(/-/g, '').slice(0, 12),
     createdAt: new Date().toISOString(),
   }

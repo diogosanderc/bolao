@@ -77,7 +77,13 @@ export interface GroupPrediction {
 export interface Participant {
   id: string
   name: string
-  token: string
+  email: string
+  passwordHash: string
+  token: string       // token único para URL de palpites
+  sessionToken?: string
+  sessionExpiry?: string
+  resetToken?: string
+  resetExpiry?: string
   createdAt: string
 }
 
