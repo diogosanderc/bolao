@@ -80,6 +80,22 @@ export default function AdminPage() {
     setParticipants(prev => prev.filter(p => p.id !== id))
   }
 
+  async function clearResult(matchId: string) {
+    setSaving(true)
+    const r = await fetch('/api/results', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ adminKey: key, matchId }),
+    })
+    if (r.ok) {
+      setResults(prev => { const n = { ...prev }; delete n[matchId]; return n })
+      showToast('Resultado removido.')
+    } else {
+      showToast('Erro: chave de admin incorreta?')
+    }
+    setSaving(false)
+  }
+
   async function saveResult(matchId: string, score1: number, score2: number, advancingTeamId?: string) {
     setSaving(true)
     const r = await fetch('/api/results', {
@@ -259,6 +275,7 @@ export default function AdminPage() {
                 isKnockout={false}
                 current={results[m.id]}
                 onSave={saveResult}
+                onDelete={clearResult}
                 saving={saving}
               />
             ))}
@@ -297,6 +314,7 @@ export default function AdminPage() {
                         isKnockout={true}
                         current={results[m.id]}
                         onSave={saveResult}
+                        onDelete={clearResult}
                         saving={saving}
                       />
                     )
@@ -318,6 +336,7 @@ function ResultInput({
   isKnockout,
   current,
   onSave,
+  onDelete,
   saving,
 }: {
   matchId: string
@@ -326,6 +345,7 @@ function ResultInput({
   isKnockout: boolean
   current?: { score1?: number; score2?: number; advancingTeamId?: string }
   onSave: (matchId: string, s1: number, s2: number, adv?: string) => void
+  onDelete: (matchId: string) => void
   saving: boolean
 }) {
   const [s1, setS1] = useState(current?.score1 !== undefined ? String(current.score1) : '')
@@ -384,6 +404,16 @@ function ResultInput({
         >
           {saved ? 'Atualizar' : 'Salvar'}
         </button>
+        {saved && (
+          <button
+            onClick={() => onDelete(matchId)}
+            disabled={saving}
+            title="Remover resultado"
+            className="shrink-0 text-xs text-red-400 hover:text-red-300 disabled:opacity-40 px-1.5 py-1.5 transition-colors"
+          >
+            ✕
+          </button>
+        )}
       </div>
 
       {isKnockout && isDraw && (
