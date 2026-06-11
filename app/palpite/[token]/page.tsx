@@ -38,7 +38,8 @@ function MatchCard({
   const team1 = teamById[t1Id]
   const team2 = teamById[t2Id]
   const isDraw = s1 !== '' && s2 !== '' && Number(s1) === Number(s2)
-  const locked = result?.score1 !== undefined
+  const officialResult = result?.score1 !== undefined
+  const locked = officialResult || prediction !== undefined
   const isTBD = t1Id === 'TBD' || t2Id === 'TBD'
 
   function handle(field: 'a' | 'b', val: string) {
@@ -112,33 +113,24 @@ function MatchCard({
       )}
 
       <div className="px-4 pb-3 flex items-center justify-between">
-        {locked ? (
+        {officialResult ? (
           <span className="text-xs text-green-500 flex items-center gap-1">
-            <span>✓</span> Resultado: {result?.score1}×{result?.score2}
+            <span>✓</span> Resultado oficial: {result?.score1}×{result?.score2}
           </span>
-        ) : saved && !dirty ? (
-          <span className="text-xs text-green-400 flex items-center gap-1"><span>✓</span> Salvo</span>
+        ) : prediction !== undefined ? (
+          <span className="text-xs text-green-400 flex items-center gap-1">
+            <span>✓</span> Palpite enviado
+          </span>
         ) : (
-          <span className="text-xs text-gray-600">
-            {prediction !== undefined ? `Palpite: ${prediction.score1}×${prediction.score2}` : 'Sem palpite'}
-          </span>
+          <span className="text-xs text-gray-600">Sem palpite</span>
         )}
 
-        <div className="flex items-center gap-2">
-          {!locked && prediction !== undefined && !dirty && (
-            <button
-              onClick={() => { inputRef.current?.select(); inputRef.current?.focus() }}
-              className="text-xs text-blue-400 hover:text-blue-300 border border-blue-800/60 hover:border-blue-600 rounded-lg px-2.5 py-1 transition-colors">
-              ✏ Alterar
-            </button>
-          )}
-          {!locked && dirty && (
-            <button onClick={save} disabled={saving || s1 === '' || s2 === '' || (isKnockout && isDraw && !adv)}
-              className="text-xs bg-yellow-600 hover:bg-yellow-500 disabled:bg-gray-800 disabled:text-gray-600 text-white rounded-lg px-3 py-1.5 font-semibold transition-colors">
-              Salvar
-            </button>
-          )}
-        </div>
+        {!locked && dirty && (
+          <button onClick={save} disabled={saving || s1 === '' || s2 === '' || (isKnockout && isDraw && !adv)}
+            className="text-xs bg-yellow-600 hover:bg-yellow-500 disabled:bg-gray-800 disabled:text-gray-600 text-white rounded-lg px-3 py-1.5 font-semibold transition-colors">
+            Salvar
+          </button>
+        )}
       </div>
     </div>
   )
