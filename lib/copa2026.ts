@@ -137,3 +137,28 @@ export const ALL_MATCHES: Match[] = [...GROUP_MATCHES, ...KNOCKOUT_MATCHES]
 export const teamById  = Object.fromEntries(TEAMS.map(t => [t.id, t]))
 export const groupById = Object.fromEntries(GROUPS.map(g => [g.id, g]))
 export const matchById = Object.fromEntries(ALL_MATCHES.map(m => [m.id, m]))
+
+// Chaveamento oficial do R32 da Copa 2026
+export type BracketSlot =
+  | { type: 'rank'; group: string; rank: 1 | 2 }
+  | { type: 'best3rd'; index: number } // índice no ranking dos melhores 3ºs (0 = melhor)
+
+// Confrontos fixos baseados no chaveamento oficial FIFA Copa 2026
+export const R32_BRACKET: { id: string; s1: BracketSlot; s2: BracketSlot }[] = [
+  { id: 'R32_1',  s1: { type:'rank', group:'A', rank:2 }, s2: { type:'rank', group:'B', rank:2 } },
+  { id: 'R32_2',  s1: { type:'rank', group:'E', rank:1 }, s2: { type:'best3rd', index:0 } },
+  { id: 'R32_3',  s1: { type:'rank', group:'F', rank:1 }, s2: { type:'rank', group:'C', rank:2 } },
+  { id: 'R32_4',  s1: { type:'rank', group:'C', rank:1 }, s2: { type:'rank', group:'F', rank:2 } },
+  { id: 'R32_5',  s1: { type:'rank', group:'B', rank:1 }, s2: { type:'best3rd', index:1 } },
+  { id: 'R32_6',  s1: { type:'rank', group:'E', rank:2 }, s2: { type:'rank', group:'I', rank:2 } },
+  { id: 'R32_7',  s1: { type:'rank', group:'A', rank:1 }, s2: { type:'best3rd', index:2 } },
+  { id: 'R32_8',  s1: { type:'rank', group:'L', rank:1 }, s2: { type:'best3rd', index:3 } },
+  { id: 'R32_9',  s1: { type:'rank', group:'G', rank:1 }, s2: { type:'best3rd', index:4 } },
+  { id: 'R32_10', s1: { type:'rank', group:'D', rank:1 }, s2: { type:'best3rd', index:5 } },
+  { id: 'R32_11', s1: { type:'rank', group:'K', rank:2 }, s2: { type:'rank', group:'L', rank:2 } },
+  { id: 'R32_12', s1: { type:'rank', group:'H', rank:1 }, s2: { type:'rank', group:'J', rank:2 } },
+  { id: 'R32_13', s1: { type:'rank', group:'J', rank:1 }, s2: { type:'rank', group:'H', rank:2 } },
+  { id: 'R32_14', s1: { type:'rank', group:'I', rank:1 }, s2: { type:'best3rd', index:6 } },
+  { id: 'R32_15', s1: { type:'rank', group:'K', rank:1 }, s2: { type:'best3rd', index:7 } },
+  { id: 'R32_16', s1: { type:'rank', group:'D', rank:2 }, s2: { type:'rank', group:'G', rank:2 } },
+]

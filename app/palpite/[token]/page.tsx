@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useState, useCallback, useMemo } from 'react'
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import { useParams } from 'next/navigation'
-import { GROUPS, GROUP_MATCHES, KNOCKOUT_MATCHES, teamById, groupById } from '@/lib/copa2026'
+import { GROUPS, GROUP_MATCHES, KNOCKOUT_MATCHES, R32_BRACKET, BracketSlot, teamById, groupById } from '@/lib/copa2026'
 import { Match, MatchPrediction, GroupPrediction, Participant, PHASE_LABELS, KNOCKOUT_PHASES } from '@/lib/types'
 import { Flag } from '@/components/Flag'
 
@@ -12,7 +12,6 @@ interface PredictionsData {
   groupPredictions: GroupPrediction[]
 }
 
-// Calculates predicted group standings from match predictions
 function computeStandings(groupId: string, predMap: Record<string, MatchPrediction>) {
   const group = groupById[groupId]
   const stats: Record<string, { p: number; j: number; v: number; e: number; d: number; gp: number; gc: number }> =
@@ -43,8 +42,41 @@ function computeStandings(groupId: string, predMap: Record<string, MatchPredicti
     .map((id, idx) => ({ teamId: id, pos: idx + 1, sg: stats[id].gp - stats[id].gc, ...stats[id] }))
 }
 
+function computeKnockoutBracket(predMap: Record<string, MatchPrediction>): Record<string, { team1Id: string; team2Id: string }> {
+  const groupRanks: Record<string, string[]> = {}
+  const thirdPlaceTeams: { teamId: string; p: number; gp: number; gc: number; sg: number }[] = []
+
+  for (const group of GROUPS) {
+    const standings = computeStandings(group.id, predMap)
+    groupRanks[group.id] = standings.map(s => s.teamId)
+    if (standings.length >= 3) {
+      const t = standings[2]
+      thirdPlaceTeams.push({ teamId: t.teamId, p: t.p, gp: t.gp, gc: t.gc, sg: t.sg })
+    }
+  }
+
+  const best8Third = [...thirdPlaceTeams]
+    .sort((a, b) => {
+      if (b.p !== a.p) return b.p - a.p
+      if (b.sg !== a.sg) return b.sg - a.sg
+      return b.gp - a.gp
+    })
+    .slice(0, 8)
+
+  const resolveSlot = (s: BracketSlot): string => {
+    if (s.type === 'rank') return groupRanks[s.group]?.[s.rank - 1] ?? 'TBD'
+    return best8Third[s.index]?.teamId ?? 'TBD'
+  }
+
+  const result: Record<string, { team1Id: string; team2Id: string }> = {}
+  for (const entry of R32_BRACKET) {
+    result[entry.id] = { team1Id: resolveSlot(entry.s1), team2Id: resolveSlot(entry.s2) }
+  }
+  return result
+}
+
 function MatchCard({
-  match, prediction, result, isKnockout, onSave, saving,
+  match, prediction, result, isKnockout, onSave, saving, team1IdOverride, team2IdOverride,
 }: {
   match: Match
   prediction?: MatchPrediction
@@ -52,18 +84,23 @@ function MatchCard({
   isKnockout: boolean
   onSave: (matchId: string, s1: number, s2: number, adv?: string) => void
   saving: boolean
+  team1IdOverride?: string
+  team2IdOverride?: string
 }) {
   const [s1, setS1] = useState<string>(prediction?.score1 !== undefined ? String(prediction.score1) : '')
   const [s2, setS2] = useState<string>(prediction?.score2 !== undefined ? String(prediction.score2) : '')
   const [adv, setAdv] = useState(prediction?.advancingTeamId ?? '')
   const [dirty, setDirty] = useState(false)
   const [saved, setSaved] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
 
-  const team1 = teamById[match.team1Id]
-  const team2 = teamById[match.team2Id]
+  const t1Id = team1IdOverride ?? match.team1Id
+  const t2Id = team2IdOverride ?? match.team2Id
+  const team1 = teamById[t1Id]
+  const team2 = teamById[t2Id]
   const isDraw = s1 !== '' && s2 !== '' && Number(s1) === Number(s2)
   const locked = result?.score1 !== undefined
-  const isTBD = match.team1Id === 'TBD' || match.team2Id === 'TBD'
+  const isTBD = t1Id === 'TBD' || t2Id === 'TBD'
 
   function handle(field: 'a' | 'b', val: string) {
     if (!/^\d*$/.test(val) || Number(val) > 20) return
@@ -90,7 +127,6 @@ function MatchCard({
 
   return (
     <div className={`bg-gray-900 border rounded-xl overflow-hidden transition-all ${locked ? 'border-green-900/50' : dirty ? 'border-yellow-700' : saved ? 'border-green-700' : 'border-gray-800 hover:border-gray-700'}`}>
-      {/* Header */}
       {(match.venue || match.date) && (
         <div className="text-center text-xs text-gray-500 pt-2.5 pb-1 px-3">
           {match.venue && <span className="font-medium text-gray-400">{match.venue}</span>}
@@ -99,17 +135,15 @@ function MatchCard({
         </div>
       )}
 
-      {/* Score row */}
       <div className="flex items-center gap-2 px-4 py-3">
-        {/* Team 1 */}
         <div className="flex-1 flex items-center gap-2 min-w-0">
-          <Flag teamId={match.team1Id} size={24} />
+          <Flag teamId={t1Id} size={24} />
           <span className="text-sm font-semibold truncate">{team1?.name}</span>
         </div>
 
-        {/* Inputs */}
         <div className="flex items-center gap-1.5 shrink-0">
           <input
+            ref={inputRef}
             type="text" inputMode="numeric" value={s1}
             disabled={locked}
             onChange={e => handle('a', e.target.value)}
@@ -124,45 +158,52 @@ function MatchCard({
           />
         </div>
 
-        {/* Team 2 */}
         <div className="flex-1 flex items-center gap-2 justify-end min-w-0">
           <span className="text-sm font-semibold truncate text-right">{team2?.name}</span>
-          <Flag teamId={match.team2Id} size={24} />
+          <Flag teamId={t2Id} size={24} />
         </div>
       </div>
 
-      {/* Knockout draw selector */}
       {isKnockout && isDraw && !locked && (
         <div className="mx-4 mb-3 flex items-center gap-2 bg-blue-950/40 border border-blue-800 rounded-lg px-3 py-2 text-sm">
           <span className="text-blue-300 text-xs whitespace-nowrap">Quem avança?</span>
-          <select value={adv} onChange={e => setAdv(e.target.value)}
+          <select value={adv} onChange={e => { setAdv(e.target.value); setDirty(true) }}
             className="ml-auto bg-gray-800 border border-gray-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-yellow-500">
             <option value="">Selecione...</option>
-            <option value={match.team1Id}>{team1?.flag} {team1?.name}</option>
-            <option value={match.team2Id}>{team2?.flag} {team2?.name}</option>
+            <option value={t1Id}>{team1?.name}</option>
+            <option value={t2Id}>{team2?.name}</option>
           </select>
         </div>
       )}
 
-      {/* Footer */}
       <div className="px-4 pb-3 flex items-center justify-between">
         {locked ? (
           <span className="text-xs text-green-500 flex items-center gap-1">
             <span>✓</span> Resultado: {result?.score1}×{result?.score2}
           </span>
-        ) : saved ? (
+        ) : saved && !dirty ? (
           <span className="text-xs text-green-400 flex items-center gap-1"><span>✓</span> Salvo</span>
         ) : (
           <span className="text-xs text-gray-600">
             {prediction !== undefined ? `Palpite: ${prediction.score1}×${prediction.score2}` : 'Sem palpite'}
           </span>
         )}
-        {!locked && dirty && (
-          <button onClick={save} disabled={saving || s1 === '' || s2 === '' || (isKnockout && isDraw && !adv)}
-            className="text-xs bg-yellow-600 hover:bg-yellow-500 disabled:bg-gray-800 disabled:text-gray-600 text-white rounded-lg px-3 py-1.5 font-semibold transition-colors">
-            Salvar
-          </button>
-        )}
+
+        <div className="flex items-center gap-2">
+          {!locked && prediction !== undefined && !dirty && (
+            <button
+              onClick={() => { inputRef.current?.select(); inputRef.current?.focus() }}
+              className="text-xs text-blue-400 hover:text-blue-300 border border-blue-800/60 hover:border-blue-600 rounded-lg px-2.5 py-1 transition-colors">
+              ✏ Alterar
+            </button>
+          )}
+          {!locked && dirty && (
+            <button onClick={save} disabled={saving || s1 === '' || s2 === '' || (isKnockout && isDraw && !adv)}
+              className="text-xs bg-yellow-600 hover:bg-yellow-500 disabled:bg-gray-800 disabled:text-gray-600 text-white rounded-lg px-3 py-1.5 font-semibold transition-colors">
+              Salvar
+            </button>
+          )}
+        </div>
       </div>
     </div>
   )
@@ -197,7 +238,6 @@ export default function PalpitePage() {
   const [activeTab, setActiveTab] = useState<'groups' | 'knockout'>('groups')
   const [activeGroup, setActiveGroup] = useState('A')
   const [activeRound, setActiveRound] = useState(1)
-  const [toast, setToast] = useState('')
 
   useEffect(() => {
     Promise.all([
@@ -243,7 +283,6 @@ export default function PalpitePage() {
     return acc
   }, {} as Record<string, Match[]>)
 
-  // Rounds: pairs of 2 matches per round
   const roundMatches = (gId: string, round: number) => {
     const all = groupMatchesByGroup[gId] ?? []
     return all.slice((round - 1) * 2, round * 2)
@@ -260,14 +299,11 @@ export default function PalpitePage() {
 
   const standings = computeStandings(activeGroup, predMap)
 
+  // Computa o chaveamento do R32 a partir dos palpites da fase de grupos
+  const knockoutBracket = computeKnockoutBracket(predMap)
+
   return (
     <div className="space-y-5">
-      {toast && (
-        <div className="fixed bottom-4 right-4 bg-green-700 text-white px-4 py-2 rounded-xl shadow-xl z-50 text-sm font-medium">
-          {toast}
-        </div>
-      )}
-
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -298,7 +334,6 @@ export default function PalpitePage() {
       {/* GROUP STAGE */}
       {activeTab === 'groups' && (
         <div className="space-y-4">
-          {/* Group selector */}
           <div className="flex flex-wrap gap-2">
             {GROUPS.map(g => (
               <GroupTab key={g.id} groupId={g.id} isActive={activeGroup === g.id}
@@ -307,9 +342,8 @@ export default function PalpitePage() {
             ))}
           </div>
 
-          {/* Group content */}
           <div className="grid lg:grid-cols-2 gap-4">
-            {/* Left: standings table */}
+            {/* Left: standings */}
             <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
               <div className="px-4 py-3 border-b border-gray-800 flex items-center justify-between">
                 <h3 className="font-bold text-sm uppercase tracking-wider text-gray-300">
@@ -372,7 +406,6 @@ export default function PalpitePage() {
 
             {/* Right: match cards */}
             <div className="space-y-3">
-              {/* Round navigation */}
               <div className="flex items-center justify-between bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5">
                 <button onClick={() => setActiveRound(r => Math.max(1, r - 1))} disabled={activeRound === 1}
                   className="text-gray-400 hover:text-white disabled:opacity-20 text-lg px-2">‹</button>
@@ -396,12 +429,14 @@ export default function PalpitePage() {
       {activeTab === 'knockout' && (
         <div className="space-y-8">
           <div className="bg-blue-950/30 border border-blue-900 rounded-xl p-4 text-sm text-blue-200">
-            <strong>Mata-mata:</strong> Em empate no tempo regulamentar, selecione quem avança (prorrogação/pênaltis). Apenas o placar dos 90 minutos conta para a pontuação.
+            <strong>Mata-mata:</strong> Os times aparecem automaticamente conforme seus palpites da fase de grupos. Em empate no tempo regulamentar, selecione quem avança (prorrogação/pênaltis).
           </div>
           {KNOCKOUT_PHASES.map(phase => {
             const phaseMatches = knockoutByPhase[phase] ?? []
             if (phaseMatches.length === 0) return null
-            const hasTeams = phaseMatches.some(m => m.team1Id !== 'TBD')
+            const hasTeams = phase === 'round_of_32'
+              ? phaseMatches.some(m => (knockoutBracket[m.id]?.team1Id ?? 'TBD') !== 'TBD')
+              : phaseMatches.some(m => m.team1Id !== 'TBD')
             return (
               <div key={phase}>
                 <h3 className="font-bold text-base text-yellow-300 uppercase tracking-wider mb-3">{PHASE_LABELS[phase]}</h3>
@@ -409,10 +444,15 @@ export default function PalpitePage() {
                   <p className="text-gray-700 text-sm italic">Seleções definidas após a fase de grupos.</p>
                 ) : (
                   <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {phaseMatches.map(m => (
-                      <MatchCard key={m.id} match={m} prediction={predMap[m.id]} result={results[m.id]}
-                        isKnockout={true} onSave={savePrediction} saving={saving} />
-                    ))}
+                    {phaseMatches.map(m => {
+                      const computed = phase === 'round_of_32' ? knockoutBracket[m.id] : undefined
+                      return (
+                        <MatchCard key={m.id} match={m} prediction={predMap[m.id]} result={results[m.id]}
+                          isKnockout={true} onSave={savePrediction} saving={saving}
+                          team1IdOverride={computed?.team1Id}
+                          team2IdOverride={computed?.team2Id} />
+                      )
+                    })}
                   </div>
                 )}
               </div>
