@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { GROUPS, GROUP_MATCHES, KNOCKOUT_MATCHES, teamById, groupById, matchById, ALL_MATCHES } from '@/lib/copa2026'
 import { Participant, Match, PHASE_LABELS } from '@/lib/types'
+import { Flag } from '@/components/Flag'
 
 const ADMIN_KEY_STORAGE = 'bolao_admin_key'
 
@@ -320,7 +321,7 @@ function ResultInput({
   return (
     <div className="bg-gray-900 border border-gray-700 rounded-lg px-4 py-3 space-y-2">
       <div className="flex items-center gap-3">
-        <span className="text-sm flex-1">{team1?.flag} {team1?.name}</span>
+        <span className="text-sm flex-1 flex items-center gap-2"><Flag teamId={match.team1Id} size={20} />{team1?.name}</span>
         <input
           type="number" min="0" max="20" value={s1}
           onChange={e => setS1(e.target.value)}
@@ -332,7 +333,7 @@ function ResultInput({
           onChange={e => setS2(e.target.value)}
           className="w-12 text-center rounded bg-gray-800 border border-gray-600 py-1 text-lg font-bold focus:outline-none focus:border-yellow-500"
         />
-        <span className="text-sm flex-1 text-right">{team2?.name} {team2?.flag}</span>
+        <span className="text-sm flex-1 text-right flex items-center justify-end gap-2">{team2?.name}<Flag teamId={match.team2Id} size={20} /></span>
         <button
           onClick={() => onSave(match.id, Number(s1), Number(s2), isKnockout && isDraw ? adv || undefined : undefined)}
           disabled={saving || s1 === '' || s2 === ''}

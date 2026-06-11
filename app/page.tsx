@@ -10,7 +10,8 @@ export default function LeaderboardPage() {
   useEffect(() => {
     fetch('/api/leaderboard')
       .then(r => r.json())
-      .then(d => { setData(d); setLoading(false) })
+      .then(d => { setData(Array.isArray(d) ? d : []); setLoading(false) })
+      .catch(() => setLoading(false))
   }, [])
 
   const medals = ['🥇', '🥈', '🥉']

@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, useMemo } from 'react'
 import { useParams } from 'next/navigation'
 import { GROUPS, GROUP_MATCHES, KNOCKOUT_MATCHES, teamById, groupById } from '@/lib/copa2026'
 import { Match, MatchPrediction, GroupPrediction, Participant, PHASE_LABELS, KNOCKOUT_PHASES } from '@/lib/types'
+import { Flag } from '@/components/Flag'
 
 interface PredictionsData {
   participant: Participant
@@ -102,7 +103,7 @@ function MatchCard({
       <div className="flex items-center gap-2 px-4 py-3">
         {/* Team 1 */}
         <div className="flex-1 flex items-center gap-2 min-w-0">
-          <span className="text-xl shrink-0">{team1?.flag}</span>
+          <Flag teamId={match.team1Id} size={24} />
           <span className="text-sm font-semibold truncate">{team1?.name}</span>
         </div>
 
@@ -126,7 +127,7 @@ function MatchCard({
         {/* Team 2 */}
         <div className="flex-1 flex items-center gap-2 justify-end min-w-0">
           <span className="text-sm font-semibold truncate text-right">{team2?.name}</span>
-          <span className="text-xl shrink-0">{team2?.flag}</span>
+          <Flag teamId={match.team2Id} size={24} />
         </div>
       </div>
 
@@ -344,7 +345,7 @@ export default function PalpitePage() {
                         </td>
                         <td className="px-3 py-3">
                           <div className="flex items-center gap-2">
-                            <span className="text-base">{team?.flag}</span>
+                            <Flag teamId={row.teamId} size={20} />
                             <span className="font-medium text-sm">{team?.name}</span>
                           </div>
                         </td>

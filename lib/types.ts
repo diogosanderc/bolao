@@ -29,7 +29,8 @@ export const KNOCKOUT_PHASES: Phase[] = [
 export interface Team {
   id: string
   name: string
-  flag: string
+  flag: string  // emoji (fallback)
+  iso2: string  // ISO 3166-1 alpha-2 para flagcdn.com
   confederation: string
 }
 
