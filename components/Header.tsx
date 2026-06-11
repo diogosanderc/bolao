@@ -25,14 +25,11 @@ export function Header() {
   }
 
   return (
-    <header className="bg-gradient-to-r from-green-800 via-green-700 to-yellow-600 shadow-lg">
+    <header className="bg-green-800 shadow-lg">
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
         <a href="/" className="flex items-center gap-2 no-underline">
           <span className="text-3xl">🏆</span>
-          <div>
-            <h1 className="font-bold text-lg leading-tight text-white">Bolão Copa do Mundo 2026</h1>
-            <p className="text-xs text-green-100 opacity-80">EUA · México · Canadá</p>
-          </div>
+          <h1 className="font-bold text-lg leading-tight text-white">Bolão Copa do Mundo 2026</h1>
         </a>
 
         {!isAuthPage && checked && (

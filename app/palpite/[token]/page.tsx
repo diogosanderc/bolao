@@ -66,12 +66,8 @@ function MatchCard({
 
   return (
     <div className={`bg-gray-900 border rounded-xl overflow-hidden transition-all ${locked ? 'border-green-900/50' : dirty ? 'border-yellow-700' : saved ? 'border-green-700' : 'border-gray-800 hover:border-gray-700'}`}>
-      {(match.venue || match.date) && (
-        <div className="text-center text-xs text-gray-500 pt-2.5 pb-1 px-3">
-          {match.venue && <span className="font-medium text-gray-400">{match.venue}</span>}
-          {match.venue && match.date && <span className="mx-1.5 text-gray-700">•</span>}
-          {match.date && <span>{match.date}</span>}
-        </div>
+      {match.date && (
+        <div className="text-center text-xs text-gray-500 pt-2.5 pb-1 px-3">{match.date}</div>
       )}
 
       <div className="flex items-center gap-2 px-4 py-3">
@@ -373,8 +369,10 @@ export default function PalpitePage() {
             if (phaseMatches.length === 0) return null
             const hasTeams = phaseMatches.some(m => (knockoutBracket[m.id]?.team1Id ?? 'TBD') !== 'TBD')
             return (
-              <div key={phase}>
-                <h3 className="font-bold text-base text-yellow-300 uppercase tracking-wider mb-3">{PHASE_LABELS[phase]}</h3>
+              <div key={phase} className="relative border border-yellow-600/25 rounded-2xl px-4 pb-4 pt-7 mt-6">
+                <span className="absolute -top-3 left-4 bg-[#030712] px-3 py-0.5 rounded-lg border border-yellow-600/30 text-yellow-300 font-bold text-xs uppercase tracking-widest">
+                  {PHASE_LABELS[phase]}
+                </span>
                 {!hasTeams ? (
                   <p className="text-gray-700 text-sm italic">Seleções definidas conforme seus palpites.</p>
                 ) : (
