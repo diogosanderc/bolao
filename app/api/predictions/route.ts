@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { readDB, updateDB } from '@/lib/db'
 import { MatchPrediction, GroupPrediction } from '@/lib/types'
 
-export const dynamic = 'force-dynamic'
-
 // GET /api/predictions?token=xxx
 export async function GET(req: NextRequest) {
   const token = req.nextUrl.searchParams.get('token')

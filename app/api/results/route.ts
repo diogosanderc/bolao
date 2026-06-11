@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { readDB, updateDB } from '@/lib/db'
 import { MatchResult } from '@/lib/types'
 
-export const dynamic = 'force-dynamic'
-
 const ADMIN_KEY = process.env.ADMIN_KEY ?? 'admin123'
 
 export async function GET() {
