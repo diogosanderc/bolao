@@ -2,9 +2,10 @@
 
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import { useParams } from 'next/navigation'
-import { GROUPS, GROUP_MATCHES, KNOCKOUT_MATCHES, R32_BRACKET, BracketSlot, teamById, groupById } from '@/lib/copa2026'
+import { GROUPS, GROUP_MATCHES, KNOCKOUT_MATCHES, teamById, groupById } from '@/lib/copa2026'
 import { Match, MatchPrediction, GroupPrediction, Participant, PHASE_LABELS, KNOCKOUT_PHASES } from '@/lib/types'
 import { Flag } from '@/components/Flag'
+import { computeGroupStandings, computeFullBracket } from '@/lib/bracket'
 
 interface PredictionsData {
   participant: Participant
@@ -12,68 +13,6 @@ interface PredictionsData {
   groupPredictions: GroupPrediction[]
 }
 
-function computeStandings(groupId: string, predMap: Record<string, MatchPrediction>) {
-  const group = groupById[groupId]
-  const stats: Record<string, { p: number; j: number; v: number; e: number; d: number; gp: number; gc: number }> =
-    Object.fromEntries(group.teamIds.map(id => [id, { p: 0, j: 0, v: 0, e: 0, d: 0, gp: 0, gc: 0 }]))
-
-  const matches = GROUP_MATCHES.filter(m => m.groupId === groupId)
-  for (const m of matches) {
-    const pred = predMap[m.id]
-    if (!pred) continue
-    const { score1, score2 } = pred
-    stats[m.team1Id].j++; stats[m.team2Id].j++
-    stats[m.team1Id].gp += score1; stats[m.team1Id].gc += score2
-    stats[m.team2Id].gp += score2; stats[m.team2Id].gc += score1
-    if (score1 > score2) { stats[m.team1Id].p += 3; stats[m.team1Id].v++; stats[m.team2Id].d++ }
-    else if (score2 > score1) { stats[m.team2Id].p += 3; stats[m.team2Id].v++; stats[m.team1Id].d++ }
-    else { stats[m.team1Id].p++; stats[m.team1Id].e++; stats[m.team2Id].p++; stats[m.team2Id].e++ }
-  }
-
-  return group.teamIds
-    .slice()
-    .sort((a, b) => {
-      if (stats[b].p !== stats[a].p) return stats[b].p - stats[a].p
-      const sgB = stats[b].gp - stats[b].gc
-      const sgA = stats[a].gp - stats[a].gc
-      if (sgB !== sgA) return sgB - sgA
-      return stats[b].gp - stats[a].gp
-    })
-    .map((id, idx) => ({ teamId: id, pos: idx + 1, sg: stats[id].gp - stats[id].gc, ...stats[id] }))
-}
-
-function computeKnockoutBracket(predMap: Record<string, MatchPrediction>): Record<string, { team1Id: string; team2Id: string }> {
-  const groupRanks: Record<string, string[]> = {}
-  const thirdPlaceTeams: { teamId: string; p: number; gp: number; gc: number; sg: number }[] = []
-
-  for (const group of GROUPS) {
-    const standings = computeStandings(group.id, predMap)
-    groupRanks[group.id] = standings.map(s => s.teamId)
-    if (standings.length >= 3) {
-      const t = standings[2]
-      thirdPlaceTeams.push({ teamId: t.teamId, p: t.p, gp: t.gp, gc: t.gc, sg: t.sg })
-    }
-  }
-
-  const best8Third = [...thirdPlaceTeams]
-    .sort((a, b) => {
-      if (b.p !== a.p) return b.p - a.p
-      if (b.sg !== a.sg) return b.sg - a.sg
-      return b.gp - a.gp
-    })
-    .slice(0, 8)
-
-  const resolveSlot = (s: BracketSlot): string => {
-    if (s.type === 'rank') return groupRanks[s.group]?.[s.rank - 1] ?? 'TBD'
-    return best8Third[s.index]?.teamId ?? 'TBD'
-  }
-
-  const result: Record<string, { team1Id: string; team2Id: string }> = {}
-  for (const entry of R32_BRACKET) {
-    result[entry.id] = { team1Id: resolveSlot(entry.s1), team2Id: resolveSlot(entry.s2) }
-  }
-  return result
-}
 
 function MatchCard({
   match, prediction, result, isKnockout, onSave, saving, team1IdOverride, team2IdOverride,
@@ -297,10 +236,8 @@ export default function PalpitePage() {
     return acc
   }, {} as Record<string, Match[]>)
 
-  const standings = computeStandings(activeGroup, predMap)
-
-  // Computa o chaveamento do R32 a partir dos palpites da fase de grupos
-  const knockoutBracket = computeKnockoutBracket(predMap)
+  const standings = computeGroupStandings(activeGroup, predMap)
+  const knockoutBracket = computeFullBracket(predMap)
 
   return (
     <div className="space-y-5">
@@ -434,18 +371,16 @@ export default function PalpitePage() {
           {KNOCKOUT_PHASES.map(phase => {
             const phaseMatches = knockoutByPhase[phase] ?? []
             if (phaseMatches.length === 0) return null
-            const hasTeams = phase === 'round_of_32'
-              ? phaseMatches.some(m => (knockoutBracket[m.id]?.team1Id ?? 'TBD') !== 'TBD')
-              : phaseMatches.some(m => m.team1Id !== 'TBD')
+            const hasTeams = phaseMatches.some(m => (knockoutBracket[m.id]?.team1Id ?? 'TBD') !== 'TBD')
             return (
               <div key={phase}>
                 <h3 className="font-bold text-base text-yellow-300 uppercase tracking-wider mb-3">{PHASE_LABELS[phase]}</h3>
                 {!hasTeams ? (
-                  <p className="text-gray-700 text-sm italic">Seleções definidas após a fase de grupos.</p>
+                  <p className="text-gray-700 text-sm italic">Seleções definidas conforme seus palpites.</p>
                 ) : (
                   <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
                     {phaseMatches.map(m => {
-                      const computed = phase === 'round_of_32' ? knockoutBracket[m.id] : undefined
+                      const computed = knockoutBracket[m.id]
                       return (
                         <MatchCard key={m.id} match={m} prediction={predMap[m.id]} result={results[m.id]}
                           isKnockout={true} onSave={savePrediction} saving={saving}
