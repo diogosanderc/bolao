@@ -1,5 +1,16 @@
 {
-  "participants": [],
+  "participants": [
+    {
+      "id": "macalister-001",
+      "name": "MACALISTER",
+      "email": "macalister@bolao.com",
+      "passwordHash": "$2b$10$G6ICBkhS.T9CQppNoi8vnOf/jkWVOziePwFItYsTFDN/preOFbC9u",
+      "token": "ab183d6813227adc",
+      "sessionToken": "d231d7503508ba461a73e397932b6ba2ae9a9ace292520a41165a01d84e660b0",
+      "sessionExpiry": "2026-06-18T13:43:27.461Z",
+      "createdAt": "2026-06-11T13:43:27.461Z"
+    }
+  ],
   "matchPredictions": [],
   "groupPredictions": [],
   "results": []
