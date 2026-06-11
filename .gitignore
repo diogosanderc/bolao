@@ -40,5 +40,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# database (local data, não versionar)
-/data/db.json
+# database — descomente para não versionar localmente
+# /data/db.json
