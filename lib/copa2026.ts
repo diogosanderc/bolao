@@ -17,6 +17,7 @@ export const TEAMS: Team[] = [
   { id: 'CRC', name: 'Costa Rica',     flag: '🇨🇷', confederation: 'CONCACAF' },
   { id: 'HON', name: 'Honduras',       flag: '🇭🇳', confederation: 'CONCACAF' },
   { id: 'SLV', name: 'El Salvador',    flag: '🇸🇻', confederation: 'CONCACAF' },
+  { id: 'CUR', name: 'Curaçao',        flag: '🇨🇼', confederation: 'CONCACAF' },
   // UEFA
   { id: 'GER', name: 'Alemanha',    flag: '🇩🇪', confederation: 'UEFA' },
   { id: 'FRA', name: 'França',      flag: '🇫🇷', confederation: 'UEFA' },
@@ -44,6 +45,7 @@ export const TEAMS: Team[] = [
   { id: 'RSA', name: 'África do Sul', flag: '🇿🇦', confederation: 'CAF' },
   { id: 'GHA', name: 'Gana',        flag: '🇬🇭', confederation: 'CAF' },
   { id: 'TUN', name: 'Tunísia',     flag: '🇹🇳', confederation: 'CAF' },
+  { id: 'CIV', name: 'Costa do Marfim', flag: '🇨🇮', confederation: 'CAF' },
   // AFC
   { id: 'JPN', name: 'Japão',       flag: '🇯🇵', confederation: 'AFC' },
   { id: 'KOR', name: 'Coreia do Sul', flag: '🇰🇷', confederation: 'AFC' },
@@ -61,16 +63,30 @@ export const GROUPS: Group[] = [
   { id: 'A', name: 'Grupo A', teamIds: ['USA', 'PAN', 'NZL', 'SLV'] },
   { id: 'B', name: 'Grupo B', teamIds: ['MEX', 'JAM', 'KSA', 'GHA'] },
   { id: 'C', name: 'Grupo C', teamIds: ['CAN', 'CRC', 'JOR', 'RSA'] },
-  { id: 'D', name: 'Grupo D', teamIds: ['BRA', 'COL', 'AUT', 'TUR'] },
-  { id: 'E', name: 'Grupo E', teamIds: ['ARG', 'ECU', 'SRB', 'CRO'] },
-  { id: 'F', name: 'Grupo F', teamIds: ['URU', 'PAR', 'POL', 'UKR'] },
-  { id: 'G', name: 'Grupo G', teamIds: ['FRA', 'GER', 'MAR', 'CMR'] },
+  { id: 'D', name: 'Grupo D', teamIds: ['USA', 'AUS', 'PAR', 'TUR'] }, // confirmado
+  { id: 'E', name: 'Grupo E', teamIds: ['GER', 'CIV', 'CUR', 'ECU'] }, // confirmado
+  { id: 'F', name: 'Grupo F', teamIds: ['URU', 'COL', 'POL', 'UKR'] },
+  { id: 'G', name: 'Grupo G', teamIds: ['FRA', 'BRA', 'MAR', 'CMR'] },
   { id: 'H', name: 'Grupo H', teamIds: ['ESP', 'ITA', 'JPN', 'ALG'] },
   { id: 'I', name: 'Grupo I', teamIds: ['ENG', 'NED', 'KOR', 'NGA'] },
-  { id: 'J', name: 'Grupo J', teamIds: ['POR', 'BEL', 'AUS', 'EGY'] },
+  { id: 'J', name: 'Grupo J', teamIds: ['POR', 'BEL', 'ARG', 'EGY'] },
   { id: 'K', name: 'Grupo K', teamIds: ['HON', 'SUI', 'UZB', 'SEN'] },
   { id: 'L', name: 'Grupo L', teamIds: ['IRN', 'SCO', 'IRQ', 'TUN'] },
 ]
+
+// [date, venue] per group per round-pair index (approximated for non-confirmed groups)
+const GROUP_SCHEDULE: Record<string, [string, string][]> = {
+  D: [
+    ['12/06 22:00', 'Los Angeles'], ['14/06 01:00', 'Vancouver'],
+    ['18/06 22:00', 'Los Angeles'], ['18/06 19:00', 'Vancouver'],
+    ['22/06 22:00', 'Los Angeles'], ['22/06 22:00', 'Vancouver'],
+  ],
+  E: [
+    ['14/06 14:00', 'Houston'], ['14/06 20:00', 'Filadélfia'],
+    ['18/06 14:00', 'Houston'], ['18/06 17:00', 'Filadélfia'],
+    ['22/06 19:00', 'Houston'], ['22/06 19:00', 'Filadélfia'],
+  ],
+}
 
 function groupMatches(groupId: string, teamIds: string[]): Match[] {
   const [t1, t2, t3, t4] = teamIds
@@ -80,6 +96,7 @@ function groupMatches(groupId: string, teamIds: string[]): Match[] {
     [t1, t4], [t2, t3],
   ]
   const groupIndex = groupId.charCodeAt(0) - 'A'.charCodeAt(0)
+  const schedule = GROUP_SCHEDULE[groupId]
   return pairs.map(([a, b], i) => ({
     id: `G${groupId}${i + 1}`,
     phase: 'group' as const,
@@ -87,6 +104,8 @@ function groupMatches(groupId: string, teamIds: string[]): Match[] {
     matchNumber: groupIndex * 6 + i + 1,
     team1Id: a,
     team2Id: b,
+    date: schedule?.[i]?.[0],
+    venue: schedule?.[i]?.[1],
   }))
 }
 
