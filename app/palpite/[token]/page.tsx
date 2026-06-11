@@ -210,7 +210,7 @@ export default function PalpitePage() {
       for (const r of (res as Array<{ matchId: string; score1: number; score2: number; advancingTeamId?: string }>)) m[r.matchId] = r
       setResults(m)
       setLoading(false)
-    }).catch(() => { setError('Erro ao carregar'); setLoading(false) })
+    }).catch((e) => { setError('Erro ao carregar: ' + String(e)); setLoading(false) })
   }, [token])
 
   const savePrediction = useCallback(async (matchId: string, s1: number, s2: number, adv?: string) => {
