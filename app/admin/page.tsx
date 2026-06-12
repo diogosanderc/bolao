@@ -245,11 +245,11 @@ export default function AdminPage() {
                   </p>
                 </div>
                 <a
-                  href={`/palpite/${p.token}`}
+                  href={`/palpite/${p.token}?admin=1`}
                   target="_blank"
                   className="text-xs bg-blue-800 hover:bg-blue-700 text-white px-2 py-1 rounded transition-colors"
                 >
-                  Ver palpites
+                  Editar palpites
                 </a>
                 <button
                   onClick={() => navigator.clipboard.writeText(`${window.location.origin}/palpite/${p.token}`)}

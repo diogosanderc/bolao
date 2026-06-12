@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useState, useCallback, useMemo, useRef } from 'react'
-import { useParams } from 'next/navigation'
+import { useEffect, useState, useCallback, useRef } from 'react'
+import { useParams, useSearchParams } from 'next/navigation'
 import { GROUPS, GROUP_MATCHES, KNOCKOUT_MATCHES, teamById, groupById } from '@/lib/copa2026'
 import { Match, MatchPrediction, GroupPrediction, Participant, PHASE_LABELS, KNOCKOUT_PHASES } from '@/lib/types'
 import { Flag } from '@/components/Flag'
@@ -15,7 +15,7 @@ interface PredictionsData {
 
 
 function MatchCard({
-  match, prediction, result, isKnockout, onSave, saving, team1IdOverride, team2IdOverride,
+  match, prediction, result, isKnockout, onSave, saving, team1IdOverride, team2IdOverride, adminMode,
 }: {
   match: Match
   prediction?: MatchPrediction
@@ -25,6 +25,7 @@ function MatchCard({
   saving: boolean
   team1IdOverride?: string
   team2IdOverride?: string
+  adminMode?: boolean
 }) {
   const [s1, setS1] = useState<string>(prediction?.score1 !== undefined ? String(prediction.score1) : '')
   const [s2, setS2] = useState<string>(prediction?.score2 !== undefined ? String(prediction.score2) : '')
@@ -33,13 +34,21 @@ function MatchCard({
   const [saved, setSaved] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
+  // Sync when prediction changes (admin editing another match updates state)
+  useEffect(() => {
+    if (prediction?.score1 !== undefined) setS1(String(prediction.score1))
+    if (prediction?.score2 !== undefined) setS2(String(prediction.score2))
+    if (prediction?.advancingTeamId) setAdv(prediction.advancingTeamId)
+  }, [prediction?.score1, prediction?.score2, prediction?.advancingTeamId])
+
   const t1Id = team1IdOverride ?? match.team1Id
   const t2Id = team2IdOverride ?? match.team2Id
   const team1 = teamById[t1Id]
   const team2 = teamById[t2Id]
   const isDraw = s1 !== '' && s2 !== '' && Number(s1) === Number(s2)
   const officialResult = result?.score1 !== undefined
-  const locked = officialResult || prediction !== undefined
+  // Admin mode: always unlocked. Participant: locked once prediction exists
+  const locked = adminMode ? false : (officialResult || prediction !== undefined)
   const isTBD = t1Id === 'TBD' || t2Id === 'TBD'
 
   function handle(field: 'a' | 'b', val: string) {
@@ -125,10 +134,10 @@ function MatchCard({
           <span className="text-xs text-gray-600">Sem palpite</span>
         )}
 
-        {!locked && dirty && (
+        {!locked && (dirty || adminMode) && (
           <button onClick={save} disabled={saving || s1 === '' || s2 === '' || (isKnockout && isDraw && !adv)}
             className="text-xs bg-yellow-600 hover:bg-yellow-500 disabled:bg-gray-800 disabled:text-gray-600 text-white rounded-lg px-3 py-1.5 font-semibold transition-colors">
-            Salvar
+            {adminMode && prediction !== undefined ? 'Atualizar' : 'Salvar'}
           </button>
         )}
       </div>
@@ -155,7 +164,9 @@ function GroupTab({ groupId, isActive, filledCount, onClick }: {
 
 export default function PalpitePage() {
   const params = useParams()
+  const searchParams = useSearchParams()
   const token = params.token as string
+  const [adminMode, setAdminMode] = useState(false)
 
   const [data, setData] = useState<PredictionsData | null>(null)
   const [results, setResults] = useState<Record<string, { score1?: number; score2?: number; advancingTeamId?: string }>>({})
@@ -165,6 +176,18 @@ export default function PalpitePage() {
   const [activeTab, setActiveTab] = useState<'groups' | 'knockout'>('groups')
   const [activeGroup, setActiveGroup] = useState('A')
   const [activeRound, setActiveRound] = useState(1)
+
+  // Detect admin mode via ?admin=1 + stored admin key
+  useEffect(() => {
+    if (searchParams.get('admin') !== '1') return
+    const storedKey = localStorage.getItem('bolao_admin_key')
+    if (!storedKey) return
+    fetch('/api/admin/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ adminKey: storedKey }),
+    }).then(r => { if (r.ok) setAdminMode(true) })
+  }, [searchParams])
 
   useEffect(() => {
     Promise.all([
@@ -229,6 +252,14 @@ export default function PalpitePage() {
 
   return (
     <div className="space-y-5">
+      {/* Admin banner */}
+      {adminMode && (
+        <div className="bg-yellow-950/60 border border-yellow-600 rounded-xl px-4 py-2.5 text-sm text-yellow-300 flex items-center gap-2">
+          <span>🔑</span>
+          <span>Modo Admin — editando palpites de <strong>{data.participant.name}</strong></span>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -343,7 +374,7 @@ export default function PalpitePage() {
 
               {roundMatches(activeGroup, activeRound).map(m => (
                 <MatchCard key={m.id} match={m} prediction={predMap[m.id]} result={results[m.id]}
-                  isKnockout={false} onSave={savePrediction} saving={saving} />
+                  isKnockout={false} onSave={savePrediction} saving={saving} adminMode={adminMode} />
               ))}
             </div>
           </div>
@@ -375,7 +406,8 @@ export default function PalpitePage() {
                         <MatchCard key={m.id} match={m} prediction={predMap[m.id]} result={results[m.id]}
                           isKnockout={true} onSave={savePrediction} saving={saving}
                           team1IdOverride={computed?.team1Id}
-                          team2IdOverride={computed?.team2Id} />
+                          team2IdOverride={computed?.team2Id}
+                          adminMode={adminMode} />
                       )
                     })}
                   </div>
