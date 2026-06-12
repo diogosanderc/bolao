@@ -25,6 +25,10 @@ export default function LeaderboardPage() {
     data.filter(e => e.totalPoints > entry.totalPoints).length + 1
   )
 
+  // últimos 7 (ou mais, em caso de empate) pagam — "rebaixados"
+  const cutoffScore = data.length >= 7 ? data[data.length - 7].totalPoints : -Infinity
+  const isRelated = (pts: number) => data.length >= 7 && pts <= cutoffScore
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -74,6 +78,7 @@ export default function LeaderboardPage() {
                 <tr
                   key={entry.participant.id}
                   className={`transition-colors ${
+                    isRelated(entry.totalPoints) ? 'bg-red-950/50 hover:bg-red-950/70' :
                     tier === 1 ? 'bg-yellow-950/40' :
                     tier === 2 ? 'bg-gray-800/30' :
                     tier === 3 ? 'bg-orange-950/30' :
@@ -81,12 +86,14 @@ export default function LeaderboardPage() {
                   }`}
                 >
                   <td className="px-4 py-3 text-center font-bold text-lg">
-                    {trophies[tier] ?? <span className="text-gray-500 text-sm">{rank}</span>}
+                    {isRelated(entry.totalPoints)
+                      ? '💸'
+                      : (trophies[tier] ?? <span className="text-gray-500 text-sm">{rank}</span>)}
                   </td>
-                  <td className="px-4 py-3 font-semibold">
+                  <td className={`px-4 py-3 font-semibold ${isRelated(entry.totalPoints) ? 'text-red-300' : ''}`}>
                     {entry.participant.name}
                   </td>
-                  <td className="px-4 py-3 text-right font-bold text-yellow-400 text-base">
+                  <td className={`px-4 py-3 text-right font-bold text-base ${isRelated(entry.totalPoints) ? 'text-red-400' : 'text-yellow-400'}`}>
                     {entry.totalPoints}
                   </td>
                   <td className="px-4 py-3 text-right text-gray-300 hidden sm:table-cell">
