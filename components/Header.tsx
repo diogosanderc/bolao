@@ -1,12 +1,44 @@
 'use client'
 import { usePathname } from 'next/navigation'
+import { useState, useEffect } from 'react'
 
 export function Header() {
   const pathname = usePathname()
   const isAuthPage = ['/login', '/cadastro', '/esqueci-senha', '/resetar-senha'].includes(pathname)
+  const [open, setOpen] = useState(false)
+
+  // Close menu on route change
+  useEffect(() => { setOpen(false) }, [pathname])
+
+  const navLinks = (
+    <>
+      <a
+        href="/"
+        onClick={() => setOpen(false)}
+        className={`hover:text-yellow-300 transition-colors text-white font-medium ${pathname === '/' ? 'text-yellow-300' : ''}`}
+      >
+        Classificação
+      </a>
+      <a
+        href="/simulador"
+        onClick={() => setOpen(false)}
+        className={`hover:text-yellow-300 transition-colors text-white font-medium ${pathname === '/simulador' ? 'text-yellow-300' : ''}`}
+      >
+        Simulador
+      </a>
+      <span className="text-gray-400 cursor-not-allowed line-through text-xs">Palpites encerrados</span>
+      <a
+        href="/admin"
+        onClick={() => setOpen(false)}
+        className="hover:text-yellow-300 transition-colors text-white opacity-50 hover:opacity-100 text-xs"
+      >
+        Admin
+      </a>
+    </>
+  )
 
   return (
-    <header className="bg-green-800 shadow-lg">
+    <header className="bg-green-800 shadow-lg relative z-50">
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
         <a href="/" className="flex items-center gap-2 no-underline">
           <span className="text-3xl">🏆</span>
@@ -14,14 +46,38 @@ export function Header() {
         </a>
 
         {!isAuthPage && (
-          <nav className="ml-auto flex items-center gap-4 text-sm font-medium">
-            <a href="/" className="hover:text-yellow-300 transition-colors text-white">Classificação</a>
-            <a href="/simulador" className="hover:text-yellow-300 transition-colors text-white">Simulador</a>
-            <span className="text-gray-400 cursor-not-allowed line-through text-xs">Palpites encerrados</span>
-            <a href="/admin" className="hover:text-yellow-300 transition-colors text-white opacity-50 hover:opacity-100 text-xs">Admin</a>
-          </nav>
+          <>
+            {/* Desktop nav */}
+            <nav className="ml-auto hidden sm:flex items-center gap-5 text-sm">
+              {navLinks}
+            </nav>
+
+            {/* Hamburger button (mobile only) */}
+            <button
+              className="ml-auto sm:hidden text-white p-1 rounded focus:outline-none"
+              onClick={() => setOpen(o => !o)}
+              aria-label="Menu"
+            >
+              {open ? (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              )}
+            </button>
+          </>
         )}
       </div>
+
+      {/* Mobile dropdown */}
+      {!isAuthPage && open && (
+        <nav className="sm:hidden bg-green-900 border-t border-green-700 px-4 py-3 flex flex-col gap-4 text-sm">
+          {navLinks}
+        </nav>
+      )}
     </header>
   )
 }
