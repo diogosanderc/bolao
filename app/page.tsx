@@ -14,7 +14,12 @@ export default function LeaderboardPage() {
       .catch(() => setLoading(false))
   }, [])
 
-  const medals = ['🥇', '🥈', '🥉']
+  const trophies: Record<number, string> = { 1: '🥇', 2: '🥈', 3: '🥉' }
+
+  // rank = quantos participantes têm mais pontos + 1 (empates compartilham o mesmo rank)
+  const ranks = data.map((entry) =>
+    data.filter(e => e.totalPoints > entry.totalPoints).length + 1
+  )
 
   return (
     <div className="space-y-6">
@@ -58,18 +63,20 @@ export default function LeaderboardPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-800">
-              {data.map((entry, idx) => (
+              {data.map((entry, idx) => {
+                const rank = ranks[idx]
+                return (
                 <tr
                   key={entry.participant.id}
                   className={`transition-colors ${
-                    idx === 0 ? 'bg-yellow-950/40' :
-                    idx === 1 ? 'bg-gray-800/30' :
-                    idx === 2 ? 'bg-orange-950/30' :
+                    rank === 1 ? 'bg-yellow-950/40' :
+                    rank === 2 ? 'bg-gray-800/30' :
+                    rank === 3 ? 'bg-orange-950/30' :
                     'hover:bg-gray-900/50'
                   }`}
                 >
                   <td className="px-4 py-3 text-center font-bold text-lg">
-                    {medals[idx] ?? <span className="text-gray-500 text-sm">{idx + 1}</span>}
+                    {trophies[rank] ?? <span className="text-gray-500 text-sm">{rank}</span>}
                   </td>
                   <td className="px-4 py-3 font-semibold">
                     {entry.participant.name}
@@ -98,7 +105,8 @@ export default function LeaderboardPage() {
                     </a>
                   </td>
                 </tr>
-              ))}
+              )}
+            )}
             </tbody>
           </table>
         </div>
