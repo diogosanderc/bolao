@@ -16,6 +16,10 @@ export default function LeaderboardPage() {
 
   const trophies: Record<number, string> = { 1: '🥇', 2: '🥈', 3: '🥉' }
 
+  // unique sorted point totals → position tier (1st, 2nd, 3rd group of scores)
+  const uniquePoints = [...new Set(data.map(e => e.totalPoints))].sort((a, b) => b - a)
+  const tierOf = (pts: number) => uniquePoints.indexOf(pts) + 1
+
   // rank = quantos participantes têm mais pontos + 1 (empates compartilham o mesmo rank)
   const ranks = data.map((entry) =>
     data.filter(e => e.totalPoints > entry.totalPoints).length + 1
@@ -65,18 +69,19 @@ export default function LeaderboardPage() {
             <tbody className="divide-y divide-gray-800">
               {data.map((entry, idx) => {
                 const rank = ranks[idx]
+                const tier = tierOf(entry.totalPoints)
                 return (
                 <tr
                   key={entry.participant.id}
                   className={`transition-colors ${
-                    rank === 1 ? 'bg-yellow-950/40' :
-                    rank === 2 ? 'bg-gray-800/30' :
-                    rank === 3 ? 'bg-orange-950/30' :
+                    tier === 1 ? 'bg-yellow-950/40' :
+                    tier === 2 ? 'bg-gray-800/30' :
+                    tier === 3 ? 'bg-orange-950/30' :
                     'hover:bg-gray-900/50'
                   }`}
                 >
                   <td className="px-4 py-3 text-center font-bold text-lg">
-                    {trophies[rank] ?? <span className="text-gray-500 text-sm">{rank}</span>}
+                    {trophies[tier] ?? <span className="text-gray-500 text-sm">{rank}</span>}
                   </td>
                   <td className="px-4 py-3 font-semibold">
                     {entry.participant.name}
