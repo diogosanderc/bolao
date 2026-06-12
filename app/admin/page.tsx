@@ -13,22 +13,42 @@ type ResultMap = Record<string, { score1?: number; score2?: number; advancingTea
 function useAdminKey() {
   const [key, setKey] = useState('')
   const [confirmed, setConfirmed] = useState(false)
+  const [verifying, setVerifying] = useState(false)
+  const [error, setError] = useState('')
 
   useEffect(() => {
     const stored = localStorage.getItem(ADMIN_KEY_STORAGE)
-    if (stored) { setKey(stored); setConfirmed(true) }
+    if (stored) {
+      fetch('/api/admin/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adminKey: stored }),
+      }).then(r => {
+        if (r.ok) { setKey(stored); setConfirmed(true) }
+        else localStorage.removeItem(ADMIN_KEY_STORAGE)
+      })
+    }
   }, [])
 
-  function confirm(k: string) {
+  async function confirm(k: string) {
+    setVerifying(true)
+    setError('')
+    const r = await fetch('/api/admin/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ adminKey: k }),
+    })
+    setVerifying(false)
+    if (!r.ok) { setError('Chave incorreta. Tente novamente.'); return }
     localStorage.setItem(ADMIN_KEY_STORAGE, k)
     setKey(k)
     setConfirmed(true)
   }
-  return { key, confirmed, confirm, setKey }
+  return { key, confirmed, confirm, setKey, verifying, error }
 }
 
 export default function AdminPage() {
-  const { key, confirmed, confirm } = useAdminKey()
+  const { key, confirmed, confirm, verifying, error } = useAdminKey()
   const [participants, setParticipants] = useState<Participant[]>([])
   const [results, setResults] = useState<ResultMap>({})
   const [newName, setNewName] = useState('')
@@ -127,10 +147,12 @@ export default function AdminPage() {
         />
         <button
           onClick={() => confirm(inputKey)}
-          className="w-full bg-yellow-600 hover:bg-yellow-500 text-white rounded-lg px-4 py-2 font-semibold transition-colors"
+          disabled={verifying || !inputKey}
+          className="w-full bg-yellow-600 hover:bg-yellow-500 disabled:bg-gray-700 text-white rounded-lg px-4 py-2 font-semibold transition-colors"
         >
-          Entrar
+          {verifying ? 'Verificando...' : 'Entrar'}
         </button>
+        {error && <p className="text-red-400 text-sm text-center">{error}</p>}
         <p className="text-xs text-gray-600 text-center">Padrão: admin123 (configure via variável ADMIN_KEY)</p>
       </div>
     )
@@ -222,6 +244,13 @@ export default function AdminPage() {
                     </a>
                   </p>
                 </div>
+                <a
+                  href={`/palpite/${p.token}`}
+                  target="_blank"
+                  className="text-xs bg-blue-800 hover:bg-blue-700 text-white px-2 py-1 rounded transition-colors"
+                >
+                  Ver palpites
+                </a>
                 <button
                   onClick={() => navigator.clipboard.writeText(`${window.location.origin}/palpite/${p.token}`)}
                   className="text-xs bg-gray-700 hover:bg-gray-600 px-2 py-1 rounded transition-colors"
