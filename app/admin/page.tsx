@@ -186,10 +186,13 @@ export default function AdminPage() {
         </div>
       )}
 
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-yellow-400">Painel Administrativo</h2>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+        <div>
+          <h2 className="text-2xl font-bold text-yellow-400">Painel Administrativo</h2>
+          <span className="text-xs text-gray-400 sm:hidden">{groupsDone}/12 grupos completos</span>
+        </div>
         <div className="flex items-center gap-4 text-xs text-gray-400">
-          <span>{groupsDone}/12 grupos completos</span>
+          <span className="hidden sm:inline">{groupsDone}/12 grupos completos</span>
           <button onClick={() => { localStorage.removeItem(ADMIN_KEY_STORAGE); location.reload() }} className="hover:text-gray-200">Sair</button>
         </div>
       </div>
