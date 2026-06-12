@@ -2,7 +2,8 @@ import fs from 'fs/promises'
 import path from 'path'
 import { Database } from './types'
 
-const DB_PATH = path.join(process.cwd(), 'data', 'db.json')
+const DATA_DIR = process.env.DATA_DIR || path.join(process.cwd(), 'data')
+const DB_PATH = path.join(DATA_DIR, 'db.json')
 
 const DEFAULT_DB: Database = {
   participants: [],
