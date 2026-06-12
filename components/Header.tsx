@@ -16,7 +16,7 @@ export function Header() {
         {!isAuthPage && (
           <nav className="ml-auto flex items-center gap-4 text-sm font-medium">
             <a href="/" className="hover:text-yellow-300 transition-colors text-white">Classificação</a>
-            <a href="/palpite" className="hover:text-yellow-300 transition-colors text-white">Palpites</a>
+            <span className="text-gray-400 cursor-not-allowed line-through text-xs">Palpites encerrados</span>
             <a href="/admin" className="hover:text-yellow-300 transition-colors text-white opacity-50 hover:opacity-100 text-xs">Admin</a>
           </nav>
         )}
