@@ -1229,18 +1229,6 @@
     },
     {
       "participantId": "macalister-001",
-      "matchId": "QF_2",
-      "score1": 1,
-      "score2": 2
-    },
-    {
-      "participantId": "macalister-001",
-      "matchId": "QF_3",
-      "score1": 2,
-      "score2": 1
-    },
-    {
-      "participantId": "macalister-001",
       "matchId": "QF_4",
       "score1": 1,
       "score2": 1,
@@ -1274,6 +1262,19 @@
     {
       "participantId": "mansoni-001",
       "matchId": "TP_1",
+      "score1": 1,
+      "score2": 0
+    },
+    {
+      "participantId": "macalister-001",
+      "matchId": "QF_2",
+      "score1": 2,
+      "score2": 2,
+      "advancingTeamId": "ENG"
+    },
+    {
+      "participantId": "macalister-001",
+      "matchId": "QF_3",
       "score1": 1,
       "score2": 0
     }
