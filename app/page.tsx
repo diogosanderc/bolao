@@ -104,12 +104,14 @@ export default function LeaderboardPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-8">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mt-8">
         {[
           { label: 'Resultado certo', pts: '4 pts', icon: '✅' },
           { label: 'Placar exato', pts: '+2 pts', icon: '🎯' },
           { label: 'Gols de um time', pts: '1 pt/time', icon: '⚽' },
           { label: 'Placar c/ 3+ gols', pts: '+2 pts', icon: '🔥' },
+          { label: 'Classificação do grupo', pts: '2 pts', icon: '📊' },
+          { label: 'Classificados na fase', pts: 'variável', icon: '🏅' },
         ].map(item => (
           <div key={item.label} className="bg-gray-900 rounded-lg p-3 text-center border border-gray-800">
             <div className="text-2xl mb-1">{item.icon}</div>

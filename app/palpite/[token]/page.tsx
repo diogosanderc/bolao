@@ -145,8 +145,116 @@ function MatchCard({
   )
 }
 
-function GroupTab({ groupId, isActive, filledCount, onClick }: {
-  groupId: string; isActive: boolean; filledCount: number; onClick: () => void
+function GroupOrderEditor({
+  groupId,
+  defaultOrder,
+  groupPrediction,
+  token,
+  locked,
+  adminMode,
+  onSaved,
+}: {
+  groupId: string
+  defaultOrder: string[]
+  groupPrediction?: { groupId: string; order: string[] }
+  token: string
+  locked: boolean
+  adminMode?: boolean
+  onSaved: (groupId: string, order: string[]) => void
+}) {
+  const [order, setOrder] = useState<string[]>(groupPrediction?.order ?? defaultOrder)
+  const [saving, setSaving] = useState(false)
+  const [dirty, setDirty] = useState(false)
+  const [saved, setSaved] = useState(false)
+
+  useEffect(() => {
+    setOrder(groupPrediction?.order ?? defaultOrder)
+    setDirty(false)
+    setSaved(false)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [groupId])
+
+  function move(idx: number, dir: 'up' | 'down') {
+    const swap = dir === 'up' ? idx - 1 : idx + 1
+    if (swap < 0 || swap >= order.length) return
+    const next = [...order]
+    ;[next[idx], next[swap]] = [next[swap], next[idx]]
+    setOrder(next)
+    setDirty(true)
+    setSaved(false)
+  }
+
+  async function save() {
+    setSaving(true)
+    await fetch('/api/group-predictions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token, groupId, order }),
+    })
+    setSaving(false)
+    setDirty(false)
+    setSaved(true)
+    onSaved(groupId, order)
+    setTimeout(() => setSaved(false), 2000)
+  }
+
+  const isLocked = locked && !adminMode
+
+  return (
+    <div className={`bg-gray-900 border rounded-xl overflow-hidden transition-all ${saved ? 'border-green-700' : dirty ? 'border-yellow-700' : groupPrediction ? 'border-green-900/50' : 'border-gray-800'}`}>
+      <div className="px-4 py-3 border-b border-gray-800 flex items-center justify-between">
+        <h3 className="font-bold text-sm uppercase tracking-wider text-gray-300">
+          Classificação Final Prevista
+        </h3>
+        <span className="text-xs text-gray-600">{isLocked ? 'bloqueado' : 'use as setas para ordenar'}</span>
+      </div>
+
+      <div className="p-3 space-y-1.5">
+        {order.map((teamId, idx) => {
+          const team = teamById[teamId]
+          const qualifies = idx < 2
+          return (
+            <div key={teamId} className={`flex items-center gap-2 rounded-lg px-3 py-2 transition-colors ${qualifies ? 'bg-green-950/30' : 'bg-gray-800/40'}`}>
+              <span className={`text-xs font-bold w-5 h-5 rounded-full inline-flex items-center justify-center shrink-0 ${qualifies ? 'bg-green-700 text-white' : 'text-gray-500 bg-gray-800'}`}>
+                {idx + 1}
+              </span>
+              <Flag teamId={teamId} size={18} />
+              <span className="text-sm font-medium flex-1 truncate">{team?.name}</span>
+              {!isLocked && (
+                <div className="flex flex-col gap-0.5">
+                  <button onClick={() => move(idx, 'up')} disabled={idx === 0}
+                    className="text-gray-500 hover:text-white disabled:opacity-20 leading-none text-xs px-1">▲</button>
+                  <button onClick={() => move(idx, 'down')} disabled={idx === order.length - 1}
+                    className="text-gray-500 hover:text-white disabled:opacity-20 leading-none text-xs px-1">▼</button>
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
+
+      <div className="px-4 pb-3 flex items-center justify-between">
+        {isLocked ? (
+          <span className="text-xs text-gray-600 flex items-center gap-1">🔒 Grupo iniciado</span>
+        ) : groupPrediction ? (
+          <span className="text-xs text-green-400 flex items-center gap-1"><span>✓</span> {saved ? 'Atualizado!' : 'Previsão salva'}</span>
+        ) : (
+          <span className="text-xs text-gray-500">Sem previsão de classificação</span>
+        )}
+
+        {!isLocked && (dirty || adminMode) && (
+          <button onClick={save} disabled={saving}
+            className="text-xs bg-yellow-600 hover:bg-yellow-500 disabled:bg-gray-800 disabled:text-gray-600 text-white rounded-lg px-3 py-1.5 font-semibold transition-colors">
+            {saving ? 'Salvando...' : groupPrediction ? 'Atualizar' : 'Salvar previsão'}
+          </button>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function GroupTab({ groupId, isActive, filledCount, hasPrediction, onClick }: {
+  groupId: string; isActive: boolean; filledCount: number; hasPrediction: boolean; onClick: () => void
 }) {
   const done = filledCount === 6
   return (
@@ -157,7 +265,8 @@ function GroupTab({ groupId, isActive, filledCount, onClick }: {
         'bg-gray-900 border-gray-800 text-gray-400 hover:border-gray-600 hover:text-white'
       }`}>
       {groupId}
-      {done && <span className="ml-1 text-xs">✓</span>}
+      {done && hasPrediction && <span className="ml-1 text-xs">✓</span>}
+      {done && !hasPrediction && <span className="ml-1 text-xs text-yellow-500">!</span>}
     </button>
   )
 }
@@ -221,11 +330,20 @@ export default function PalpitePage() {
     }
   }, [token])
 
+  const saveGroupPrediction = useCallback((groupId: string, order: string[]) => {
+    setData(prev => {
+      if (!prev) return prev
+      const filtered = prev.groupPredictions.filter(p => p.groupId !== groupId)
+      return { ...prev, groupPredictions: [...filtered, { participantId: prev.participant.id, groupId, order }] }
+    })
+  }, [])
+
   if (loading) return <div className="text-center py-20 text-gray-400 animate-pulse">Carregando...</div>
   if (error) return <div className="text-center py-20"><p className="text-red-400 text-lg">{error}</p></div>
   if (!data) return null
 
   const predMap = Object.fromEntries(data.matchPredictions.map(p => [p.matchId, p]))
+  const groupPredMap = Object.fromEntries(data.groupPredictions.map(p => [p.groupId, p]))
 
   const groupMatchesByGroup = GROUP_MATCHES.reduce((acc, m) => {
     if (!acc[m.groupId!]) acc[m.groupId!] = []
@@ -240,6 +358,8 @@ export default function PalpitePage() {
 
   const totalPredicted = data.matchPredictions.length
   const totalGroupMatches = GROUP_MATCHES.length
+  const totalGroupPreds = data.groupPredictions.length
+  const totalGroups = GROUPS.length
 
   const knockoutByPhase = KNOCKOUT_MATCHES.reduce((acc, m) => {
     if (!acc[m.phase]) acc[m.phase] = []
@@ -264,12 +384,21 @@ export default function PalpitePage() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-white">{data.participant.name}</h2>
-          <div className="flex items-center gap-3 mt-1">
-            <div className="w-40 bg-gray-800 rounded-full h-1.5">
-              <div className="bg-green-500 h-1.5 rounded-full transition-all"
-                style={{ width: `${Math.min(100, (totalPredicted / totalGroupMatches) * 100)}%` }} />
+          <div className="flex flex-col gap-1 mt-1.5">
+            <div className="flex items-center gap-3">
+              <div className="w-36 bg-gray-800 rounded-full h-1.5">
+                <div className="bg-green-500 h-1.5 rounded-full transition-all"
+                  style={{ width: `${Math.min(100, (totalPredicted / totalGroupMatches) * 100)}%` }} />
+              </div>
+              <span className="text-xs text-gray-500">{totalPredicted}/{totalGroupMatches} jogos</span>
             </div>
-            <span className="text-xs text-gray-500">{totalPredicted}/{totalGroupMatches} jogos</span>
+            <div className="flex items-center gap-3">
+              <div className="w-36 bg-gray-800 rounded-full h-1.5">
+                <div className="bg-yellow-500 h-1.5 rounded-full transition-all"
+                  style={{ width: `${Math.min(100, (totalGroupPreds / totalGroups) * 100)}%` }} />
+              </div>
+              <span className="text-xs text-gray-500">{totalGroupPreds}/{totalGroups} grupos</span>
+            </div>
           </div>
         </div>
         <a href="/" className="text-sm text-gray-500 hover:text-white transition-colors">← Classificação</a>
@@ -294,12 +423,14 @@ export default function PalpitePage() {
             {GROUPS.map(g => (
               <GroupTab key={g.id} groupId={g.id} isActive={activeGroup === g.id}
                 filledCount={(groupMatchesByGroup[g.id] ?? []).filter(m => predMap[m.id]).length}
+                hasPrediction={!!groupPredMap[g.id]}
                 onClick={() => { setActiveGroup(g.id); setActiveRound(1) }} />
             ))}
           </div>
 
           <div className="grid lg:grid-cols-2 gap-4">
-            {/* Left: standings */}
+            {/* Left: standings + group order prediction */}
+            <div className="space-y-3">
             <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
               <div className="px-4 py-3 border-b border-gray-800 flex items-center justify-between">
                 <h3 className="font-bold text-sm uppercase tracking-wider text-gray-300">
@@ -358,6 +489,17 @@ export default function PalpitePage() {
                 <span className="w-2 h-2 rounded-full bg-green-700 inline-block"></span>
                 <span className="text-xs text-gray-600">Classificados (top 2 + melhores 3ºs)</span>
               </div>
+            </div>
+
+            <GroupOrderEditor
+              groupId={activeGroup}
+              defaultOrder={standings.map(s => s.teamId)}
+              groupPrediction={groupPredMap[activeGroup]}
+              token={token}
+              locked={(groupMatchesByGroup[activeGroup] ?? []).some(m => results[m.id]?.score1 !== undefined)}
+              adminMode={adminMode}
+              onSaved={saveGroupPrediction}
+            />
             </div>
 
             {/* Right: match cards */}
