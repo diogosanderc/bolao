@@ -1,6 +1,6 @@
 import { GROUPS, GROUP_MATCHES, R32_BRACKET } from './copa2026'
 import { THIRD_PLACE_TABLE } from './thirdPlaceTable'
-import { MatchPrediction } from './types'
+import { MatchPrediction, MatchResult } from './types'
 
 // R32 match ID → slot key (letter of the group whose 1st-place faces a best-3rd)
 const SLOT_GROUP: Record<string, string> = {
@@ -126,4 +126,88 @@ export function computeFullBracket(
   }
 
   return result
+}
+
+export function computeBracketFromResults(
+  results: MatchResult[]
+): Record<string, { team1Id: string; team2Id: string }> {
+  const rMap = Object.fromEntries(results.map(r => [r.matchId, r]))
+
+  const groupRanks: Record<string, string[]> = {}
+  const thirdPlace: { group: string; teamId: string; p: number; gp: number; gc: number; sg: number }[] = []
+
+  for (const group of GROUPS) {
+    const s: Record<string, { p: number; gp: number; gc: number }> =
+      Object.fromEntries(group.teamIds.map(id => [id, { p: 0, gp: 0, gc: 0 }]))
+
+    for (const m of GROUP_MATCHES.filter(m => m.groupId === group.id)) {
+      const res = rMap[m.id]
+      if (!res) continue
+      s[m.team1Id].gp += res.score1; s[m.team1Id].gc += res.score2
+      s[m.team2Id].gp += res.score2; s[m.team2Id].gc += res.score1
+      if (res.score1 > res.score2) s[m.team1Id].p += 3
+      else if (res.score2 > res.score1) s[m.team2Id].p += 3
+      else { s[m.team1Id].p++; s[m.team2Id].p++ }
+    }
+
+    const sorted = group.teamIds.slice().sort((a, b) => {
+      if (s[b].p !== s[a].p) return s[b].p - s[a].p
+      const sgA = s[a].gp - s[a].gc, sgB = s[b].gp - s[b].gc
+      if (sgB !== sgA) return sgB - sgA
+      return s[b].gp - s[a].gp
+    })
+    groupRanks[group.id] = sorted
+    if (sorted.length >= 3) {
+      const t = sorted[2]
+      thirdPlace.push({ group: group.id, teamId: t, p: s[t].p, gp: s[t].gp, gc: s[t].gc, sg: s[t].gp - s[t].gc })
+    }
+  }
+
+  const best8 = [...thirdPlace].sort((a, b) => b.p - a.p || b.sg - a.sg || b.gp - a.gp).slice(0, 8)
+  const qualKey = best8.map(t => t.group).sort().join('')
+  const slotMap = THIRD_PLACE_TABLE[qualKey] ?? {}
+  const thirdByGroup = Object.fromEntries(thirdPlace.map(t => [t.group, t.teamId]))
+  const getThird = (r32Id: string) => {
+    const src = slotMap[SLOT_GROUP[r32Id]]
+    return src ? (thirdByGroup[src] ?? 'TBD') : 'TBD'
+  }
+
+  const out: Record<string, { team1Id: string; team2Id: string }> = {}
+
+  for (const entry of R32_BRACKET) {
+    const pick = (sl: typeof entry.s1): string =>
+      sl.type === 'rank' ? (groupRanks[sl.group]?.[sl.rank - 1] ?? 'TBD') : getThird(entry.id)
+    out[entry.id] = { team1Id: pick(entry.s1), team2Id: pick(entry.s2) }
+  }
+
+  const winner = (matchId: string, teams: { team1Id: string; team2Id: string }): string => {
+    if (teams.team1Id === 'TBD' || teams.team2Id === 'TBD') return 'TBD'
+    const res = rMap[matchId]
+    if (!res) return 'TBD'
+    if (res.score1 > res.score2) return teams.team1Id
+    if (res.score2 > res.score1) return teams.team2Id
+    return res.advancingTeamId ?? 'TBD'
+  }
+
+  const loser = (matchId: string, teams: { team1Id: string; team2Id: string }): string => {
+    if (teams.team1Id === 'TBD' || teams.team2Id === 'TBD') return 'TBD'
+    const res = rMap[matchId]
+    if (!res) return 'TBD'
+    const adv = winner(matchId, teams)
+    if (adv === 'TBD') return 'TBD'
+    return adv === teams.team1Id ? teams.team2Id : teams.team1Id
+  }
+
+  for (const [matchId, f1, f2] of BRACKET_TREE) {
+    const t1 = out[f1] ?? { team1Id: 'TBD', team2Id: 'TBD' }
+    const t2 = out[f2] ?? { team1Id: 'TBD', team2Id: 'TBD' }
+    out[matchId] = { team1Id: winner(f1, t1), team2Id: winner(f2, t2) }
+  }
+
+  out['TP_1'] = {
+    team1Id: loser('SF_1', out['SF_1'] ?? { team1Id: 'TBD', team2Id: 'TBD' }),
+    team2Id: loser('SF_2', out['SF_2'] ?? { team1Id: 'TBD', team2Id: 'TBD' }),
+  }
+
+  return out
 }
