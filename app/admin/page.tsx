@@ -135,7 +135,7 @@ export default function AdminPage() {
   if (!confirmed) {
     return (
       <div className="max-w-sm mx-auto mt-20 space-y-4">
-        <h2 className="text-2xl font-bold text-center text-yellow-400">Acesso Admin</h2>
+        <h2 className="text-2xl font-bold text-center text-yellow-600 dark:text-yellow-400">Acesso Admin</h2>
         <p className="text-gray-400 text-sm text-center">Digite a chave de administrador para continuar.</p>
         <input
           type="password"
@@ -188,7 +188,7 @@ export default function AdminPage() {
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
         <div>
-          <h2 className="text-2xl font-bold text-yellow-400">Painel Administrativo</h2>
+          <h2 className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">Painel Administrativo</h2>
           <span className="text-xs text-gray-400 sm:hidden">{groupsDone}/12 grupos completos</span>
         </div>
         <div className="flex items-center gap-4 text-xs text-gray-400">
@@ -203,7 +203,7 @@ export default function AdminPage() {
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === tab ? 'border-yellow-500 text-yellow-400' : 'border-transparent text-gray-400 hover:text-white'}`}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === tab ? 'border-yellow-500 text-yellow-600 dark:text-yellow-400' : 'border-transparent text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
           >
             {tab === 'participants' ? '👥 Participantes' : tab === 'results' ? '⚽ Grupos' : '🏆 Mata-Mata'}
           </button>

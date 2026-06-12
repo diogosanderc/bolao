@@ -14,6 +14,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="pt-BR">
       <body className={`min-h-screen antialiased ${rajdhani.className}`}>
+        <script dangerouslySetInnerHTML={{ __html: `(function(){var t=localStorage.getItem('theme')||'dark';if(t==='dark')document.documentElement.classList.add('dark')})()` }} />
         <Header />
         <main className="max-w-7xl mx-auto px-4 py-6">{children}</main>
       </body>

@@ -154,7 +154,7 @@ function GroupTab({ groupId, isActive, filledCount, onClick }: {
       className={`px-3 py-2 rounded-lg text-sm font-bold border transition-all ${
         isActive ? 'bg-green-700 border-green-600 text-white shadow-lg shadow-green-900/30' :
         done ? 'bg-gray-800 border-green-800 text-green-400' :
-        'bg-gray-900 border-gray-800 text-gray-400 hover:border-gray-600 hover:text-white'
+        'bg-gray-900 border-gray-800 text-gray-400 hover:border-gray-600 hover:text-gray-900 dark:hover:text-white'
       }`}>
       {groupId}
       {done && <span className="ml-1 text-xs">✓</span>}
@@ -263,7 +263,7 @@ export default function PalpitePage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-white">{data.participant.name}</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{data.participant.name}</h2>
           <div className="flex items-center gap-3 mt-1">
             <div className="w-40 bg-gray-800 rounded-full h-1.5">
               <div className="bg-green-500 h-1.5 rounded-full transition-all"
@@ -272,17 +272,17 @@ export default function PalpitePage() {
             <span className="text-xs text-gray-500">{totalPredicted}/{totalGroupMatches} jogos</span>
           </div>
         </div>
-        <a href="/" className="text-sm text-gray-500 hover:text-white transition-colors">← Classificação</a>
+        <a href="/" className="text-sm text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors">← Classificação</a>
       </div>
 
       {/* Phase tabs */}
       <div className="flex gap-1 bg-gray-900 p-1 rounded-xl w-fit">
         <button onClick={() => setActiveTab('groups')}
-          className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all ${activeTab === 'groups' ? 'bg-green-700 text-white shadow' : 'text-gray-400 hover:text-white'}`}>
+          className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all ${activeTab === 'groups' ? 'bg-green-700 text-white shadow' : 'text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}>
           ⚽ Fase de Grupos
         </button>
         <button onClick={() => setActiveTab('knockout')}
-          className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all ${activeTab === 'knockout' ? 'bg-green-700 text-white shadow' : 'text-gray-400 hover:text-white'}`}>
+          className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all ${activeTab === 'knockout' ? 'bg-green-700 text-white shadow' : 'text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}>
           🏆 Mata-Mata
         </button>
       </div>
@@ -339,7 +339,7 @@ export default function PalpitePage() {
                             <span className="font-medium text-sm">{team?.name}</span>
                           </div>
                         </td>
-                        <td className="px-2 py-3 text-center font-bold text-white">{row.p}</td>
+                        <td className="px-2 py-3 text-center font-bold text-gray-900 dark:text-white">{row.p}</td>
                         <td className="px-2 py-3 text-center text-gray-400">{row.j}</td>
                         <td className="px-2 py-3 text-center text-gray-400">{row.v}</td>
                         <td className="px-2 py-3 text-center text-gray-400">{row.e}</td>

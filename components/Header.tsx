@@ -6,9 +6,21 @@ export function Header() {
   const pathname = usePathname()
   const isAuthPage = ['/login', '/cadastro', '/esqueci-senha', '/resetar-senha'].includes(pathname)
   const [open, setOpen] = useState(false)
+  const [isDark, setIsDark] = useState(true)
 
   // Close menu on route change
   useEffect(() => { setOpen(false) }, [pathname])
+
+  useEffect(() => {
+    setIsDark(document.documentElement.classList.contains('dark'))
+  }, [])
+
+  const toggleTheme = () => {
+    const next = !isDark
+    setIsDark(next)
+    document.documentElement.classList.toggle('dark', next)
+    localStorage.setItem('theme', next ? 'dark' : 'light')
+  }
 
   const navLinks = (
     <>
@@ -50,6 +62,9 @@ export function Header() {
             {/* Desktop nav */}
             <nav className="ml-auto hidden sm:flex items-center gap-5 text-sm">
               {navLinks}
+              <button onClick={toggleTheme} className="text-white hover:text-yellow-300 transition-colors text-lg" aria-label="Alternar tema">
+                {isDark ? '☀️' : '🌙'}
+              </button>
             </nav>
 
             {/* Hamburger button (mobile only) */}
@@ -76,6 +91,9 @@ export function Header() {
       {!isAuthPage && open && (
         <nav className="sm:hidden bg-green-900 border-t border-green-700 px-4 py-3 flex flex-col gap-4 text-sm">
           {navLinks}
+          <button onClick={toggleTheme} className="text-white hover:text-yellow-300 transition-colors text-lg text-left" aria-label="Alternar tema">
+            {isDark ? '☀️' : '🌙'}
+          </button>
         </nav>
       )}
     </header>

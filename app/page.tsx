@@ -32,10 +32,10 @@ export default function LeaderboardPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-yellow-400">Classificação</h2>
+        <h2 className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">Classificação</h2>
         <button
           onClick={() => location.reload()}
-          className="text-sm text-gray-400 hover:text-white transition-colors"
+          className="text-sm text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
         >
           ↻ Atualizar
         </button>
@@ -78,10 +78,10 @@ export default function LeaderboardPage() {
                 <tr
                   key={entry.participant.id}
                   className={`transition-colors ${
-                    isRelated(entry.totalPoints) ? 'bg-red-950/50 hover:bg-red-950/70' :
-                    tier === 1 ? 'bg-yellow-950/40' :
+                    isRelated(entry.totalPoints) ? 'bg-red-50 hover:bg-red-100 dark:bg-red-950/50 dark:hover:bg-red-950/70' :
+                    tier === 1 ? 'bg-yellow-100 dark:bg-yellow-950/40' :
                     tier === 2 ? 'bg-gray-800/30' :
-                    tier === 3 ? 'bg-orange-950/30' :
+                    tier === 3 ? 'bg-orange-50 dark:bg-orange-950/30' :
                     'hover:bg-gray-900/50'
                   }`}
                 >
@@ -91,15 +91,15 @@ export default function LeaderboardPage() {
                       : (trophies[tier] ?? <span className="text-gray-500 text-sm">{rank}</span>)}
                   </td>
                   <td className={`px-4 py-3 font-semibold ${
-                    isRelated(entry.totalPoints) ? 'text-red-300' :
-                    tier === 1 ? 'text-yellow-300' :
+                    isRelated(entry.totalPoints) ? 'text-red-700 dark:text-red-300' :
+                    tier === 1 ? 'text-yellow-700 dark:text-yellow-300' :
                     tier === 2 ? 'text-gray-300' :
                     tier === 3 ? 'text-amber-600' :
                     ''
                   }`}>
                     {entry.participant.name}
                   </td>
-                  <td className={`px-4 py-3 text-right font-bold text-base ${isRelated(entry.totalPoints) ? 'text-red-400' : 'text-yellow-400'}`}>
+                  <td className={`px-4 py-3 text-right font-bold text-base ${isRelated(entry.totalPoints) ? 'text-red-600 dark:text-red-400' : 'text-yellow-600 dark:text-yellow-400'}`}>
                     {entry.totalPoints}
                   </td>
                   <td className="px-4 py-3 text-right text-gray-300 hidden sm:table-cell">

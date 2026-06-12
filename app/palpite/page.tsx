@@ -36,7 +36,7 @@ export default function PalpiteEntryPage() {
     <div className="flex flex-col items-center justify-center min-h-[65vh] gap-8">
       <div className="text-center">
         <div className="text-5xl mb-3">⚽</div>
-        <h1 className="text-3xl font-bold text-white">Enviar Palpites</h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Enviar Palpites</h1>
         <p className="text-gray-400 mt-2 text-sm">Digite seu nome para acessar ou criar seus palpites</p>
       </div>
 
@@ -52,7 +52,7 @@ export default function PalpiteEntryPage() {
             placeholder="Ex: MACALISTER"
             autoFocus
             autoComplete="off"
-            className="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3.5 text-white text-lg font-semibold uppercase tracking-wide focus:outline-none focus:border-green-500 transition-colors placeholder:font-normal placeholder:normal-case placeholder:tracking-normal placeholder:text-gray-600"
+            className="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3.5 text-gray-900 dark:text-white text-lg font-semibold uppercase tracking-wide focus:outline-none focus:border-green-500 transition-colors placeholder:font-normal placeholder:normal-case placeholder:tracking-normal placeholder:text-gray-600"
           />
         </div>
 

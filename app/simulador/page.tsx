@@ -105,7 +105,7 @@ export default function SimuladorPage() {
           value={s.score1}
           onChange={e => handleInput(matchId, 'score1', e.target.value)}
           disabled={tbd}
-          className="w-9 text-center bg-gray-800 border border-gray-700 rounded text-white text-sm py-0.5 focus:outline-none focus:border-yellow-500 disabled:opacity-40 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          className="w-9 text-center bg-gray-800 border border-gray-700 rounded text-gray-900 dark:text-white text-sm py-0.5 focus:outline-none focus:border-yellow-500 disabled:opacity-40 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
         />
         <span className="text-gray-600 text-xs shrink-0">×</span>
         <input
@@ -113,7 +113,7 @@ export default function SimuladorPage() {
           value={s.score2}
           onChange={e => handleInput(matchId, 'score2', e.target.value)}
           disabled={tbd}
-          className="w-9 text-center bg-gray-800 border border-gray-700 rounded text-white text-sm py-0.5 focus:outline-none focus:border-yellow-500 disabled:opacity-40 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          className="w-9 text-center bg-gray-800 border border-gray-700 rounded text-gray-900 dark:text-white text-sm py-0.5 focus:outline-none focus:border-yellow-500 disabled:opacity-40 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
         />
         <span className="text-base shrink-0">{t2?.flag ?? '🏳'}</span>
         <span className="text-xs text-gray-300 flex-1 truncate min-w-0">{t2?.name ?? team2Id}</span>
@@ -126,7 +126,7 @@ export default function SimuladorPage() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
-          <h2 className="text-2xl font-bold text-yellow-400">Simulador</h2>
+          <h2 className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">Simulador</h2>
           <p className="text-xs text-gray-500 mt-0.5">Insira resultados hipotéticos e veja como a classificação muda — nada é salvo</p>
         </div>
         <div className="flex gap-2 items-center">
@@ -235,9 +235,9 @@ export default function SimuladorPage() {
                       <tr
                         key={entry.participant.id}
                         className={`text-xs transition-colors ${
-                          tier === 1 ? 'bg-yellow-950/40' :
+                          tier === 1 ? 'bg-yellow-100 dark:bg-yellow-950/40' :
                           tier === 2 ? 'bg-gray-800/30' :
-                          tier === 3 ? 'bg-orange-950/30' : ''
+                          tier === 3 ? 'bg-orange-50 dark:bg-orange-950/30' : ''
                         }`}
                       >
                         <td className="px-3 py-1.5 text-center font-bold">
@@ -246,7 +246,7 @@ export default function SimuladorPage() {
                         <td className="px-3 py-1.5 text-gray-200 truncate max-w-[160px]">
                           {entry.participant.name}
                         </td>
-                        <td className="px-3 py-1.5 text-right font-bold text-yellow-400">
+                        <td className="px-3 py-1.5 text-right font-bold text-yellow-600 dark:text-yellow-400">
                           {entry.totalPoints}
                         </td>
                       </tr>
