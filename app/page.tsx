@@ -90,7 +90,13 @@ export default function LeaderboardPage() {
                       ? '💸'
                       : (trophies[tier] ?? <span className="text-gray-500 text-sm">{rank}</span>)}
                   </td>
-                  <td className={`px-4 py-3 font-semibold ${isRelated(entry.totalPoints) ? 'text-red-300' : ''}`}>
+                  <td className={`px-4 py-3 font-semibold ${
+                    isRelated(entry.totalPoints) ? 'text-red-300' :
+                    tier === 1 ? 'text-yellow-300' :
+                    tier === 2 ? 'text-gray-300' :
+                    tier === 3 ? 'text-amber-600' :
+                    ''
+                  }`}>
                     {entry.participant.name}
                   </td>
                   <td className={`px-4 py-3 text-right font-bold text-base ${isRelated(entry.totalPoints) ? 'text-red-400' : 'text-yellow-400'}`}>
