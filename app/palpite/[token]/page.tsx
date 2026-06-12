@@ -364,12 +364,12 @@ export default function PalpitePage() {
             <div className="space-y-3">
               <div className="flex items-center justify-between bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5">
                 <button onClick={() => setActiveRound(r => Math.max(1, r - 1))} disabled={activeRound === 1}
-                  className="text-gray-400 hover:text-white disabled:opacity-20 text-lg px-2">‹</button>
+                  className="text-gray-400 hover:text-gray-900 dark:hover:text-white disabled:opacity-20 text-lg px-2">‹</button>
                 <span className="text-sm font-bold text-gray-300 uppercase tracking-wider">
                   {activeRound}ª Rodada
                 </span>
                 <button onClick={() => setActiveRound(r => Math.min(3, r + 1))} disabled={activeRound === 3}
-                  className="text-gray-400 hover:text-white disabled:opacity-20 text-lg px-2">›</button>
+                  className="text-gray-400 hover:text-gray-900 dark:hover:text-white disabled:opacity-20 text-lg px-2">›</button>
               </div>
 
               {roundMatches(activeGroup, activeRound).map(m => (
