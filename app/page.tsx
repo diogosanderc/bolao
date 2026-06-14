@@ -29,6 +29,9 @@ export default function LeaderboardPage() {
   const cutoffScore = data.length >= 7 ? data[data.length - 7].totalPoints : -Infinity
   const isRelated = (pts: number) => data.length >= 7 && pts <= cutoffScore
 
+  // só mostra o número do rank na primeira ocorrência de cada grupo empatado
+  const isFirstOfRank = data.map((_, idx) => idx === 0 || ranks[idx] !== ranks[idx - 1])
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -88,7 +91,8 @@ export default function LeaderboardPage() {
                   <td className="px-4 py-3 text-center font-bold text-lg">
                     {isRelated(entry.totalPoints)
                       ? '💸'
-                      : (trophies[tier] ?? <span className="text-gray-500 text-sm">{rank}</span>)}
+                      : trophies[tier]
+                      ?? (isFirstOfRank[idx] ? <span className="text-gray-500 text-sm">{rank}</span> : null)}
                   </td>
                   <td className={`px-4 py-3 font-semibold ${
                     isRelated(entry.totalPoints) ? 'text-red-700 dark:text-red-300' :
