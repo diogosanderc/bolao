@@ -38,7 +38,7 @@ export function Header() {
       >
         Simulador
       </a>
-      <span className="text-gray-400 cursor-not-allowed line-through text-xs">Palpites encerrados</span>
+      <a href="/palpite" onClick={() => setOpen(false)} className={`hover:text-yellow-300 transition-colors text-white font-medium ${pathname.startsWith('/palpite') ? 'text-yellow-300' : ''}`}>Palpites</a>
       <a
         href="/admin"
         onClick={() => setOpen(false)}
