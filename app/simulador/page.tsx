@@ -228,9 +228,10 @@ export default function SimuladorPage() {
                       </td>
                     </tr>
                   )}
-                  {leaderboard.map(entry => {
+                  {leaderboard.map((entry, idx) => {
                     const tier = tierOf(entry.totalPoints)
                     const rank = leaderboard.filter(e => e.totalPoints > entry.totalPoints).length + 1
+                    const isFirst = idx === 0 || entry.totalPoints !== leaderboard[idx - 1].totalPoints
                     return (
                       <tr
                         key={entry.participant.id}
@@ -241,7 +242,7 @@ export default function SimuladorPage() {
                         }`}
                       >
                         <td className="px-3 py-1.5 text-center font-bold">
-                          {trophies[tier] ?? <span className="text-gray-500">{rank}</span>}
+                          {trophies[tier] ?? (isFirst ? <span className="text-gray-500">{rank}</span> : null)}
                         </td>
                         <td className="px-3 py-1.5 text-gray-200 truncate max-w-[160px]">
                           {entry.participant.name}
