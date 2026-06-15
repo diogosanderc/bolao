@@ -3,6 +3,7 @@
 // persistent-volume db (results + any admin-edited predictions) so that:
 //   - New participants added to git appear in production after the next deploy.
 //   - Results entered via the admin panel survive deploys.
+//   - Seed matchPredictions always win (they come from the canonical TXT import).
 //
 // Only active when DATA_DIR env var is set (production).
 // In development (no DATA_DIR), the app reads/writes data/db.json directly.
@@ -32,25 +33,28 @@ if (existsSync(volumePath)) {
   }
 }
 
-const existingParticipantIds = new Set((volumeDb.participants || []).map(p => p.id))
-const existingPredictionKeys = new Set(
-  (volumeDb.matchPredictions || []).map(p => `${p.participantId}:${p.matchId}`)
+// Participants: seed wins (preserves tokens for existing ones, adds new ones)
+const volumeParticipantMap = Object.fromEntries((volumeDb.participants || []).map(p => [p.id, p]))
+const mergedParticipants = seedDb.participants.map(p =>
+  volumeParticipantMap[p.id]
+    ? { ...p, token: volumeParticipantMap[p.id].token } // preserve custom tokens
+    : p
 )
 
-const newParticipants = seedDb.participants.filter(p => !existingParticipantIds.has(p.id))
-const newPredictions = seedDb.matchPredictions.filter(
-  p => !existingPredictionKeys.has(`${p.participantId}:${p.matchId}`)
-)
+// matchPredictions: seed always wins (canonical TXT import)
+const mergedPredictions = seedDb.matchPredictions
 
+// results: volume always wins (admin-entered game results must survive deploys)
 const merged = {
-  participants: [...(volumeDb.participants || []), ...newParticipants],
-  matchPredictions: [...(volumeDb.matchPredictions || []), ...newPredictions],
-  groupPredictions: volumeDb.groupPredictions || [],
+  participants: mergedParticipants,
+  matchPredictions: mergedPredictions,
+  groupPredictions: seedDb.groupPredictions || [],
   results: volumeDb.results || [],
 }
 
 writeFileSync(volumePath, JSON.stringify(merged, null, 2))
 console.log(
-  `[init-db] ${merged.participants.length} participants (${newParticipants.length} new), ` +
-  `${merged.results.length} results preserved.`
+  `[init-db] ${merged.participants.length} participants, ` +
+  `${merged.matchPredictions.length} predictions from seed, ` +
+  `${merged.results.length} results preserved from volume.`
 )
