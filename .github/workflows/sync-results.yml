@@ -14,7 +14,7 @@ jobs:
     steps:
       - name: Call auto-sync endpoint
         run: |
-          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "${{ secrets.APP_URL }}/api/admin/sync/auto" \
+          RESPONSE=$(curl -s -L -w "\n%{http_code}" -X POST "${{ secrets.APP_URL }}/api/admin/sync/auto" \
             -H "Content-Type: application/json" \
             -d "{\"adminKey\":\"${{ secrets.ADMIN_KEY }}\"}")
 
