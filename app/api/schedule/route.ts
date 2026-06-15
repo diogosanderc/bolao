@@ -3,7 +3,9 @@ import { fetchESPNEvents } from '@/lib/espn'
 import { readDB, updateDB } from '@/lib/db'
 import { teamById } from '@/lib/copa2026'
 
-// GET /api/schedule — returns next match + all upcoming from ESPN (cached 30min)
+export const dynamic = 'force-dynamic' // never cache this route — live scores need fresh data
+
+// GET /api/schedule — returns next match + live + upcoming from ESPN
 export async function GET() {
   try {
     const [events, db] = await Promise.all([fetchESPNEvents(), readDB()])

@@ -1,6 +1,9 @@
-import { ALL_MATCHES, teamById } from './copa2026'
+import { ALL_MATCHES } from './copa2026'
 
-const ESPN_URL = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=20260612-20260719&limit=200'
+// Full tournament schedule — 30 min cache (dates don't change often)
+const ESPN_SCHEDULE_URL = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=20260612-20260719&limit=200'
+// Today only — 60 sec cache (for live scores)
+const ESPN_TODAY_URL = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard'
 
 export const ESPN_TO_TEAM_ID: Record<string, string> = {
   GER: 'GER', FRA: 'FRA', ESP: 'ESP', ENG: 'ENG', POR: 'POR',
@@ -59,26 +62,21 @@ function toBRT(isoDate: string): string {
   }
 }
 
-export async function fetchESPNEvents(): Promise<ESPNEvent[]> {
-  const res = await fetch(ESPN_URL, {
-    headers: { 'User-Agent': 'Mozilla/5.0 (compatible; bolao/1.0)' },
-    next: { revalidate: 1800 }, // cache 30 min
-  })
-  if (!res.ok) throw new Error(`ESPN ${res.status}`)
-  const data = await res.json()
-  const events: any[] = data.events ?? []
+function parseEvents(rawEvents: any[], liveMatchIds: Set<string>): ESPNEvent[] {
   const result: ESPNEvent[] = []
-
-  for (const event of events) {
+  for (const event of rawEvents) {
     const competition = event.competitions?.[0]
     if (!competition) continue
 
     const status = competition.status ?? event.status
     const completed = status?.type?.completed === true || status?.type?.name === 'STATUS_FINAL'
-    const inProgress = !completed && (
-      status?.type?.name === 'STATUS_IN_PROGRESS' ||
-      status?.type?.name === 'STATUS_HALFTIME'
-    )
+    const inProgress = liveMatchIds.size > 0
+      ? false // will be set below from today fetch
+      : !completed && (
+          status?.type?.name === 'STATUS_IN_PROGRESS' ||
+          status?.type?.name === 'STATUS_HALFTIME' ||
+          (status?.clock !== undefined && status?.clock > 0 && !completed)
+        )
 
     const competitors: any[] = competition.competitors ?? []
     if (competitors.length !== 2) continue
@@ -95,20 +93,69 @@ export async function fetchESPNEvents(): Promise<ESPNEvent[]> {
     )
     if (!match) continue
 
-    const venue = competition.venue?.fullName ?? competition.venue?.address?.city ?? ''
-    const dateISO = event.date ?? ''
-
     result.push({
       matchId: match.id,
       team1Id: match.team1Id,
       team2Id: match.team2Id,
-      date: dateISO,
-      dateBRT: toBRT(dateISO),
-      venue,
+      date: event.date ?? '',
+      dateBRT: toBRT(event.date ?? ''),
+      venue: competition.venue?.fullName ?? competition.venue?.address?.city ?? '',
       completed,
-      inProgress,
+      inProgress: liveMatchIds.has(match.id) || inProgress,
     })
   }
-
   return result
+}
+
+// Fetch today's scoreboard to get real-time live status (60s cache)
+async function fetchLiveMatchIds(): Promise<Set<string>> {
+  try {
+    const res = await fetch(ESPN_TODAY_URL, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; bolao/1.0)' },
+      next: { revalidate: 60 },
+    })
+    if (!res.ok) return new Set()
+    const data = await res.json()
+    const liveIds = new Set<string>()
+    for (const event of data.events ?? []) {
+      const competition = event.competitions?.[0]
+      const status = competition?.status ?? event.status
+      const isLive = !status?.type?.completed && (
+        status?.type?.name === 'STATUS_IN_PROGRESS' ||
+        status?.type?.name === 'STATUS_HALFTIME' ||
+        status?.type?.name === 'STATUS_SECOND_HALF' ||
+        status?.type?.name === 'STATUS_EXTRA_TIME' ||
+        status?.type?.name === 'STATUS_PENALTY' ||
+        (status?.displayClock && status?.displayClock !== '0:00' && !status?.type?.completed)
+      )
+      if (!isLive) continue
+      const competitors: any[] = competition?.competitors ?? []
+      if (competitors.length !== 2) continue
+      const c1 = competitors[0], c2 = competitors[1]
+      const id1 = resolveTeam(c1.team?.abbreviation ?? '', c1.team?.displayName ?? '')
+      const id2 = resolveTeam(c2.team?.abbreviation ?? '', c2.team?.displayName ?? '')
+      if (!id1 || !id2) continue
+      const match = ALL_MATCHES.find(m =>
+        (m.team1Id === id1 && m.team2Id === id2) ||
+        (m.team1Id === id2 && m.team2Id === id1)
+      )
+      if (match) liveIds.add(match.id)
+    }
+    return liveIds
+  } catch {
+    return new Set()
+  }
+}
+
+export async function fetchESPNEvents(): Promise<ESPNEvent[]> {
+  const [scheduleRes, liveIds] = await Promise.all([
+    fetch(ESPN_SCHEDULE_URL, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; bolao/1.0)' },
+      next: { revalidate: 1800 },
+    }),
+    fetchLiveMatchIds(),
+  ])
+  if (!scheduleRes.ok) throw new Error(`ESPN ${scheduleRes.status}`)
+  const data = await scheduleRes.json()
+  return parseEvents(data.events ?? [], liveIds)
 }

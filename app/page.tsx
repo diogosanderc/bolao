@@ -38,13 +38,18 @@ export default function LeaderboardPage() {
       })
       .catch(() => setLoading(false))
 
-    fetch('/api/schedule')
-      .then(r => r.json())
-      .then(d => {
-        setNextMatch(d.nextMatch ?? null)
-        setLiveMatch(d.live?.[0] ?? null)
-      })
-      .catch(() => {})
+    function fetchSchedule() {
+      fetch('/api/schedule')
+        .then(r => r.json())
+        .then(d => {
+          setNextMatch(d.nextMatch ?? null)
+          setLiveMatch(d.live?.[0] ?? null)
+        })
+        .catch(() => {})
+    }
+    fetchSchedule()
+    const interval = setInterval(fetchSchedule, 60_000)
+    return () => clearInterval(interval)
   }, [])
 
   const trophies: Record<number, string> = { 1: '🥇', 2: '🥈', 3: '🥉' }
