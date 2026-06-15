@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo } from 'react'
 import Link from 'next/link'
+import { Flag } from '@/components/Flag'
 import { ALL_MATCHES, teamById, GROUPS } from '@/lib/copa2026'
 import { PHASE_LABELS, MatchPrediction, Phase } from '@/lib/types'
 
@@ -162,9 +163,9 @@ export default function TodosPalpitesPage() {
                       <div className="flex items-center gap-2 min-w-0">
                         <span className="text-xs text-gray-600 shrink-0">#{match.matchNumber}</span>
                         <span className="font-semibold text-white text-sm">
-                          {team1 ? `${team1.flag} ${team1.name}` : match.team1Id}
+                          {team1 ? <><Flag teamId={match.team1Id} size={18} /> {team1.name}</> : match.team1Id}
                           <span className="text-gray-500 mx-2">vs</span>
-                          {team2 ? `${team2.flag} ${team2.name}` : match.team2Id}
+                          {team2 ? <><Flag teamId={match.team2Id} size={18} /> {team2.name}</> : match.team2Id}
                         </span>
                         {match.date && (
                           <span className="text-xs text-gray-600 hidden sm:inline shrink-0">{match.date}</span>

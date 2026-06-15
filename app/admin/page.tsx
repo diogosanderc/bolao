@@ -279,9 +279,9 @@ export default function AdminPage() {
                       />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 text-sm font-semibold text-white">
-                          <span>{d.team1.flag} {d.team1.name}</span>
+                          <span className="flex items-center gap-1"><Flag teamId={d.team1.id} size={18} />{d.team1.name}</span>
                           <span className="text-blue-400 font-bold">{d.espnScore1} × {d.espnScore2}</span>
-                          <span>{d.team2.flag} {d.team2.name}</span>
+                          <span className="flex items-center gap-1"><Flag teamId={d.team2.id} size={18} />{d.team2.name}</span>
                         </div>
                         <div className="text-xs mt-0.5">
                           {d.isNew

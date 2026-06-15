@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { GROUPS, GROUP_MATCHES, KNOCKOUT_MATCHES, teamById } from '@/lib/copa2026'
+import { Flag } from '@/components/Flag'
 import { LeaderboardEntry, MatchResult } from '@/lib/types'
 
 type SimScore = { score1: string; score2: string }
@@ -98,7 +99,7 @@ export default function SimuladorPage() {
     const tbd = team1Id === 'TBD' || team2Id === 'TBD'
     return (
       <div key={matchId} className={`flex items-center gap-1.5 py-1.5 px-2 rounded-lg bg-gray-900 border border-gray-800 ${tbd ? 'opacity-40' : ''}`}>
-        <span className="text-base shrink-0">{t1?.flag ?? '🏳'}</span>
+        <span className="shrink-0">{team1Id !== 'TBD' ? <Flag teamId={team1Id} size={18} /> : '🏳'}</span>
         <span className="text-xs text-gray-300 flex-1 text-right truncate min-w-0">{t1?.name ?? team1Id}</span>
         <input
           type="number" min="0" max="20"
@@ -115,7 +116,7 @@ export default function SimuladorPage() {
           disabled={tbd}
           className="w-9 text-center bg-gray-800 border border-gray-700 rounded text-gray-900 dark:text-white text-sm py-0.5 focus:outline-none focus:border-yellow-500 disabled:opacity-40 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
         />
-        <span className="text-base shrink-0">{t2?.flag ?? '🏳'}</span>
+        <span className="shrink-0">{team2Id !== 'TBD' ? <Flag teamId={team2Id} size={18} /> : '🏳'}</span>
         <span className="text-xs text-gray-300 flex-1 truncate min-w-0">{t2?.name ?? team2Id}</span>
       </div>
     )

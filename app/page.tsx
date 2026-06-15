@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { LeaderboardEntry } from '@/lib/types'
+import { Flag } from '@/components/Flag'
 
 type LastMatch = {
   matchId: string
@@ -56,9 +57,9 @@ export default function LeaderboardPage() {
       {lastMatch && (
         <div className="flex items-center gap-2 text-sm text-gray-400 bg-gray-900 border border-gray-800 rounded-lg px-4 py-2">
           <span className="text-xs text-gray-500 uppercase tracking-wider shrink-0">Último jogo</span>
-          <span className="ml-1">{lastMatch.team1.flag} {lastMatch.team1.name}</span>
+          <span className="ml-1 flex items-center gap-1.5"><Flag teamId={lastMatch.team1.id} size={18} />{lastMatch.team1.name}</span>
           <span className="font-bold text-white">{lastMatch.score1} × {lastMatch.score2}</span>
-          <span>{lastMatch.team2.flag} {lastMatch.team2.name}</span>
+          <span className="flex items-center gap-1.5"><Flag teamId={lastMatch.team2.id} size={18} />{lastMatch.team2.name}</span>
         </div>
       )}
 
