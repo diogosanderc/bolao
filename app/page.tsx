@@ -98,7 +98,7 @@ export default function LeaderboardPage() {
                   <td className="px-4 py-3 text-right text-gray-300">
                     {entry.lastMatchPoints > 0
                       ? <span className="text-green-400 font-semibold">+{entry.lastMatchPoints}</span>
-                      : <span className="text-gray-600">—</span>}
+                      : <span className="text-gray-500">0</span>}
                   </td>
                   <td className={`px-4 py-3 text-right font-bold text-base ${isRelated(entry.totalPoints) ? 'text-red-600 dark:text-red-400' : 'text-yellow-600 dark:text-yellow-400'}`}>
                     {entry.totalPoints}
