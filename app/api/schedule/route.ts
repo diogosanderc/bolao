@@ -5,11 +5,47 @@ import { teamById } from '@/lib/copa2026'
 
 export const dynamic = 'force-dynamic' // never cache this route — live scores need fresh data
 
+// Auto-save completed results found in ESPN that are missing from DB
+async function autoSaveNewResults(events: Awaited<ReturnType<typeof fetchESPNEvents>>, db: Awaited<ReturnType<typeof readDB>>) {
+  const resultMap = Object.fromEntries(db.results.map(r => [r.matchId, r]))
+  const newResults: { matchId: string; score1: number; score2: number }[] = []
+  const newDates: Record<string, { date: string; dateBRT: string; venue: string }> = {}
+
+  for (const e of events) {
+    if (!e.completed) continue
+    if (resultMap[e.matchId]) continue // already saved
+    if (e.score1 === undefined || e.score2 === undefined) continue // no valid scores yet
+    newResults.push({ matchId: e.matchId, score1: e.score1, score2: e.score2 })
+    if (e.date) newDates[e.matchId] = { date: e.date, dateBRT: e.dateBRT, venue: e.venue }
+  }
+
+  // Also keep matchDates up to date for all events
+  for (const e of events) {
+    if (e.date && !newDates[e.matchId]) newDates[e.matchId] = { date: e.date, dateBRT: e.dateBRT, venue: e.venue }
+  }
+
+  if (newResults.length > 0 || Object.keys(newDates).length > 0) {
+    await updateDB(db => {
+      const map = Object.fromEntries(db.results.map(r => [r.matchId, r]))
+      for (const r of newResults) map[r.matchId] = r
+      return {
+        ...db,
+        results: Object.values(map),
+        matchDates: { ...(db.matchDates ?? {}), ...newDates },
+      }
+    })
+  }
+
+  return newResults.length
+}
+
 // GET /api/schedule — returns next match + live + upcoming from ESPN
 export async function GET() {
   try {
     const [events, db] = await Promise.all([fetchESPNEvents(), readDB()])
-    const now = new Date()
+
+    // Silently auto-save any newly completed results found in ESPN
+    autoSaveNewResults(events, db).catch(() => {})
 
     const upcoming = events
       .filter(e => !e.completed)

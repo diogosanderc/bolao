@@ -47,6 +47,8 @@ export type ESPNEvent = {
   venue: string
   completed: boolean
   inProgress: boolean
+  score1?: number   // set for completed games
+  score2?: number   // set for completed games
   liveScore1?: number
   liveScore2?: number
   clock?: string
@@ -94,6 +96,12 @@ function parseEvents(rawEvents: any[], liveMap: Map<string, LiveInfo>): ESPNEven
     const live = liveMap.get(match.id)
     const flipped = match.team1Id === id2
 
+    const rawScore1 = parseInt(c1.score ?? '', 10)
+    const rawScore2 = parseInt(c2.score ?? '', 10)
+    const hasScores = !isNaN(rawScore1) && !isNaN(rawScore2)
+    const finalScore1 = hasScores ? (flipped ? rawScore2 : rawScore1) : undefined
+    const finalScore2 = hasScores ? (flipped ? rawScore1 : rawScore2) : undefined
+
     result.push({
       matchId: match.id,
       team1Id: match.team1Id,
@@ -103,6 +111,8 @@ function parseEvents(rawEvents: any[], liveMap: Map<string, LiveInfo>): ESPNEven
       venue: competition.venue?.fullName ?? competition.venue?.address?.city ?? '',
       completed,
       inProgress: !!live,
+      score1: completed ? finalScore1 : undefined,
+      score2: completed ? finalScore2 : undefined,
       liveScore1: live ? (flipped ? live.score2 : live.score1) : undefined,
       liveScore2: live ? (flipped ? live.score1 : live.score2) : undefined,
       clock: live?.clock,
