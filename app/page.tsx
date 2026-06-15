@@ -19,6 +19,9 @@ type ScheduleMatch = {
   dateBRT: string
   venue: string
   inProgress: boolean
+  liveScore1?: number
+  liveScore2?: number
+  clock?: string
 }
 
 export default function LeaderboardPage() {
@@ -113,10 +116,17 @@ export default function LeaderboardPage() {
 
       {liveMatch && (
         <div className="bg-red-950/60 border border-red-700 rounded-lg px-4 py-2.5 animate-pulse">
-          <div className="text-xs text-red-400 uppercase tracking-wider font-bold mb-1">🔴 Ao vivo</div>
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-xs text-red-400 uppercase tracking-wider font-bold">🔴 Ao vivo</span>
+            {liveMatch.clock && <span className="text-xs text-red-300 font-semibold">{liveMatch.clock}</span>}
+          </div>
           <div className="flex items-center gap-2 text-sm text-white">
             <span className="flex items-center gap-1.5"><Flag teamId={liveMatch.team1.id} size={18} />{liveMatch.team1.name}</span>
-            <span className="font-bold text-red-300">vs</span>
+            <span className="font-bold text-white text-base px-1">
+              {liveMatch.liveScore1 !== undefined && liveMatch.liveScore2 !== undefined
+                ? `${liveMatch.liveScore1} × ${liveMatch.liveScore2}`
+                : <span className="text-red-300">vs</span>}
+            </span>
             <span className="flex items-center gap-1.5"><Flag teamId={liveMatch.team2.id} size={18} />{liveMatch.team2.name}</span>
           </div>
         </div>

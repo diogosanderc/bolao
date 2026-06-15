@@ -28,6 +28,9 @@ export async function GET() {
         ...e,
         team1: { id: e.team1Id, name: teamById[e.team1Id]?.name ?? e.team1Id },
         team2: { id: e.team2Id, name: teamById[e.team2Id]?.name ?? e.team2Id },
+        liveScore1: e.liveScore1,
+        liveScore2: e.liveScore2,
+        clock: e.clock,
       })),
       upcoming: upcoming.slice(0, 20).map(e => ({
         ...e,

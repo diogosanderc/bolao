@@ -42,11 +42,14 @@ export type ESPNEvent = {
   matchId: string
   team1Id: string
   team2Id: string
-  date: string      // ISO 8601 UTC
-  dateBRT: string   // formatted BRT for display
+  date: string
+  dateBRT: string
   venue: string
   completed: boolean
   inProgress: boolean
+  liveScore1?: number
+  liveScore2?: number
+  clock?: string
 }
 
 function toBRT(isoDate: string): string {
@@ -62,7 +65,9 @@ function toBRT(isoDate: string): string {
   }
 }
 
-function parseEvents(rawEvents: any[], liveMatchIds: Set<string>): ESPNEvent[] {
+type LiveInfo = { score1: number; score2: number; clock: string }
+
+function parseEvents(rawEvents: any[], liveMap: Map<string, LiveInfo>): ESPNEvent[] {
   const result: ESPNEvent[] = []
   for (const event of rawEvents) {
     const competition = event.competitions?.[0]
@@ -70,13 +75,6 @@ function parseEvents(rawEvents: any[], liveMatchIds: Set<string>): ESPNEvent[] {
 
     const status = competition.status ?? event.status
     const completed = status?.type?.completed === true || status?.type?.name === 'STATUS_FINAL'
-    const inProgress = liveMatchIds.size > 0
-      ? false // will be set below from today fetch
-      : !completed && (
-          status?.type?.name === 'STATUS_IN_PROGRESS' ||
-          status?.type?.name === 'STATUS_HALFTIME' ||
-          (status?.clock !== undefined && status?.clock > 0 && !completed)
-        )
 
     const competitors: any[] = competition.competitors ?? []
     if (competitors.length !== 2) continue
@@ -93,6 +91,9 @@ function parseEvents(rawEvents: any[], liveMatchIds: Set<string>): ESPNEvent[] {
     )
     if (!match) continue
 
+    const live = liveMap.get(match.id)
+    const flipped = match.team1Id === id2
+
     result.push({
       matchId: match.id,
       team1Id: match.team1Id,
@@ -101,22 +102,25 @@ function parseEvents(rawEvents: any[], liveMatchIds: Set<string>): ESPNEvent[] {
       dateBRT: toBRT(event.date ?? ''),
       venue: competition.venue?.fullName ?? competition.venue?.address?.city ?? '',
       completed,
-      inProgress: liveMatchIds.has(match.id) || inProgress,
+      inProgress: !!live,
+      liveScore1: live ? (flipped ? live.score2 : live.score1) : undefined,
+      liveScore2: live ? (flipped ? live.score1 : live.score2) : undefined,
+      clock: live?.clock,
     })
   }
   return result
 }
 
-// Fetch today's scoreboard to get real-time live status (60s cache)
-async function fetchLiveMatchIds(): Promise<Set<string>> {
+// Fetch today's scoreboard for real-time live scores (60s cache)
+async function fetchLiveMap(): Promise<Map<string, LiveInfo>> {
   try {
     const res = await fetch(ESPN_TODAY_URL, {
       headers: { 'User-Agent': 'Mozilla/5.0 (compatible; bolao/1.0)' },
       next: { revalidate: 60 },
     })
-    if (!res.ok) return new Set()
+    if (!res.ok) return new Map()
     const data = await res.json()
-    const liveIds = new Set<string>()
+    const liveMap = new Map<string, LiveInfo>()
     for (const event of data.events ?? []) {
       const competition = event.competitions?.[0]
       const status = competition?.status ?? event.status
@@ -131,7 +135,8 @@ async function fetchLiveMatchIds(): Promise<Set<string>> {
       if (!isLive) continue
       const competitors: any[] = competition?.competitors ?? []
       if (competitors.length !== 2) continue
-      const c1 = competitors[0], c2 = competitors[1]
+      const c1 = competitors.find((c: any) => c.homeAway === 'home') ?? competitors[0]
+      const c2 = competitors.find((c: any) => c.homeAway === 'away') ?? competitors[1]
       const id1 = resolveTeam(c1.team?.abbreviation ?? '', c1.team?.displayName ?? '')
       const id2 = resolveTeam(c2.team?.abbreviation ?? '', c2.team?.displayName ?? '')
       if (!id1 || !id2) continue
@@ -139,23 +144,28 @@ async function fetchLiveMatchIds(): Promise<Set<string>> {
         (m.team1Id === id1 && m.team2Id === id2) ||
         (m.team1Id === id2 && m.team2Id === id1)
       )
-      if (match) liveIds.add(match.id)
+      if (!match) continue
+      liveMap.set(match.id, {
+        score1: parseInt(c1.score ?? '0', 10),
+        score2: parseInt(c2.score ?? '0', 10),
+        clock: status?.displayClock ?? '',
+      })
     }
-    return liveIds
+    return liveMap
   } catch {
-    return new Set()
+    return new Map()
   }
 }
 
 export async function fetchESPNEvents(): Promise<ESPNEvent[]> {
-  const [scheduleRes, liveIds] = await Promise.all([
+  const [scheduleRes, liveMap] = await Promise.all([
     fetch(ESPN_SCHEDULE_URL, {
       headers: { 'User-Agent': 'Mozilla/5.0 (compatible; bolao/1.0)' },
       next: { revalidate: 1800 },
     }),
-    fetchLiveMatchIds(),
+    fetchLiveMap(),
   ])
   if (!scheduleRes.ok) throw new Error(`ESPN ${scheduleRes.status}`)
   const data = await scheduleRes.json()
-  return parseEvents(data.events ?? [], liveIds)
+  return parseEvents(data.events ?? [], liveMap)
 }
