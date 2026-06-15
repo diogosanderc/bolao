@@ -12,9 +12,20 @@ type LastMatch = {
   team2: { id: string; name: string; flag: string }
 } | null
 
+type ScheduleMatch = {
+  matchId: string
+  team1: { id: string; name: string; flag: string }
+  team2: { id: string; name: string; flag: string }
+  dateBRT: string
+  venue: string
+  inProgress: boolean
+}
+
 export default function LeaderboardPage() {
   const [data, setData] = useState<LeaderboardEntry[]>([])
   const [lastMatch, setLastMatch] = useState<LastMatch>(null)
+  const [nextMatch, setNextMatch] = useState<ScheduleMatch | null>(null)
+  const [liveMatch, setLiveMatch] = useState<ScheduleMatch | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -26,6 +37,14 @@ export default function LeaderboardPage() {
         setLoading(false)
       })
       .catch(() => setLoading(false))
+
+    fetch('/api/schedule')
+      .then(r => r.json())
+      .then(d => {
+        setNextMatch(d.nextMatch ?? null)
+        setLiveMatch(d.live?.[0] ?? null)
+      })
+      .catch(() => {})
   }, [])
 
   const trophies: Record<number, string> = { 1: '🥇', 2: '🥈', 3: '🥉' }
@@ -87,12 +106,31 @@ export default function LeaderboardPage() {
         </div>
       </div>
 
+      {liveMatch && (
+        <div className="flex items-center gap-2 text-sm bg-red-950/60 border border-red-700 rounded-lg px-4 py-2 animate-pulse">
+          <span className="text-xs text-red-400 uppercase tracking-wider font-bold shrink-0">🔴 Ao vivo</span>
+          <span className="ml-1 flex items-center gap-1.5 text-white"><Flag teamId={liveMatch.team1.id} size={18} />{liveMatch.team1.name}</span>
+          <span className="font-bold text-red-300">vs</span>
+          <span className="flex items-center gap-1.5 text-white"><Flag teamId={liveMatch.team2.id} size={18} />{liveMatch.team2.name}</span>
+        </div>
+      )}
+
       {lastMatch && (
         <div className="flex items-center gap-2 text-sm text-gray-400 bg-gray-900 border border-gray-800 rounded-lg px-4 py-2">
           <span className="text-xs text-gray-500 uppercase tracking-wider shrink-0">Último jogo</span>
           <span className="ml-1 flex items-center gap-1.5"><Flag teamId={lastMatch.team1.id} size={18} />{lastMatch.team1.name}</span>
           <span className="font-bold text-white">{lastMatch.score1} × {lastMatch.score2}</span>
           <span className="flex items-center gap-1.5"><Flag teamId={lastMatch.team2.id} size={18} />{lastMatch.team2.name}</span>
+        </div>
+      )}
+
+      {nextMatch && !liveMatch && (
+        <div className="flex items-center gap-2 text-sm text-gray-400 bg-gray-900 border border-gray-800 rounded-lg px-4 py-2">
+          <span className="text-xs text-gray-500 uppercase tracking-wider shrink-0">Próximo jogo</span>
+          <span className="ml-1 flex items-center gap-1.5"><Flag teamId={nextMatch.team1.id} size={18} />{nextMatch.team1.name}</span>
+          <span className="text-gray-600">vs</span>
+          <span className="flex items-center gap-1.5"><Flag teamId={nextMatch.team2.id} size={18} />{nextMatch.team2.name}</span>
+          <span className="ml-auto text-xs text-yellow-500 shrink-0">{nextMatch.dateBRT}</span>
         </div>
       )}
 

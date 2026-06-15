@@ -148,6 +148,23 @@ export default function AdminPage() {
     setSaving(false)
   }
 
+  async function syncSchedule() {
+    setSyncing(true)
+    try {
+      const r = await fetch('/api/schedule', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adminKey: key }),
+      })
+      const data = await r.json()
+      if (r.ok) showToast(`Agenda sincronizada: ${data.count} jogos atualizados`)
+      else showToast(data.error ?? 'Erro ao sincronizar agenda')
+    } catch {
+      showToast('Erro de conexão')
+    }
+    setSyncing(false)
+  }
+
   async function fetchSyncDiffs() {
     setSyncing(true)
     setSyncError('')
@@ -328,11 +345,18 @@ export default function AdminPage() {
         <div className="flex items-center gap-3 text-xs text-gray-400">
           <span className="hidden sm:inline">{groupsDone}/12 grupos completos</span>
           <button
+            onClick={syncSchedule}
+            disabled={syncing}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 disabled:text-gray-600 text-gray-100 rounded-lg font-semibold transition-colors text-xs"
+          >
+            {syncing ? '⟳ ...' : '📅 Sincronizar Agenda'}
+          </button>
+          <button
             onClick={fetchSyncDiffs}
             disabled={syncing}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-800 hover:bg-blue-700 disabled:bg-gray-800 disabled:text-gray-600 text-blue-100 rounded-lg font-semibold transition-colors text-xs"
           >
-            {syncing ? '⟳ Buscando...' : '⟳ Sincronizar ESPN'}
+            {syncing ? '⟳ Buscando...' : '⟳ Sincronizar Resultados'}
           </button>
           <button onClick={() => { localStorage.removeItem(ADMIN_KEY_STORAGE); location.reload() }} className="hover:text-gray-200">Sair</button>
         </div>

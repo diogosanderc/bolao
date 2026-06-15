@@ -92,6 +92,7 @@ export interface Database {
   matchPredictions: MatchPrediction[]
   groupPredictions: GroupPrediction[]
   results: MatchResult[]
+  matchDates: Record<string, { date: string; dateBRT: string; venue: string }>
 }
 
 export interface LeaderboardEntry {

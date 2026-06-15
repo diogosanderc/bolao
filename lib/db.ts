@@ -10,6 +10,7 @@ const DEFAULT_DB: Database = {
   matchPredictions: [],
   groupPredictions: [],
   results: [],
+  matchDates: {},
 }
 
 export async function readDB(): Promise<Database> {
