@@ -120,20 +120,6 @@ export default function LeaderboardPage() {
     }
   }
 
-  async function nativeShare() {
-    if (!previewUrl) return
-    try {
-      const res = await fetch(previewUrl)
-      const blob = await res.blob()
-      const file = new File([blob], 'classificacao-bolao.png', { type: 'image/png' })
-      if (navigator.canShare?.({ files: [file] })) {
-        await navigator.share({ files: [file], title: 'Bolão Copa 2026 — Classificação' })
-      }
-    } catch {
-      // ignore — user cancelled or not supported
-    }
-  }
-
   function downloadImage() {
     if (!previewUrl) return
     const a = document.createElement('a')
@@ -304,22 +290,12 @@ export default function LeaderboardPage() {
             >✕</button>
             <p className="text-center text-sm text-gray-400 mb-3">Classificação gerada — escolha como compartilhar</p>
             <img src={previewUrl} alt="Classificação" className="w-full rounded-lg mb-4" />
-            <div className="flex gap-2">
-              <button
-                onClick={downloadImage}
-                className="flex-1 py-2 rounded-lg bg-blue-700 hover:bg-blue-600 text-white font-bold transition-colors text-sm"
-              >
-                ⬇️ Baixar imagem
-              </button>
-              {typeof navigator !== 'undefined' && !!navigator.share && (
-                <button
-                  onClick={nativeShare}
-                  className="flex-1 py-2 rounded-lg bg-green-600 hover:bg-green-500 text-white font-bold transition-colors text-sm"
-                >
-                  📤 Compartilhar
-                </button>
-              )}
-            </div>
+            <button
+              onClick={downloadImage}
+              className="w-full py-2 rounded-lg bg-green-700 hover:bg-green-600 text-white font-bold transition-colors text-sm"
+            >
+              ⬇️ Salvar imagem
+            </button>
           </div>
         </div>
       )}
