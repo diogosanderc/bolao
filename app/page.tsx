@@ -3,14 +3,27 @@
 import { useEffect, useState } from 'react'
 import { LeaderboardEntry } from '@/lib/types'
 
+type LastMatch = {
+  matchId: string
+  score1: number
+  score2: number
+  team1: { id: string; name: string; flag: string }
+  team2: { id: string; name: string; flag: string }
+} | null
+
 export default function LeaderboardPage() {
   const [data, setData] = useState<LeaderboardEntry[]>([])
+  const [lastMatch, setLastMatch] = useState<LastMatch>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     fetch('/api/leaderboard')
       .then(r => r.json())
-      .then(d => { setData(Array.isArray(d) ? d : []); setLoading(false) })
+      .then(d => {
+        setData(Array.isArray(d.leaderboard) ? d.leaderboard : [])
+        setLastMatch(d.lastMatch ?? null)
+        setLoading(false)
+      })
       .catch(() => setLoading(false))
   }, [])
 
@@ -39,6 +52,15 @@ export default function LeaderboardPage() {
           ↻ Atualizar
         </button>
       </div>
+
+      {lastMatch && (
+        <div className="flex items-center gap-2 text-sm text-gray-400 bg-gray-900 border border-gray-800 rounded-lg px-4 py-2">
+          <span className="text-xs text-gray-500 uppercase tracking-wider shrink-0">Último jogo</span>
+          <span className="ml-1">{lastMatch.team1.flag} {lastMatch.team1.name}</span>
+          <span className="font-bold text-white">{lastMatch.score1} × {lastMatch.score2}</span>
+          <span>{lastMatch.team2.flag} {lastMatch.team2.name}</span>
+        </div>
+      )}
 
       {loading && (
         <div className="text-center py-20 text-gray-400">Carregando...</div>
