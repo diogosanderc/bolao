@@ -29,24 +29,25 @@ export default function LeaderboardPage() {
         logging: false,
       })
       const url = canvas.toDataURL('image/png')
-      // Try native share first (works on Android/iOS Chrome/Safari)
-      canvas.toBlob(async (blob) => {
-        if (blob) {
-          const file = new File([blob], 'classificacao-bolao.png', { type: 'image/png' })
-          try {
-            if (navigator.canShare?.({ files: [file] })) {
-              await navigator.share({ files: [file], title: 'Bolão Copa 2026 — Classificação' })
-              setSharing(false)
-              return
-            }
-          } catch {}
-        }
-        // Fallback: show preview modal
-        setPreviewUrl(url)
-        setSharing(false)
-      }, 'image/png')
+      setPreviewUrl(url)
     } catch {
+      // ignore
+    } finally {
       setSharing(false)
+    }
+  }
+
+  async function nativeShare() {
+    if (!previewUrl) return
+    try {
+      const res = await fetch(previewUrl)
+      const blob = await res.blob()
+      const file = new File([blob], 'classificacao-bolao.png', { type: 'image/png' })
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: 'Bolão Copa 2026 — Classificação' })
+      }
+    } catch {
+      // ignore — user cancelled or not supported
     }
   }
 
@@ -218,14 +219,24 @@ export default function LeaderboardPage() {
               className="absolute top-3 right-3 text-gray-400 hover:text-white text-xl leading-none"
               aria-label="Fechar"
             >✕</button>
-            <p className="text-center text-sm text-gray-400 mb-3">Salve a imagem e envie pelo WhatsApp</p>
+            <p className="text-center text-sm text-gray-400 mb-3">Classificação gerada — escolha como compartilhar</p>
             <img src={previewUrl} alt="Classificação" className="w-full rounded-lg mb-4" />
-            <button
-              onClick={downloadImage}
-              className="w-full py-2 rounded-lg bg-green-600 hover:bg-green-500 text-white font-bold transition-colors"
-            >
-              ⬇️ Salvar imagem
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={downloadImage}
+                className="flex-1 py-2 rounded-lg bg-blue-700 hover:bg-blue-600 text-white font-bold transition-colors text-sm"
+              >
+                ⬇️ Baixar imagem
+              </button>
+              {typeof navigator !== 'undefined' && !!navigator.share && (
+                <button
+                  onClick={nativeShare}
+                  className="flex-1 py-2 rounded-lg bg-green-600 hover:bg-green-500 text-white font-bold transition-colors text-sm"
+                >
+                  📤 Compartilhar
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}
