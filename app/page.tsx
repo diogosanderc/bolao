@@ -51,7 +51,7 @@ export default function LeaderboardPage() {
     data.forEach((entry, idx) => {
       const rank = ranks[idx]
       const tier = tierOf(entry.totalPoints)
-      const medal = isRelated(entry.totalPoints) ? '💸' : (trophies[tier] ?? `${rank}.`)
+      const medal = isRelated(entry.totalPoints) ? '💸' : (trophies[tier] ?? (isFirstOfRank[idx] ? `${rank}.` : '   '))
       const pts = `${entry.totalPoints}pts`
       const last = entry.lastMatchPoints > 0 ? ` (+${entry.lastMatchPoints})` : ''
       lines.push(`${medal} *${entry.participant.name}* — ${pts}${last}`)
