@@ -40097,5 +40097,66 @@
     }
   ],
   "groupPredictions": [],
-  "results": []
+  "results": [
+    {
+      "matchId": "GA1",
+      "score1": 2,
+      "score2": 0
+    },
+    {
+      "matchId": "GA2",
+      "score1": 2,
+      "score2": 1
+    },
+    {
+      "matchId": "GB1",
+      "score1": 1,
+      "score2": 1
+    },
+    {
+      "matchId": "GB2",
+      "score1": 1,
+      "score2": 1
+    },
+    {
+      "matchId": "GC1",
+      "score1": 1,
+      "score2": 1
+    },
+    {
+      "matchId": "GC2",
+      "score1": 0,
+      "score2": 1
+    },
+    {
+      "matchId": "GD1",
+      "score1": 3,
+      "score2": 1
+    },
+    {
+      "matchId": "GD2",
+      "score1": 2,
+      "score2": 0
+    },
+    {
+      "matchId": "GE3",
+      "score1": 7,
+      "score2": 1
+    },
+    {
+      "matchId": "GE4",
+      "score1": 1,
+      "score2": 0
+    },
+    {
+      "matchId": "GF1",
+      "score1": 2,
+      "score2": 2
+    },
+    {
+      "matchId": "GF2",
+      "score1": 5,
+      "score2": 1
+    }
+  ]
 }
