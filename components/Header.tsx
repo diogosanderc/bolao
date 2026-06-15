@@ -62,8 +62,8 @@ export function Header() {
             {/* Desktop nav */}
             <nav className="ml-auto hidden sm:flex items-center gap-5 text-sm">
               {navLinks}
-              <button onClick={toggleTheme} className="text-white hover:text-yellow-300 transition-colors text-lg" aria-label="Alternar tema">
-                {isDark ? '☀️' : '🌙'}
+              <button onClick={toggleTheme} className="text-white hover:text-yellow-300 transition-colors text-xs font-medium" aria-label="Alternar tema">
+                {isDark ? 'Tema claro' : 'Tema escuro'}
               </button>
             </nav>
 
@@ -91,8 +91,8 @@ export function Header() {
       {!isAuthPage && open && (
         <nav className="sm:hidden bg-green-900 border-t border-green-700 px-4 py-3 flex flex-col gap-4 text-sm">
           {navLinks}
-          <button onClick={toggleTheme} className="text-white hover:text-yellow-300 transition-colors text-lg text-left" aria-label="Alternar tema">
-            {isDark ? '☀️' : '🌙'}
+          <button onClick={toggleTheme} className="text-white hover:text-yellow-300 transition-colors text-sm font-medium text-left" aria-label="Alternar tema">
+            {isDark ? 'Tema claro' : 'Tema escuro'}
           </button>
         </nav>
       )}
