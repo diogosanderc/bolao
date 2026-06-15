@@ -101,8 +101,7 @@ export default function TodosPalpitesPage() {
       for (const key of scoreKeys) {
         const [s1, s2] = key.split('-')
         const names = matchPreds[key].sort()
-        const pct = total > 0 ? Math.round((names.length / total) * 100) : 0
-        lines.push(`*${s1} × ${s2}* (${pct}%): ${names.join(', ')}`)
+        lines.push(`*${s1} × ${s2}* (${names.length}): ${names.join(', ')}`)
       }
     }
     const text = encodeURIComponent(lines.join('\n'))
