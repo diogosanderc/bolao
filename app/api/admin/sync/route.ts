@@ -55,6 +55,20 @@ type SyncDiff = {
   currentScore2?: number
   isNew: boolean
   isDivergent: boolean
+  date?: string
+  dateBRT?: string
+  venue?: string
+}
+
+function toBRT(isoDate: string): string {
+  try {
+    const d = new Date(isoDate)
+    return d.toLocaleString('pt-BR', {
+      timeZone: 'America/Sao_Paulo',
+      day: '2-digit', month: '2-digit',
+      hour: '2-digit', minute: '2-digit',
+    })
+  } catch { return isoDate }
 }
 
 async function fetchESPN(): Promise<Response> {
@@ -145,6 +159,9 @@ export async function GET(req: NextRequest) {
       currentScore2: current?.score2,
       isNew,
       isDivergent,
+      date: event.date ?? undefined,
+      dateBRT: event.date ? toBRT(event.date) : undefined,
+      venue: competition.venue?.fullName ?? competition.venue?.address?.city ?? undefined,
     })
   }
 
@@ -154,7 +171,11 @@ export async function GET(req: NextRequest) {
 // POST /api/admin/sync — apply selected updates
 export async function POST(req: NextRequest) {
   const body = await req.json()
-  const { adminKey, updates } = body as { adminKey: string; updates: MatchResult[] }
+  const { adminKey, updates, diffs } = body as {
+    adminKey: string
+    updates: MatchResult[]
+    diffs?: SyncDiff[]
+  }
 
   if (adminKey !== (process.env.ADMIN_KEY ?? 'admin123')) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -164,12 +185,23 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Nenhuma atualização enviada' }, { status: 400 })
   }
 
+  // Build date lookup from diffs payload (so leaderboard sort works correctly)
+  const dateMap: Record<string, { date: string; dateBRT: string; venue: string }> = {}
+  for (const d of diffs ?? []) {
+    if (d.date) dateMap[d.matchId] = { date: d.date, dateBRT: d.dateBRT ?? '', venue: d.venue ?? '' }
+  }
+
   await updateDB(db => {
     const resultMap = Object.fromEntries(db.results.map(r => [r.matchId, r]))
     for (const u of updates) {
       resultMap[u.matchId] = { matchId: u.matchId, score1: u.score1, score2: u.score2 }
     }
-    return { ...db, results: Object.values(resultMap) }
+    const existingDates = db.matchDates ?? {}
+    return {
+      ...db,
+      results: Object.values(resultMap),
+      matchDates: { ...existingDates, ...dateMap },
+    }
   })
 
   return NextResponse.json({ ok: true, count: updates.length })

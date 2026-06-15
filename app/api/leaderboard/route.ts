@@ -12,12 +12,17 @@ export async function GET() {
     }
     const validParticipants = db.participants.filter(p => (predCount.get(p.id) ?? 0) > 0)
 
-    // Sort results by match date so "last match" is the most recently played, not insertion order
+    // Sort results by match date (if available) then matchNumber so "last match"
+    // is always the most recently played, regardless of insertion order in DB
     const matchDates = db.matchDates ?? {}
     const sortedResults = [...db.results].sort((a, b) => {
       const dateA = matchDates[a.matchId]?.date ?? ''
       const dateB = matchDates[b.matchId]?.date ?? ''
-      return dateA.localeCompare(dateB)
+      if (dateA && dateB && dateA !== dateB) return dateA.localeCompare(dateB)
+      // Fallback: match number is assigned in schedule order
+      const numA = matchById[a.matchId]?.matchNumber ?? 0
+      const numB = matchById[b.matchId]?.matchNumber ?? 0
+      return numA - numB
     })
 
     const leaderboard = computeLeaderboard(

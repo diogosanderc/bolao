@@ -191,7 +191,7 @@ export default function AdminPage() {
     const r = await fetch('/api/admin/sync', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ adminKey: key, updates }),
+      body: JSON.stringify({ adminKey: key, updates, diffs: syncDiffs }),
     })
     const data = await r.json()
     if (r.ok) {
