@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { GROUPS, GROUP_MATCHES, KNOCKOUT_MATCHES, teamById, groupById } from '@/lib/copa2026'
 import { Participant, Match, PHASE_LABELS, KNOCKOUT_PHASES } from '@/lib/types'
 import { Flag } from '@/components/Flag'
@@ -9,6 +9,18 @@ import { computeFullBracket } from '@/lib/bracket'
 const ADMIN_KEY_STORAGE = 'bolao_admin_key'
 
 type ResultMap = Record<string, { score1?: number; score2?: number; advancingTeamId?: string }>
+
+type SyncDiff = {
+  matchId: string
+  team1: { id: string; name: string; flag: string }
+  team2: { id: string; name: string; flag: string }
+  espnScore1: number
+  espnScore2: number
+  currentScore1?: number
+  currentScore2?: number
+  isNew: boolean
+  isDivergent: boolean
+}
 
 function useAdminKey() {
   const [key, setKey] = useState('')
@@ -57,6 +69,10 @@ export default function AdminPage() {
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState('')
   const [inputKey, setInputKey] = useState('')
+  const [syncing, setSyncing] = useState(false)
+  const [syncDiffs, setSyncDiffs] = useState<SyncDiff[] | null>(null)
+  const [syncError, setSyncError] = useState('')
+  const [selectedDiffs, setSelectedDiffs] = useState<Set<string>>(new Set())
 
   const showToast = (msg: string) => {
     setToast(msg)
@@ -132,6 +148,47 @@ export default function AdminPage() {
     setSaving(false)
   }
 
+  async function fetchSyncDiffs() {
+    setSyncing(true)
+    setSyncError('')
+    setSyncDiffs(null)
+    try {
+      const r = await fetch('/api/admin/sync', { headers: { 'x-admin-key': key } })
+      const data = await r.json()
+      if (!r.ok) { setSyncError(data.error ?? 'Erro desconhecido'); setSyncing(false); return }
+      setSyncDiffs(data.diffs ?? [])
+      setSelectedDiffs(new Set((data.diffs ?? []).map((d: SyncDiff) => d.matchId)))
+    } catch {
+      setSyncError('Erro de conexão com a ESPN.')
+    }
+    setSyncing(false)
+  }
+
+  async function applySync() {
+    if (!syncDiffs) return
+    const updates = syncDiffs
+      .filter(d => selectedDiffs.has(d.matchId))
+      .map(d => ({ matchId: d.matchId, score1: d.espnScore1, score2: d.espnScore2 }))
+    if (updates.length === 0) { setSyncDiffs(null); return }
+    setSaving(true)
+    const r = await fetch('/api/admin/sync', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ adminKey: key, updates }),
+    })
+    const data = await r.json()
+    if (r.ok) {
+      for (const u of updates) {
+        setResults(prev => ({ ...prev, [u.matchId]: { score1: u.score1, score2: u.score2 } }))
+      }
+      showToast(`${data.count} resultado(s) sincronizado(s)!`)
+      setSyncDiffs(null)
+    } else {
+      setSyncError(data.error ?? 'Erro ao aplicar')
+    }
+    setSaving(false)
+  }
+
   if (!confirmed) {
     return (
       <div className="max-w-sm mx-auto mt-20 space-y-4">
@@ -186,13 +243,97 @@ export default function AdminPage() {
         </div>
       )}
 
+      {/* ESPN Sync Modal */}
+      {(syncDiffs !== null || syncError) && (
+        <div className="fixed inset-0 bg-black/70 z-40 flex items-center justify-center p-4">
+          <div className="bg-gray-900 border border-gray-700 rounded-xl w-full max-w-lg max-h-[80vh] flex flex-col shadow-2xl">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-800">
+              <h3 className="font-bold text-white">⟳ Sincronização ESPN</h3>
+              <button onClick={() => { setSyncDiffs(null); setSyncError('') }} className="text-gray-500 hover:text-white text-lg leading-none">×</button>
+            </div>
+
+            <div className="overflow-y-auto flex-1 p-4 space-y-3">
+              {syncError && (
+                <div className="bg-red-950/50 border border-red-800 rounded-lg p-3 text-red-300 text-sm">{syncError}</div>
+              )}
+
+              {syncDiffs !== null && syncDiffs.length === 0 && (
+                <p className="text-gray-400 text-sm text-center py-6">Nenhuma divergência encontrada. Todos os resultados estão atualizados.</p>
+              )}
+
+              {syncDiffs && syncDiffs.length > 0 && (
+                <>
+                  <p className="text-xs text-gray-500">{syncDiffs.length} alteraç{syncDiffs.length === 1 ? 'ão' : 'ões'} encontrada{syncDiffs.length === 1 ? '' : 's'}. Selecione as que deseja aplicar:</p>
+                  {syncDiffs.map(d => (
+                    <label key={d.matchId} className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${selectedDiffs.has(d.matchId) ? 'border-blue-600 bg-blue-950/30' : 'border-gray-700 bg-gray-800/50'}`}>
+                      <input
+                        type="checkbox"
+                        checked={selectedDiffs.has(d.matchId)}
+                        onChange={e => setSelectedDiffs(prev => {
+                          const next = new Set(prev)
+                          if (e.target.checked) next.add(d.matchId)
+                          else next.delete(d.matchId)
+                          return next
+                        })}
+                        className="mt-0.5 accent-blue-500"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 text-sm font-semibold text-white">
+                          <span>{d.team1.flag} {d.team1.name}</span>
+                          <span className="text-blue-400 font-bold">{d.espnScore1} × {d.espnScore2}</span>
+                          <span>{d.team2.flag} {d.team2.name}</span>
+                        </div>
+                        <div className="text-xs mt-0.5">
+                          {d.isNew
+                            ? <span className="text-green-400">Novo resultado</span>
+                            : <span className="text-yellow-400">
+                                Divergente — atual: {d.currentScore1} × {d.currentScore2}
+                              </span>
+                          }
+                          <span className="text-gray-600 ml-2">{d.matchId}</span>
+                        </div>
+                      </div>
+                    </label>
+                  ))}
+                </>
+              )}
+            </div>
+
+            {syncDiffs !== null && syncDiffs.length > 0 && (
+              <div className="flex gap-2 px-5 py-4 border-t border-gray-800">
+                <button
+                  onClick={applySync}
+                  disabled={saving || selectedDiffs.size === 0}
+                  className="flex-1 bg-blue-700 hover:bg-blue-600 disabled:bg-gray-700 disabled:text-gray-500 text-white font-bold py-2 rounded-lg transition-colors text-sm"
+                >
+                  {saving ? 'Salvando...' : `Confirmar ${selectedDiffs.size} resultado${selectedDiffs.size === 1 ? '' : 's'}`}
+                </button>
+                <button
+                  onClick={() => { setSyncDiffs(null); setSyncError('') }}
+                  className="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg text-sm"
+                >
+                  Cancelar
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
         <div>
           <h2 className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">Painel Administrativo</h2>
           <span className="text-xs text-gray-400 sm:hidden">{groupsDone}/12 grupos completos</span>
         </div>
-        <div className="flex items-center gap-4 text-xs text-gray-400">
+        <div className="flex items-center gap-3 text-xs text-gray-400">
           <span className="hidden sm:inline">{groupsDone}/12 grupos completos</span>
+          <button
+            onClick={fetchSyncDiffs}
+            disabled={syncing}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-800 hover:bg-blue-700 disabled:bg-gray-800 disabled:text-gray-600 text-blue-100 rounded-lg font-semibold transition-colors text-xs"
+          >
+            {syncing ? '⟳ Buscando...' : '⟳ Sincronizar ESPN'}
+          </button>
           <button onClick={() => { localStorage.removeItem(ADMIN_KEY_STORAGE); location.reload() }} className="hover:text-gray-200">Sair</button>
         </div>
       </div>
