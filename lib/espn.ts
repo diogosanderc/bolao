@@ -125,6 +125,7 @@ async function fetchLiveMap(): Promise<Map<string, LiveInfo>> {
       const competition = event.competitions?.[0]
       const status = competition?.status ?? event.status
       const isLive = !status?.type?.completed && (
+        status?.type?.state === 'in' ||
         status?.type?.name === 'STATUS_IN_PROGRESS' ||
         status?.type?.name === 'STATUS_HALFTIME' ||
         status?.type?.name === 'STATUS_SECOND_HALF' ||
