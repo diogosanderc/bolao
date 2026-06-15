@@ -11,16 +11,25 @@ export async function GET() {
       predCount.set(p.participantId, (predCount.get(p.participantId) ?? 0) + 1)
     }
     const validParticipants = db.participants.filter(p => (predCount.get(p.id) ?? 0) > 0)
+
+    // Sort results by match date so "last match" is the most recently played, not insertion order
+    const matchDates = db.matchDates ?? {}
+    const sortedResults = [...db.results].sort((a, b) => {
+      const dateA = matchDates[a.matchId]?.date ?? ''
+      const dateB = matchDates[b.matchId]?.date ?? ''
+      return dateA.localeCompare(dateB)
+    })
+
     const leaderboard = computeLeaderboard(
       validParticipants,
       db.matchPredictions,
       db.groupPredictions,
-      db.results
+      sortedResults
     )
 
     let lastMatch = null
-    if (db.results.length > 0) {
-      const last = db.results[db.results.length - 1]
+    if (sortedResults.length > 0) {
+      const last = sortedResults[sortedResults.length - 1]
       const match = matchById[last.matchId]
       if (match) {
         lastMatch = {

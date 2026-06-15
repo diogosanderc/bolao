@@ -61,6 +61,18 @@ export async function POST(req: NextRequest) {
 
   const events: any[] = espnData.events ?? []
   const updates: { matchId: string; score1: number; score2: number; label: string }[] = []
+  const dateUpdates: Record<string, { date: string; dateBRT: string; venue: string }> = {}
+
+  function toBRT(isoDate: string): string {
+    try {
+      const d = new Date(isoDate)
+      return d.toLocaleString('pt-BR', {
+        timeZone: 'America/Sao_Paulo',
+        day: '2-digit', month: '2-digit',
+        hour: '2-digit', minute: '2-digit',
+      })
+    } catch { return isoDate }
+  }
 
   for (const event of events) {
     const competition = event.competitions?.[0]
@@ -87,6 +99,15 @@ export async function POST(req: NextRequest) {
     )
     if (!match) continue
 
+    // Always keep matchDates up to date for every completed event
+    if (event.date) {
+      dateUpdates[match.id] = {
+        date: event.date,
+        dateBRT: toBRT(event.date),
+        venue: competition.venue?.fullName ?? competition.venue?.address?.city ?? '',
+      }
+    }
+
     const flipped = match.team1Id === id2
     const ourScore1 = flipped ? espnScore2 : espnScore1
     const ourScore2 = flipped ? espnScore1 : espnScore2
@@ -104,11 +125,16 @@ export async function POST(req: NextRequest) {
     })
   }
 
-  if (updates.length > 0) {
+  if (updates.length > 0 || Object.keys(dateUpdates).length > 0) {
     await updateDB(db => {
       const map = Object.fromEntries(db.results.map(r => [r.matchId, r]))
       for (const u of updates) map[u.matchId] = { matchId: u.matchId, score1: u.score1, score2: u.score2 }
-      return { ...db, results: Object.values(map) }
+      const existingDates = db.matchDates ?? {}
+      return {
+        ...db,
+        results: Object.values(map),
+        matchDates: { ...existingDates, ...dateUpdates },
+      }
     })
   }
 
