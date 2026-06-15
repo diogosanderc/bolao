@@ -35,8 +35,10 @@ export function scoreMatch(
     prediction.score1 === result.score1 && prediction.score2 === result.score2
   const correctGoal1 = prediction.score1 === result.score1
   const correctGoal2 = prediction.score2 === result.score2
-  const highScoreBonus =
-    correctScore && (result.score1 >= 4 || result.score2 >= 4)
+  // +2 bonus for correctly predicting a team's goal tally when they scored 4+
+  const highScoreBonus1 = result.score1 >= 4 && correctGoal1
+  const highScoreBonus2 = result.score2 >= 4 && correctGoal2
+  const highScoreBonus = highScoreBonus1 || highScoreBonus2
 
   const isKnockout = match.phase !== 'group'
   const isDraw = result.score1 === result.score2
@@ -50,7 +52,8 @@ export function scoreMatch(
   if (correctGoal1) total += 1
   if (correctGoal2) total += 1
   if (correctScore) total += 2
-  if (highScoreBonus) total += 2
+  if (highScoreBonus1) total += 2
+  if (highScoreBonus2) total += 2
 
   // No extra points for predicting advancing team — it's a tiebreaker, not scored
   // (regulation interpretation: the "resultado" already covers who wins)
