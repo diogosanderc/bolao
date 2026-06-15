@@ -86,6 +86,7 @@ export function computeLeaderboard(
   results: MatchResult[]
 ): LeaderboardEntry[] {
   const resultMap = Object.fromEntries(results.map(r => [r.matchId, r]))
+  const lastResult = results.length > 0 ? results[results.length - 1] : null
 
   // For each phase, collect which teams actually qualified
   const qualifiedByPhase: Record<Phase, Set<string>> = {
@@ -225,11 +226,21 @@ export function computeLeaderboard(
 
     phasePoints += groupOrderPoints
 
+    let lastMatchPoints = 0
+    if (lastResult) {
+      const lastMatch = matchById[lastResult.matchId]
+      if (lastMatch) {
+        const pred = myPreds.find(p => p.matchId === lastResult.matchId)
+        if (pred) lastMatchPoints = scoreMatch(pred, lastResult, lastMatch).total
+      }
+    }
+
     return {
       participant,
       totalPoints: matchPoints + phasePoints,
       matchPoints,
       phasePoints,
+      lastMatchPoints,
       breakdown: {
         correctResults,
         correctScores,

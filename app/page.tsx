@@ -61,12 +61,8 @@ export default function LeaderboardPage() {
               <tr className="bg-gray-900 text-gray-400 text-xs uppercase tracking-wider">
                 <th className="px-4 py-3 text-left w-10">#</th>
                 <th className="px-4 py-3 text-left">Participante</th>
+                <th className="px-4 py-3 text-right">Último jogo</th>
                 <th className="px-4 py-3 text-right">Total</th>
-                <th className="px-4 py-3 text-right hidden sm:table-cell">Jogos</th>
-                <th className="px-4 py-3 text-right hidden sm:table-cell">Fases</th>
-                <th className="px-4 py-3 text-right hidden md:table-cell">Resultados</th>
-                <th className="px-4 py-3 text-right hidden md:table-cell">Placares exatos</th>
-                <th className="px-4 py-3 text-center hidden lg:table-cell">Palpites</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-800">
@@ -99,28 +95,13 @@ export default function LeaderboardPage() {
                   }`}>
                     {entry.participant.name}
                   </td>
+                  <td className="px-4 py-3 text-right text-gray-300">
+                    {entry.lastMatchPoints > 0
+                      ? <span className="text-green-400 font-semibold">+{entry.lastMatchPoints}</span>
+                      : <span className="text-gray-600">—</span>}
+                  </td>
                   <td className={`px-4 py-3 text-right font-bold text-base ${isRelated(entry.totalPoints) ? 'text-red-600 dark:text-red-400' : 'text-yellow-600 dark:text-yellow-400'}`}>
                     {entry.totalPoints}
-                  </td>
-                  <td className="px-4 py-3 text-right text-gray-300 hidden sm:table-cell">
-                    {entry.matchPoints}
-                  </td>
-                  <td className="px-4 py-3 text-right text-gray-300 hidden sm:table-cell">
-                    {entry.phasePoints}
-                  </td>
-                  <td className="px-4 py-3 text-right text-gray-400 hidden md:table-cell">
-                    {entry.breakdown.correctResults}
-                  </td>
-                  <td className="px-4 py-3 text-right text-gray-400 hidden md:table-cell">
-                    {entry.breakdown.correctScores}
-                  </td>
-                  <td className="px-4 py-3 text-center hidden lg:table-cell">
-                    <a
-                      href={`/palpite/${entry.participant.token}`}
-                      className="text-xs text-blue-400 hover:text-blue-300 hover:underline"
-                    >
-                      Ver palpites
-                    </a>
                   </td>
                 </tr>
               )}

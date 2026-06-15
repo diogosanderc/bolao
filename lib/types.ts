@@ -99,6 +99,7 @@ export interface LeaderboardEntry {
   totalPoints: number
   matchPoints: number
   phasePoints: number
+  lastMatchPoints: number
   breakdown: {
     correctResults: number
     correctScores: number
