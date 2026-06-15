@@ -7,6 +7,7 @@ export default function LeaderboardPage() {
   const [data, setData] = useState<LeaderboardEntry[]>([])
   const [loading, setLoading] = useState(true)
   const [sharing, setSharing] = useState(false)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const tableRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -27,25 +28,38 @@ export default function LeaderboardPage() {
         useCORS: true,
         logging: false,
       })
+      const url = canvas.toDataURL('image/png')
+      // Try native share first (works on Android/iOS Chrome/Safari)
       canvas.toBlob(async (blob) => {
-        if (!blob) return
-        const file = new File([blob], 'classificacao-bolao.png', { type: 'image/png' })
-        if (navigator.canShare?.({ files: [file] })) {
-          await navigator.share({ files: [file], title: 'Bolão Copa 2026 — Classificação' })
-        } else {
-          // Fallback: download
-          const url = URL.createObjectURL(blob)
-          const a = document.createElement('a')
-          a.href = url
-          a.download = 'classificacao-bolao.png'
-          a.click()
-          URL.revokeObjectURL(url)
+        if (blob) {
+          const file = new File([blob], 'classificacao-bolao.png', { type: 'image/png' })
+          try {
+            if (navigator.canShare?.({ files: [file] })) {
+              await navigator.share({ files: [file], title: 'Bolão Copa 2026 — Classificação' })
+              setSharing(false)
+              return
+            }
+          } catch {}
         }
+        // Fallback: show preview modal
+        setPreviewUrl(url)
         setSharing(false)
       }, 'image/png')
     } catch {
       setSharing(false)
     }
+  }
+
+  function downloadImage() {
+    if (!previewUrl) return
+    const a = document.createElement('a')
+    a.href = previewUrl
+    a.download = 'classificacao-bolao.png'
+    a.click()
+  }
+
+  function closePreview() {
+    setPreviewUrl(null)
   }
 
   const trophies: Record<number, string> = { 1: '🥇', 2: '🥈', 3: '🥉' }
@@ -195,6 +209,26 @@ export default function LeaderboardPage() {
       <div className="text-center text-xs text-gray-600 mt-4">
         Classificação atualizada em tempo real conforme resultados são lançados
       </div>
+
+      {previewUrl && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4" onClick={closePreview}>
+          <div className="relative max-w-lg w-full bg-gray-900 rounded-xl shadow-2xl p-4" onClick={e => e.stopPropagation()}>
+            <button
+              onClick={closePreview}
+              className="absolute top-3 right-3 text-gray-400 hover:text-white text-xl leading-none"
+              aria-label="Fechar"
+            >✕</button>
+            <p className="text-center text-sm text-gray-400 mb-3">Salve a imagem e envie pelo WhatsApp</p>
+            <img src={previewUrl} alt="Classificação" className="w-full rounded-lg mb-4" />
+            <button
+              onClick={downloadImage}
+              className="w-full py-2 rounded-lg bg-green-600 hover:bg-green-500 text-white font-bold transition-colors"
+            >
+              ⬇️ Salvar imagem
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
