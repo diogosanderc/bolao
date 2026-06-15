@@ -202,10 +202,10 @@ export default function LeaderboardPage() {
                   <td className="px-4 py-3 text-center font-bold text-lg">
                     {isRelated(entry.totalPoints)
                       ? '💸'
-                      : isWarning(entry.totalPoints) && isFirstOfRank[idx]
-                      ? <span className="text-yellow-500 text-sm">{rank}</span>
+                      : isWarning(entry.totalPoints)
+                      ? (isFirstOfRank[idx] ? <span className="text-yellow-500 text-sm">{rank}</span> : null)
                       : trophies[tier]
-                      ?? (rank >= 4 && rank <= 7 && isFirstOfRank[idx]
+                      ?? (rank >= 4 && rank <= 7
                           ? '⭐'
                           : (isFirstOfRank[idx] ? <span className="text-gray-500 text-sm">{rank}</span> : null))}
                   </td>
