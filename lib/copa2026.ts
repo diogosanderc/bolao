@@ -62,7 +62,7 @@ export const GROUPS: Group[] = [
   { id: 'B', name: 'Grupo B', teamIds: ['CAN', 'BIH', 'QAT', 'SUI'] },
   { id: 'C', name: 'Grupo C', teamIds: ['BRA', 'MAR', 'HAI', 'SCO'] },
   { id: 'D', name: 'Grupo D', teamIds: ['USA', 'PAR', 'AUS', 'TUR'] },
-  { id: 'E', name: 'Grupo E', teamIds: ['GER', 'CIV', 'CUR', 'ECU'] },
+  { id: 'E', name: 'Grupo E', teamIds: ['GER', 'CUR', 'CIV', 'ECU'] },
   { id: 'F', name: 'Grupo F', teamIds: ['NED', 'JPN', 'SWE', 'TUN'] },
   { id: 'G', name: 'Grupo G', teamIds: ['BEL', 'EGY', 'IRN', 'NZL'] },
   { id: 'H', name: 'Grupo H', teamIds: ['ESP', 'CPV', 'KSA', 'URU'] },

@@ -652,33 +652,33 @@
     },
     {
       "participantId": "moreatico-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 4,
       "score2": 0
     },
     {
       "participantId": "moreatico-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 1,
       "score2": 1
     },
     {
       "participantId": "moreatico-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 2,
       "score2": 0
     },
     {
       "participantId": "moreatico-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 0,
       "score2": 3
     },
     {
       "participantId": "moreatico-001",
       "matchId": "GE6",
-      "score1": 3,
-      "score2": 0
+      "score1": 0,
+      "score2": 3
     },
     {
       "participantId": "moreatico-001",
@@ -1277,33 +1277,33 @@
     },
     {
       "participantId": "aladim-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 4,
       "score2": 0
     },
     {
       "participantId": "aladim-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 1,
       "score2": 1
     },
     {
       "participantId": "aladim-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 3,
       "score2": 1
     },
     {
       "participantId": "aladim-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 0,
       "score2": 2
     },
     {
       "participantId": "aladim-001",
       "matchId": "GE6",
-      "score1": 3,
-      "score2": 0
+      "score1": 0,
+      "score2": 3
     },
     {
       "participantId": "aladim-001",
@@ -1912,33 +1912,33 @@
     },
     {
       "participantId": "alexandre-pedroni-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 4,
       "score2": 0
     },
     {
       "participantId": "alexandre-pedroni-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 2,
       "score2": 2
     },
     {
       "participantId": "alexandre-pedroni-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 2,
       "score2": 0
     },
     {
       "participantId": "alexandre-pedroni-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 0,
       "score2": 2
     },
     {
       "participantId": "alexandre-pedroni-001",
       "matchId": "GE6",
-      "score1": 2,
-      "score2": 0
+      "score1": 0,
+      "score2": 2
     },
     {
       "participantId": "alexandre-pedroni-001",
@@ -2538,33 +2538,33 @@
     },
     {
       "participantId": "andre-shark-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 4,
       "score2": 0
     },
     {
       "participantId": "andre-shark-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 1,
       "score2": 1
     },
     {
       "participantId": "andre-shark-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 2,
       "score2": 1
     },
     {
       "participantId": "andre-shark-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 0,
       "score2": 3
     },
     {
       "participantId": "andre-shark-001",
       "matchId": "GE6",
-      "score1": 3,
-      "score2": 0
+      "score1": 0,
+      "score2": 3
     },
     {
       "participantId": "andre-shark-001",
@@ -3165,25 +3165,25 @@
     },
     {
       "participantId": "antonio-pai-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 3,
       "score2": 0
     },
     {
       "participantId": "antonio-pai-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 1,
       "score2": 1
     },
     {
       "participantId": "antonio-pai-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 2,
       "score2": 0
     },
     {
       "participantId": "antonio-pai-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 1,
       "score2": 2
     },
@@ -3791,33 +3791,33 @@
     },
     {
       "participantId": "avila-pedroni-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 3,
       "score2": 1
     },
     {
       "participantId": "avila-pedroni-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 0,
       "score2": 1
     },
     {
       "participantId": "avila-pedroni-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 1,
       "score2": 1
     },
     {
       "participantId": "avila-pedroni-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 1,
       "score2": 2
     },
     {
       "participantId": "avila-pedroni-001",
       "matchId": "GE6",
-      "score1": 1,
-      "score2": 0
+      "score1": 0,
+      "score2": 1
     },
     {
       "participantId": "avila-pedroni-001",
@@ -4420,33 +4420,33 @@
     },
     {
       "participantId": "bebeto-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 3,
       "score2": 0
     },
     {
       "participantId": "bebeto-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 3,
       "score2": 1
     },
     {
       "participantId": "bebeto-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 1,
       "score2": 2
     },
     {
       "participantId": "bebeto-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 0,
       "score2": 3
     },
     {
       "participantId": "bebeto-001",
       "matchId": "GE6",
-      "score1": 4,
-      "score2": 1
+      "score1": 1,
+      "score2": 4
     },
     {
       "participantId": "bebeto-001",
@@ -5050,33 +5050,33 @@
     },
     {
       "participantId": "biro-claude-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 4,
       "score2": 0
     },
     {
       "participantId": "biro-claude-001",
-      "matchId": "GE4",
-      "score1": 2,
-      "score2": 1
-    },
-    {
-      "participantId": "biro-claude-001",
-      "matchId": "GE1",
-      "score1": 2,
-      "score2": 1
-    },
-    {
-      "participantId": "biro-claude-001",
       "matchId": "GE2",
+      "score1": 2,
+      "score2": 1
+    },
+    {
+      "participantId": "biro-claude-001",
+      "matchId": "GE3",
+      "score1": 2,
+      "score2": 1
+    },
+    {
+      "participantId": "biro-claude-001",
+      "matchId": "GE4",
       "score1": 0,
       "score2": 3
     },
     {
       "participantId": "biro-claude-001",
       "matchId": "GE6",
-      "score1": 3,
-      "score2": 0
+      "score1": 0,
+      "score2": 3
     },
     {
       "participantId": "biro-claude-001",
@@ -5676,33 +5676,33 @@
     },
     {
       "participantId": "biula-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 5,
       "score2": 0
     },
     {
       "participantId": "biula-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 1,
       "score2": 1
     },
     {
       "participantId": "biula-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 2,
       "score2": 0
     },
     {
       "participantId": "biula-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 0,
       "score2": 2
     },
     {
       "participantId": "biula-001",
       "matchId": "GE6",
-      "score1": 1,
-      "score2": 0
+      "score1": 0,
+      "score2": 1
     },
     {
       "participantId": "biula-001",
@@ -6304,33 +6304,33 @@
     },
     {
       "participantId": "caca-candeia-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 6,
       "score2": 0
     },
     {
       "participantId": "caca-candeia-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 1,
       "score2": 1
     },
     {
       "participantId": "caca-candeia-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 3,
       "score2": 1
     },
     {
       "participantId": "caca-candeia-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 0,
       "score2": 4
     },
     {
       "participantId": "caca-candeia-001",
       "matchId": "GE6",
-      "score1": 3,
-      "score2": 0
+      "score1": 0,
+      "score2": 3
     },
     {
       "participantId": "caca-candeia-001",
@@ -6931,33 +6931,33 @@
     },
     {
       "participantId": "capelli-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 2,
       "score2": 0
     },
     {
       "participantId": "capelli-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 2,
       "score2": 1
     },
     {
       "participantId": "capelli-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 1,
       "score2": 2
     },
     {
       "participantId": "capelli-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 0,
       "score2": 3
     },
     {
       "participantId": "capelli-001",
       "matchId": "GE6",
-      "score1": 3,
-      "score2": 0
+      "score1": 0,
+      "score2": 3
     },
     {
       "participantId": "capelli-001",
@@ -7561,33 +7561,33 @@
     },
     {
       "participantId": "champinha-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 5,
       "score2": 0
     },
     {
       "participantId": "champinha-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 1,
       "score2": 2
     },
     {
       "participantId": "champinha-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 2,
       "score2": 1
     },
     {
       "participantId": "champinha-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 0,
       "score2": 3
     },
     {
       "participantId": "champinha-001",
       "matchId": "GE6",
-      "score1": 2,
-      "score2": 0
+      "score1": 0,
+      "score2": 2
     },
     {
       "participantId": "champinha-001",
@@ -8191,33 +8191,33 @@
     },
     {
       "participantId": "damasio-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 8,
       "score2": 0
     },
     {
       "participantId": "damasio-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 1,
       "score2": 0
     },
     {
       "participantId": "damasio-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 2,
       "score2": 0
     },
     {
       "participantId": "damasio-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 0,
       "score2": 5
     },
     {
       "participantId": "damasio-001",
       "matchId": "GE6",
-      "score1": 5,
-      "score2": 0
+      "score1": 0,
+      "score2": 5
     },
     {
       "participantId": "damasio-001",
@@ -8821,33 +8821,33 @@
     },
     {
       "participantId": "danniel-benevides-001",
-      "matchId": "GE3",
-      "score1": 3,
-      "score2": 0
-    },
-    {
-      "participantId": "danniel-benevides-001",
-      "matchId": "GE4",
-      "score1": 0,
-      "score2": 1
-    },
-    {
-      "participantId": "danniel-benevides-001",
       "matchId": "GE1",
-      "score1": 2,
+      "score1": 3,
       "score2": 0
     },
     {
       "participantId": "danniel-benevides-001",
       "matchId": "GE2",
       "score1": 0,
+      "score2": 1
+    },
+    {
+      "participantId": "danniel-benevides-001",
+      "matchId": "GE3",
+      "score1": 2,
+      "score2": 0
+    },
+    {
+      "participantId": "danniel-benevides-001",
+      "matchId": "GE4",
+      "score1": 0,
       "score2": 2
     },
     {
       "participantId": "danniel-benevides-001",
       "matchId": "GE6",
-      "score1": 2,
-      "score2": 0
+      "score1": 0,
+      "score2": 2
     },
     {
       "participantId": "danniel-benevides-001",
@@ -9446,33 +9446,33 @@
     },
     {
       "participantId": "davi-cade-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 3,
       "score2": 0
     },
     {
       "participantId": "davi-cade-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 0,
       "score2": 2
     },
     {
       "participantId": "davi-cade-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 2,
       "score2": 0
     },
     {
       "participantId": "davi-cade-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 1,
       "score2": 2
     },
     {
       "participantId": "davi-cade-001",
       "matchId": "GE6",
-      "score1": 1,
-      "score2": 2
+      "score1": 2,
+      "score2": 1
     },
     {
       "participantId": "davi-cade-001",
@@ -10070,33 +10070,33 @@
     },
     {
       "participantId": "doug-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 4,
       "score2": 0
     },
     {
       "participantId": "doug-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 1,
       "score2": 2
     },
     {
       "participantId": "doug-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 2,
       "score2": 0
     },
     {
       "participantId": "doug-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 0,
       "score2": 3
     },
     {
       "participantId": "doug-001",
       "matchId": "GE6",
-      "score1": 2,
-      "score2": 1
+      "score1": 1,
+      "score2": 2
     },
     {
       "participantId": "doug-001",
@@ -10699,33 +10699,33 @@
     },
     {
       "participantId": "dudu-rocha-001",
-      "matchId": "GE3",
-      "score1": 4,
-      "score2": 0
-    },
-    {
-      "participantId": "dudu-rocha-001",
-      "matchId": "GE4",
-      "score1": 0,
-      "score2": 1
-    },
-    {
-      "participantId": "dudu-rocha-001",
       "matchId": "GE1",
-      "score1": 1,
+      "score1": 4,
       "score2": 0
     },
     {
       "participantId": "dudu-rocha-001",
       "matchId": "GE2",
       "score1": 0,
+      "score2": 1
+    },
+    {
+      "participantId": "dudu-rocha-001",
+      "matchId": "GE3",
+      "score1": 1,
+      "score2": 0
+    },
+    {
+      "participantId": "dudu-rocha-001",
+      "matchId": "GE4",
+      "score1": 0,
       "score2": 3
     },
     {
       "participantId": "dudu-rocha-001",
       "matchId": "GE6",
-      "score1": 2,
-      "score2": 0
+      "score1": 0,
+      "score2": 2
     },
     {
       "participantId": "dudu-rocha-001",
@@ -11326,33 +11326,33 @@
     },
     {
       "participantId": "edinho-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 7,
       "score2": 0
     },
     {
       "participantId": "edinho-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 1,
       "score2": 1
     },
     {
       "participantId": "edinho-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 1,
       "score2": 0
     },
     {
       "participantId": "edinho-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 0,
       "score2": 5
     },
     {
       "participantId": "edinho-001",
       "matchId": "GE6",
-      "score1": 5,
-      "score2": 0
+      "score1": 0,
+      "score2": 5
     },
     {
       "participantId": "edinho-001",
@@ -11952,33 +11952,33 @@
     },
     {
       "participantId": "eduardo-campeol-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 3,
       "score2": 0
     },
     {
       "participantId": "eduardo-campeol-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 1,
       "score2": 1
     },
     {
       "participantId": "eduardo-campeol-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 2,
       "score2": 0
     },
     {
       "participantId": "eduardo-campeol-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 0,
       "score2": 2
     },
     {
       "participantId": "eduardo-campeol-001",
       "matchId": "GE6",
-      "score1": 2,
-      "score2": 0
+      "score1": 0,
+      "score2": 2
     },
     {
       "participantId": "eduardo-campeol-001",
@@ -12583,33 +12583,33 @@
     },
     {
       "participantId": "enzo-magliano-queiroz-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 3,
       "score2": 0
     },
     {
       "participantId": "enzo-magliano-queiroz-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 1,
       "score2": 1
     },
     {
       "participantId": "enzo-magliano-queiroz-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 2,
       "score2": 1
     },
     {
       "participantId": "enzo-magliano-queiroz-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 0,
       "score2": 2
     },
     {
       "participantId": "enzo-magliano-queiroz-001",
       "matchId": "GE6",
-      "score1": 2,
-      "score2": 0
+      "score1": 0,
+      "score2": 2
     },
     {
       "participantId": "enzo-magliano-queiroz-001",
@@ -13216,33 +13216,33 @@
     },
     {
       "participantId": "everton-wutke-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 6,
       "score2": 0
     },
     {
       "participantId": "everton-wutke-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 1,
       "score2": 2
     },
     {
       "participantId": "everton-wutke-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 1,
       "score2": 1
     },
     {
       "participantId": "everton-wutke-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 0,
       "score2": 5
     },
     {
       "participantId": "everton-wutke-001",
       "matchId": "GE6",
-      "score1": 5,
-      "score2": 0
+      "score1": 0,
+      "score2": 5
     },
     {
       "participantId": "everton-wutke-001",
@@ -13841,33 +13841,33 @@
     },
     {
       "participantId": "felipim-candelotti-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 5,
       "score2": 0
     },
     {
       "participantId": "felipim-candelotti-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 0,
       "score2": 1
     },
     {
       "participantId": "felipim-candelotti-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 1,
       "score2": 1
     },
     {
       "participantId": "felipim-candelotti-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 0,
       "score2": 2
     },
     {
       "participantId": "felipim-candelotti-001",
       "matchId": "GE6",
-      "score1": 1,
-      "score2": 0
+      "score1": 0,
+      "score2": 1
     },
     {
       "participantId": "felipim-candelotti-001",
@@ -14465,33 +14465,33 @@
     },
     {
       "participantId": "gazela-marcelinho-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 3,
       "score2": 0
     },
     {
       "participantId": "gazela-marcelinho-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 1,
       "score2": 1
     },
     {
       "participantId": "gazela-marcelinho-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 2,
       "score2": 1
     },
     {
       "participantId": "gazela-marcelinho-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 0,
       "score2": 2
     },
     {
       "participantId": "gazela-marcelinho-001",
       "matchId": "GE6",
-      "score1": 2,
-      "score2": 1
+      "score1": 1,
+      "score2": 2
     },
     {
       "participantId": "gazela-marcelinho-001",
@@ -15094,33 +15094,33 @@
     },
     {
       "participantId": "giani-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 3,
       "score2": 0
     },
     {
       "participantId": "giani-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 1,
       "score2": 2
     },
     {
       "participantId": "giani-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 2,
       "score2": 1
     },
     {
       "participantId": "giani-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 0,
       "score2": 2
     },
     {
       "participantId": "giani-001",
       "matchId": "GE6",
-      "score1": 3,
-      "score2": 1
+      "score1": 1,
+      "score2": 3
     },
     {
       "participantId": "giani-001",
@@ -15721,33 +15721,33 @@
     },
     {
       "participantId": "gilberto-papito-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 6,
       "score2": 1
     },
     {
       "participantId": "gilberto-papito-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 0,
       "score2": 1
     },
     {
       "participantId": "gilberto-papito-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 1,
       "score2": 1
     },
     {
       "participantId": "gilberto-papito-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 1,
       "score2": 4
     },
     {
       "participantId": "gilberto-papito-001",
       "matchId": "GE6",
-      "score1": 2,
-      "score2": 0
+      "score1": 0,
+      "score2": 2
     },
     {
       "participantId": "gilberto-papito-001",
@@ -16352,33 +16352,33 @@
     },
     {
       "participantId": "guilherme-dal-piaz-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 3,
       "score2": 0
     },
     {
       "participantId": "guilherme-dal-piaz-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 1,
       "score2": 1
     },
     {
       "participantId": "guilherme-dal-piaz-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 1,
       "score2": 0
     },
     {
       "participantId": "guilherme-dal-piaz-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 0,
       "score2": 2
     },
     {
       "participantId": "guilherme-dal-piaz-001",
       "matchId": "GE6",
-      "score1": 3,
-      "score2": 0
+      "score1": 0,
+      "score2": 3
     },
     {
       "participantId": "guilherme-dal-piaz-001",
@@ -16978,20 +16978,8 @@
     },
     {
       "participantId": "indio-001",
-      "matchId": "GE3",
-      "score1": 4,
-      "score2": 0
-    },
-    {
-      "participantId": "indio-001",
-      "matchId": "GE4",
-      "score1": 1,
-      "score2": 2
-    },
-    {
-      "participantId": "indio-001",
       "matchId": "GE1",
-      "score1": 2,
+      "score1": 4,
       "score2": 0
     },
     {
@@ -17002,9 +16990,21 @@
     },
     {
       "participantId": "indio-001",
-      "matchId": "GE6",
+      "matchId": "GE3",
       "score1": 2,
       "score2": 0
+    },
+    {
+      "participantId": "indio-001",
+      "matchId": "GE4",
+      "score1": 1,
+      "score2": 2
+    },
+    {
+      "participantId": "indio-001",
+      "matchId": "GE6",
+      "score1": 0,
+      "score2": 2
     },
     {
       "participantId": "indio-001",
@@ -17607,33 +17607,33 @@
     },
     {
       "participantId": "iverson-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 4,
       "score2": 0
     },
     {
       "participantId": "iverson-001",
-      "matchId": "GE4",
-      "score1": 2,
-      "score2": 1
-    },
-    {
-      "participantId": "iverson-001",
-      "matchId": "GE1",
-      "score1": 2,
-      "score2": 1
-    },
-    {
-      "participantId": "iverson-001",
       "matchId": "GE2",
+      "score1": 2,
+      "score2": 1
+    },
+    {
+      "participantId": "iverson-001",
+      "matchId": "GE3",
+      "score1": 2,
+      "score2": 1
+    },
+    {
+      "participantId": "iverson-001",
+      "matchId": "GE4",
       "score1": 1,
       "score2": 5
     },
     {
       "participantId": "iverson-001",
       "matchId": "GE6",
-      "score1": 4,
-      "score2": 1
+      "score1": 1,
+      "score2": 4
     },
     {
       "participantId": "iverson-001",
@@ -18235,33 +18235,33 @@
     },
     {
       "participantId": "jamir-nogueira-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 5,
       "score2": 0
     },
     {
       "participantId": "jamir-nogueira-001",
-      "matchId": "GE4",
-      "score1": 2,
-      "score2": 1
-    },
-    {
-      "participantId": "jamir-nogueira-001",
-      "matchId": "GE1",
-      "score1": 2,
-      "score2": 1
-    },
-    {
-      "participantId": "jamir-nogueira-001",
       "matchId": "GE2",
+      "score1": 2,
+      "score2": 1
+    },
+    {
+      "participantId": "jamir-nogueira-001",
+      "matchId": "GE3",
+      "score1": 2,
+      "score2": 1
+    },
+    {
+      "participantId": "jamir-nogueira-001",
+      "matchId": "GE4",
       "score1": 0,
       "score2": 3
     },
     {
       "participantId": "jamir-nogueira-001",
       "matchId": "GE6",
-      "score1": 4,
-      "score2": 1
+      "score1": 1,
+      "score2": 4
     },
     {
       "participantId": "jamir-nogueira-001",
@@ -18865,33 +18865,33 @@
     },
     {
       "participantId": "jefinho-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 4,
       "score2": 0
     },
     {
       "participantId": "jefinho-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 1,
       "score2": 1
     },
     {
       "participantId": "jefinho-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 2,
       "score2": 0
     },
     {
       "participantId": "jefinho-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 0,
       "score2": 3
     },
     {
       "participantId": "jefinho-001",
       "matchId": "GE6",
-      "score1": 2,
-      "score2": 0
+      "score1": 0,
+      "score2": 2
     },
     {
       "participantId": "jefinho-001",
@@ -19493,33 +19493,33 @@
     },
     {
       "participantId": "joao-paulo-martinelli-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 5,
       "score2": 0
     },
     {
       "participantId": "joao-paulo-martinelli-001",
-      "matchId": "GE4",
-      "score1": 2,
-      "score2": 1
-    },
-    {
-      "participantId": "joao-paulo-martinelli-001",
-      "matchId": "GE1",
-      "score1": 2,
-      "score2": 1
-    },
-    {
-      "participantId": "joao-paulo-martinelli-001",
       "matchId": "GE2",
+      "score1": 2,
+      "score2": 1
+    },
+    {
+      "participantId": "joao-paulo-martinelli-001",
+      "matchId": "GE3",
+      "score1": 2,
+      "score2": 1
+    },
+    {
+      "participantId": "joao-paulo-martinelli-001",
+      "matchId": "GE4",
       "score1": 0,
       "score2": 2
     },
     {
       "participantId": "joao-paulo-martinelli-001",
       "matchId": "GE6",
-      "score1": 3,
-      "score2": 0
+      "score1": 0,
+      "score2": 3
     },
     {
       "participantId": "joao-paulo-martinelli-001",
@@ -20119,33 +20119,33 @@
     },
     {
       "participantId": "jorjao-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 5,
       "score2": 0
     },
     {
       "participantId": "jorjao-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 2,
       "score2": 1
     },
     {
       "participantId": "jorjao-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 3,
       "score2": 1
     },
     {
       "participantId": "jorjao-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 1,
       "score2": 3
     },
     {
       "participantId": "jorjao-001",
       "matchId": "GE6",
-      "score1": 2,
-      "score2": 0
+      "score1": 0,
+      "score2": 2
     },
     {
       "participantId": "jorjao-001",
@@ -20748,33 +20748,33 @@
     },
     {
       "participantId": "kabelao-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 4,
       "score2": 0
     },
     {
       "participantId": "kabelao-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 1,
       "score2": 1
     },
     {
       "participantId": "kabelao-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 3,
       "score2": 1
     },
     {
       "participantId": "kabelao-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 1,
       "score2": 2
     },
     {
       "participantId": "kabelao-001",
       "matchId": "GE6",
-      "score1": 2,
-      "score2": 1
+      "score1": 1,
+      "score2": 2
     },
     {
       "participantId": "kabelao-001",
@@ -21376,33 +21376,33 @@
     },
     {
       "participantId": "konrad-campos-salomao-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 5,
       "score2": 0
     },
     {
       "participantId": "konrad-campos-salomao-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 1,
       "score2": 2
     },
     {
       "participantId": "konrad-campos-salomao-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 2,
       "score2": 0
     },
     {
       "participantId": "konrad-campos-salomao-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 0,
       "score2": 4
     },
     {
       "participantId": "konrad-campos-salomao-001",
       "matchId": "GE6",
-      "score1": 3,
-      "score2": 0
+      "score1": 0,
+      "score2": 3
     },
     {
       "participantId": "konrad-campos-salomao-001",
@@ -22008,33 +22008,33 @@
     },
     {
       "participantId": "leandro-leite-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 3,
       "score2": 0
     },
     {
       "participantId": "leandro-leite-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 1,
       "score2": 2
     },
     {
       "participantId": "leandro-leite-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 2,
       "score2": 1
     },
     {
       "participantId": "leandro-leite-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 0,
       "score2": 3
     },
     {
       "participantId": "leandro-leite-001",
       "matchId": "GE6",
-      "score1": 2,
-      "score2": 0
+      "score1": 0,
+      "score2": 2
     },
     {
       "participantId": "leandro-leite-001",
@@ -22638,33 +22638,33 @@
     },
     {
       "participantId": "lirio-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 4,
       "score2": 0
     },
     {
       "participantId": "lirio-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 0,
       "score2": 1
     },
     {
       "participantId": "lirio-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 2,
       "score2": 1
     },
     {
       "participantId": "lirio-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 0,
       "score2": 2
     },
     {
       "participantId": "lirio-001",
       "matchId": "GE6",
-      "score1": 2,
-      "score2": 0
+      "score1": 0,
+      "score2": 2
     },
     {
       "participantId": "lirio-001",
@@ -23268,33 +23268,33 @@
     },
     {
       "participantId": "lucao-aredes-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 3,
       "score2": 0
     },
     {
       "participantId": "lucao-aredes-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 1,
       "score2": 1
     },
     {
       "participantId": "lucao-aredes-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 2,
       "score2": 1
     },
     {
       "participantId": "lucao-aredes-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 0,
       "score2": 2
     },
     {
       "participantId": "lucao-aredes-001",
       "matchId": "GE6",
-      "score1": 2,
-      "score2": 0
+      "score1": 0,
+      "score2": 2
     },
     {
       "participantId": "lucao-aredes-001",
@@ -23892,33 +23892,33 @@
     },
     {
       "participantId": "lucilio-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 4,
       "score2": 0
     },
     {
       "participantId": "lucilio-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 1,
       "score2": 2
     },
     {
       "participantId": "lucilio-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 1,
       "score2": 0
     },
     {
       "participantId": "lucilio-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 0,
       "score2": 3
     },
     {
       "participantId": "lucilio-001",
       "matchId": "GE6",
-      "score1": 2,
-      "score2": 0
+      "score1": 0,
+      "score2": 2
     },
     {
       "participantId": "lucilio-001",
@@ -24521,33 +24521,33 @@
     },
     {
       "participantId": "lucio-venturim-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 4,
       "score2": 0
     },
     {
       "participantId": "lucio-venturim-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 2,
       "score2": 1
     },
     {
       "participantId": "lucio-venturim-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 2,
       "score2": 0
     },
     {
       "participantId": "lucio-venturim-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 0,
       "score2": 2
     },
     {
       "participantId": "lucio-venturim-001",
       "matchId": "GE6",
-      "score1": 2,
-      "score2": 0
+      "score1": 0,
+      "score2": 2
     },
     {
       "participantId": "lucio-venturim-001",
@@ -25151,33 +25151,33 @@
     },
     {
       "participantId": "macalister-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 4,
       "score2": 0
     },
     {
       "participantId": "macalister-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 1,
       "score2": 1
     },
     {
       "participantId": "macalister-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 2,
       "score2": 1
     },
     {
       "participantId": "macalister-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 0,
       "score2": 3
     },
     {
       "participantId": "macalister-001",
       "matchId": "GE6",
-      "score1": 2,
-      "score2": 0
+      "score1": 0,
+      "score2": 2
     },
     {
       "participantId": "macalister-001",
@@ -25782,33 +25782,33 @@
     },
     {
       "participantId": "malone-marco-aur-lio-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 3,
       "score2": 0
     },
     {
       "participantId": "malone-marco-aur-lio-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 0,
       "score2": 1
     },
     {
       "participantId": "malone-marco-aur-lio-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 2,
       "score2": 1
     },
     {
       "participantId": "malone-marco-aur-lio-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 0,
       "score2": 2
     },
     {
       "participantId": "malone-marco-aur-lio-001",
       "matchId": "GE6",
-      "score1": 1,
-      "score2": 0
+      "score1": 0,
+      "score2": 1
     },
     {
       "participantId": "malone-marco-aur-lio-001",
@@ -26413,33 +26413,33 @@
     },
     {
       "participantId": "mansoni-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 5,
       "score2": 0
     },
     {
       "participantId": "mansoni-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 1,
       "score2": 1
     },
     {
       "participantId": "mansoni-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 2,
       "score2": 1
     },
     {
       "participantId": "mansoni-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 1,
       "score2": 3
     },
     {
       "participantId": "mansoni-001",
       "matchId": "GE6",
-      "score1": 2,
-      "score2": 0
+      "score1": 0,
+      "score2": 2
     },
     {
       "participantId": "mansoni-001",
@@ -27043,33 +27043,33 @@
     },
     {
       "participantId": "markim-coco-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 4,
       "score2": 0
     },
     {
       "participantId": "markim-coco-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 1,
       "score2": 1
     },
     {
       "participantId": "markim-coco-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 2,
       "score2": 1
     },
     {
       "participantId": "markim-coco-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 0,
       "score2": 2
     },
     {
       "participantId": "markim-coco-001",
       "matchId": "GE6",
-      "score1": 2,
-      "score2": 0
+      "score1": 0,
+      "score2": 2
     },
     {
       "participantId": "markim-coco-001",
@@ -27678,33 +27678,33 @@
     },
     {
       "participantId": "milena-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 3,
       "score2": 0
     },
     {
       "participantId": "milena-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 0,
       "score2": 0
     },
     {
       "participantId": "milena-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 2,
       "score2": 1
     },
     {
       "participantId": "milena-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 0,
       "score2": 2
     },
     {
       "participantId": "milena-001",
       "matchId": "GE6",
-      "score1": 4,
-      "score2": 0
+      "score1": 0,
+      "score2": 4
     },
     {
       "participantId": "milena-001",
@@ -28308,33 +28308,33 @@
     },
     {
       "participantId": "tainha-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 8,
       "score2": 0
     },
     {
       "participantId": "tainha-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 2,
       "score2": 1
     },
     {
       "participantId": "tainha-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 1,
       "score2": 0
     },
     {
       "participantId": "tainha-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 0,
       "score2": 4
     },
     {
       "participantId": "tainha-001",
       "matchId": "GE6",
-      "score1": 4,
-      "score2": 0
+      "score1": 0,
+      "score2": 4
     },
     {
       "participantId": "tainha-001",
@@ -28934,33 +28934,33 @@
     },
     {
       "participantId": "morelli-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 3,
       "score2": 0
     },
     {
       "participantId": "morelli-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 1,
       "score2": 1
     },
     {
       "participantId": "morelli-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 2,
       "score2": 0
     },
     {
       "participantId": "morelli-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 0,
       "score2": 2
     },
     {
       "participantId": "morelli-001",
       "matchId": "GE6",
-      "score1": 0,
-      "score2": 2
+      "score1": 2,
+      "score2": 0
     },
     {
       "participantId": "morelli-001",
@@ -29562,33 +29562,33 @@
     },
     {
       "participantId": "nandinho-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 4,
       "score2": 0
     },
     {
       "participantId": "nandinho-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 1,
       "score2": 1
     },
     {
       "participantId": "nandinho-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 1,
       "score2": 0
     },
     {
       "participantId": "nandinho-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 0,
       "score2": 2
     },
     {
       "participantId": "nandinho-001",
       "matchId": "GE6",
-      "score1": 2,
-      "score2": 0
+      "score1": 0,
+      "score2": 2
     },
     {
       "participantId": "nandinho-001",
@@ -30192,21 +30192,9 @@
     },
     {
       "participantId": "octavio-pereira-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 4,
       "score2": 0
-    },
-    {
-      "participantId": "octavio-pereira-001",
-      "matchId": "GE4",
-      "score1": 0,
-      "score2": 1
-    },
-    {
-      "participantId": "octavio-pereira-001",
-      "matchId": "GE1",
-      "score1": 3,
-      "score2": 1
     },
     {
       "participantId": "octavio-pereira-001",
@@ -30216,9 +30204,21 @@
     },
     {
       "participantId": "octavio-pereira-001",
+      "matchId": "GE3",
+      "score1": 3,
+      "score2": 1
+    },
+    {
+      "participantId": "octavio-pereira-001",
+      "matchId": "GE4",
+      "score1": 0,
+      "score2": 1
+    },
+    {
+      "participantId": "octavio-pereira-001",
       "matchId": "GE6",
-      "score1": 1,
-      "score2": 0
+      "score1": 0,
+      "score2": 1
     },
     {
       "participantId": "octavio-pereira-001",
@@ -30819,25 +30819,25 @@
     },
     {
       "participantId": "otori-bittencourt-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 3,
       "score2": 0
     },
     {
       "participantId": "otori-bittencourt-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 1,
       "score2": 2
     },
     {
       "participantId": "otori-bittencourt-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 2,
       "score2": 0
     },
     {
       "participantId": "otori-bittencourt-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 0,
       "score2": 1
     },
@@ -31447,33 +31447,33 @@
     },
     {
       "participantId": "phillipe-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 5,
       "score2": 0
     },
     {
       "participantId": "phillipe-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 2,
       "score2": 1
     },
     {
       "participantId": "phillipe-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 4,
       "score2": 0
     },
     {
       "participantId": "phillipe-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 1,
       "score2": 2
     },
     {
       "participantId": "phillipe-001",
       "matchId": "GE6",
-      "score1": 2,
-      "score2": 0
+      "score1": 0,
+      "score2": 2
     },
     {
       "participantId": "phillipe-001",
@@ -32080,33 +32080,33 @@
     },
     {
       "participantId": "polo-marco-001",
-      "matchId": "GE3",
-      "score1": 3,
-      "score2": 0
-    },
-    {
-      "participantId": "polo-marco-001",
-      "matchId": "GE4",
-      "score1": 0,
-      "score2": 1
-    },
-    {
-      "participantId": "polo-marco-001",
       "matchId": "GE1",
-      "score1": 1,
+      "score1": 3,
       "score2": 0
     },
     {
       "participantId": "polo-marco-001",
       "matchId": "GE2",
       "score1": 0,
+      "score2": 1
+    },
+    {
+      "participantId": "polo-marco-001",
+      "matchId": "GE3",
+      "score1": 1,
+      "score2": 0
+    },
+    {
+      "participantId": "polo-marco-001",
+      "matchId": "GE4",
+      "score1": 0,
       "score2": 2
     },
     {
       "participantId": "polo-marco-001",
       "matchId": "GE6",
-      "score1": 1,
-      "score2": 0
+      "score1": 0,
+      "score2": 1
     },
     {
       "participantId": "polo-marco-001",
@@ -32707,33 +32707,33 @@
     },
     {
       "participantId": "ramon-poldi-guimar-es-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 4,
       "score2": 0
     },
     {
       "participantId": "ramon-poldi-guimar-es-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 2,
       "score2": 1
     },
     {
       "participantId": "ramon-poldi-guimar-es-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 2,
       "score2": 0
     },
     {
       "participantId": "ramon-poldi-guimar-es-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 0,
       "score2": 2
     },
     {
       "participantId": "ramon-poldi-guimar-es-001",
       "matchId": "GE6",
-      "score1": 3,
-      "score2": 0
+      "score1": 0,
+      "score2": 3
     },
     {
       "participantId": "ramon-poldi-guimar-es-001",
@@ -33335,33 +33335,33 @@
     },
     {
       "participantId": "ricardo-rocha-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 5,
       "score2": 0
     },
     {
       "participantId": "ricardo-rocha-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 2,
       "score2": 1
     },
     {
       "participantId": "ricardo-rocha-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 2,
       "score2": 0
     },
     {
       "participantId": "ricardo-rocha-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 0,
       "score2": 2
     },
     {
       "participantId": "ricardo-rocha-001",
       "matchId": "GE6",
-      "score1": 2,
-      "score2": 0
+      "score1": 0,
+      "score2": 2
     },
     {
       "participantId": "ricardo-rocha-001",
@@ -33960,33 +33960,33 @@
     },
     {
       "participantId": "sandro-aredes-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 6,
       "score2": 0
     },
     {
       "participantId": "sandro-aredes-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 0,
       "score2": 1
     },
     {
       "participantId": "sandro-aredes-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 1,
       "score2": 1
     },
     {
       "participantId": "sandro-aredes-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 0,
       "score2": 2
     },
     {
       "participantId": "sandro-aredes-001",
       "matchId": "GE6",
-      "score1": 2,
-      "score2": 1
+      "score1": 1,
+      "score2": 2
     },
     {
       "participantId": "sandro-aredes-001",
@@ -34585,33 +34585,33 @@
     },
     {
       "participantId": "silvio-roberto-lessa-amin-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 4,
       "score2": 0
     },
     {
       "participantId": "silvio-roberto-lessa-amin-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 1,
       "score2": 2
     },
     {
       "participantId": "silvio-roberto-lessa-amin-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 3,
       "score2": 0
     },
     {
       "participantId": "silvio-roberto-lessa-amin-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 0,
       "score2": 2
     },
     {
       "participantId": "silvio-roberto-lessa-amin-001",
       "matchId": "GE6",
-      "score1": 2,
-      "score2": 1
+      "score1": 1,
+      "score2": 2
     },
     {
       "participantId": "silvio-roberto-lessa-amin-001",
@@ -35210,33 +35210,33 @@
     },
     {
       "participantId": "spag-mytho-tiago-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 5,
       "score2": 0
     },
     {
       "participantId": "spag-mytho-tiago-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 2,
       "score2": 2
     },
     {
       "participantId": "spag-mytho-tiago-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 1,
       "score2": 2
     },
     {
       "participantId": "spag-mytho-tiago-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 1,
       "score2": 3
     },
     {
       "participantId": "spag-mytho-tiago-001",
       "matchId": "GE6",
-      "score1": 2,
-      "score2": 0
+      "score1": 0,
+      "score2": 2
     },
     {
       "participantId": "spag-mytho-tiago-001",
@@ -35839,33 +35839,33 @@
     },
     {
       "participantId": "stelzer-marcel-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 3,
       "score2": 0
     },
     {
       "participantId": "stelzer-marcel-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 1,
       "score2": 1
     },
     {
       "participantId": "stelzer-marcel-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 2,
       "score2": 1
     },
     {
       "participantId": "stelzer-marcel-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 0,
       "score2": 2
     },
     {
       "participantId": "stelzer-marcel-001",
       "matchId": "GE6",
-      "score1": 2,
-      "score2": 0
+      "score1": 0,
+      "score2": 2
     },
     {
       "participantId": "stelzer-marcel-001",
@@ -36464,33 +36464,33 @@
     },
     {
       "participantId": "teo-castro-001",
-      "matchId": "GE3",
-      "score1": 4,
-      "score2": 0
-    },
-    {
-      "participantId": "teo-castro-001",
-      "matchId": "GE4",
-      "score1": 1,
-      "score2": 2
-    },
-    {
-      "participantId": "teo-castro-001",
       "matchId": "GE1",
-      "score1": 2,
+      "score1": 4,
       "score2": 0
     },
     {
       "participantId": "teo-castro-001",
       "matchId": "GE2",
       "score1": 1,
+      "score2": 2
+    },
+    {
+      "participantId": "teo-castro-001",
+      "matchId": "GE3",
+      "score1": 2,
+      "score2": 0
+    },
+    {
+      "participantId": "teo-castro-001",
+      "matchId": "GE4",
+      "score1": 1,
       "score2": 3
     },
     {
       "participantId": "teo-castro-001",
       "matchId": "GE6",
-      "score1": 3,
-      "score2": 2
+      "score1": 2,
+      "score2": 3
     },
     {
       "participantId": "teo-castro-001",
@@ -37091,25 +37091,25 @@
     },
     {
       "participantId": "thiago-negao-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 3,
       "score2": 0
     },
     {
       "participantId": "thiago-negao-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 1,
       "score2": 2
     },
     {
       "participantId": "thiago-negao-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 2,
       "score2": 1
     },
     {
       "participantId": "thiago-negao-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 0,
       "score2": 2
     },
@@ -37723,25 +37723,25 @@
     },
     {
       "participantId": "tiagao-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 0,
       "score2": 0
     },
     {
       "participantId": "tiagao-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 1,
       "score2": 1
     },
     {
       "participantId": "tiagao-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 2,
       "score2": 0
     },
     {
       "participantId": "tiagao-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 0,
       "score2": 2
     },
@@ -38352,21 +38352,9 @@
     },
     {
       "participantId": "tinoco-fernando-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 3,
       "score2": 0
-    },
-    {
-      "participantId": "tinoco-fernando-001",
-      "matchId": "GE4",
-      "score1": 0,
-      "score2": 2
-    },
-    {
-      "participantId": "tinoco-fernando-001",
-      "matchId": "GE1",
-      "score1": 2,
-      "score2": 1
     },
     {
       "participantId": "tinoco-fernando-001",
@@ -38376,9 +38364,21 @@
     },
     {
       "participantId": "tinoco-fernando-001",
-      "matchId": "GE6",
-      "score1": 0,
+      "matchId": "GE3",
+      "score1": 2,
       "score2": 1
+    },
+    {
+      "participantId": "tinoco-fernando-001",
+      "matchId": "GE4",
+      "score1": 0,
+      "score2": 2
+    },
+    {
+      "participantId": "tinoco-fernando-001",
+      "matchId": "GE6",
+      "score1": 1,
+      "score2": 0
     },
     {
       "participantId": "tinoco-fernando-001",
@@ -38976,33 +38976,33 @@
     },
     {
       "participantId": "venzel-alex-001",
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 6,
       "score2": 0
     },
     {
       "participantId": "venzel-alex-001",
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 1,
       "score2": 3
     },
     {
       "participantId": "venzel-alex-001",
-      "matchId": "GE1",
+      "matchId": "GE3",
       "score1": 2,
       "score2": 0
     },
     {
       "participantId": "venzel-alex-001",
-      "matchId": "GE2",
+      "matchId": "GE4",
       "score1": 0,
       "score2": 3
     },
     {
       "participantId": "venzel-alex-001",
       "matchId": "GE6",
-      "score1": 2,
-      "score2": 1
+      "score1": 1,
+      "score2": 2
     },
     {
       "participantId": "venzel-alex-001",
@@ -39608,20 +39608,8 @@
     },
     {
       "participantId": "vitim-001",
-      "matchId": "GE3",
-      "score1": 3,
-      "score2": 0
-    },
-    {
-      "participantId": "vitim-001",
-      "matchId": "GE4",
-      "score1": 1,
-      "score2": 2
-    },
-    {
-      "participantId": "vitim-001",
       "matchId": "GE1",
-      "score1": 2,
+      "score1": 3,
       "score2": 0
     },
     {
@@ -39632,9 +39620,21 @@
     },
     {
       "participantId": "vitim-001",
-      "matchId": "GE6",
-      "score1": 1,
+      "matchId": "GE3",
+      "score1": 2,
       "score2": 0
+    },
+    {
+      "participantId": "vitim-001",
+      "matchId": "GE4",
+      "score1": 1,
+      "score2": 2
+    },
+    {
+      "participantId": "vitim-001",
+      "matchId": "GE6",
+      "score1": 0,
+      "score2": 1
     },
     {
       "participantId": "vitim-001",
@@ -40139,12 +40139,12 @@
       "score2": 0
     },
     {
-      "matchId": "GE3",
+      "matchId": "GE1",
       "score1": 7,
       "score2": 1
     },
     {
-      "matchId": "GE4",
+      "matchId": "GE2",
       "score1": 1,
       "score2": 0
     },
