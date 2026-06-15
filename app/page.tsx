@@ -1,11 +1,13 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { LeaderboardEntry } from '@/lib/types'
 
 export default function LeaderboardPage() {
   const [data, setData] = useState<LeaderboardEntry[]>([])
   const [loading, setLoading] = useState(true)
+  const [sharing, setSharing] = useState(false)
+  const tableRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     fetch('/api/leaderboard')
@@ -13,6 +15,38 @@ export default function LeaderboardPage() {
       .then(d => { setData(Array.isArray(d) ? d : []); setLoading(false) })
       .catch(() => setLoading(false))
   }, [])
+
+  async function shareTable() {
+    if (!tableRef.current) return
+    setSharing(true)
+    try {
+      const html2canvas = (await import('html2canvas')).default
+      const canvas = await html2canvas(tableRef.current, {
+        backgroundColor: '#030712',
+        scale: 2,
+        useCORS: true,
+        logging: false,
+      })
+      canvas.toBlob(async (blob) => {
+        if (!blob) return
+        const file = new File([blob], 'classificacao-bolao.png', { type: 'image/png' })
+        if (navigator.canShare?.({ files: [file] })) {
+          await navigator.share({ files: [file], title: 'Bolão Copa 2026 — Classificação' })
+        } else {
+          // Fallback: download
+          const url = URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = 'classificacao-bolao.png'
+          a.click()
+          URL.revokeObjectURL(url)
+        }
+        setSharing(false)
+      }, 'image/png')
+    } catch {
+      setSharing(false)
+    }
+  }
 
   const trophies: Record<number, string> = { 1: '🥇', 2: '🥈', 3: '🥉' }
 
@@ -36,12 +70,21 @@ export default function LeaderboardPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">Classificação</h2>
-        <button
-          onClick={() => location.reload()}
-          className="text-sm text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-        >
-          ↻ Atualizar
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={shareTable}
+            disabled={sharing || loading || data.length === 0}
+            className="text-sm text-gray-400 hover:text-green-400 disabled:opacity-40 transition-colors flex items-center gap-1"
+          >
+            {sharing ? '⏳' : '📤'} {sharing ? 'Gerando...' : 'Compartilhar'}
+          </button>
+          <button
+            onClick={() => location.reload()}
+            className="text-sm text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+          >
+            ↻ Atualizar
+          </button>
+        </div>
       </div>
 
       {loading && (
@@ -59,7 +102,7 @@ export default function LeaderboardPage() {
       )}
 
       {!loading && data.length > 0 && (
-        <div className="overflow-x-auto rounded-xl border border-gray-800">
+        <div ref={tableRef} className="overflow-x-auto rounded-xl border border-gray-800">
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-gray-900 text-gray-400 text-xs uppercase tracking-wider">
