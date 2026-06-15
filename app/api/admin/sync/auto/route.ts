@@ -125,7 +125,8 @@ export async function POST(req: NextRequest) {
     })
   }
 
-  if (updates.length > 0 || Object.keys(dateUpdates).length > 0) {
+  // Always update matchDates for all completed events (not just changed results)
+  if (true) {
     await updateDB(db => {
       const map = Object.fromEntries(db.results.map(r => [r.matchId, r]))
       for (const u of updates) map[u.matchId] = { matchId: u.matchId, score1: u.score1, score2: u.score2 }
