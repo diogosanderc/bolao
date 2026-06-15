@@ -253,7 +253,10 @@ export function computeLeaderboard(
         advancementPoints,
       },
     }
-  }).sort((a, b) => b.totalPoints - a.totalPoints)
+  }).sort((a, b) => {
+    if (b.totalPoints !== a.totalPoints) return b.totalPoints - a.totalPoints
+    return a.participant.name.localeCompare(b.participant.name, 'pt')
+  })
 }
 
 function nextPhaseOf(phase: Phase): Phase | null {
