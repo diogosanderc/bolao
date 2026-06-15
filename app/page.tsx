@@ -66,6 +66,7 @@ export default function LeaderboardPage() {
 
   const cutoffScore = data.length >= 7 ? data[data.length - 7].totalPoints : -Infinity
   const isRelated = (pts: number) => data.length >= 7 && pts <= cutoffScore
+  const isWarning = (pts: number) => !isRelated(pts) && data.length >= 7 && pts <= cutoffScore + 2
 
   const isFirstOfRank = data.map((_, idx) => idx === 0 || ranks[idx] !== ranks[idx - 1])
 
@@ -78,7 +79,7 @@ export default function LeaderboardPage() {
     data.forEach((entry, idx) => {
       const rank = ranks[idx]
       const tier = tierOf(entry.totalPoints)
-      const medal = isRelated(entry.totalPoints) ? '💸' : (trophies[tier] ?? (isFirstOfRank[idx] ? `${rank}.` : '   '))
+      const medal = isRelated(entry.totalPoints) ? '💸' : isWarning(entry.totalPoints) ? '⚠️' : (trophies[tier] ?? (rank >= 4 && rank <= 7 && isFirstOfRank[idx] ? '⭐' : (isFirstOfRank[idx] ? `${rank}.` : '   ')))
       const pts = `${entry.totalPoints}pts`
       const last = entry.lastMatchPoints > 0 ? ` (+${entry.lastMatchPoints})` : ''
       lines.push(`${medal} *${entry.participant.name}* — ${pts}${last}`)
@@ -191,6 +192,7 @@ export default function LeaderboardPage() {
                   key={entry.participant.id}
                   className={`transition-colors ${
                     isRelated(entry.totalPoints) ? 'bg-red-50 hover:bg-red-100 dark:bg-red-950/50 dark:hover:bg-red-950/70' :
+                    isWarning(entry.totalPoints) ? 'bg-yellow-50 hover:bg-yellow-100 dark:bg-yellow-950/20 dark:hover:bg-yellow-950/30' :
                     tier === 1 ? 'bg-yellow-100 dark:bg-yellow-950/40' :
                     tier === 2 ? 'bg-gray-800/30' :
                     tier === 3 ? 'bg-orange-50 dark:bg-orange-950/30' :
@@ -200,11 +202,16 @@ export default function LeaderboardPage() {
                   <td className="px-4 py-3 text-center font-bold text-lg">
                     {isRelated(entry.totalPoints)
                       ? '💸'
+                      : isWarning(entry.totalPoints) && isFirstOfRank[idx]
+                      ? <span className="text-yellow-500 text-sm">{rank}</span>
                       : trophies[tier]
-                      ?? (isFirstOfRank[idx] ? <span className="text-gray-500 text-sm">{rank}</span> : null)}
+                      ?? (rank >= 4 && rank <= 7 && isFirstOfRank[idx]
+                          ? '⭐'
+                          : (isFirstOfRank[idx] ? <span className="text-gray-500 text-sm">{rank}</span> : null))}
                   </td>
                   <td className={`px-4 py-3 font-semibold ${
                     isRelated(entry.totalPoints) ? 'text-red-700 dark:text-red-300' :
+                    isWarning(entry.totalPoints) ? 'text-yellow-600 dark:text-yellow-400' :
                     tier === 1 ? 'text-yellow-700 dark:text-yellow-300' :
                     tier === 2 ? 'text-gray-300' :
                     tier === 3 ? 'text-amber-600' :
@@ -217,7 +224,7 @@ export default function LeaderboardPage() {
                       ? <span className="text-green-400 font-semibold">+{entry.lastMatchPoints}</span>
                       : <span className="text-gray-500">0</span>}
                   </td>
-                  <td className={`px-4 py-3 text-right font-bold text-base ${isRelated(entry.totalPoints) ? 'text-red-600 dark:text-red-400' : 'text-yellow-600 dark:text-yellow-400'}`}>
+                  <td className={`px-4 py-3 text-right font-bold text-base ${isRelated(entry.totalPoints) ? 'text-red-600 dark:text-red-400' : isWarning(entry.totalPoints) ? 'text-yellow-500 dark:text-yellow-400' : 'text-yellow-600 dark:text-yellow-400'}`}>
                     {entry.totalPoints}
                   </td>
                 </tr>
