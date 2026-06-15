@@ -11,6 +11,10 @@ export default function PalpiteEntryPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!name.trim()) return
+    if (name.trim().toUpperCase() === 'TODOS') {
+      router.push('/palpite/todos')
+      return
+    }
     setLoading(true)
     setError('')
     try {
