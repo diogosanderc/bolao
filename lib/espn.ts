@@ -129,8 +129,7 @@ async function fetchLiveMap(): Promise<Map<string, LiveInfo>> {
         status?.type?.name === 'STATUS_HALFTIME' ||
         status?.type?.name === 'STATUS_SECOND_HALF' ||
         status?.type?.name === 'STATUS_EXTRA_TIME' ||
-        status?.type?.name === 'STATUS_PENALTY' ||
-        (status?.displayClock && status?.displayClock !== '0:00' && !status?.type?.completed)
+        status?.type?.name === 'STATUS_PENALTY'
       )
       if (!isLive) continue
       const competitors: any[] = competition?.competitors ?? []
