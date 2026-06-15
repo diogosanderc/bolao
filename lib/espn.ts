@@ -148,7 +148,7 @@ async function fetchLiveMap(): Promise<Map<string, LiveInfo>> {
       liveMap.set(match.id, {
         score1: parseInt(c1.score ?? '0', 10),
         score2: parseInt(c2.score ?? '0', 10),
-        clock: status?.displayClock ?? '',
+        clock: status?.type?.name === 'STATUS_HALFTIME' ? 'Intervalo' : (status?.displayClock ?? ''),
       })
     }
     return liveMap
