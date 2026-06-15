@@ -51,7 +51,7 @@ export default function LeaderboardPage() {
         .catch(() => {})
     }
     fetchSchedule()
-    const interval = setInterval(fetchSchedule, 60_000)
+    const interval = setInterval(fetchSchedule, 30_000)
     return () => clearInterval(interval)
   }, [])
 
