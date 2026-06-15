@@ -138,7 +138,7 @@ export default function LeaderboardPage() {
           { label: 'Resultado certo', pts: '4 pts', icon: '✅' },
           { label: 'Placar exato', pts: '+2 pts', icon: '🎯' },
           { label: 'Gols de um time', pts: '1 pt/time', icon: '⚽' },
-          { label: 'Placar exato c/ 4+ gols', pts: '+2 pts', icon: '🔥' },
+          { label: 'Placar exato (um time ≥ 4 gols)', pts: '+2 pts', icon: '🔥' },
         ].map(item => (
           <div key={item.label} className="bg-gray-900 rounded-lg p-3 text-center border border-gray-800">
             <div className="text-2xl mb-1">{item.icon}</div>

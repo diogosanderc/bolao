@@ -36,7 +36,7 @@ export function scoreMatch(
   const correctGoal1 = prediction.score1 === result.score1
   const correctGoal2 = prediction.score2 === result.score2
   const highScoreBonus =
-    correctScore && (result.score1 + result.score2 >= 4)
+    correctScore && (result.score1 >= 4 || result.score2 >= 4)
 
   const isKnockout = match.phase !== 'group'
   const isDraw = result.score1 === result.score2
