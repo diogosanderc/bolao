@@ -99,8 +99,8 @@ export default function SimuladorPage() {
     const tbd = team1Id === 'TBD' || team2Id === 'TBD'
     return (
       <div key={matchId} className={`flex items-center gap-1.5 py-1.5 px-2 rounded-lg bg-gray-900 border border-gray-800 ${tbd ? 'opacity-40' : ''}`}>
-        <span className="shrink-0">{team1Id !== 'TBD' ? <Flag teamId={team1Id} size={18} /> : '🏳'}</span>
         <span className="text-xs text-gray-300 flex-1 text-right truncate min-w-0">{t1?.name ?? team1Id}</span>
+        <span className="shrink-0">{team1Id !== 'TBD' ? <Flag teamId={team1Id} size={18} /> : '🏳'}</span>
         <input
           type="number" min="0" max="20"
           value={s.score1}

@@ -213,14 +213,25 @@ export default function LeaderboardPage() {
                   }`}
                 >
                   <td className="px-4 py-3 text-center font-bold text-lg">
-                    {isRelated(entry.totalPoints)
-                      ? '💸'
-                      : isWarning(entry.totalPoints)
-                      ? (isFirstOfRank[idx] ? <span className="text-yellow-500 text-sm">{rank}</span> : null)
-                      : trophies[tier]
-                      ?? (rank >= 4 && rank <= 7
-                          ? '⭐'
-                          : (isFirstOfRank[idx] ? <span className="text-gray-500 text-sm">{rank}</span> : null))}
+                    <div className="flex flex-col items-center leading-none gap-0.5">
+                      <span>
+                        {isRelated(entry.totalPoints)
+                          ? '💸'
+                          : isWarning(entry.totalPoints)
+                          ? (isFirstOfRank[idx] ? <span className="text-yellow-500 text-sm">{rank}</span> : null)
+                          : trophies[tier]
+                          ?? (rank >= 4 && rank <= 7
+                              ? '⭐'
+                              : (isFirstOfRank[idx] ? <span className="text-gray-500 text-sm">{rank}</span> : null))}
+                      </span>
+                      {(() => {
+                        const change = (entry as any).positionChange
+                        if (!change) return null
+                        return change > 0
+                          ? <span className="text-green-400 text-[10px] font-bold">▲{change}</span>
+                          : <span className="text-red-400 text-[10px] font-bold">▼{Math.abs(change)}</span>
+                      })()}
+                    </div>
                   </td>
                   <td className={`px-4 py-3 font-semibold ${
                     isRelated(entry.totalPoints) ? 'text-red-700 dark:text-red-300' :

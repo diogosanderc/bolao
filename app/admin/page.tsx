@@ -421,8 +421,8 @@ export default function AdminPage() {
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">📈 Visitas à Classificação</h3>
             <div className="flex gap-4 text-xs text-gray-500">
-              <span>Hoje: <span className="text-yellow-400 font-bold text-sm">{visitStats.today}</span></span>
-              <span>Total: <span className="text-gray-300 font-semibold">{visitStats.total}</span></span>
+              <span>Hoje: <span className="text-yellow-400 font-bold">{visitStats.today}</span></span>
+              <span>Total: <span className="text-gray-300">{visitStats.total}</span></span>
             </div>
           </div>
           <div className="flex items-end gap-1 h-16">
