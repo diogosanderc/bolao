@@ -128,6 +128,13 @@ export default function LeaderboardPage() {
     }
   }, [])
 
+  function urlBase64ToUint8Array(base64String: string) {
+    const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
+    const rawData = window.atob(base64)
+    return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)))
+  }
+
   async function toggleNotifications() {
     if (!('serviceWorker' in navigator)) return
     const reg = await navigator.serviceWorker.ready
@@ -145,15 +152,23 @@ export default function LeaderboardPage() {
     if (permission !== 'granted') { setNotifState('denied'); showToast('🚫 Permissão negada pelo browser'); return }
     const vapidKey = process.env.NEXT_PUBLIC_VAPID_KEY
     if (!vapidKey) { showToast('⚠️ Configuração incompleta (VAPID)'); return }
-    const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: vapidKey })
-    const json = sub.toJSON()
-    await fetch('/api/push/subscribe', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ endpoint: sub.endpoint, keys: { p256dh: json.keys?.p256dh, auth: json.keys?.auth } }),
-    })
-    setNotifState('subscribed')
-    showToast('🔔 Notificações ativadas! Você receberá alertas de gols e resultados.')
+    try {
+      const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(vapidKey) })
+      const json = sub.toJSON()
+      const p256dh = json.keys?.p256dh
+      const auth = json.keys?.auth
+      if (!p256dh || !auth) { showToast('⚠️ Erro ao obter chaves de assinatura'); return }
+      const r = await fetch('/api/push/subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ endpoint: sub.endpoint, keys: { p256dh, auth } }),
+      })
+      if (!r.ok) { showToast('⚠️ Erro ao salvar assinatura no servidor'); return }
+      setNotifState('subscribed')
+      showToast('🔔 Notificações ativadas! Você receberá alertas de gols e resultados.')
+    } catch (err: any) {
+      showToast('⚠️ Erro: ' + (err?.message ?? 'falhou'))
+    }
   }
 
   function shareWhatsApp() {
