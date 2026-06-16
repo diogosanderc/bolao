@@ -16,6 +16,8 @@ export const ESPN_TO_TEAM_ID: Record<string, string> = {
   JPN: 'JPN', KOR: 'KOR', AUS: 'AUS', KSA: 'KSA', IRN: 'IRN',
   UZB: 'UZB', JOR: 'JOR', IRQ: 'IRQ', QAT: 'QAT', NZL: 'NZL',
   CUW: 'CUR', CUR: 'CUR', CIV: 'CIV', IVC: 'CIV', SAF: 'RSA',
+  // additional ESPN variants seen in the wild
+  'bosnia & herzegovina': 'BIH', 'usa': 'USA', 'congo dr': 'COD', 'costa do marfim': 'CIV',
   germany: 'GER', france: 'FRA', spain: 'ESP', england: 'ENG', portugal: 'POR',
   netherlands: 'NED', belgium: 'BEL', croatia: 'CRO', turkey: 'TUR', austria: 'AUT',
   scotland: 'SCO', switzerland: 'SUI', czechia: 'CZE', 'czech republic': 'CZE',

@@ -1,49 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { readDB, updateDB } from '@/lib/db'
 import { ALL_MATCHES, teamById } from '@/lib/copa2026'
+import { resolveTeam } from '@/lib/espn'
 import { MatchResult } from '@/lib/types'
-
-// Map ESPN team abbreviations/names → our team IDs
-const ESPN_TO_TEAM_ID: Record<string, string> = {
-  // by abbreviation (ESPN → ours)
-  GER: 'GER', FRA: 'FRA', ESP: 'ESP', ENG: 'ENG', POR: 'POR',
-  NED: 'NED', BEL: 'BEL', CRO: 'CRO', TUR: 'TUR', AUT: 'AUT',
-  SCO: 'SCO', SUI: 'SUI', CZE: 'CZE', BIH: 'BIH', SWE: 'SWE', NOR: 'NOR',
-  BRA: 'BRA', ARG: 'ARG', COL: 'COL', URU: 'URU', ECU: 'ECU',
-  PAR: 'PAR', USA: 'USA', MEX: 'MEX', CAN: 'CAN', PAN: 'PAN',
-  HAI: 'HAI',
-  MAR: 'MAR', SEN: 'SEN', EGY: 'EGY', ALG: 'ALG', RSA: 'RSA',
-  GHA: 'GHA', TUN: 'TUN', CPV: 'CPV', COD: 'COD',
-  JPN: 'JPN', KOR: 'KOR', AUS: 'AUS', KSA: 'KSA', IRN: 'IRN',
-  UZB: 'UZB', JOR: 'JOR', IRQ: 'IRQ', QAT: 'QAT', NZL: 'NZL',
-  // ESPN-specific variants
-  CUW: 'CUR', CUR: 'CUR',
-  CIV: 'CIV', IVC: 'CIV',
-  RSA2: 'RSA', SAF: 'RSA',
-  IRQ2: 'IRQ',
-  GRN: 'GHA',
-  // English name fallbacks (lowercase key)
-  germany: 'GER', france: 'FRA', spain: 'ESP', england: 'ENG', portugal: 'POR',
-  netherlands: 'NED', belgium: 'BEL', croatia: 'CRO', turkey: 'TUR', austria: 'AUT',
-  scotland: 'SCO', switzerland: 'SUI', czechia: 'CZE', 'czech republic': 'CZE',
-  'bosnia and herzegovina': 'BIH', 'bosnia & herzegovina': 'BIH', sweden: 'SWE', norway: 'NOR',
-  brazil: 'BRA', argentina: 'ARG', colombia: 'COL', uruguay: 'URU', ecuador: 'ECU',
-  paraguay: 'PAR', 'united states': 'USA', 'usa': 'USA', mexico: 'MEX', canada: 'CAN',
-  panama: 'PAN', haiti: 'HAI',
-  morocco: 'MAR', senegal: 'SEN', egypt: 'EGY', algeria: 'ALG', 'south africa': 'RSA',
-  ghana: 'GHA', tunisia: 'TUN', 'cabo verde': 'CPV', 'cape verde': 'CPV',
-  'dr congo': 'COD', 'congo dr': 'COD', 'democratic republic of congo': 'COD',
-  japan: 'JPN', 'south korea': 'KOR', australia: 'AUS', 'saudi arabia': 'KSA',
-  iran: 'IRN', uzbekistan: 'UZB', jordan: 'JOR', iraq: 'IRQ', qatar: 'QAT',
-  'new zealand': 'NZL', curacao: 'CUR', "curaçao": 'CUR',
-  "côte d'ivoire": 'CIV', "ivory coast": 'CIV', 'costa do marfim': 'CIV',
-}
-
-function resolveTeam(abbr: string, name: string): string | null {
-  return ESPN_TO_TEAM_ID[abbr]
-    ?? ESPN_TO_TEAM_ID[name.toLowerCase()]
-    ?? null
-}
 
 type SyncDiff = {
   matchId: string
