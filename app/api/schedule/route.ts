@@ -70,6 +70,7 @@ export async function GET() {
         liveScore1: e.liveScore1,
         liveScore2: e.liveScore2,
         clock: e.clock,
+        goals: e.goals,
       })),
       upcoming: upcoming.slice(0, 20).map(e => ({
         ...e,

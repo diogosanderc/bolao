@@ -13,6 +13,13 @@ type LastMatch = {
   team2: { id: string; name: string; flag: string }
 } | null
 
+type GoalEvent = {
+  minute: string
+  playerName: string
+  teamId: string
+  ownGoal: boolean
+}
+
 type ScheduleMatch = {
   matchId: string
   team1: { id: string; name: string; flag: string }
@@ -23,6 +30,7 @@ type ScheduleMatch = {
   liveScore1?: number
   liveScore2?: number
   clock?: string
+  goals?: GoalEvent[]
 }
 
 export default function LeaderboardPage() {
@@ -164,6 +172,15 @@ export default function LeaderboardPage() {
                 </span>
                 <span className="flex items-center gap-1.5"><Flag teamId={m.team2.id} size={18} />{m.team2.name}</span>
               </div>
+              {m.goals && m.goals.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-x-3 gap-y-0.5">
+                  {m.goals.map((g, i) => (
+                    <span key={i} className="text-xs text-red-200">
+                      ⚽ {g.minute && <span className="text-red-400">{g.minute}</span>} {g.playerName}{g.ownGoal ? ' (contra)' : ''}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
           ))}
         </div>

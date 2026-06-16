@@ -40,6 +40,13 @@ export function resolveTeam(abbr: string, name: string): string | null {
     ?? null
 }
 
+export type GoalEvent = {
+  minute: string
+  playerName: string
+  teamId: string
+  ownGoal: boolean
+}
+
 export type ESPNEvent = {
   matchId: string
   team1Id: string
@@ -49,11 +56,12 @@ export type ESPNEvent = {
   venue: string
   completed: boolean
   inProgress: boolean
-  score1?: number   // set for completed games
-  score2?: number   // set for completed games
+  score1?: number
+  score2?: number
   liveScore1?: number
   liveScore2?: number
   clock?: string
+  goals?: GoalEvent[]
 }
 
 function toBRT(isoDate: string): string {
@@ -104,6 +112,23 @@ function parseEvents(rawEvents: any[], liveMap: Map<string, LiveInfo>): ESPNEven
     const finalScore1 = hasScores ? (flipped ? rawScore2 : rawScore1) : undefined
     const finalScore2 = hasScores ? (flipped ? rawScore1 : rawScore2) : undefined
 
+    // Parse goal events from competition details
+    const goals: GoalEvent[] = []
+    for (const detail of competition.details ?? []) {
+      const typeText: string = detail.type?.text ?? ''
+      const isGoal = typeText === 'Goal' || typeText === 'Own Goal' || typeText === 'Penalty - Scored'
+      if (!isGoal) continue
+      const minute: string = detail.clock?.displayValue ?? ''
+      const playerName: string = detail.athletesInvolved?.[0]?.displayName ?? ''
+      const ownGoal = typeText === 'Own Goal'
+      // detail.team.id is ESPN's team id — match against c1/c2
+      const detailTeamId = detail.team?.id
+      const scoringTeamId = detailTeamId === c1.team?.id ? (flipped ? match.team2Id : match.team1Id)
+        : detailTeamId === c2.team?.id ? (flipped ? match.team1Id : match.team2Id)
+        : ''
+      if (playerName) goals.push({ minute, playerName, teamId: scoringTeamId, ownGoal })
+    }
+
     result.push({
       matchId: match.id,
       team1Id: match.team1Id,
@@ -118,6 +143,7 @@ function parseEvents(rawEvents: any[], liveMap: Map<string, LiveInfo>): ESPNEven
       liveScore1: live ? (flipped ? live.score2 : live.score1) : undefined,
       liveScore2: live ? (flipped ? live.score1 : live.score2) : undefined,
       clock: live?.clock,
+      goals: goals.length > 0 ? goals : undefined,
     })
   }
   return result
