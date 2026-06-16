@@ -62,21 +62,33 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
       <div
         className="relative bg-gray-950 border border-gray-800 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-2xl max-h-[90vh] flex flex-col"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
         onClick={e => e.stopPropagation()}
       >
+        {/* Drag handle (mobile only) */}
+        <div className="flex justify-center pt-3 pb-1 sm:hidden shrink-0">
+          <div className="w-10 h-1 rounded-full bg-gray-700" />
+        </div>
+
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-800 shrink-0">
-          <div>
+        <div className="flex items-start justify-between px-5 py-3 border-b border-gray-800 shrink-0">
+          <div className="flex-1 min-w-0 pr-3">
             <h2 className="text-lg font-bold text-white">{name}</h2>
             {data && (
-              <div className="flex gap-4 mt-1 text-xs text-gray-500">
+              <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-xs text-gray-500">
                 <span><span className="text-yellow-400 font-bold">{data.summary.totalPoints}pts</span> totais</span>
                 <span><span className="text-green-400 font-semibold">{data.summary.correctResults}</span> resultados certos</span>
                 <span><span className="text-yellow-300 font-semibold">{data.summary.correctScores}</span> placares exatos</span>
               </div>
             )}
           </div>
-          <button onClick={onClose} className="text-gray-500 hover:text-white text-2xl leading-none">&times;</button>
+          <button
+            onClick={onClose}
+            className="shrink-0 w-9 h-9 flex items-center justify-center rounded-full bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white text-xl font-bold transition-colors"
+            aria-label="Fechar"
+          >
+            ×
+          </button>
         </div>
 
         {/* Tabs */}
