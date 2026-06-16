@@ -177,14 +177,14 @@ export default function LeaderboardPage() {
             <button
               onClick={toggleNotifications}
               title={notifState === 'subscribed' ? 'Desativar notificações' : notifState === 'denied' ? 'Notificações bloqueadas no browser' : 'Ativar notificações de gol e resultado'}
-              className={`text-sm px-3 py-1.5 rounded-lg transition-colors font-semibold ${
-                notifState === 'subscribed' ? 'bg-yellow-600 hover:bg-yellow-500 text-white' :
-                notifState === 'denied' ? 'bg-gray-700 text-gray-500 cursor-not-allowed' :
-                'bg-gray-800 hover:bg-gray-700 text-gray-300'
+              className={`text-xl px-2 py-1 rounded-lg transition-colors ${
+                notifState === 'subscribed' ? 'text-yellow-400' :
+                notifState === 'denied' ? 'text-gray-600 cursor-not-allowed' :
+                'text-gray-500 hover:text-gray-300'
               }`}
               disabled={notifState === 'denied'}
             >
-              {notifState === 'subscribed' ? '🔔 Ativado' : notifState === 'denied' ? '🔕 Bloqueado' : '🔔 Notificações'}
+              {notifState === 'denied' ? '🔕' : '🔔'}
             </button>
           )}
           {!loading && data.length > 0 && (
