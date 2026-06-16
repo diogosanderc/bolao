@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { readDB, updateDB } from '@/lib/db'
 import { ALL_MATCHES, teamById } from '@/lib/copa2026'
 import { resolveTeam } from '@/lib/espn'
+import { sendPushToAll } from '@/lib/push'
 
 // Module-level rate limit: only run once per 60 seconds
 let lastRunAt = 0
@@ -29,7 +30,8 @@ export async function POST() {
   const resultMap = Object.fromEntries(db.results.map(r => [r.matchId, r]))
 
   const events: any[] = espnData.events ?? []
-  const updates: { matchId: string; score1: number; score2: number }[] = []
+  type Update = { matchId: string; score1: number; score2: number; label: string; wasNew: boolean; scoreDiff: number }
+  const updates: Update[] = []
 
   for (const event of events) {
     const competition = event.competitions?.[0]
@@ -63,15 +65,47 @@ export async function POST() {
     const current = resultMap[match.id]
     if (current && current.score1 === ourScore1 && current.score2 === ourScore2) continue
 
-    updates.push({ matchId: match.id, score1: ourScore1, score2: ourScore2 })
+    const t1 = teamById[match.team1Id]?.name ?? match.team1Id
+    const t2 = teamById[match.team2Id]?.name ?? match.team2Id
+    const wasNew = !current
+    const prevTotal = current ? current.score1 + current.score2 : 0
+    const newTotal = ourScore1 + ourScore2
+    updates.push({
+      matchId: match.id,
+      score1: ourScore1,
+      score2: ourScore2,
+      label: `${t1} ${ourScore1}×${ourScore2} ${t2}`,
+      wasNew,
+      scoreDiff: newTotal - prevTotal,
+    })
   }
 
   if (updates.length > 0) {
     await updateDB(db => {
       const map = Object.fromEntries(db.results.map(r => [r.matchId, r]))
-      for (const u of updates) map[u.matchId] = u
+      for (const u of updates) map[u.matchId] = { matchId: u.matchId, score1: u.score1, score2: u.score2 }
       return { ...db, results: Object.values(map) }
     })
+
+    // Send push notifications
+    for (const u of updates) {
+      if (u.wasNew) {
+        // Full-time result
+        sendPushToAll({
+          title: '⚽ Resultado Final',
+          body: u.label,
+          icon: '/icon-192.png',
+        }).catch(() => {})
+      } else if (u.scoreDiff > 0) {
+        // Score changed during a match — likely a goal correction or delayed update
+        sendPushToAll({
+          title: '⚽ Placar atualizado',
+          body: u.label,
+          icon: '/icon-192.png',
+        }).catch(() => {})
+      }
+    }
+
     console.log(`[sync/live] ${updates.length} result(s) updated`)
   }
 

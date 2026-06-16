@@ -107,6 +107,47 @@ export default function LeaderboardPage() {
 
   const isFirstOfRank = data.map((_, idx) => idx === 0 || ranks[idx] !== ranks[idx - 1])
 
+  const [notifState, setNotifState] = useState<'default' | 'subscribed' | 'denied' | 'unsupported'>('default')
+
+  useEffect(() => {
+    if (!('Notification' in window) || !('serviceWorker' in navigator)) {
+      setNotifState('unsupported')
+    } else if (Notification.permission === 'denied') {
+      setNotifState('denied')
+    } else {
+      // Check if already subscribed
+      navigator.serviceWorker.ready.then(reg => reg.pushManager.getSubscription()).then(sub => {
+        if (sub) setNotifState('subscribed')
+      }).catch(() => {})
+    }
+  }, [])
+
+  async function toggleNotifications() {
+    if (!('serviceWorker' in navigator)) return
+    const reg = await navigator.serviceWorker.ready
+    if (notifState === 'subscribed') {
+      const sub = await reg.pushManager.getSubscription()
+      if (sub) {
+        await fetch('/api/push/subscribe', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ endpoint: sub.endpoint }) })
+        await sub.unsubscribe()
+      }
+      setNotifState('default')
+      return
+    }
+    const permission = await Notification.requestPermission()
+    if (permission !== 'granted') { setNotifState('denied'); return }
+    const vapidKey = process.env.NEXT_PUBLIC_VAPID_KEY
+    if (!vapidKey) return
+    const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: vapidKey })
+    const json = sub.toJSON()
+    await fetch('/api/push/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ endpoint: sub.endpoint, keys: { p256dh: json.keys?.p256dh, auth: json.keys?.auth } }),
+    })
+    setNotifState('subscribed')
+  }
+
   function shareWhatsApp() {
     const lines: string[] = ['🏆 *Classificação Bolão Copa 2026*']
     if (lastMatch) {
@@ -132,6 +173,20 @@ export default function LeaderboardPage() {
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">Classificação</h2>
         <div className="flex items-center gap-3">
+          {notifState !== 'unsupported' && (
+            <button
+              onClick={toggleNotifications}
+              title={notifState === 'subscribed' ? 'Desativar notificações' : notifState === 'denied' ? 'Notificações bloqueadas no browser' : 'Ativar notificações de gol e resultado'}
+              className={`text-sm px-3 py-1.5 rounded-lg transition-colors font-semibold ${
+                notifState === 'subscribed' ? 'bg-yellow-600 hover:bg-yellow-500 text-white' :
+                notifState === 'denied' ? 'bg-gray-700 text-gray-500 cursor-not-allowed' :
+                'bg-gray-800 hover:bg-gray-700 text-gray-300'
+              }`}
+              disabled={notifState === 'denied'}
+            >
+              {notifState === 'subscribed' ? '🔔 Ativado' : notifState === 'denied' ? '🔕 Bloqueado' : '🔔 Notificações'}
+            </button>
+          )}
           {!loading && data.length > 0 && (
             <button
               onClick={shareWhatsApp}

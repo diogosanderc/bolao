@@ -1,6 +1,3 @@
-// Minimal service worker — required for PWA installability
-// Caches the shell on install; serves from network with cache fallback
-
 const CACHE = 'bolao-v1'
 const SHELL = ['/', '/manifest.json']
 
@@ -19,7 +16,6 @@ self.addEventListener('activate', e => {
 })
 
 self.addEventListener('fetch', e => {
-  // Only cache GET requests; skip API calls so data is always fresh
   if (e.request.method !== 'GET') return
   if (e.request.url.includes('/api/')) return
 
@@ -32,4 +28,25 @@ self.addEventListener('fetch', e => {
       })
       .catch(() => caches.match(e.request))
   )
+})
+
+self.addEventListener('push', e => {
+  if (!e.data) return
+  let payload = { title: 'Bolão Copa 2026', body: '', icon: '/icon-192.png' }
+  try { Object.assign(payload, e.data.json()) } catch { payload.body = e.data.text() }
+  e.waitUntil(
+    self.registration.showNotification(payload.title, {
+      body: payload.body,
+      icon: payload.icon ?? '/icon-192.png',
+      badge: '/icon-192.png',
+      vibrate: [200, 100, 200],
+      tag: 'bolao-event',
+      renotify: true,
+    })
+  )
+})
+
+self.addEventListener('notificationclick', e => {
+  e.notification.close()
+  e.waitUntil(clients.openWindow('/'))
 })

@@ -87,12 +87,19 @@ export interface Participant {
   createdAt: string
 }
 
+export interface PushSubscriptionRecord {
+  endpoint: string
+  keys: { p256dh: string; auth: string }
+  createdAt: string
+}
+
 export interface Database {
   participants: Participant[]
   matchPredictions: MatchPrediction[]
   groupPredictions: GroupPrediction[]
   results: MatchResult[]
   matchDates: Record<string, { date: string; dateBRT: string; venue: string }>
+  pushSubscriptions?: PushSubscriptionRecord[]
 }
 
 export interface LeaderboardEntry {
