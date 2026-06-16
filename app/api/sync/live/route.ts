@@ -4,20 +4,28 @@ import { ALL_MATCHES, teamById } from '@/lib/copa2026'
 import { resolveTeam } from '@/lib/espn'
 import { sendPushToAll } from '@/lib/push'
 
-// Module-level rate limit: only run once per 60 seconds
+// In-memory state persists between requests on Railway's single instance
+type MatchState = {
+  status: 'pre' | 'in' | 'halftime' | 'completed'
+  score1: number
+  score2: number
+}
+const matchStates = new Map<string, MatchState>()
+
 let lastRunAt = 0
 
 export async function POST() {
   const now = Date.now()
-  if (now - lastRunAt < 60_000) {
-    return NextResponse.json({ ok: true, skipped: true, nextAllowedIn: Math.ceil((60_000 - (now - lastRunAt)) / 1000) })
+  if (now - lastRunAt < 28_000) {
+    return NextResponse.json({ ok: true, skipped: true })
   }
   lastRunAt = now
 
   let espnData: any
   try {
     const res = await fetch(
-      'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard?dates=20260612-20260719&limit=200',
+      // Today endpoint — real-time, no cache
+      'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard',
       { headers: { 'User-Agent': 'Mozilla/5.0 (compatible; bolao-sync/1.0)' }, cache: 'no-store' }
     )
     if (!res.ok) return NextResponse.json({ ok: false, error: `ESPN ${res.status}` })
@@ -28,17 +36,25 @@ export async function POST() {
 
   const db = await readDB()
   const resultMap = Object.fromEntries(db.results.map(r => [r.matchId, r]))
+  const dbUpdates: { matchId: string; score1: number; score2: number }[] = []
+  const pushQueue: { title: string; body: string }[] = []
 
-  const events: any[] = espnData.events ?? []
-  type Update = { matchId: string; score1: number; score2: number; label: string; wasNew: boolean; scoreDiff: number }
-  const updates: Update[] = []
-
-  for (const event of events) {
+  for (const event of espnData.events ?? []) {
     const competition = event.competitions?.[0]
     if (!competition) continue
+
     const status = competition.status ?? event.status
-    const completed = status?.type?.completed === true || status?.type?.name === 'STATUS_FINAL'
-    if (!completed) continue
+    const typeName: string = status?.type?.name ?? ''
+    const completed = status?.type?.completed === true || typeName === 'STATUS_FINAL'
+    const halftime = typeName === 'STATUS_HALFTIME'
+    const inProgress = !completed && (
+      status?.type?.state === 'in' ||
+      typeName === 'STATUS_IN_PROGRESS' ||
+      typeName === 'STATUS_SECOND_HALF' ||
+      typeName === 'STATUS_EXTRA_TIME' ||
+      typeName === 'STATUS_PENALTY' ||
+      halftime
+    )
 
     const competitors: any[] = competition.competitors ?? []
     if (competitors.length !== 2) continue
@@ -49,9 +65,6 @@ export async function POST() {
     const id2 = resolveTeam(c2.team?.abbreviation ?? '', c2.team?.displayName ?? '')
     if (!id1 || !id2) continue
 
-    const espnScore1 = parseInt(c1.score ?? '0', 10)
-    const espnScore2 = parseInt(c2.score ?? '0', 10)
-
     const match = ALL_MATCHES.find(m =>
       (m.team1Id === id1 && m.team2Id === id2) ||
       (m.team1Id === id2 && m.team2Id === id1)
@@ -59,55 +72,71 @@ export async function POST() {
     if (!match) continue
 
     const flipped = match.team1Id === id2
-    const ourScore1 = flipped ? espnScore2 : espnScore1
-    const ourScore2 = flipped ? espnScore1 : espnScore2
-
-    const current = resultMap[match.id]
-    if (current && current.score1 === ourScore1 && current.score2 === ourScore2) continue
-
+    const rawS1 = parseInt(c1.score ?? '0', 10)
+    const rawS2 = parseInt(c2.score ?? '0', 10)
+    const score1 = flipped ? rawS2 : rawS1
+    const score2 = flipped ? rawS1 : rawS2
     const t1 = teamById[match.team1Id]?.name ?? match.team1Id
     const t2 = teamById[match.team2Id]?.name ?? match.team2Id
-    const wasNew = !current
-    const prevTotal = current ? current.score1 + current.score2 : 0
-    const newTotal = ourScore1 + ourScore2
-    updates.push({
-      matchId: match.id,
-      score1: ourScore1,
-      score2: ourScore2,
-      label: `${t1} ${ourScore1}×${ourScore2} ${t2}`,
-      wasNew,
-      scoreDiff: newTotal - prevTotal,
-    })
-  }
+    const scoreStr = `${t1} ${score1}×${score2} ${t2}`
+    const clock: string = halftime ? 'Intervalo' : (status?.displayClock ?? '')
 
-  if (updates.length > 0) {
-    await updateDB(db => {
-      const map = Object.fromEntries(db.results.map(r => [r.matchId, r]))
-      for (const u of updates) map[u.matchId] = { matchId: u.matchId, score1: u.score1, score2: u.score2 }
-      return { ...db, results: Object.values(map) }
-    })
+    const prev = matchStates.get(match.id)
+    const newStatus: MatchState['status'] = completed ? 'completed' : halftime ? 'halftime' : inProgress ? 'in' : 'pre'
 
-    // Send push notifications
-    for (const u of updates) {
-      if (u.wasNew) {
-        // Full-time result
-        sendPushToAll({
-          title: '⚽ Resultado Final',
-          body: u.label,
-          icon: '/icon-192.png',
-        }).catch(() => {})
-      } else if (u.scoreDiff > 0) {
-        // Score changed during a match — likely a goal correction or delayed update
-        sendPushToAll({
-          title: '⚽ Placar atualizado',
-          body: u.label,
-          icon: '/icon-192.png',
-        }).catch(() => {})
+    if (!prev) {
+      // First time we see this match — just record state, no push (avoid noise on server restart)
+      matchStates.set(match.id, { status: newStatus, score1, score2 })
+      continue
+    }
+
+    // Detect transitions
+    if (prev.status === 'pre' && newStatus === 'in') {
+      pushQueue.push({ title: '🟢 Jogo começou!', body: `${t1} vs ${t2}` })
+    }
+
+    if ((prev.status === 'in' || prev.status === 'pre') && newStatus === 'halftime') {
+      pushQueue.push({ title: '⏸ Intervalo', body: `${scoreStr}` })
+    }
+
+    if (newStatus === 'in' || newStatus === 'halftime' || newStatus === 'completed') {
+      const prevTotal = prev.score1 + prev.score2
+      const newTotal = score1 + score2
+      const goalCount = newTotal - prevTotal
+      if (goalCount > 0) {
+        const goalLabel = goalCount === 1 ? 'Gol!' : `${goalCount} gols!`
+        const clockLabel = clock ? ` · ${clock}` : ''
+        pushQueue.push({ title: `⚽ ${goalLabel}${clockLabel}`, body: scoreStr })
       }
     }
 
-    console.log(`[sync/live] ${updates.length} result(s) updated`)
+    if (prev.status !== 'completed' && newStatus === 'completed') {
+      pushQueue.push({ title: '🏁 Resultado final', body: scoreStr })
+      // Save to DB
+      const current = resultMap[match.id]
+      if (!current || current.score1 !== score1 || current.score2 !== score2) {
+        dbUpdates.push({ matchId: match.id, score1, score2 })
+      }
+    }
+
+    matchStates.set(match.id, { status: newStatus, score1, score2 })
   }
 
-  return NextResponse.json({ ok: true, updated: updates.length })
+  if (dbUpdates.length > 0) {
+    await updateDB(db => {
+      const map = Object.fromEntries(db.results.map(r => [r.matchId, r]))
+      for (const u of dbUpdates) map[u.matchId] = u
+      return { ...db, results: Object.values(map) }
+    })
+  }
+
+  for (const p of pushQueue) {
+    sendPushToAll({ ...p, icon: '/icon-192.png' }).catch(() => {})
+  }
+
+  if (pushQueue.length > 0) {
+    console.log(`[sync/live] pushed ${pushQueue.length} notification(s):`, pushQueue.map(p => p.title))
+  }
+
+  return NextResponse.json({ ok: true, notifications: pushQueue.length, dbUpdates: dbUpdates.length })
 }

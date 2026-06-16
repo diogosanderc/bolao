@@ -83,7 +83,7 @@ export default function LeaderboardPage() {
     const leaderboardInterval = setInterval(fetchLeaderboard, 30_000)
     const syncInterval = setInterval(() => {
       fetch('/api/sync/live', { method: 'POST' }).catch(() => {})
-    }, 60_000)
+    }, 30_000)
     // Trigger sync immediately when a live match is first detected
     fetch('/api/sync/live', { method: 'POST' }).catch(() => {})
     return () => {
