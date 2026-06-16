@@ -12,8 +12,7 @@ export async function GET() {
     }
     const validParticipants = db.participants.filter(p => (predCount.get(p.id) ?? 0) > 0)
 
-    // Sort results by actual match date (ISO string from ESPN) so "último jogo"
-    // is always the most recently played. Empty string sorts before any real date.
+    // Sort results by match date so "last result" is chronologically last
     const matchDates = db.matchDates ?? {}
     const sortedResults = [...db.results].sort((a, b) => {
       const dateA = matchDates[a.matchId]?.date ?? ''
@@ -27,6 +26,29 @@ export async function GET() {
       db.groupPredictions,
       sortedResults
     )
+
+    // Compute previous leaderboard (all results except the last) for position change arrows
+    let leaderboardWithChanges: (typeof leaderboard[0] & { positionChange?: number })[] = leaderboard
+    if (sortedResults.length > 1) {
+      const prevResults = sortedResults.slice(0, -1)
+      const prevLeaderboard = computeLeaderboard(
+        validParticipants,
+        db.matchPredictions,
+        db.groupPredictions,
+        prevResults
+      )
+      const prevRankMap = new Map<string, number>()
+      for (const entry of prevLeaderboard) {
+        const prevRank = prevLeaderboard.filter(e => e.totalPoints > entry.totalPoints).length + 1
+        prevRankMap.set(entry.participant.id, prevRank)
+      }
+      leaderboardWithChanges = leaderboard.map(entry => {
+        const currentRank = leaderboard.filter(e => e.totalPoints > entry.totalPoints).length + 1
+        const prevRank = prevRankMap.get(entry.participant.id)
+        const positionChange = prevRank !== undefined ? prevRank - currentRank : undefined
+        return { ...entry, positionChange }
+      })
+    }
 
     let lastMatch = null
     if (sortedResults.length > 0) {
@@ -43,7 +65,7 @@ export async function GET() {
       }
     }
 
-    return NextResponse.json({ leaderboard, lastMatch })
+    return NextResponse.json({ leaderboard: leaderboardWithChanges, lastMatch })
   } catch (err) {
     console.error('[leaderboard]', err)
     return NextResponse.json({ leaderboard: [], lastMatch: null }, { status: 200 })

@@ -89,14 +89,14 @@ function MatchCard({
         <div className="flex items-center gap-1.5 shrink-0">
           <input
             ref={inputRef}
-            type="text" inputMode="numeric" value={s1}
+            type="text" inputMode="numeric" pattern="[0-9]*" value={s1}
             disabled={locked}
             onChange={e => handle('a', e.target.value)}
             className="w-10 h-10 text-center text-xl font-bold rounded-lg bg-gray-800 border border-gray-700 focus:outline-none focus:border-yellow-500 disabled:opacity-40 transition-colors"
           />
           <span className="text-gray-600 font-bold text-lg">×</span>
           <input
-            type="text" inputMode="numeric" value={s2}
+            type="text" inputMode="numeric" pattern="[0-9]*" value={s2}
             disabled={locked}
             onChange={e => handle('b', e.target.value)}
             className="w-10 h-10 text-center text-xl font-bold rounded-lg bg-gray-800 border border-gray-700 focus:outline-none focus:border-yellow-500 disabled:opacity-40 transition-colors"
@@ -263,7 +263,7 @@ export default function PalpitePage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-200">{data.participant.name}</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{data.participant.name}</h2>
           <div className="flex items-center gap-3 mt-1">
             <div className="w-40 bg-gray-800 rounded-full h-1.5">
               <div className="bg-green-500 h-1.5 rounded-full transition-all"
@@ -272,17 +272,17 @@ export default function PalpitePage() {
             <span className="text-xs text-gray-500">{totalPredicted}/{totalGroupMatches} jogos</span>
           </div>
         </div>
-        <a href="/" className="text-sm text-gray-500 hover:text-gray-200 transition-colors">← Classificação</a>
+        <a href="/" className="text-sm text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors">← Classificação</a>
       </div>
 
       {/* Phase tabs */}
       <div className="flex gap-1 bg-gray-900 p-1 rounded-xl w-fit">
         <button onClick={() => setActiveTab('groups')}
-          className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all ${activeTab === 'groups' ? 'bg-green-700 text-white shadow' : 'text-gray-400 hover:text-gray-200'}`}>
+          className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all ${activeTab === 'groups' ? 'bg-green-700 text-white shadow' : 'text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}>
           ⚽ Fase de Grupos
         </button>
         <button onClick={() => setActiveTab('knockout')}
-          className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all ${activeTab === 'knockout' ? 'bg-green-700 text-white shadow' : 'text-gray-400 hover:text-gray-200'}`}>
+          className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all ${activeTab === 'knockout' ? 'bg-green-700 text-white shadow' : 'text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}>
           🏆 Mata-Mata
         </button>
       </div>
@@ -339,7 +339,7 @@ export default function PalpitePage() {
                             <span className="font-medium text-sm">{team?.name}</span>
                           </div>
                         </td>
-                        <td className="px-2 py-3 text-center font-bold text-gray-200">{row.p}</td>
+                        <td className="px-2 py-3 text-center font-bold text-gray-900 dark:text-white">{row.p}</td>
                         <td className="px-2 py-3 text-center text-gray-400">{row.j}</td>
                         <td className="px-2 py-3 text-center text-gray-400">{row.v}</td>
                         <td className="px-2 py-3 text-center text-gray-400">{row.e}</td>
@@ -364,12 +364,12 @@ export default function PalpitePage() {
             <div className="space-y-3">
               <div className="flex items-center justify-between bg-gray-900 border border-gray-800 rounded-xl px-4 py-2.5">
                 <button onClick={() => setActiveRound(r => Math.max(1, r - 1))} disabled={activeRound === 1}
-                  className="text-gray-400 hover:text-gray-200 disabled:opacity-20 text-lg px-2">‹</button>
+                  className="text-gray-400 hover:text-gray-900 dark:hover:text-white disabled:opacity-20 text-lg px-2">‹</button>
                 <span className="text-sm font-bold text-gray-300 uppercase tracking-wider">
                   {activeRound}ª Rodada
                 </span>
                 <button onClick={() => setActiveRound(r => Math.min(3, r + 1))} disabled={activeRound === 3}
-                  className="text-gray-400 hover:text-gray-200 disabled:opacity-20 text-lg px-2">›</button>
+                  className="text-gray-400 hover:text-gray-900 dark:hover:text-white disabled:opacity-20 text-lg px-2">›</button>
               </div>
 
               {roundMatches(activeGroup, activeRound).map(m => (
@@ -393,7 +393,7 @@ export default function PalpitePage() {
             const hasTeams = phaseMatches.some(m => (knockoutBracket[m.id]?.team1Id ?? 'TBD') !== 'TBD')
             return (
               <div key={phase} className="relative border border-yellow-600/25 rounded-2xl px-4 pb-4 pt-7 mt-6">
-                <span className="absolute -top-3 left-4 bg-gray-950 px-3 py-0.5 rounded-lg border border-yellow-600/30 text-yellow-300 font-bold text-xs uppercase tracking-widest">
+                <span className="absolute -top-3 left-4 bg-[#030712] px-3 py-0.5 rounded-lg border border-yellow-600/30 text-yellow-300 font-bold text-xs uppercase tracking-widest">
                   {PHASE_LABELS[phase]}
                 </span>
                 {!hasTeams ? (

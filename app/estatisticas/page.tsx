@@ -190,6 +190,42 @@ export default function EstatisticasPage() {
         </p>
       </div>
 
+      {/* Comparison panel — shown when exactly 2 participants selected */}
+      {activeIds.size === 2 && (() => {
+        const ids = [...activeIds]
+        const s1 = participantStats.find(s => s.id === ids[0])
+        const s2 = participantStats.find(s => s.id === ids[1])
+        if (!s1 || !s2) return null
+        const p1idx = participants.findIndex(p => p.id === ids[0])
+        const p2idx = participants.findIndex(p => p.id === ids[1])
+        const c1 = LINE_COLORS[p1idx % LINE_COLORS.length]
+        const c2 = LINE_COLORS[p2idx % LINE_COLORS.length]
+        const leader = s1.totalPoints > s2.totalPoints ? 0 : s2.totalPoints > s1.totalPoints ? 1 : -1
+        return (
+          <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+            <div className="px-4 py-3 border-b border-gray-800">
+              <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">⚔️ Comparação Direta</h3>
+            </div>
+            <div className="grid grid-cols-2 divide-x divide-gray-800">
+              {[{ s: s1, c: c1, win: leader === 0 }, { s: s2, c: c2, win: leader === 1 }].map(({ s, c, win }) => (
+                <div key={s.id} className={`p-4 text-center ${win ? 'bg-green-950/20' : ''}`}>
+                  <p className="font-bold text-sm mb-3 truncate" style={{ color: c }}>{s.name}</p>
+                  <div className="space-y-2 text-sm">
+                    <div className={`text-2xl font-black ${win ? 'text-yellow-400' : 'text-gray-300'}`}>{s.totalPoints}<span className="text-xs font-normal text-gray-500 ml-1">pts</span></div>
+                    <div className="flex justify-around text-xs text-gray-500 pt-1">
+                      <span><span className="text-green-400 font-bold text-base">{s.correctResults}</span><br/>resultados</span>
+                      <span><span className="text-yellow-400 font-bold text-base">{s.correctScores}</span><br/>placares</span>
+                      <span><span className="text-gray-300 font-bold text-base">{s.pointsPerMatch}</span><br/>pts/jogo</span>
+                    </div>
+                  </div>
+                  {win && <div className="mt-3 text-xs text-green-400 font-semibold">👑 Na frente</div>}
+                </div>
+              ))}
+            </div>
+          </div>
+        )
+      })()}
+
       {/* Participant Stats */}
       <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
         <div className="px-4 py-3 border-b border-gray-800">

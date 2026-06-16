@@ -75,6 +75,7 @@ export default function AdminPage() {
   const [syncError, setSyncError] = useState('')
   const [selectedDiffs, setSelectedDiffs] = useState<Set<string>>(new Set())
   const [visitStats, setVisitStats] = useState<{ today: number; total: number; days: { date: string; label: string; count: number }[] } | null>(null)
+  const [lastDateSync, setLastDateSync] = useState<string | null>(null)
 
   const showToast = (msg: string) => {
     setToast(msg)
@@ -146,10 +147,26 @@ export default function AdminPage() {
     if (r.ok) {
       setResults(prev => ({ ...prev, [matchId]: { score1, score2, advancingTeamId } }))
       showToast('Resultado salvo!')
+      // Sync ESPN dates in background so manually-entered results get correct date ordering
+      fetch('/api/schedule', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ adminKey: key }) }).catch(() => {})
     } else {
       showToast('Erro: chave de admin incorreta?')
     }
     setSaving(false)
+  }
+
+  async function downloadBackup() {
+    try {
+      const r = await fetch('/api/admin/backup', { headers: { 'x-admin-key': key } })
+      if (!r.ok) { showToast('Erro ao gerar backup'); return }
+      const blob = await r.blob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `bolao-backup-${new Date().toISOString().slice(0, 10)}.json`
+      a.click()
+      URL.revokeObjectURL(url)
+    } catch { showToast('Erro ao baixar backup') }
   }
 
   async function syncSchedule() {
@@ -161,8 +178,10 @@ export default function AdminPage() {
         body: JSON.stringify({ adminKey: key }),
       })
       const data = await r.json()
-      if (r.ok) showToast(`Agenda sincronizada: ${data.count} jogos atualizados`)
-      else showToast(data.error ?? 'Erro ao sincronizar agenda')
+      if (r.ok) {
+        showToast(`Agenda sincronizada: ${data.count} jogos atualizados`)
+        setLastDateSync(new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }))
+      } else showToast(data.error ?? 'Erro ao sincronizar agenda')
     } catch {
       showToast('Erro de conexão')
     }
@@ -377,6 +396,13 @@ export default function AdminPage() {
             className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 disabled:text-gray-600 text-gray-100 rounded-lg font-semibold transition-colors text-xs"
           >
             {syncing ? '⟳ ...' : '📅 Sincronizar Agenda'}
+          </button>
+          {lastDateSync && <span className="text-xs text-gray-500">🕐 {lastDateSync}</span>}
+          <button
+            onClick={downloadBackup}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg font-semibold transition-colors text-xs border border-gray-700"
+          >
+            ⬇ Backup DB
           </button>
           <button
             onClick={fetchSyncDiffs}

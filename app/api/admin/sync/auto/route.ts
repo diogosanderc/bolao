@@ -1,40 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { readDB, updateDB } from '@/lib/db'
 import { ALL_MATCHES, teamById } from '@/lib/copa2026'
-
-// Reuse same mapping from parent route
-const ESPN_TO_TEAM_ID: Record<string, string> = {
-  GER: 'GER', FRA: 'FRA', ESP: 'ESP', ENG: 'ENG', POR: 'POR',
-  NED: 'NED', BEL: 'BEL', CRO: 'CRO', TUR: 'TUR', AUT: 'AUT',
-  SCO: 'SCO', SUI: 'SUI', CZE: 'CZE', BIH: 'BIH', SWE: 'SWE', NOR: 'NOR',
-  BRA: 'BRA', ARG: 'ARG', COL: 'COL', URU: 'URU', ECU: 'ECU',
-  PAR: 'PAR', USA: 'USA', MEX: 'MEX', CAN: 'CAN', PAN: 'PAN', HAI: 'HAI',
-  MAR: 'MAR', SEN: 'SEN', EGY: 'EGY', ALG: 'ALG', RSA: 'RSA',
-  GHA: 'GHA', TUN: 'TUN', CPV: 'CPV', COD: 'COD',
-  JPN: 'JPN', KOR: 'KOR', AUS: 'AUS', KSA: 'KSA', IRN: 'IRN',
-  UZB: 'UZB', JOR: 'JOR', IRQ: 'IRQ', QAT: 'QAT', NZL: 'NZL',
-  CUW: 'CUR', CUR: 'CUR', CIV: 'CIV', IVC: 'CIV', SAF: 'RSA',
-  germany: 'GER', france: 'FRA', spain: 'ESP', england: 'ENG', portugal: 'POR',
-  netherlands: 'NED', belgium: 'BEL', croatia: 'CRO', turkey: 'TUR', austria: 'AUT',
-  scotland: 'SCO', switzerland: 'SUI', czechia: 'CZE', 'czech republic': 'CZE',
-  'bosnia and herzegovina': 'BIH', sweden: 'SWE', norway: 'NOR',
-  brazil: 'BRA', argentina: 'ARG', colombia: 'COL', uruguay: 'URU', ecuador: 'ECU',
-  paraguay: 'PAR', 'united states': 'USA', mexico: 'MEX', canada: 'CAN',
-  panama: 'PAN', haiti: 'HAI',
-  morocco: 'MAR', senegal: 'SEN', egypt: 'EGY', algeria: 'ALG', 'south africa': 'RSA',
-  ghana: 'GHA', tunisia: 'TUN', 'cabo verde': 'CPV', 'cape verde': 'CPV',
-  'dr congo': 'COD', 'democratic republic of congo': 'COD',
-  japan: 'JPN', 'south korea': 'KOR', australia: 'AUS', 'saudi arabia': 'KSA',
-  iran: 'IRN', uzbekistan: 'UZB', jordan: 'JOR', iraq: 'IRQ', qatar: 'QAT',
-  'new zealand': 'NZL', curacao: 'CUR', "curaçao": 'CUR',
-  "côte d'ivoire": 'CIV', "ivory coast": 'CIV',
-}
-
-function resolveTeam(abbr: string, name: string): string | null {
-  return ESPN_TO_TEAM_ID[abbr]
-    ?? ESPN_TO_TEAM_ID[name.toLowerCase()]
-    ?? null
-}
+import { resolveTeam } from '@/lib/espn'
 
 // POST /api/admin/sync/auto — called by GitHub Actions cron
 export async function POST(req: NextRequest) {
@@ -61,18 +28,6 @@ export async function POST(req: NextRequest) {
 
   const events: any[] = espnData.events ?? []
   const updates: { matchId: string; score1: number; score2: number; label: string }[] = []
-  const dateUpdates: Record<string, { date: string; dateBRT: string; venue: string }> = {}
-
-  function toBRT(isoDate: string): string {
-    try {
-      const d = new Date(isoDate)
-      return d.toLocaleString('pt-BR', {
-        timeZone: 'America/Sao_Paulo',
-        day: '2-digit', month: '2-digit',
-        hour: '2-digit', minute: '2-digit',
-      })
-    } catch { return isoDate }
-  }
 
   for (const event of events) {
     const competition = event.competitions?.[0]
@@ -99,15 +54,6 @@ export async function POST(req: NextRequest) {
     )
     if (!match) continue
 
-    // Always keep matchDates up to date for every completed event
-    if (event.date) {
-      dateUpdates[match.id] = {
-        date: event.date,
-        dateBRT: toBRT(event.date),
-        venue: competition.venue?.fullName ?? competition.venue?.address?.city ?? '',
-      }
-    }
-
     const flipped = match.team1Id === id2
     const ourScore1 = flipped ? espnScore2 : espnScore1
     const ourScore2 = flipped ? espnScore1 : espnScore2
@@ -125,17 +71,11 @@ export async function POST(req: NextRequest) {
     })
   }
 
-  // Always update matchDates for all completed events (not just changed results)
-  if (true) {
+  if (updates.length > 0) {
     await updateDB(db => {
       const map = Object.fromEntries(db.results.map(r => [r.matchId, r]))
       for (const u of updates) map[u.matchId] = { matchId: u.matchId, score1: u.score1, score2: u.score2 }
-      const existingDates = db.matchDates ?? {}
-      return {
-        ...db,
-        results: Object.values(map),
-        matchDates: { ...existingDates, ...dateUpdates },
-      }
+      return { ...db, results: Object.values(map) }
     })
   }
 

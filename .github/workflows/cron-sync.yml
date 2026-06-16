@@ -1,0 +1,17 @@
+name: Sync ESPN Results
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call auto-sync endpoint
+        run: |
+          curl -s -X POST "${{ secrets.RAILWAY_URL }}/api/admin/sync/auto" \
+            -H "Content-Type: application/json" \
+            -H "x-admin-key: ${{ secrets.ADMIN_KEY }}" \
+            -d "{\"adminKey\": \"${{ secrets.ADMIN_KEY }}\"}" \
+            | jq .
