@@ -155,7 +155,7 @@ async function fetchLiveMap(): Promise<Map<string, LiveInfo>> {
   try {
     const res = await fetch(ESPN_TODAY_URL, {
       headers: { 'User-Agent': 'Mozilla/5.0 (compatible; bolao/1.0)' },
-      next: { revalidate: 60 },
+      cache: 'no-store',
     })
     if (!res.ok) return new Map()
     const data = await res.json()
