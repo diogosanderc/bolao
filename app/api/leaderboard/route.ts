@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { readDB } from '@/lib/db'
-import { computeLeaderboard } from '@/lib/scoring'
+import { computeLeaderboard, scoreMatch } from '@/lib/scoring'
 import { matchById, teamById } from '@/lib/copa2026'
 
 export async function GET() {
@@ -28,7 +28,24 @@ export async function GET() {
     )
 
     // Compute previous leaderboard (all results except the last) for position change arrows
-    let leaderboardWithChanges: (typeof leaderboard[0] & { positionChange?: number })[] = leaderboard
+    // Compute last-4-matches points per participant
+    const last4Results = sortedResults.slice(-4)
+    const last4PointsMap = new Map<string, number>()
+    for (const participant of validParticipants) {
+      let pts = 0
+      for (const result of last4Results) {
+        const match = matchById[result.matchId]
+        if (!match) continue
+        const pred = db.matchPredictions.find(
+          p => p.participantId === participant.id && p.matchId === result.matchId
+        )
+        if (pred) pts += scoreMatch(pred, result, match).total
+      }
+      last4PointsMap.set(participant.id, pts)
+    }
+
+    let leaderboardWithChanges: (typeof leaderboard[0] & { positionChange?: number; last4Points?: number })[] =
+      leaderboard.map(entry => ({ ...entry, last4Points: last4PointsMap.get(entry.participant.id) ?? 0 }))
     if (sortedResults.length > 1) {
       const prevResults = sortedResults.slice(0, -1)
       const prevLeaderboard = computeLeaderboard(
@@ -46,7 +63,7 @@ export async function GET() {
         const currentRank = leaderboard.filter(e => e.totalPoints > entry.totalPoints).length + 1
         const prevRank = prevRankMap.get(entry.participant.id)
         const positionChange = prevRank !== undefined ? prevRank - currentRank : undefined
-        return { ...entry, positionChange }
+        return { ...entry, positionChange, last4Points: last4PointsMap.get(entry.participant.id) ?? 0 }
       })
     }
 

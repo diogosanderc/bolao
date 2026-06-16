@@ -191,7 +191,8 @@ export default function LeaderboardPage() {
               <tr className="bg-gray-900 text-gray-400 text-xs uppercase tracking-wider">
                 <th className="px-4 py-3 text-left w-10">#</th>
                 <th className="px-4 py-3 text-left">Participante</th>
-                <th className="px-4 py-3 text-right">Último jogo</th>
+                <th className="px-4 py-3 text-right">Último</th>
+                <th className="px-4 py-3 text-right">Últ. 4</th>
                 <th className="px-4 py-3 text-right">Total</th>
               </tr>
             </thead>
@@ -245,6 +246,12 @@ export default function LeaderboardPage() {
                     {entry.lastMatchPoints > 0
                       ? <span className="text-green-400 font-semibold">+{entry.lastMatchPoints}</span>
                       : <span className="text-gray-500">0</span>}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    {(() => {
+                      const pts = (entry as any).last4Points ?? 0
+                      return <span className={pts > 0 ? 'text-blue-400 font-semibold' : 'text-gray-500'}>{pts}</span>
+                    })()}
                   </td>
                   <td className={`px-4 py-3 text-right font-bold text-base ${isRelated(entry.totalPoints) ? 'text-red-600 dark:text-red-400' : isWarning(entry.totalPoints) ? 'text-yellow-500 dark:text-yellow-400' : 'text-yellow-600 dark:text-yellow-400'}`}>
                     {entry.totalPoints}
