@@ -47,8 +47,11 @@ export async function GET() {
     // Silently auto-save any newly completed results found in ESPN
     autoSaveNewResults(events, db).catch(() => {})
 
+    // Exclude matches already in DB results from upcoming (ESPN cache may lag)
+    const savedMatchIds = new Set(db.results.map(r => r.matchId))
+
     const upcoming = events
-      .filter(e => !e.completed)
+      .filter(e => !e.completed && !savedMatchIds.has(e.matchId))
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
 
     const nextMatch = upcoming[0] ?? null
