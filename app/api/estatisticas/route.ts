@@ -126,8 +126,14 @@ export async function GET() {
       return !predsForMatch.some(mp => mp.score1 === rs1 && mp.score2 === rs2)
     })
 
+    // Return participants sorted by current leaderboard ranking
+    const lbOrder = new Map(finalLb.map((e, i) => [e.participant.id, i]))
+    const sortedParticipants = [...participants].sort(
+      (a, b) => (lbOrder.get(a.id) ?? 999) - (lbOrder.get(b.id) ?? 999)
+    )
+
     return NextResponse.json({
-      participants: participants.map(p => ({ id: p.id, name: p.name })),
+      participants: sortedParticipants.map(p => ({ id: p.id, name: p.name })),
       snapshots,
       participantStats: Object.values(stats),
       popularPredictions,
