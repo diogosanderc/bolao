@@ -425,7 +425,7 @@ export default function AdminPage() {
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === tab ? 'border-yellow-500 text-yellow-600 dark:text-yellow-400' : 'border-transparent text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
+            className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === tab ? 'border-yellow-500 text-yellow-600 dark:text-yellow-400' : 'border-transparent text-gray-400 hover:text-gray-200'}`}
           >
             {tab === 'participants' ? '👥 Participantes' : tab === 'results' ? '⚽ Grupos' : '🏆 Mata-Mata'}
           </button>

@@ -106,7 +106,7 @@ export default function SimuladorPage() {
           value={s.score1}
           onChange={e => handleInput(matchId, 'score1', e.target.value)}
           disabled={tbd}
-          className="w-9 text-center bg-gray-800 border border-gray-700 rounded text-gray-900 dark:text-white text-sm py-0.5 focus:outline-none focus:border-yellow-500 disabled:opacity-40 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          className="w-9 text-center bg-gray-800 border border-gray-700 rounded text-gray-200 text-sm py-0.5 focus:outline-none focus:border-yellow-500 disabled:opacity-40 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
         />
         <span className="text-gray-600 text-xs shrink-0">×</span>
         <input
@@ -114,7 +114,7 @@ export default function SimuladorPage() {
           value={s.score2}
           onChange={e => handleInput(matchId, 'score2', e.target.value)}
           disabled={tbd}
-          className="w-9 text-center bg-gray-800 border border-gray-700 rounded text-gray-900 dark:text-white text-sm py-0.5 focus:outline-none focus:border-yellow-500 disabled:opacity-40 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          className="w-9 text-center bg-gray-800 border border-gray-700 rounded text-gray-200 text-sm py-0.5 focus:outline-none focus:border-yellow-500 disabled:opacity-40 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
         />
         <span className="shrink-0">{team2Id !== 'TBD' ? <Flag teamId={team2Id} size={18} /> : '🏳'}</span>
         <span className="text-xs text-gray-300 flex-1 truncate min-w-0">{t2?.name ?? team2Id}</span>

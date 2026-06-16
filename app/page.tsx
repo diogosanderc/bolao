@@ -116,7 +116,7 @@ export default function LeaderboardPage() {
           )}
           <button
             onClick={() => location.reload()}
-            className="text-sm text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+            className="text-sm text-gray-400 hover:text-gray-200 transition-colors"
           >
             ↻ Atualizar
           </button>
