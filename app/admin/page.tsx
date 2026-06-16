@@ -430,27 +430,26 @@ export default function AdminPage() {
 
       {/* Visit stats */}
       {visitStats && (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">📈 Visitas à Classificação</h3>
-            <div className="flex gap-4 text-xs text-gray-500">
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-3">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">📈 Visitas</h3>
+            <div className="flex gap-3 text-xs text-gray-500">
               <span>Hoje: <span className="text-yellow-400 font-bold">{visitStats.today}</span></span>
-              <span>Total: <span className="text-gray-300">{visitStats.total}</span></span>
+              <span>Total: <span className="text-gray-300 font-semibold">{visitStats.total}</span></span>
             </div>
           </div>
-          <div className="flex items-end gap-1 h-16">
+          <div className="flex items-end gap-0.5 h-12">
             {visitStats.days.map(d => {
               const max = Math.max(...visitStats.days.map(x => x.count), 1)
               const pct = Math.round((d.count / max) * 100)
               const isToday = d.date === new Date().toISOString().slice(0, 10)
               return (
-                <div key={d.date} className="flex-1 flex flex-col items-center gap-0.5" title={`${d.label}: ${d.count} visitas`}>
-                  <span className="text-xs text-gray-600 leading-none">{d.count > 0 ? d.count : ''}</span>
+                <div key={d.date} className="flex-1 flex flex-col items-center gap-0.5" title={`${d.label}: ${d.count}`}>
                   <div
-                    className={`w-full rounded-sm transition-all ${isToday ? 'bg-yellow-500' : 'bg-gray-700'}`}
-                    style={{ height: `${Math.max(pct, d.count > 0 ? 8 : 2)}%` }}
+                    className={`w-full rounded-sm ${isToday ? 'bg-yellow-500' : 'bg-gray-700'}`}
+                    style={{ height: `${Math.max(pct, d.count > 0 ? 10 : 2)}%` }}
                   />
-                  <span className={`text-xs leading-none ${isToday ? 'text-yellow-400' : 'text-gray-700'}`}>{d.label.slice(0, 5)}</span>
+                  {isToday && <span className="text-[9px] leading-none text-yellow-400">•</span>}
                 </div>
               )
             })}
