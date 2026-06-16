@@ -24,7 +24,7 @@ mkdirSync(dataDir, { recursive: true })
 
 const seedDb = JSON.parse(readFileSync(seedPath, 'utf8'))
 
-let volumeDb = { participants: [], matchPredictions: [], groupPredictions: [], results: [] }
+let volumeDb = { participants: [], matchPredictions: [], groupPredictions: [], results: [], matchDates: {} }
 if (existsSync(volumePath)) {
   try {
     volumeDb = JSON.parse(readFileSync(volumePath, 'utf8'))
@@ -44,17 +44,19 @@ const mergedParticipants = seedDb.participants.map(p =>
 // matchPredictions: seed always wins (canonical TXT import)
 const mergedPredictions = seedDb.matchPredictions
 
-// results: volume always wins (admin-entered game results must survive deploys)
+// results, matchDates, visits: volume always wins
 const merged = {
   participants: mergedParticipants,
   matchPredictions: mergedPredictions,
   groupPredictions: seedDb.groupPredictions || [],
   results: volumeDb.results || [],
+  matchDates: volumeDb.matchDates || {},
 }
 
 writeFileSync(volumePath, JSON.stringify(merged, null, 2))
 console.log(
   `[init-db] ${merged.participants.length} participants, ` +
   `${merged.matchPredictions.length} predictions from seed, ` +
-  `${merged.results.length} results preserved from volume.`
+  `${merged.results.length} results, ` +
+  `${Object.keys(merged.matchDates).length} matchDates preserved from volume.`
 )

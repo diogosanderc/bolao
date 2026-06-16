@@ -93,7 +93,6 @@ export interface Database {
   groupPredictions: GroupPrediction[]
   results: MatchResult[]
   matchDates: Record<string, { date: string; dateBRT: string; venue: string }>
-  visits: Record<string, number>  // "YYYY-MM-DD" → daily count
 }
 
 export interface LeaderboardEntry {

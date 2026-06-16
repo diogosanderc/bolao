@@ -11,7 +11,6 @@ const DEFAULT_DB: Database = {
   groupPredictions: [],
   results: [],
   matchDates: {},
-  visits: {},
 }
 
 export async function readDB(): Promise<Database> {
