@@ -126,7 +126,7 @@ function parseEvents(rawEvents: any[], liveMap: Map<string, LiveInfo>): ESPNEven
       const scoringTeamId = detailTeamId === c1.team?.id ? (flipped ? match.team2Id : match.team1Id)
         : detailTeamId === c2.team?.id ? (flipped ? match.team1Id : match.team2Id)
         : ''
-      if (playerName) goals.push({ minute, playerName, teamId: scoringTeamId, ownGoal })
+      if (playerName || minute) goals.push({ minute, playerName: playerName || '?', teamId: scoringTeamId, ownGoal })
     }
 
     result.push({
@@ -201,7 +201,7 @@ async function fetchLiveMap(): Promise<Map<string, LiveInfo>> {
         const scoringTeamId = detailTeamId === c1.team?.id ? (flippedLive ? match.team2Id : match.team1Id)
           : detailTeamId === c2.team?.id ? (flippedLive ? match.team1Id : match.team2Id)
           : ''
-        if (playerName) liveGoals.push({ minute, playerName, teamId: scoringTeamId, ownGoal })
+        if (playerName || minute) liveGoals.push({ minute, playerName: playerName || '?', teamId: scoringTeamId, ownGoal })
       }
 
       liveMap.set(match.id, {
