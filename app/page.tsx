@@ -172,15 +172,26 @@ export default function LeaderboardPage() {
                 </span>
                 <span className="flex items-center gap-1.5"><Flag teamId={m.team2.id} size={18} />{m.team2.name}</span>
               </div>
-              {m.goals && m.goals.length > 0 && (
-                <div className="mt-2 flex flex-wrap gap-x-3 gap-y-0.5">
-                  {m.goals.map((g, i) => (
-                    <span key={i} className="text-xs text-red-200">
-                      ⚽ {g.minute && <span className="text-red-400">{g.minute}</span>} {g.playerName}{g.ownGoal ? ' (contra)' : ''}
-                    </span>
-                  ))}
-                </div>
-              )}
+              {m.goals && m.goals.length > 0 && (() => {
+                const t1Goals = m.goals.filter(g => g.teamId === m.team1.id)
+                const t2Goals = m.goals.filter(g => g.teamId === m.team2.id)
+                return (
+                  <div className="mt-2 space-y-0.5">
+                    {[{ team: m.team1, goals: t1Goals }, { team: m.team2, goals: t2Goals }].map(({ team, goals }) =>
+                      goals.length > 0 ? (
+                        <div key={team.id} className="flex items-center gap-1.5 flex-wrap">
+                          <Flag teamId={team.id} size={14} />
+                          {goals.map((g, i) => (
+                            <span key={i} className="text-xs text-red-200">
+                              ⚽{g.minute && <span className="text-red-400"> {g.minute}</span>} {g.playerName}
+                            </span>
+                          ))}
+                        </div>
+                      ) : null
+                    )}
+                  </div>
+                )
+              })()}
             </div>
           ))}
         </div>
