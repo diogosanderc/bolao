@@ -1,0 +1,15 @@
+name: Live Match Notifications
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+jobs:
+  live-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call live sync endpoint
+        run: |
+          curl -s -X POST "${{ secrets.RAILWAY_URL }}/api/sync/live" \
+            -H "Content-Type: application/json" \
+            | jq .

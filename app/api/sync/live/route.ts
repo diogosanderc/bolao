@@ -4,13 +4,7 @@ import { ALL_MATCHES, teamById } from '@/lib/copa2026'
 import { resolveTeam } from '@/lib/espn'
 import { sendPushToAll } from '@/lib/push'
 
-// In-memory state persists between requests on Railway's single instance
-type MatchState = {
-  status: 'pre' | 'in' | 'halftime' | 'completed'
-  score1: number
-  score2: number
-}
-const matchStates = new Map<string, MatchState>()
+type MatchState = { status: 'pre' | 'in' | 'halftime' | 'completed'; score1: number; score2: number }
 
 let lastRunAt = 0
 
@@ -24,7 +18,6 @@ export async function POST() {
   let espnData: any
   try {
     const res = await fetch(
-      // Today endpoint — real-time, no cache
       'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world/scoreboard',
       { headers: { 'User-Agent': 'Mozilla/5.0 (compatible; bolao-sync/1.0)' }, cache: 'no-store' }
     )
@@ -36,7 +29,11 @@ export async function POST() {
 
   const db = await readDB()
   const resultMap = Object.fromEntries(db.results.map(r => [r.matchId, r]))
-  const dbUpdates: { matchId: string; score1: number; score2: number }[] = []
+  // Load persisted states — source of truth across server restarts
+  const persistedStates: Record<string, MatchState> = db.liveMatchStates ?? {}
+
+  const newPersistedStates: Record<string, MatchState> = { ...persistedStates }
+  const dbResultUpdates: { matchId: string; score1: number; score2: number }[] = []
   const pushQueue: { title: string; body: string }[] = []
 
   for (const event of espnData.events ?? []) {
@@ -81,52 +78,52 @@ export async function POST() {
     const scoreStr = `${t1} ${score1}×${score2} ${t2}`
     const clock: string = halftime ? 'Intervalo' : (status?.displayClock ?? '')
 
-    const prev = matchStates.get(match.id)
     const newStatus: MatchState['status'] = completed ? 'completed' : halftime ? 'halftime' : inProgress ? 'in' : 'pre'
+    const prev = persistedStates[match.id]
 
     if (!prev) {
-      // First time we see this match — just record state, no push (avoid noise on server restart)
-      matchStates.set(match.id, { status: newStatus, score1, score2 })
+      // First time seeing this match — store state, no push
+      newPersistedStates[match.id] = { status: newStatus, score1, score2 }
       continue
     }
 
-    // Detect transitions
+    // Detect transitions and queue pushes
     if (prev.status === 'pre' && newStatus === 'in') {
       pushQueue.push({ title: '🟢 Jogo começou!', body: `${t1} vs ${t2}` })
     }
 
-    if ((prev.status === 'in' || prev.status === 'pre') && newStatus === 'halftime') {
-      pushQueue.push({ title: '⏸ Intervalo', body: `${scoreStr}` })
+    if (prev.status !== 'halftime' && newStatus === 'halftime') {
+      pushQueue.push({ title: '⏸ Intervalo', body: scoreStr })
     }
 
-    if (newStatus === 'in' || newStatus === 'halftime' || newStatus === 'completed') {
+    if (newStatus !== 'pre') {
       const prevTotal = prev.score1 + prev.score2
       const newTotal = score1 + score2
       const goalCount = newTotal - prevTotal
       if (goalCount > 0) {
-        const goalLabel = goalCount === 1 ? 'Gol!' : `${goalCount} gols!`
-        const clockLabel = clock ? ` · ${clock}` : ''
-        pushQueue.push({ title: `⚽ ${goalLabel}${clockLabel}`, body: scoreStr })
+        const clockLabel = clock && clock !== 'Intervalo' ? ` · ${clock}` : ''
+        pushQueue.push({ title: `⚽ Gol!${clockLabel}`, body: scoreStr })
       }
     }
 
     if (prev.status !== 'completed' && newStatus === 'completed') {
       pushQueue.push({ title: '🏁 Resultado final', body: scoreStr })
-      // Save to DB
       const current = resultMap[match.id]
       if (!current || current.score1 !== score1 || current.score2 !== score2) {
-        dbUpdates.push({ matchId: match.id, score1, score2 })
+        dbResultUpdates.push({ matchId: match.id, score1, score2 })
       }
     }
 
-    matchStates.set(match.id, { status: newStatus, score1, score2 })
+    newPersistedStates[match.id] = { status: newStatus, score1, score2 }
   }
 
-  if (dbUpdates.length > 0) {
+  // Persist updated states + any new results in one DB write
+  const hasStateChanges = JSON.stringify(newPersistedStates) !== JSON.stringify(persistedStates)
+  if (dbResultUpdates.length > 0 || hasStateChanges) {
     await updateDB(db => {
       const map = Object.fromEntries(db.results.map(r => [r.matchId, r]))
-      for (const u of dbUpdates) map[u.matchId] = u
-      return { ...db, results: Object.values(map) }
+      for (const u of dbResultUpdates) map[u.matchId] = u
+      return { ...db, results: Object.values(map), liveMatchStates: newPersistedStates }
     })
   }
 
@@ -135,8 +132,8 @@ export async function POST() {
   }
 
   if (pushQueue.length > 0) {
-    console.log(`[sync/live] pushed ${pushQueue.length} notification(s):`, pushQueue.map(p => p.title))
+    console.log(`[sync/live] ${pushQueue.length} notification(s):`, pushQueue.map(p => p.title))
   }
 
-  return NextResponse.json({ ok: true, notifications: pushQueue.length, dbUpdates: dbUpdates.length })
+  return NextResponse.json({ ok: true, notifications: pushQueue.length, dbUpdates: dbResultUpdates.length })
 }
