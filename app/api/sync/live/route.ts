@@ -82,7 +82,11 @@ export async function POST() {
     const prev = persistedStates[match.id]
 
     if (!prev) {
-      // First time seeing this match — store state, no push
+      if (newStatus === 'in' || newStatus === 'halftime') {
+        // First time seeing a match already live — notify with current score
+        pushQueue.push({ title: '🟢 Jogo em andamento', body: `${scoreStr}${clock ? ` · ${clock}` : ''}` })
+      }
+      // Initialize with current score so future goals are detected as deltas
       newPersistedStates[match.id] = { status: newStatus, score1, score2 }
       continue
     }

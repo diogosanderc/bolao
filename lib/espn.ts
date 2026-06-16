@@ -77,7 +77,7 @@ function toBRT(isoDate: string): string {
   }
 }
 
-type LiveInfo = { score1: number; score2: number; clock: string }
+type LiveInfo = { score1: number; score2: number; clock: string; goals: GoalEvent[] }
 
 function parseEvents(rawEvents: any[], liveMap: Map<string, LiveInfo>): ESPNEvent[] {
   const result: ESPNEvent[] = []
@@ -143,7 +143,8 @@ function parseEvents(rawEvents: any[], liveMap: Map<string, LiveInfo>): ESPNEven
       liveScore1: live ? (flipped ? live.score2 : live.score1) : undefined,
       liveScore2: live ? (flipped ? live.score1 : live.score2) : undefined,
       clock: live?.clock,
-      goals: goals.length > 0 ? goals : undefined,
+      // For live matches use real-time goals from today endpoint; fall back to schedule details
+      goals: (live?.goals?.length ? live.goals : goals.length > 0 ? goals : undefined),
     })
   }
   return result
@@ -183,10 +184,31 @@ async function fetchLiveMap(): Promise<Map<string, LiveInfo>> {
         (m.team1Id === id2 && m.team2Id === id1)
       )
       if (!match) continue
+      const flippedLive = match.team1Id === id2
+      const rawLiveS1 = parseInt(c1.score ?? '0', 10)
+      const rawLiveS2 = parseInt(c2.score ?? '0', 10)
+
+      // Extract goal details from the live (today) endpoint
+      const liveGoals: GoalEvent[] = []
+      for (const detail of competition?.details ?? []) {
+        const typeText: string = detail.type?.text ?? ''
+        const isGoal = typeText === 'Goal' || typeText === 'Own Goal' || typeText === 'Penalty - Scored'
+        if (!isGoal) continue
+        const minute: string = detail.clock?.displayValue ?? ''
+        const playerName: string = detail.athletesInvolved?.[0]?.displayName ?? ''
+        const ownGoal = typeText === 'Own Goal'
+        const detailTeamId = detail.team?.id
+        const scoringTeamId = detailTeamId === c1.team?.id ? (flippedLive ? match.team2Id : match.team1Id)
+          : detailTeamId === c2.team?.id ? (flippedLive ? match.team1Id : match.team2Id)
+          : ''
+        if (playerName) liveGoals.push({ minute, playerName, teamId: scoringTeamId, ownGoal })
+      }
+
       liveMap.set(match.id, {
-        score1: parseInt(c1.score ?? '0', 10),
-        score2: parseInt(c2.score ?? '0', 10),
+        score1: rawLiveS1,
+        score2: rawLiveS2,
         clock: status?.type?.name === 'STATUS_HALFTIME' ? 'Intervalo' : (status?.displayClock ?? ''),
+        goals: liveGoals,
       })
     }
     return liveMap

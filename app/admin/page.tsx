@@ -155,6 +155,13 @@ export default function AdminPage() {
     setSaving(false)
   }
 
+  async function testPush() {
+    const r = await fetch('/api/push/test', { method: 'POST', headers: { 'Content-Type': 'application/json', 'x-admin-key': key }, body: JSON.stringify({ adminKey: key }) })
+    const d = await r.json()
+    if (d.ok) showToast(`🔔 Push enviado para ${d.subscribers} assinante(s)`)
+    else showToast('Erro: ' + (d.error ?? 'falhou'))
+  }
+
   async function downloadBackup() {
     try {
       const r = await fetch('/api/admin/backup', { headers: { 'x-admin-key': key } })
@@ -403,6 +410,12 @@ export default function AdminPage() {
             className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg font-semibold transition-colors text-xs border border-gray-700"
           >
             ⬇ Backup DB
+          </button>
+          <button
+            onClick={testPush}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg font-semibold transition-colors text-xs border border-gray-700"
+          >
+            🔔 Testar Push
           </button>
           <button
             onClick={fetchSyncDiffs}
