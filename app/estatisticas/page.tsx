@@ -105,13 +105,13 @@ export default function EstatisticasPage() {
     const snap = snapshots[chartData.findIndex(d => d.name === label)]
     const sorted = [...payload].sort((a, b) => (b.value as number) - (a.value as number))
     return (
-      <div className="bg-gray-900 border border-gray-700 rounded-lg p-3 text-xs max-w-xs">
-        <p className="text-gray-300 font-semibold mb-1 truncate">{snap?.label ?? label}</p>
-        {snap?.dateBRT && <p className="text-gray-500 mb-2">{snap.dateBRT}</p>}
+      <div className="bg-gray-800 border border-gray-700 rounded-lg p-3 text-xs max-w-xs shadow-lg">
+        <p className="text-gray-200 font-semibold mb-1 truncate">{snap?.label ?? label}</p>
+        {snap?.dateBRT && <p className="text-gray-400 mb-2">{snap.dateBRT}</p>}
         {sorted.map((entry: any) => (
           <div key={entry.dataKey} className="flex justify-between gap-4 items-center">
             <span style={{ color: entry.color }} className="truncate">{entry.name}</span>
-            <span className="font-bold text-white">{entry.value}pts</span>
+            <span className="font-bold text-gray-200">{entry.value}pts</span>
           </div>
         ))}
       </div>
@@ -127,7 +127,7 @@ export default function EstatisticasPage() {
         <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Evolução da Classificação</h3>
 
         {/* Participant toggles */}
-        <div className="flex flex-wrap gap-2 mb-1">
+        <div className="flex flex-wrap gap-1.5 mb-1">
           {participants.map((p, idx) => {
             const color = LINE_COLORS[idx % LINE_COLORS.length]
             const active = activeIds.has(p.id)
@@ -135,33 +135,37 @@ export default function EstatisticasPage() {
               <button
                 key={p.id}
                 onClick={() => toggleParticipant(p.id)}
-                className={`text-xs px-2.5 py-1 rounded-full border transition-all font-medium ${
-                  active ? 'opacity-100' : 'opacity-25 hover:opacity-60'
+                className={`text-xs px-3 py-1 rounded-full border transition-all font-medium ${
+                  active
+                    ? ''
+                    : 'border-gray-300 dark:border-gray-700 text-gray-500 dark:text-gray-500 hover:border-gray-400 dark:hover:border-gray-600 hover:text-gray-200'
                 }`}
-                style={{ borderColor: color, color: active ? color : '#6b7280', backgroundColor: active ? `${color}15` : 'transparent' }}
+                style={active ? { borderColor: color, color: color, backgroundColor: `${color}20` } : {}}
               >
                 {p.name}
               </button>
             )
           })}
+        </div>
+        <div className="flex items-center justify-between mb-4">
+          <p className="text-xs text-gray-500">Clique no participante para incluir no gráfico</p>
           {activeIds.size > 0 && (
-            <button onClick={clearChart} className="text-xs px-2.5 py-1 rounded-full border border-gray-700 text-gray-500 hover:text-red-400 hover:border-red-800 transition-colors">
-              Limpar gráfico
+            <button onClick={clearChart} className="text-xs px-2.5 py-1 rounded-full border border-gray-400 dark:border-gray-700 text-gray-500 hover:text-red-400 hover:border-red-500 transition-colors">
+              ✕ Limpar gráfico
             </button>
           )}
         </div>
-        <p className="text-xs text-gray-600 mb-4">Clique no participante para incluir no gráfico</p>
 
         {activeIds.size === 0 ? (
-          <div className="flex items-center justify-center h-48 text-gray-600 text-sm">
+          <div className="flex items-center justify-center h-48 text-gray-500 text-sm">
             Selecione um participante acima para visualizar a evolução
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={360}>
             <LineChart data={chartData} margin={{ top: 5, right: 5, bottom: 5, left: -20 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
-              <XAxis dataKey="name" tick={{ fill: '#6b7280', fontSize: 11 }} />
-              <YAxis tick={{ fill: '#6b7280', fontSize: 11 }} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-gray-700)" />
+              <XAxis dataKey="name" tick={{ fill: 'var(--color-gray-500)', fontSize: 11 }} />
+              <YAxis tick={{ fill: 'var(--color-gray-500)', fontSize: 11 }} />
               <Tooltip content={<CustomTooltip />} />
               {participants.map((p, idx) =>
                 activeIds.has(p.id) ? (
