@@ -10,7 +10,7 @@ jobs:
     steps:
       - name: Call auto-sync endpoint
         run: |
-          curl -s -X POST "${{ secrets.RAILWAY_URL }}/api/admin/sync/auto" \
+          curl -s -X POST "${{ secrets.APP_URL }}/api/admin/sync/auto" \
             -H "Content-Type: application/json" \
             -H "x-admin-key: ${{ secrets.ADMIN_KEY }}" \
             -d "{\"adminKey\": \"${{ secrets.ADMIN_KEY }}\"}" \

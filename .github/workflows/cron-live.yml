@@ -10,6 +10,6 @@ jobs:
     steps:
       - name: Call live sync endpoint
         run: |
-          curl -s -X POST "${{ secrets.RAILWAY_URL }}/api/sync/live" \
+          curl -s -X POST "${{ secrets.APP_URL }}/api/sync/live" \
             -H "Content-Type: application/json" \
             | jq .
