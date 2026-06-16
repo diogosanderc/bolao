@@ -52,7 +52,7 @@ export default function EstatisticasPage() {
       .then(r => r.json())
       .then(d => {
         setData(d)
-        setActiveIds(new Set(d.participants.map((p: ParticipantInfo) => p.id)))
+        setActiveIds(new Set())
         setLoading(false)
       })
       .catch(() => setLoading(false))
@@ -74,14 +74,13 @@ export default function EstatisticasPage() {
   function toggleParticipant(id: string) {
     setActiveIds(prev => {
       const next = new Set(prev)
-      if (next.has(id)) { if (next.size > 1) next.delete(id) }
+      if (next.has(id)) next.delete(id)
       else next.add(id)
       return next
     })
   }
 
-  function selectAll() { if (data) setActiveIds(new Set(data.participants.map(p => p.id))) }
-  function selectNone() { /* keep at least 1 */ }
+  function clearChart() { setActiveIds(new Set()) }
 
   if (loading) return <div className="text-center py-20 text-gray-400">Carregando estatísticas...</div>
   if (!data) return <div className="text-center py-20 text-gray-500">Erro ao carregar dados.</div>
@@ -128,7 +127,7 @@ export default function EstatisticasPage() {
         <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Evolução da Classificação</h3>
 
         {/* Participant toggles */}
-        <div className="flex flex-wrap gap-2 mb-4">
+        <div className="flex flex-wrap gap-2 mb-1">
           {participants.map((p, idx) => {
             const color = LINE_COLORS[idx % LINE_COLORS.length]
             const active = activeIds.has(p.id)
@@ -137,7 +136,7 @@ export default function EstatisticasPage() {
                 key={p.id}
                 onClick={() => toggleParticipant(p.id)}
                 className={`text-xs px-2.5 py-1 rounded-full border transition-all font-medium ${
-                  active ? 'opacity-100' : 'opacity-30'
+                  active ? 'opacity-100' : 'opacity-25 hover:opacity-60'
                 }`}
                 style={{ borderColor: color, color: active ? color : '#6b7280', backgroundColor: active ? `${color}15` : 'transparent' }}
               >
@@ -145,36 +144,45 @@ export default function EstatisticasPage() {
               </button>
             )
           })}
-          <button onClick={selectAll} className="text-xs px-2.5 py-1 rounded-full border border-gray-700 text-gray-500 hover:text-gray-300 transition-colors">
-            Todos
-          </button>
+          {activeIds.size > 0 && (
+            <button onClick={clearChart} className="text-xs px-2.5 py-1 rounded-full border border-gray-700 text-gray-500 hover:text-red-400 hover:border-red-800 transition-colors">
+              Limpar gráfico
+            </button>
+          )}
         </div>
+        <p className="text-xs text-gray-600 mb-4">Clique no participante para incluir no gráfico</p>
 
-        <ResponsiveContainer width="100%" height={360}>
-          <LineChart data={chartData} margin={{ top: 5, right: 5, bottom: 5, left: -20 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
-            <XAxis dataKey="name" tick={{ fill: '#6b7280', fontSize: 11 }} />
-            <YAxis tick={{ fill: '#6b7280', fontSize: 11 }} />
-            <Tooltip content={<CustomTooltip />} />
-            {participants.map((p, idx) =>
-              activeIds.has(p.id) ? (
-                <Line
-                  key={p.id}
-                  type="monotone"
-                  dataKey={p.id}
-                  name={p.name}
-                  stroke={LINE_COLORS[idx % LINE_COLORS.length]}
-                  strokeWidth={2}
-                  dot={{ r: 3, fill: LINE_COLORS[idx % LINE_COLORS.length] }}
-                  activeDot={{ r: 5 }}
-                />
-              ) : null
-            )}
-          </LineChart>
-        </ResponsiveContainer>
+        {activeIds.size === 0 ? (
+          <div className="flex items-center justify-center h-48 text-gray-600 text-sm">
+            Selecione um participante acima para visualizar a evolução
+          </div>
+        ) : (
+          <ResponsiveContainer width="100%" height={360}>
+            <LineChart data={chartData} margin={{ top: 5, right: 5, bottom: 5, left: -20 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" />
+              <XAxis dataKey="name" tick={{ fill: '#6b7280', fontSize: 11 }} />
+              <YAxis tick={{ fill: '#6b7280', fontSize: 11 }} />
+              <Tooltip content={<CustomTooltip />} />
+              {participants.map((p, idx) =>
+                activeIds.has(p.id) ? (
+                  <Line
+                    key={p.id}
+                    type="monotone"
+                    dataKey={p.id}
+                    name={p.name}
+                    stroke={LINE_COLORS[idx % LINE_COLORS.length]}
+                    strokeWidth={2}
+                    dot={{ r: 3, fill: LINE_COLORS[idx % LINE_COLORS.length] }}
+                    activeDot={{ r: 5 }}
+                  />
+                ) : null
+              )}
+            </LineChart>
+          </ResponsiveContainer>
+        )}
 
         <p className="text-xs text-gray-600 text-center mt-2">
-          Cada ponto representa um jogo finalizado. Passe o mouse para ver os detalhes.
+          Cada ponto representa um jogo finalizado · Passe o mouse para ver os detalhes
         </p>
       </div>
 
@@ -187,13 +195,25 @@ export default function EstatisticasPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-xs text-gray-500 uppercase tracking-wider border-b border-gray-800">
+              <tr className="text-xs text-gray-500 tracking-wider border-b border-gray-800 bg-gray-950/50">
                 <th className="px-4 py-2 text-left">#</th>
                 <th className="px-4 py-2 text-left">Participante</th>
-                <th className="px-4 py-2 text-right" title="Resultados certos (vitória/empate/derrota)">✅ Resultados</th>
-                <th className="px-4 py-2 text-right" title="Placares exatos">🎯 Placares</th>
-                <th className="px-4 py-2 text-right" title="Média de pontos por jogo">Média/jogo</th>
-                <th className="px-4 py-2 text-right">Total</th>
+                <th className="px-4 py-2 text-right">
+                  <div className="font-semibold">✅ Resultados</div>
+                  <div className="font-normal text-gray-600 normal-case">acertou quem vence/empate</div>
+                </th>
+                <th className="px-4 py-2 text-right">
+                  <div className="font-semibold">🎯 Placares</div>
+                  <div className="font-normal text-gray-600 normal-case">acertou o placar exato</div>
+                </th>
+                <th className="px-4 py-2 text-right">
+                  <div className="font-semibold">Média</div>
+                  <div className="font-normal text-gray-600 normal-case">pontos por jogo</div>
+                </th>
+                <th className="px-4 py-2 text-right">
+                  <div className="font-semibold">Total</div>
+                  <div className="font-normal text-gray-600 normal-case">pontos acumulados</div>
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-800">
