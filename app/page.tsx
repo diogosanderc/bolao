@@ -213,25 +213,14 @@ export default function LeaderboardPage() {
                   }`}
                 >
                   <td className="px-4 py-3 text-center font-bold text-lg">
-                    <div className="flex flex-col items-center leading-none gap-0.5">
-                      <span>
-                        {isRelated(entry.totalPoints)
-                          ? '💸'
-                          : isWarning(entry.totalPoints)
-                          ? (isFirstOfRank[idx] ? <span className="text-yellow-500 text-sm">{rank}</span> : null)
-                          : trophies[tier]
-                          ?? (rank >= 4 && rank <= 7
-                              ? '⭐'
-                              : (isFirstOfRank[idx] ? <span className="text-gray-500 text-sm">{rank}</span> : null))}
-                      </span>
-                      {(() => {
-                        const change = (entry as any).positionChange
-                        if (!change) return null
-                        return change > 0
-                          ? <span className="text-green-400 text-[10px] font-bold">▲{change}</span>
-                          : <span className="text-red-400 text-[10px] font-bold">▼{Math.abs(change)}</span>
-                      })()}
-                    </div>
+                    {isRelated(entry.totalPoints)
+                      ? '💸'
+                      : isWarning(entry.totalPoints)
+                      ? (isFirstOfRank[idx] ? <span className="text-yellow-500 text-sm">{rank}</span> : null)
+                      : trophies[tier]
+                      ?? (rank >= 4 && rank <= 7
+                          ? '⭐'
+                          : (isFirstOfRank[idx] ? <span className="text-gray-500 text-sm">{rank}</span> : null))}
                   </td>
                   <td className={`px-4 py-3 font-semibold ${
                     isRelated(entry.totalPoints) ? 'text-red-700 dark:text-red-300' :
@@ -241,7 +230,16 @@ export default function LeaderboardPage() {
                     tier === 3 ? 'text-amber-600' :
                     ''
                   }`}>
-                    {entry.participant.name}
+                    <span className="flex items-center gap-1.5">
+                      {entry.participant.name}
+                      {(() => {
+                        const change = (entry as any).positionChange
+                        if (!change) return null
+                        return change > 0
+                          ? <span className="text-green-400 text-[10px] font-bold">▲{change}</span>
+                          : <span className="text-red-400 text-[10px] font-bold">▼{Math.abs(change)}</span>
+                      })()}
+                    </span>
                   </td>
                   <td className="px-4 py-3 text-right text-gray-300">
                     {entry.lastMatchPoints > 0
