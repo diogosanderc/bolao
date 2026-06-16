@@ -108,6 +108,12 @@ export default function LeaderboardPage() {
   const isFirstOfRank = data.map((_, idx) => idx === 0 || ranks[idx] !== ranks[idx - 1])
 
   const [notifState, setNotifState] = useState<'default' | 'subscribed' | 'denied' | 'unsupported'>('default')
+  const [notifToast, setNotifToast] = useState<string | null>(null)
+
+  function showToast(msg: string) {
+    setNotifToast(msg)
+    setTimeout(() => setNotifToast(null), 3000)
+  }
 
   useEffect(() => {
     if (!('Notification' in window) || !('serviceWorker' in navigator)) {
@@ -132,12 +138,13 @@ export default function LeaderboardPage() {
         await sub.unsubscribe()
       }
       setNotifState('default')
+      showToast('🔕 Notificações desativadas')
       return
     }
     const permission = await Notification.requestPermission()
-    if (permission !== 'granted') { setNotifState('denied'); return }
+    if (permission !== 'granted') { setNotifState('denied'); showToast('🚫 Permissão negada pelo browser'); return }
     const vapidKey = process.env.NEXT_PUBLIC_VAPID_KEY
-    if (!vapidKey) return
+    if (!vapidKey) { showToast('⚠️ Configuração incompleta (VAPID)'); return }
     const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: vapidKey })
     const json = sub.toJSON()
     await fetch('/api/push/subscribe', {
@@ -146,6 +153,7 @@ export default function LeaderboardPage() {
       body: JSON.stringify({ endpoint: sub.endpoint, keys: { p256dh: json.keys?.p256dh, auth: json.keys?.auth } }),
     })
     setNotifState('subscribed')
+    showToast('🔔 Notificações ativadas! Você receberá alertas de gols e resultados.')
   }
 
   function shareWhatsApp() {
@@ -174,18 +182,23 @@ export default function LeaderboardPage() {
         <h2 className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">Classificação</h2>
         <div className="flex items-center gap-3">
           {notifState !== 'unsupported' && (
-            <button
-              onClick={toggleNotifications}
-              title={notifState === 'subscribed' ? 'Desativar notificações' : notifState === 'denied' ? 'Notificações bloqueadas no browser' : 'Ativar notificações de gol e resultado'}
-              className={`text-xl px-2 py-1 rounded-lg transition-colors ${
-                notifState === 'subscribed' ? 'text-yellow-400' :
-                notifState === 'denied' ? 'text-gray-600 cursor-not-allowed' :
-                'text-gray-500 hover:text-gray-300'
-              }`}
-              disabled={notifState === 'denied'}
-            >
-              {notifState === 'denied' ? '🔕' : '🔔'}
-            </button>
+            <div className="relative">
+              <button
+                onClick={toggleNotifications}
+                title={notifState === 'subscribed' ? 'Notificações ativas — clique para desativar' : notifState === 'denied' ? 'Notificações bloqueadas no browser' : 'Ativar notificações de gol e resultado'}
+                className={`text-xl px-2 py-1 rounded-lg transition-colors ${
+                  notifState === 'subscribed' ? 'text-yellow-400' :
+                  notifState === 'denied' ? 'text-gray-600 cursor-not-allowed' :
+                  'text-gray-500 hover:text-gray-300'
+                }`}
+                disabled={notifState === 'denied'}
+              >
+                {notifState === 'denied' ? '🔕' : '🔔'}
+              </button>
+              {notifState === 'subscribed' && (
+                <span className="absolute top-0.5 right-0.5 w-2 h-2 bg-green-400 rounded-full border border-gray-950" />
+              )}
+            </div>
           )}
           {!loading && data.length > 0 && (
             <button
@@ -398,6 +411,12 @@ export default function LeaderboardPage() {
       <div className="text-center text-xs text-gray-600 mt-4">
         Classificação atualizada em tempo real conforme resultados são lançados
       </div>
+
+      {notifToast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-gray-800 border border-gray-700 text-gray-100 text-sm px-4 py-3 rounded-xl shadow-xl max-w-xs w-max text-center animate-fade-in">
+          {notifToast}
+        </div>
+      )}
     </div>
   )
 }
