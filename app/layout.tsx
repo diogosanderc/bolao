@@ -31,6 +31,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: `if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js')}` }} />
         <Header />
         <main className="max-w-7xl mx-auto px-4 py-6">{children}</main>
+        <footer className="text-center text-xs text-gray-700 py-6 mt-4">
+          Criado por Diogo Sander — 2026
+        </footer>
       </body>
     </html>
   )

@@ -43,6 +43,12 @@ export default function LeaderboardPage() {
       })
       .catch(() => setLoading(false))
 
+    // Count this session as a visit once (dedup via sessionStorage)
+    if (!sessionStorage.getItem('bolao_visited')) {
+      sessionStorage.setItem('bolao_visited', '1')
+      fetch('/api/visit', { method: 'POST' }).catch(() => {})
+    }
+
     function fetchSchedule() {
       fetch('/api/schedule')
         .then(r => r.json())

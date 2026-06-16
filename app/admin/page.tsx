@@ -73,6 +73,7 @@ export default function AdminPage() {
   const [syncDiffs, setSyncDiffs] = useState<SyncDiff[] | null>(null)
   const [syncError, setSyncError] = useState('')
   const [selectedDiffs, setSelectedDiffs] = useState<Set<string>>(new Set())
+  const [visitStats, setVisitStats] = useState<{ today: number; total: number; days: { date: string; label: string; count: number }[] } | null>(null)
 
   const showToast = (msg: string) => {
     setToast(msg)
@@ -87,6 +88,8 @@ export default function AdminPage() {
       for (const r of res) m[r.matchId] = r
       setResults(m)
     })
+    fetch('/api/admin/stats', { headers: { 'x-admin-key': localStorage.getItem('bolao_admin_key') ?? '' } })
+      .then(r => r.json()).then(d => { if (!d.error) setVisitStats(d) }).catch(() => {})
   }, [confirmed])
 
   async function addParticipant() {
@@ -361,6 +364,36 @@ export default function AdminPage() {
           <button onClick={() => { localStorage.removeItem(ADMIN_KEY_STORAGE); location.reload() }} className="hover:text-gray-200">Sair</button>
         </div>
       </div>
+
+      {/* Visit stats */}
+      {visitStats && (
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">📈 Visitas à Classificação</h3>
+            <div className="flex gap-4 text-xs text-gray-500">
+              <span>Hoje: <span className="text-yellow-400 font-bold text-sm">{visitStats.today}</span></span>
+              <span>Total: <span className="text-gray-300 font-semibold">{visitStats.total}</span></span>
+            </div>
+          </div>
+          <div className="flex items-end gap-1 h-16">
+            {visitStats.days.map(d => {
+              const max = Math.max(...visitStats.days.map(x => x.count), 1)
+              const pct = Math.round((d.count / max) * 100)
+              const isToday = d.date === new Date().toISOString().slice(0, 10)
+              return (
+                <div key={d.date} className="flex-1 flex flex-col items-center gap-0.5" title={`${d.label}: ${d.count} visitas`}>
+                  <span className="text-xs text-gray-600 leading-none">{d.count > 0 ? d.count : ''}</span>
+                  <div
+                    className={`w-full rounded-sm transition-all ${isToday ? 'bg-yellow-500' : 'bg-gray-700'}`}
+                    style={{ height: `${Math.max(pct, d.count > 0 ? 8 : 2)}%` }}
+                  />
+                  <span className={`text-xs leading-none ${isToday ? 'text-yellow-400' : 'text-gray-700'}`}>{d.label.slice(0, 5)}</span>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="flex gap-2 border-b border-gray-800">
