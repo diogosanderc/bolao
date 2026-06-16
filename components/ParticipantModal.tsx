@@ -61,8 +61,11 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={onClose}>
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
       <div
-        className="relative bg-gray-950 border border-gray-800 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-2xl max-h-[90vh] flex flex-col"
-        style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+        className="relative bg-gray-950 border border-gray-800 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-2xl flex flex-col"
+        style={{
+          maxHeight: '78vh',
+          paddingBottom: 'env(safe-area-inset-bottom)',
+        }}
         onClick={e => e.stopPropagation()}
       >
         {/* Drag handle (mobile only) */}
@@ -175,11 +178,19 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
           )}
         </div>
 
-        {/* Legend */}
-        <div className="flex gap-4 px-5 py-3 border-t border-gray-800 text-xs text-gray-600 shrink-0">
-          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-green-600 inline-block"></span> Placar exato</span>
-          <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-blue-700 inline-block"></span> Resultado certo</span>
-          <span className="text-gray-700">Resultado | Palpite | Pontos</span>
+        {/* Footer */}
+        <div className="border-t border-gray-800 px-5 py-3 shrink-0 space-y-2">
+          <div className="flex gap-4 text-xs text-gray-600">
+            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-green-600 inline-block" /> Placar exato</span>
+            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-blue-700 inline-block" /> Resultado certo</span>
+            <span className="text-gray-700">Resultado | Palpite | Pts</span>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-full py-2.5 rounded-xl bg-gray-800 hover:bg-gray-700 text-white font-semibold text-sm transition-colors"
+          >
+            Fechar
+          </button>
         </div>
       </div>
     </div>
