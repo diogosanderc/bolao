@@ -22,28 +22,40 @@ export function Header() {
     localStorage.setItem('theme', next ? 'dark' : 'light')
   }
 
-  const navLinks = (
+  const navLinks = (mobile: boolean) => (
     <>
       <a
         href="/"
         onClick={() => setOpen(false)}
-        className={`hover:text-yellow-300 transition-colors text-white font-medium ${pathname === '/' ? 'text-yellow-300' : ''}`}
+        className={`hover:text-yellow-300 transition-colors text-white font-semibold tracking-wide uppercase ${mobile ? 'py-2 text-base' : 'text-sm'} ${pathname === '/' ? 'text-yellow-300' : ''}`}
       >
         Classificação
       </a>
       <a
         href="/simulador"
         onClick={() => setOpen(false)}
-        className={`hover:text-yellow-300 transition-colors text-white font-medium ${pathname === '/simulador' ? 'text-yellow-300' : ''}`}
+        className={`hover:text-yellow-300 transition-colors text-white font-semibold tracking-wide uppercase ${mobile ? 'py-2 text-base' : 'text-sm'} ${pathname === '/simulador' ? 'text-yellow-300' : ''}`}
       >
         Simulador
       </a>
-      <a href="/palpite" onClick={() => setOpen(false)} className={`hover:text-yellow-300 transition-colors text-white font-medium ${pathname.startsWith('/palpite') ? 'text-yellow-300' : ''}`}>Palpites</a>
-      <a href="/estatisticas" onClick={() => setOpen(false)} className={`hover:text-yellow-300 transition-colors text-white font-medium ${pathname.startsWith('/estatisticas') ? 'text-yellow-300' : ''}`}>Estatísticas</a>
+      <a
+        href="/palpite"
+        onClick={() => setOpen(false)}
+        className={`hover:text-yellow-300 transition-colors text-white font-semibold tracking-wide uppercase ${mobile ? 'py-2 text-base' : 'text-sm'} ${pathname.startsWith('/palpite') ? 'text-yellow-300' : ''}`}
+      >
+        Palpites
+      </a>
+      <a
+        href="/estatisticas"
+        onClick={() => setOpen(false)}
+        className={`hover:text-yellow-300 transition-colors text-white font-semibold tracking-wide uppercase ${mobile ? 'py-2 text-base' : 'text-sm'} ${pathname.startsWith('/estatisticas') ? 'text-yellow-300' : ''}`}
+      >
+        Estatísticas
+      </a>
       <a
         href="/admin"
         onClick={() => setOpen(false)}
-        className="hover:text-yellow-300 transition-colors text-white opacity-50 hover:opacity-100 text-xs"
+        className={`hover:text-yellow-300 transition-colors text-white opacity-50 hover:opacity-100 uppercase ${mobile ? 'py-2 text-sm' : 'text-xs'}`}
       >
         Admin
       </a>
@@ -62,7 +74,7 @@ export function Header() {
           <>
             {/* Desktop nav */}
             <nav className="ml-auto hidden sm:flex items-center gap-5 text-sm">
-              {navLinks}
+              {navLinks(false)}
               <button onClick={toggleTheme} className="text-white hover:text-yellow-300 transition-colors text-xs font-medium" aria-label="Alternar tema">
                 {isDark ? 'Tema claro' : 'Tema escuro'}
               </button>
@@ -90,9 +102,9 @@ export function Header() {
 
       {/* Mobile dropdown */}
       {!isAuthPage && open && (
-        <nav className="sm:hidden bg-green-900 border-t border-green-700 px-4 py-3 flex flex-col gap-4 text-sm">
-          {navLinks}
-          <button onClick={toggleTheme} className="text-white hover:text-yellow-300 transition-colors text-sm font-medium text-left" aria-label="Alternar tema">
+        <nav className="sm:hidden bg-green-900 border-t border-green-700 px-4 py-2 flex flex-col">
+          {navLinks(true)}
+          <button onClick={toggleTheme} className="py-2 text-white hover:text-yellow-300 transition-colors text-sm font-medium text-left" aria-label="Alternar tema">
             {isDark ? 'Tema claro' : 'Tema escuro'}
           </button>
         </nav>
