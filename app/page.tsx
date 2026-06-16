@@ -32,16 +32,22 @@ export default function LeaderboardPage() {
   const [liveMatches, setLiveMatches] = useState<ScheduleMatch[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedParticipant, setSelectedParticipant] = useState<{ id: string; name: string } | null>(null)
+  const [lastRefresh, setLastRefresh] = useState<Date | null>(null)
 
-  useEffect(() => {
+  function fetchLeaderboard() {
     fetch('/api/leaderboard')
       .then(r => r.json())
       .then(d => {
         setData(Array.isArray(d.leaderboard) ? d.leaderboard : [])
         setLastMatch(d.lastMatch ?? null)
+        setLastRefresh(new Date())
         setLoading(false)
       })
       .catch(() => setLoading(false))
+  }
+
+  useEffect(() => {
+    fetchLeaderboard()
 
     // Count this session as a visit once (dedup via sessionStorage)
     if (!sessionStorage.getItem('bolao_visited')) {
@@ -62,6 +68,21 @@ export default function LeaderboardPage() {
     const interval = setInterval(fetchSchedule, 30_000)
     return () => clearInterval(interval)
   }, [])
+
+  // When there are live matches, refresh leaderboard every 30s and trigger ESPN sync every 60s
+  useEffect(() => {
+    if (liveMatches.length === 0) return
+    const leaderboardInterval = setInterval(fetchLeaderboard, 30_000)
+    const syncInterval = setInterval(() => {
+      fetch('/api/sync/live', { method: 'POST' }).catch(() => {})
+    }, 60_000)
+    // Trigger sync immediately when a live match is first detected
+    fetch('/api/sync/live', { method: 'POST' }).catch(() => {})
+    return () => {
+      clearInterval(leaderboardInterval)
+      clearInterval(syncInterval)
+    }
+  }, [liveMatches.length])
 
   const trophies: Record<number, string> = { 1: '🥇', 2: '🥈', 3: '🥉' }
 
@@ -129,7 +150,10 @@ export default function LeaderboardPage() {
             <div key={m.matchId} className="bg-red-950/60 border border-red-700 rounded-lg px-4 py-2.5 animate-pulse">
               <div className="flex items-center justify-between mb-1">
                 <span className="text-xs text-red-400 uppercase tracking-wider font-bold">🔴 Ao vivo</span>
-                {m.clock && <span className="text-xs text-red-300 font-semibold">{m.clock}</span>}
+                <span className="flex items-center gap-2">
+                  {m.clock && <span className="text-xs text-red-300 font-semibold">{m.clock}</span>}
+                  {lastRefresh && <span className="text-xs text-gray-500">atualizado {lastRefresh.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>}
+                </span>
               </div>
               <div className="flex items-center gap-2 text-sm text-white">
                 <span className="flex items-center gap-1.5"><Flag teamId={m.team1.id} size={18} />{m.team1.name}</span>
