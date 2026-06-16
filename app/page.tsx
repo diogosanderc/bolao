@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { LeaderboardEntry } from '@/lib/types'
 import { Flag } from '@/components/Flag'
+import { ParticipantModal } from '@/components/ParticipantModal'
 
 type LastMatch = {
   matchId: string
@@ -28,8 +29,9 @@ export default function LeaderboardPage() {
   const [data, setData] = useState<LeaderboardEntry[]>([])
   const [lastMatch, setLastMatch] = useState<LastMatch>(null)
   const [nextMatch, setNextMatch] = useState<ScheduleMatch | null>(null)
-  const [liveMatch, setLiveMatch] = useState<ScheduleMatch | null>(null)
+  const [liveMatches, setLiveMatches] = useState<ScheduleMatch[]>([])
   const [loading, setLoading] = useState(true)
+  const [selectedParticipant, setSelectedParticipant] = useState<{ id: string; name: string } | null>(null)
 
   useEffect(() => {
     fetch('/api/leaderboard')
@@ -46,7 +48,7 @@ export default function LeaderboardPage() {
         .then(r => r.json())
         .then(d => {
           setNextMatch(d.nextMatch ?? null)
-          setLiveMatch(d.live?.[0] ?? null)
+          setLiveMatches(Array.isArray(d.live) ? d.live : [])
         })
         .catch(() => {})
     }
@@ -115,21 +117,25 @@ export default function LeaderboardPage() {
         </div>
       </div>
 
-      {liveMatch && (
-        <div className="bg-red-950/60 border border-red-700 rounded-lg px-4 py-2.5 animate-pulse">
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-xs text-red-400 uppercase tracking-wider font-bold">🔴 Ao vivo</span>
-            {liveMatch.clock && <span className="text-xs text-red-300 font-semibold">{liveMatch.clock}</span>}
-          </div>
-          <div className="flex items-center gap-2 text-sm text-white">
-            <span className="flex items-center gap-1.5"><Flag teamId={liveMatch.team1.id} size={18} />{liveMatch.team1.name}</span>
-            <span className="font-bold text-white text-base px-1">
-              {liveMatch.liveScore1 !== undefined && liveMatch.liveScore2 !== undefined
-                ? `${liveMatch.liveScore1} × ${liveMatch.liveScore2}`
-                : <span className="text-red-300">vs</span>}
-            </span>
-            <span className="flex items-center gap-1.5"><Flag teamId={liveMatch.team2.id} size={18} />{liveMatch.team2.name}</span>
-          </div>
+      {liveMatches.length > 0 && (
+        <div className="space-y-1.5">
+          {liveMatches.map(m => (
+            <div key={m.matchId} className="bg-red-950/60 border border-red-700 rounded-lg px-4 py-2.5 animate-pulse">
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-xs text-red-400 uppercase tracking-wider font-bold">🔴 Ao vivo</span>
+                {m.clock && <span className="text-xs text-red-300 font-semibold">{m.clock}</span>}
+              </div>
+              <div className="flex items-center gap-2 text-sm text-white">
+                <span className="flex items-center gap-1.5"><Flag teamId={m.team1.id} size={18} />{m.team1.name}</span>
+                <span className="font-bold text-white text-base px-1">
+                  {m.liveScore1 !== undefined && m.liveScore2 !== undefined
+                    ? `${m.liveScore1} × ${m.liveScore2}`
+                    : <span className="text-red-300">vs</span>}
+                </span>
+                <span className="flex items-center gap-1.5"><Flag teamId={m.team2.id} size={18} />{m.team2.name}</span>
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
@@ -144,7 +150,7 @@ export default function LeaderboardPage() {
         </div>
       )}
 
-      {nextMatch && !liveMatch && (
+      {nextMatch && liveMatches.length === 0 && (
         <div className="bg-gray-900 border border-gray-800 rounded-lg px-4 py-2.5">
           <div className="flex items-center justify-between mb-1">
             <span className="text-xs text-gray-500 uppercase tracking-wider">Próximo jogo</span>
@@ -190,12 +196,13 @@ export default function LeaderboardPage() {
                 return (
                 <tr
                   key={entry.participant.id}
-                  className={`transition-colors ${
+                  onClick={() => setSelectedParticipant({ id: entry.participant.id, name: entry.participant.name })}
+                  className={`cursor-pointer transition-colors ${
                     isRelated(entry.totalPoints) ? 'bg-red-50 hover:bg-red-100 dark:bg-red-950/50 dark:hover:bg-red-950/70' :
                     isWarning(entry.totalPoints) ? 'bg-yellow-50 hover:bg-yellow-100 dark:bg-yellow-950/20 dark:hover:bg-yellow-950/30' :
-                    tier === 1 ? 'bg-yellow-100 dark:bg-yellow-950/40' :
-                    tier === 2 ? 'bg-gray-800/30' :
-                    tier === 3 ? 'bg-orange-50 dark:bg-orange-950/30' :
+                    tier === 1 ? 'bg-yellow-100 hover:bg-yellow-200 dark:bg-yellow-950/40 dark:hover:bg-yellow-950/60' :
+                    tier === 2 ? 'bg-gray-800/30 hover:bg-gray-800/60' :
+                    tier === 3 ? 'bg-orange-50 hover:bg-orange-100 dark:bg-orange-950/30 dark:hover:bg-orange-950/50' :
                     'hover:bg-gray-900/50'
                   }`}
                 >
@@ -232,7 +239,16 @@ export default function LeaderboardPage() {
             )}
             </tbody>
           </table>
+          <p className="text-xs text-gray-700 text-center py-2">Clique num participante para ver seus palpites</p>
         </div>
+      )}
+
+      {selectedParticipant && (
+        <ParticipantModal
+          participantId={selectedParticipant.id}
+          name={selectedParticipant.name}
+          onClose={() => setSelectedParticipant(null)}
+        />
       )}
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-8">
