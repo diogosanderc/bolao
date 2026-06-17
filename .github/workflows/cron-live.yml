@@ -10,6 +10,11 @@ jobs:
     steps:
       - name: Call live sync endpoint
         run: |
-          curl -s -X POST "${{ secrets.APP_URL }}/api/sync/live" \
+          response=$(curl -s -L -X POST "${{ secrets.APP_URL }}/api/sync/live" \
             -H "Content-Type: application/json" \
-            | jq .
+            -w "\n__HTTP_STATUS__%{http_code}")
+          http_status=$(echo "$response" | grep '__HTTP_STATUS__' | sed 's/__HTTP_STATUS__//')
+          body=$(echo "$response" | grep -v '__HTTP_STATUS__')
+          echo "HTTP Status: $http_status"
+          echo "Response: $body"
+          echo "$body" | jq . || echo "(response is not JSON)"
