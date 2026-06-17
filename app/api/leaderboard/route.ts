@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { readDB } from '@/lib/db'
 import { computeLeaderboard, scoreMatch } from '@/lib/scoring'
-import { matchById, teamById } from '@/lib/copa2026'
+import { ALL_MATCHES, matchById, teamById } from '@/lib/copa2026'
 
 export async function GET() {
   try {
@@ -44,8 +44,40 @@ export async function GET() {
       last4PointsMap.set(participant.id, pts)
     }
 
-    let leaderboardWithChanges: (typeof leaderboard[0] & { positionChange?: number; last4Points?: number })[] =
-      leaderboard.map(entry => ({ ...entry, last4Points: last4PointsMap.get(entry.participant.id) ?? 0 }))
+    // Remaining matches (non-TBD only — group stage matches we can predict)
+    const playedMatchIds = new Set(db.results.map(r => r.matchId))
+    const remainingMatches = ALL_MATCHES.filter(
+      m => !playedMatchIds.has(m.id) && m.team1Id !== 'TBD' && m.team2Id !== 'TBD'
+    ).length
+    const maxPerMatch = 8
+
+    // Top 7 threshold: points of the participant currently in 7th position
+    const top7Score = leaderboard.length >= 7 ? leaderboard[6].totalPoints : 0
+    const firstScore = leaderboard[0]?.totalPoints ?? 0
+
+    let leaderboardWithChanges: (typeof leaderboard[0] & {
+      positionChange?: number
+      last4Points?: number
+      maxPossiblePoints?: number
+      pointsToFirst?: number
+      pointsToTop7?: number
+      canReachFirst?: boolean
+      canReachTop7?: boolean
+      isInTop7?: boolean
+    })[] = leaderboard.map((entry, idx) => {
+      const rank = leaderboard.filter(e => e.totalPoints > entry.totalPoints).length + 1
+      const maxPossiblePoints = entry.totalPoints + remainingMatches * maxPerMatch
+      return {
+        ...entry,
+        last4Points: last4PointsMap.get(entry.participant.id) ?? 0,
+        maxPossiblePoints,
+        pointsToFirst: Math.max(0, firstScore - entry.totalPoints),
+        pointsToTop7: Math.max(0, top7Score - entry.totalPoints),
+        canReachFirst: maxPossiblePoints >= firstScore,
+        canReachTop7: leaderboard.length < 7 || maxPossiblePoints >= top7Score,
+        isInTop7: rank <= 7,
+      }
+    })
     if (sortedResults.length > 1) {
       const prevResults = sortedResults.slice(0, -1)
       const prevLeaderboard = computeLeaderboard(
@@ -59,11 +91,11 @@ export async function GET() {
         const prevRank = prevLeaderboard.filter(e => e.totalPoints > entry.totalPoints).length + 1
         prevRankMap.set(entry.participant.id, prevRank)
       }
-      leaderboardWithChanges = leaderboard.map(entry => {
+      leaderboardWithChanges = leaderboardWithChanges.map(entry => {
         const currentRank = leaderboard.filter(e => e.totalPoints > entry.totalPoints).length + 1
         const prevRank = prevRankMap.get(entry.participant.id)
         const positionChange = prevRank !== undefined ? prevRank - currentRank : undefined
-        return { ...entry, positionChange, last4Points: last4PointsMap.get(entry.participant.id) ?? 0 }
+        return { ...entry, positionChange }
       })
     }
 
@@ -82,7 +114,7 @@ export async function GET() {
       }
     }
 
-    return NextResponse.json({ leaderboard: leaderboardWithChanges, lastMatch })
+    return NextResponse.json({ leaderboard: leaderboardWithChanges, lastMatch, remainingMatches })
   } catch (err) {
     console.error('[leaderboard]', err)
     return NextResponse.json({ leaderboard: [], lastMatch: null }, { status: 200 })
