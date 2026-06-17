@@ -8,9 +8,13 @@ const VISITS_PATH = path.join(
   'visits.json'
 )
 
+function todayBRT() {
+  return new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' })
+}
+
 export async function POST() {
   try {
-    const today = new Date().toISOString().slice(0, 10)
+    const today = todayBRT()
     let visits: Record<string, number> = {}
     try {
       visits = JSON.parse(await fs.readFile(VISITS_PATH, 'utf-8'))

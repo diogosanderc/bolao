@@ -431,25 +431,37 @@ export default function AdminPage() {
       {/* Visit stats */}
       {visitStats && (
         <div className="bg-gray-900 border border-gray-800 rounded-xl p-3">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">📈 Visitas</h3>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">📈 Visitas ao Site</h3>
             <div className="flex gap-3 text-xs text-gray-500">
               <span>Hoje: <span className="text-yellow-400 font-bold">{visitStats.today}</span></span>
               <span>Total: <span className="text-gray-300 font-semibold">{visitStats.total}</span></span>
             </div>
           </div>
-          <div className="flex items-end gap-0.5 h-12">
+          <div className="flex items-end gap-0.5 h-14">
             {visitStats.days.map(d => {
               const max = Math.max(...visitStats.days.map(x => x.count), 1)
               const pct = Math.round((d.count / max) * 100)
-              const isToday = d.date === new Date().toISOString().slice(0, 10)
+              const isToday = d.date === visitStats.days[visitStats.days.length - 1].date
               return (
-                <div key={d.date} className="flex-1 flex flex-col items-center gap-0.5" title={`${d.label}: ${d.count}`}>
+                <div key={d.date} className="flex-1 flex flex-col justify-end" title={`${d.label}: ${d.count}`}>
                   <div
                     className={`w-full rounded-sm ${isToday ? 'bg-yellow-500' : 'bg-gray-700'}`}
-                    style={{ height: `${Math.max(pct, d.count > 0 ? 10 : 2)}%` }}
+                    style={{ height: `${Math.max(pct, d.count > 0 ? 8 : 2)}%` }}
                   />
-                  {isToday && <span className="text-[9px] leading-none text-yellow-400">•</span>}
+                </div>
+              )
+            })}
+          </div>
+          <div className="flex gap-0.5 mt-1">
+            {visitStats.days.map((d, i) => {
+              const isToday = i === visitStats.days.length - 1
+              const showLabel = i === 0 || i === 6 || i === 7 || isToday
+              return (
+                <div key={d.date} className="flex-1 text-center">
+                  {showLabel
+                    ? <span className={`text-[8px] leading-none ${isToday ? 'text-yellow-400 font-bold' : 'text-gray-600'}`}>{d.label}</span>
+                    : null}
                 </div>
               )
             })}
