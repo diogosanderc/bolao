@@ -56,11 +56,17 @@ export default function LeaderboardPage() {
 
   function shareMatchPredictions(t1: string, t2: string, dateBRT: string) {
     if (!matchModal) return
-    const lines = [`🏆 *Palpites — ${t1} vs ${t2}*`, `📅 ${dateBRT}`, '']
-    const maxName = Math.max(...matchPredictions.map(p => p.name.length), 4)
-    for (const p of matchPredictions) {
-      lines.push(`${p.name.padEnd(maxName)}  ${p.score1}×${p.score2}`)
-    }
+    const grouped = matchPredictions.reduce<Record<string, string[]>>((acc, p) => {
+      const key = `${p.score1}×${p.score2}`
+      acc[key] = [...(acc[key] ?? []), p.name]
+      return acc
+    }, {})
+    const lines = [`🏆 *Palpites — ${t1} vs ${t2}*`]
+    if (dateBRT) lines.push(`📅 ${dateBRT}`)
+    lines.push('')
+    Object.entries(grouped)
+      .sort((a, b) => b[1].length - a[1].length)
+      .forEach(([score, names]) => lines.push(`*${score}* — ${names.join(', ')}`))
     lines.push('', '_Bolão Copa 2026_')
     window.open(`https://wa.me/?text=${encodeURIComponent(lines.join('\n'))}`, '_blank')
   }
@@ -473,12 +479,20 @@ export default function LeaderboardPage() {
             ) : (
               <>
                 <div className="divide-y divide-gray-800 mb-4">
-                  {matchPredictions.map((p, i) => (
-                    <div key={i} className="flex items-center justify-between py-2.5">
-                      <span className="text-sm text-gray-300 font-medium">{p.name}</span>
-                      <span className="text-sm font-bold text-yellow-400">{p.score1} × {p.score2}</span>
-                    </div>
-                  ))}
+                  {Object.entries(
+                    matchPredictions.reduce<Record<string, string[]>>((acc, p) => {
+                      const key = `${p.score1}×${p.score2}`
+                      acc[key] = [...(acc[key] ?? []), p.name]
+                      return acc
+                    }, {})
+                  )
+                    .sort((a, b) => b[1].length - a[1].length)
+                    .map(([score, names]) => (
+                      <div key={score} className="flex items-start justify-between gap-4 py-2.5">
+                        <span className="text-sm text-gray-300">{names.join(', ')}</span>
+                        <span className="text-sm font-bold text-yellow-400 shrink-0">{score}</span>
+                      </div>
+                    ))}
                 </div>
                 <button
                   onClick={() => shareMatchPredictions(matchModal.label.split(' vs ')[0], matchModal.label.split(' vs ')[1], '')}
