@@ -68,6 +68,17 @@ export async function POST() {
     )
     if (!match) continue
 
+    // Skip matches already completed in our state — nothing left to notify
+    const prev = persistedStates[match.id]
+    if (prev?.status === 'completed') continue
+
+    // Skip matches scheduled more than 5 hours ago (prevents stale ESPN data from triggering old notifications)
+    const matchDate = db.matchDates?.[match.id]?.date
+    if (matchDate) {
+      const hoursSince = (Date.now() - new Date(matchDate).getTime()) / 3_600_000
+      if (hoursSince > 5) continue
+    }
+
     const flipped = match.team1Id === id2
     const rawS1 = parseInt(c1.score ?? '0', 10)
     const rawS2 = parseInt(c2.score ?? '0', 10)
@@ -79,7 +90,6 @@ export async function POST() {
     const clock: string = halftime ? 'Intervalo' : (status?.displayClock ?? '')
 
     const newStatus: MatchState['status'] = completed ? 'completed' : halftime ? 'halftime' : inProgress ? 'in' : 'pre'
-    const prev = persistedStates[match.id]
 
     if (!prev) {
       // Always initialize as pre/0-0 so ALL transitions are detected on the next poll
@@ -107,7 +117,7 @@ export async function POST() {
       }
     }
 
-    if (prev.status !== 'completed' && newStatus === 'completed') {
+    if (newStatus === 'completed') {
       pushQueue.push({ title: '🏁 Resultado final', body: scoreStr })
       const current = resultMap[match.id]
       if (!current || current.score1 !== score1 || current.score2 !== score2) {
