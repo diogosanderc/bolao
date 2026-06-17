@@ -41,6 +41,7 @@ export default function LeaderboardPage() {
   const [loading, setLoading] = useState(true)
   const [projectionMode, setProjectionMode] = useState(false)
   const [remainingMatches, setRemainingMatches] = useState(0)
+  const [activeUsers, setActiveUsers] = useState<number | null>(null)
   const [selectedParticipant, setSelectedParticipant] = useState<{ id: string; name: string } | null>(null)
   const [matchModal, setMatchModal] = useState<{ matchId: string; label: string } | null>(null)
   const [matchPredictions, setMatchPredictions] = useState<{ name: string; score1: number; score2: number }[]>([])
@@ -96,6 +97,21 @@ export default function LeaderboardPage() {
       fetch('/api/visit', { method: 'POST' }).catch(() => {})
     }
 
+    // Presence heartbeat — anonymous ID persisted in localStorage
+    let presenceId = localStorage.getItem('bolao_pid')
+    if (!presenceId) {
+      presenceId = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2)
+      localStorage.setItem('bolao_pid', presenceId)
+    }
+    function pingPresence() {
+      fetch('/api/presence', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: presenceId }) })
+        .then(r => r.json())
+        .then(d => { if (typeof d.active === 'number') setActiveUsers(d.active) })
+        .catch(() => {})
+    }
+    pingPresence()
+    const presenceInterval = setInterval(pingPresence, 30_000)
+
     function fetchSchedule() {
       fetch('/api/schedule')
         .then(r => r.json())
@@ -107,7 +123,10 @@ export default function LeaderboardPage() {
     }
     fetchSchedule()
     const interval = setInterval(fetchSchedule, 30_000)
-    return () => clearInterval(interval)
+    return () => {
+      clearInterval(presenceInterval)
+      clearInterval(interval)
+    }
   }, [])
 
   // When there are live matches, refresh leaderboard every 30s and trigger ESPN sync every 60s
@@ -566,6 +585,13 @@ export default function LeaderboardPage() {
       {notifToast && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-gray-800 border border-gray-700 text-gray-100 text-sm px-4 py-3 rounded-xl shadow-xl max-w-xs w-max text-center animate-fade-in">
           {notifToast}
+        </div>
+      )}
+
+      {activeUsers !== null && (
+        <div className="text-center text-xs text-gray-600 py-4 pb-8">
+          <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-500 mr-1.5 align-middle" />
+          {activeUsers} {activeUsers === 1 ? 'pessoa online' : 'pessoas online'}
         </div>
       )}
     </div>
