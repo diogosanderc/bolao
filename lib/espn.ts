@@ -64,6 +64,24 @@ export type ESPNEvent = {
   goals?: GoalEvent[]
 }
 
+// ESPN sometimes encodes a brace (2+ goals by same player) as a single detail
+// with comma-separated minutes, e.g. clock.displayValue = "12, 42".
+// Expand those into one GoalEvent per minute so each goal is listed separately.
+function expandGoalDetail(
+  detail: any,
+  playerName: string,
+  ownGoal: boolean,
+  scoringTeamId: string,
+): GoalEvent[] {
+  const raw: string = detail.clock?.displayValue ?? ''
+  const minutes = raw.split(',').map(s => s.trim()).filter(Boolean)
+  if (minutes.length <= 1) {
+    if (playerName || raw) return [{ minute: raw, playerName: playerName || '?', teamId: scoringTeamId, ownGoal }]
+    return []
+  }
+  return minutes.map(m => ({ minute: m, playerName: playerName || '?', teamId: scoringTeamId, ownGoal }))
+}
+
 function toBRT(isoDate: string): string {
   try {
     const d = new Date(isoDate)
@@ -118,7 +136,6 @@ function parseEvents(rawEvents: any[], liveMap: Map<string, LiveInfo>): ESPNEven
       const typeText: string = detail.type?.text ?? ''
       const isGoal = typeText === 'Goal' || typeText === 'Own Goal' || typeText === 'Penalty - Scored'
       if (!isGoal) continue
-      const minute: string = detail.clock?.displayValue ?? ''
       const playerName: string = detail.athletesInvolved?.[0]?.displayName ?? ''
       const ownGoal = typeText === 'Own Goal'
       // detail.team.id is ESPN's team id — match against c1/c2
@@ -126,7 +143,7 @@ function parseEvents(rawEvents: any[], liveMap: Map<string, LiveInfo>): ESPNEven
       const scoringTeamId = detailTeamId === c1.team?.id ? (flipped ? match.team2Id : match.team1Id)
         : detailTeamId === c2.team?.id ? (flipped ? match.team1Id : match.team2Id)
         : ''
-      if (playerName || minute) goals.push({ minute, playerName: playerName || '?', teamId: scoringTeamId, ownGoal })
+      goals.push(...expandGoalDetail(detail, playerName, ownGoal, scoringTeamId))
     }
 
     result.push({
@@ -194,14 +211,13 @@ async function fetchLiveMap(): Promise<Map<string, LiveInfo>> {
         const typeText: string = detail.type?.text ?? ''
         const isGoal = typeText === 'Goal' || typeText === 'Own Goal' || typeText === 'Penalty - Scored'
         if (!isGoal) continue
-        const minute: string = detail.clock?.displayValue ?? ''
         const playerName: string = detail.athletesInvolved?.[0]?.displayName ?? ''
         const ownGoal = typeText === 'Own Goal'
         const detailTeamId = detail.team?.id
         const scoringTeamId = detailTeamId === c1.team?.id ? (flippedLive ? match.team2Id : match.team1Id)
           : detailTeamId === c2.team?.id ? (flippedLive ? match.team1Id : match.team2Id)
           : ''
-        if (playerName || minute) liveGoals.push({ minute, playerName: playerName || '?', teamId: scoringTeamId, ownGoal })
+        liveGoals.push(...expandGoalDetail(detail, playerName, ownGoal, scoringTeamId))
       }
 
       liveMap.set(match.id, {
