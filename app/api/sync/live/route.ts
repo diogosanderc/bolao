@@ -91,9 +91,16 @@ export async function POST() {
 
     const newStatus: MatchState['status'] = completed ? 'completed' : halftime ? 'halftime' : inProgress ? 'in' : 'pre'
 
+    // If the result is already in DB with the same score and ESPN says completed,
+    // silently mark as completed and skip — avoids late notifications after server restart
+    const dbResult = resultMap[match.id]
+    if (newStatus === 'completed' && dbResult && dbResult.score1 === score1 && dbResult.score2 === score2) {
+      newPersistedStates[match.id] = { status: 'completed', score1, score2 }
+      continue
+    }
+
     if (!prev) {
       // Always initialize as pre/0-0 so ALL transitions are detected on the next poll
-      // (even if we first see the match already in progress or with goals scored)
       newPersistedStates[match.id] = { status: 'pre', score1: 0, score2: 0 }
       continue
     }
@@ -112,15 +119,18 @@ export async function POST() {
       const newTotal = score1 + score2
       const goalCount = newTotal - prevTotal
       if (goalCount > 0) {
-        const clockLabel = clock && clock !== 'Intervalo' ? ` · ${clock}` : ''
-        pushQueue.push({ title: `⚽ Gol!${clockLabel}`, body: scoreStr })
+        // Don't send goal notification if result already finalized in DB at this score
+        const alreadyFinal = dbResult && dbResult.score1 === score1 && dbResult.score2 === score2
+        if (!alreadyFinal) {
+          const clockLabel = clock && clock !== 'Intervalo' ? ` · ${clock}` : ''
+          pushQueue.push({ title: `⚽ Gol!${clockLabel}`, body: scoreStr })
+        }
       }
     }
 
     if (newStatus === 'completed') {
       pushQueue.push({ title: '🏁 Resultado final', body: scoreStr })
-      const current = resultMap[match.id]
-      if (!current || current.score1 !== score1 || current.score2 !== score2) {
+      if (!dbResult || dbResult.score1 !== score1 || dbResult.score2 !== score2) {
         dbResultUpdates.push({ matchId: match.id, score1, score2 })
       }
     }
