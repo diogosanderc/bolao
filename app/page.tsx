@@ -355,42 +355,68 @@ export default function LeaderboardPage() {
         </div>
       )}
 
+      {!loading && data.length > 0 && remainingMatches > 0 && (
+        <button
+          onClick={() => setProjectionMode(p => !p)}
+          className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border font-semibold text-sm transition-colors ${
+            projectionMode
+              ? 'bg-purple-900/60 border-purple-600 text-purple-200'
+              : 'border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-200'
+          }`}
+        >
+          📊 {projectionMode ? 'Ocultar Projeção' : 'Ver Projeção'}
+        </button>
+      )}
+
+      {projectionMode && data.length > 0 && (
+        <div className="rounded-xl border border-purple-800 overflow-hidden">
+          <div className="bg-purple-950/60 px-4 py-2.5 border-b border-purple-800">
+            <p className="text-xs text-purple-300 font-semibold uppercase tracking-wider">📊 Projeção — {remainingMatches} jogos restantes</p>
+            <p className="text-xs text-purple-500 mt-0.5">Máximo estimado: pts atuais + {remainingMatches} × 8 pts/jogo</p>
+          </div>
+          <div className="divide-y divide-purple-900/40">
+            {data.map((entry, idx) => {
+              const p = entry as any
+              const rank = ranks[idx]
+              return (
+                <div key={entry.participant.id} className="px-4 py-3 bg-gray-950/40 flex items-center gap-3">
+                  <span className="text-gray-500 text-xs w-5 text-right shrink-0">{rank}</span>
+                  <span className="text-gray-200 text-sm font-semibold flex-1 min-w-0 truncate">{entry.participant.name}</span>
+                  <div className="flex items-center gap-3 shrink-0 text-sm">
+                    <span className="text-purple-300 font-bold">{p.maxPossiblePoints ?? '—'}</span>
+                    <span className="text-gray-600 text-xs">máx.</span>
+                    <span className="w-16 text-right">
+                      {p.pointsToFirst === 0
+                        ? <span className="text-yellow-400 font-bold text-xs">Líder</span>
+                        : p.canReachFirst
+                        ? <span className="text-green-400 text-xs">+{p.pointsToFirst} p/ 1º</span>
+                        : <span className="text-gray-600 text-xs">+{p.pointsToFirst} p/ 1º</span>}
+                    </span>
+                    <span className="w-16 text-right">
+                      {p.isInTop7
+                        ? <span className="text-green-400 text-xs font-bold">Top 7 ✓</span>
+                        : p.canReachTop7
+                        ? <span className="text-yellow-400 text-xs">+{p.pointsToTop7} p/ T7</span>
+                        : <span className="text-red-500 text-xs">fora</span>}
+                    </span>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
       {!loading && data.length > 0 && (
         <div className="overflow-x-auto rounded-xl border border-gray-800">
           <table className="w-full text-sm">
             <thead>
               <tr className="bg-gray-900 text-gray-400 text-xs uppercase tracking-wider">
                 <th className="px-4 py-3 text-left w-10">#</th>
-                <th className="px-4 py-3 text-left">
-                  <div className="flex items-center gap-2">
-                    <span>Participante</span>
-                    {remainingMatches > 0 && (
-                      <button
-                        onClick={e => { e.stopPropagation(); setProjectionMode(p => !p) }}
-                        className={`text-[10px] px-2 py-0.5 rounded-full border font-bold tracking-wide transition-colors ${
-                          projectionMode
-                            ? 'bg-purple-800 border-purple-600 text-purple-200'
-                            : 'border-gray-700 text-gray-500 hover:border-gray-500 hover:text-gray-300'
-                        }`}
-                      >
-                        📊 Projeção
-                      </button>
-                    )}
-                  </div>
-                </th>
-                {projectionMode ? (
-                  <>
-                    <th className="px-4 py-3 text-right text-purple-400">Máx.</th>
-                    <th className="px-4 py-3 text-right text-purple-400">p/ 1º</th>
-                    <th className="px-4 py-3 text-right text-purple-400">p/ Top 7</th>
-                  </>
-                ) : (
-                  <>
-                    <th className="px-4 py-3 text-right">Último</th>
-                    <th className="px-4 py-3 text-right">Últ. 4</th>
-                    <th className="px-4 py-3 text-right">Total</th>
-                  </>
-                )}
+                <th className="px-4 py-3 text-left">Participante</th>
+                <th className="px-4 py-3 text-right">Último</th>
+                <th className="px-4 py-3 text-right">Últ. 4</th>
+                <th className="px-4 py-3 text-right">Total</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-800">
@@ -440,53 +466,26 @@ export default function LeaderboardPage() {
                       })()}
                     </span>
                   </td>
-                  {projectionMode ? (
-                    <>
-                      <td className="px-4 py-3 text-right font-semibold text-purple-300">
-                        {p.maxPossiblePoints ?? '—'}
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        {p.pointsToFirst === 0
-                          ? <span className="text-yellow-400 font-bold">Líder</span>
-                          : p.canReachFirst
-                          ? <span className="text-green-400">+{p.pointsToFirst}</span>
-                          : <span className="text-red-500">+{p.pointsToFirst}</span>}
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        {p.isInTop7
-                          ? <span className="text-green-400 font-bold">✓</span>
-                          : p.canReachTop7
-                          ? <span className="text-yellow-400">+{p.pointsToTop7}</span>
-                          : <span className="text-red-500 text-xs">impossível</span>}
-                      </td>
-                    </>
-                  ) : (
-                    <>
-                      <td className="px-4 py-3 text-right text-gray-300">
-                        {entry.lastMatchPoints > 0
-                          ? <span className="text-green-400 font-semibold">+{entry.lastMatchPoints}</span>
-                          : <span className="text-gray-500">0</span>}
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        {(() => {
-                          const pts = p.last4Points ?? 0
-                          return <span className={pts > 0 ? 'text-blue-400 font-semibold' : 'text-gray-500'}>{pts}</span>
-                        })()}
-                      </td>
-                      <td className={`px-4 py-3 text-right font-bold text-base ${isRelated(entry.totalPoints) ? 'text-red-600 dark:text-red-400' : isWarning(entry.totalPoints) ? 'text-yellow-500 dark:text-yellow-400' : 'text-yellow-600 dark:text-yellow-400'}`}>
-                        {entry.totalPoints}
-                      </td>
-                    </>
-                  )}
+                  <td className="px-4 py-3 text-right text-gray-300">
+                    {entry.lastMatchPoints > 0
+                      ? <span className="text-green-400 font-semibold">+{entry.lastMatchPoints}</span>
+                      : <span className="text-gray-500">0</span>}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    {(() => {
+                      const pts = p.last4Points ?? 0
+                      return <span className={pts > 0 ? 'text-blue-400 font-semibold' : 'text-gray-500'}>{pts}</span>
+                    })()}
+                  </td>
+                  <td className={`px-4 py-3 text-right font-bold text-base ${isRelated(entry.totalPoints) ? 'text-red-600 dark:text-red-400' : isWarning(entry.totalPoints) ? 'text-yellow-500 dark:text-yellow-400' : 'text-yellow-600 dark:text-yellow-400'}`}>
+                    {entry.totalPoints}
+                  </td>
                 </tr>
               )}
             )}
             </tbody>
           </table>
-          {projectionMode
-            ? <p className="text-xs text-gray-600 text-center py-2">Máx. = pontos atuais + {remainingMatches} jogos restantes × 8 pts. Verde = possível, vermelho = impossível.</p>
-            : <p className="text-xs text-gray-700 text-center py-2">Clique num participante para ver seus palpites</p>
-          }
+          <p className="text-xs text-gray-700 text-center py-2">Clique num participante para ver seus palpites</p>
         </div>
       )}
 
