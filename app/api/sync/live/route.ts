@@ -4,7 +4,16 @@ import { ALL_MATCHES, teamById } from '@/lib/copa2026'
 import { resolveTeam } from '@/lib/espn'
 import { sendPushToAll } from '@/lib/push'
 
-type MatchState = { status: 'pre' | 'in' | 'halftime' | 'completed'; score1: number; score2: number }
+type MatchState = {
+  status: 'pre' | 'in' | 'halftime' | 'completed'
+  score1: number
+  score2: number
+  // Tracks which notifications have been sent — never reset, survives bell toggles
+  sentStarted?: boolean
+  sentHalftime?: boolean
+  sentFinal?: boolean
+  sentGoals?: number  // total goals for which a notification was sent
+}
 
 let lastRunAt = 0
 
@@ -29,7 +38,6 @@ export async function POST() {
 
   const db = await readDB()
   const resultMap = Object.fromEntries(db.results.map(r => [r.matchId, r]))
-  // Load persisted states — source of truth across server restarts
   const persistedStates: Record<string, MatchState> = db.liveMatchStates ?? {}
 
   const newPersistedStates: Record<string, MatchState> = { ...persistedStates }
@@ -68,11 +76,9 @@ export async function POST() {
     )
     if (!match) continue
 
-    // Skip matches already completed in our state — nothing left to notify
     const prev = persistedStates[match.id]
     if (prev?.status === 'completed') continue
 
-    // Skip matches scheduled more than 5 hours ago (prevents stale ESPN data from triggering old notifications)
     const matchDate = db.matchDates?.[match.id]?.date
     if (matchDate) {
       const hoursSince = (Date.now() - new Date(matchDate).getTime()) / 3_600_000
@@ -91,62 +97,67 @@ export async function POST() {
 
     const newStatus: MatchState['status'] = completed ? 'completed' : halftime ? 'halftime' : inProgress ? 'in' : 'pre'
 
-    // If the result is already in DB with the same score and ESPN says completed,
-    // silently mark as completed and skip — avoids late notifications after server restart
+    // Silently mark as completed if the result is already in DB — avoids late notifications after restart
     const dbResult = resultMap[match.id]
     if (newStatus === 'completed' && dbResult && dbResult.score1 === score1 && dbResult.score2 === score2) {
-      newPersistedStates[match.id] = { status: 'completed', score1, score2 }
+      newPersistedStates[match.id] = { ...prev, status: 'completed', score1, score2, sentStarted: true, sentFinal: true, sentGoals: score1 + score2 }
       continue
     }
 
     if (!prev) {
-      // Always initialize as pre/0-0 so ALL transitions are detected on the next poll
       newPersistedStates[match.id] = { status: 'pre', score1: 0, score2: 0 }
       continue
     }
 
-    // Guard against ESPN returning stale pre-game data for a match already in progress.
-    // If our state is beyond 'pre' but ESPN now says 'pre', that's stale data — skip
-    // this cycle entirely to prevent state regression and duplicate notifications.
+    // Guard: never let state regress (ESPN occasionally returns stale pre-game data)
     if (prev.status !== 'pre' && newStatus === 'pre') continue
 
-    // Guard against score going backwards — another sign of stale ESPN data.
+    // Guard: never let score go backwards (another ESPN staleness signal)
     if (score1 < prev.score1 || score2 < prev.score2) continue
 
-    // Detect transitions and queue pushes
-    if (prev.status === 'pre' && newStatus === 'in') {
+    // Infer sent flags from existing state for backward compatibility with old DB entries
+    const sentStarted = prev.sentStarted ?? (prev.status !== 'pre')
+    const sentHalftime = prev.sentHalftime ?? false
+    const sentGoals = prev.sentGoals ?? (prev.score1 + prev.score2)
+    const sentFinal = prev.sentFinal ?? false
+
+    const newState: MatchState = { status: newStatus, score1, score2, sentStarted, sentHalftime, sentGoals, sentFinal }
+
+    // Game started — sent only once ever
+    if (newStatus === 'in' && !sentStarted) {
       pushQueue.push({ title: '🟢 Jogo começou!', body: `${t1} vs ${t2}` })
+      newState.sentStarted = true
     }
 
-    if (prev.status !== 'halftime' && newStatus === 'halftime') {
+    // Halftime — sent only once ever
+    if (newStatus === 'halftime' && !sentHalftime) {
       pushQueue.push({ title: '⏸ Intervalo', body: scoreStr })
+      newState.sentHalftime = true
     }
 
-    if (newStatus !== 'pre') {
-      const prevTotal = prev.score1 + prev.score2
-      const newTotal = score1 + score2
-      const goalCount = newTotal - prevTotal
-      if (goalCount > 0) {
-        // Don't send goal notification if result already finalized in DB at this score
-        const alreadyFinal = dbResult && dbResult.score1 === score1 && dbResult.score2 === score2
-        if (!alreadyFinal) {
-          const clockLabel = clock && clock !== 'Intervalo' ? ` · ${clock}` : ''
-          pushQueue.push({ title: `⚽ Gol!${clockLabel}`, body: scoreStr })
-        }
+    // Goals — only for goals beyond what was already notified
+    const currentGoals = score1 + score2
+    if (newStatus !== 'pre' && currentGoals > sentGoals) {
+      const alreadyFinal = dbResult && dbResult.score1 === score1 && dbResult.score2 === score2
+      if (!alreadyFinal) {
+        const clockLabel = clock && clock !== 'Intervalo' ? ` · ${clock}` : ''
+        pushQueue.push({ title: `⚽ Gol!${clockLabel}`, body: scoreStr })
       }
+      newState.sentGoals = currentGoals
     }
 
-    if (newStatus === 'completed') {
+    // Final result — sent only once ever
+    if (newStatus === 'completed' && !sentFinal) {
       pushQueue.push({ title: '🏁 Resultado final', body: scoreStr })
+      newState.sentFinal = true
       if (!dbResult || dbResult.score1 !== score1 || dbResult.score2 !== score2) {
         dbResultUpdates.push({ matchId: match.id, score1, score2 })
       }
     }
 
-    newPersistedStates[match.id] = { status: newStatus, score1, score2 }
+    newPersistedStates[match.id] = newState
   }
 
-  // Persist updated states + any new results in one DB write
   const hasStateChanges = JSON.stringify(newPersistedStates) !== JSON.stringify(persistedStates)
   if (dbResultUpdates.length > 0 || hasStateChanges) {
     await updateDB(db => {
