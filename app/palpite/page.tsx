@@ -41,7 +41,7 @@ export default function PalpiteEntryPage() {
       <div className="text-center">
         <div className="text-5xl mb-3">⚽</div>
         <h1 className="text-3xl font-bold text-gray-200">Enviar Palpites</h1>
-        <p className="text-gray-400 mt-2 text-sm">Digite seu nome para acessar ou criar seus palpites</p>
+        <p className="text-gray-400 mt-2 text-sm">Digite o seu nome no bolão para acessar os seus palpites</p>
       </div>
 
       <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4">
@@ -75,9 +75,15 @@ export default function PalpiteEntryPage() {
         </button>
       </form>
 
-      <p className="text-xs text-gray-700 text-center max-w-xs">
-        Se você ainda não tem palpites, um novo perfil será criado automaticamente com seu nome.
-      </p>
+      <div className="w-full max-w-sm text-center space-y-2">
+        <p className="text-xs text-gray-600">Quer ver os palpites de todos os participantes?</p>
+        <button
+          onClick={() => router.push('/palpite/todos')}
+          className="w-full border border-gray-700 hover:border-gray-500 text-gray-400 hover:text-gray-200 font-bold py-3 rounded-xl transition-colors text-sm tracking-widest uppercase"
+        >
+          Ver Todos
+        </button>
+      </div>
     </div>
   )
 }
