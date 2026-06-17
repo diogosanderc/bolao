@@ -105,6 +105,14 @@ export async function POST() {
       continue
     }
 
+    // Guard against ESPN returning stale pre-game data for a match already in progress.
+    // If our state is beyond 'pre' but ESPN now says 'pre', that's stale data — skip
+    // this cycle entirely to prevent state regression and duplicate notifications.
+    if (prev.status !== 'pre' && newStatus === 'pre') continue
+
+    // Guard against score going backwards — another sign of stale ESPN data.
+    if (score1 < prev.score1 || score2 < prev.score2) continue
+
     // Detect transitions and queue pushes
     if (prev.status === 'pre' && newStatus === 'in') {
       pushQueue.push({ title: '🟢 Jogo começou!', body: `${t1} vs ${t2}` })
