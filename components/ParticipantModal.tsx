@@ -33,8 +33,6 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
   const [data, setData] = useState<ParticipantData | null>(null)
   const [loading, setLoading] = useState(true)
   const [tab, setTab] = useState<'played' | 'upcoming'>('played')
-  const [touchStartY, setTouchStartY] = useState(0)
-  const [dragY, setDragY] = useState(0)
 
   useEffect(() => {
     fetch(`/api/participante/${participantId}`)
@@ -73,30 +71,8 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
       <div
         className="relative bg-gray-950 border border-gray-800 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-2xl flex flex-col"
-        style={{
-          maxHeight: '78vh',
-          paddingBottom: 'env(safe-area-inset-bottom)',
-          transform: `translateY(${dragY}px)`,
-          transition: dragY > 0 ? 'none' : 'transform 0.3s',
-        }}
+        style={{ maxHeight: '78vh', paddingBottom: 'env(safe-area-inset-bottom)' }}
         onClick={e => e.stopPropagation()}
-        onTouchStart={e => {
-          setTouchStartY(e.touches[0].clientY)
-          setDragY(0)
-        }}
-        onTouchMove={e => {
-          const delta = e.touches[0].clientY - touchStartY
-          if (delta > 0) {
-            setDragY(Math.min(delta, 300))
-          }
-        }}
-        onTouchEnd={() => {
-          if (dragY > 80) {
-            onClose()
-          } else {
-            setDragY(0)
-          }
-        }}
       >
         {/* Drag handle (mobile only) */}
         <div className="flex justify-center pt-3 pb-1 sm:hidden shrink-0">
