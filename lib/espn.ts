@@ -134,14 +134,16 @@ function parseEvents(rawEvents: any[], liveMap: Map<string, LiveInfo>): ESPNEven
     const goals: GoalEvent[] = []
     for (const detail of competition.details ?? []) {
       const typeText: string = detail.type?.text ?? ''
-      const isGoal = typeText === 'Goal' || typeText === 'Own Goal' || typeText === 'Penalty - Scored'
+      const typeLower = typeText.toLowerCase()
+      const isGoal = typeLower.includes('goal') || typeText === 'Penalty - Scored'
       if (!isGoal) continue
       const playerName: string = detail.athletesInvolved?.[0]?.displayName ?? ''
-      const ownGoal = typeText === 'Own Goal'
-      // detail.team.id is ESPN's team id — match against c1/c2
-      const detailTeamId = detail.team?.id
-      const scoringTeamId = detailTeamId === c1.team?.id ? (flipped ? match.team2Id : match.team1Id)
-        : detailTeamId === c2.team?.id ? (flipped ? match.team1Id : match.team2Id)
+      const ownGoal = typeLower.includes('own')
+      const detailTeamId = String(detail.team?.id ?? '')
+      const c1TeamId = String(c1.team?.id ?? '')
+      const c2TeamId = String(c2.team?.id ?? '')
+      const scoringTeamId = detailTeamId && detailTeamId === c1TeamId ? (flipped ? match.team2Id : match.team1Id)
+        : detailTeamId && detailTeamId === c2TeamId ? (flipped ? match.team1Id : match.team2Id)
         : ''
       goals.push(...expandGoalDetail(detail, playerName, ownGoal, scoringTeamId))
     }
@@ -209,13 +211,16 @@ async function fetchLiveMap(): Promise<Map<string, LiveInfo>> {
       const liveGoals: GoalEvent[] = []
       for (const detail of competition?.details ?? []) {
         const typeText: string = detail.type?.text ?? ''
-        const isGoal = typeText === 'Goal' || typeText === 'Own Goal' || typeText === 'Penalty - Scored'
+        const typeLower = typeText.toLowerCase()
+        const isGoal = typeLower.includes('goal') || typeText === 'Penalty - Scored'
         if (!isGoal) continue
         const playerName: string = detail.athletesInvolved?.[0]?.displayName ?? ''
-        const ownGoal = typeText === 'Own Goal'
-        const detailTeamId = detail.team?.id
-        const scoringTeamId = detailTeamId === c1.team?.id ? (flippedLive ? match.team2Id : match.team1Id)
-          : detailTeamId === c2.team?.id ? (flippedLive ? match.team1Id : match.team2Id)
+        const ownGoal = typeLower.includes('own')
+        const detailTeamId = String(detail.team?.id ?? '')
+        const c1TeamId = String(c1.team?.id ?? '')
+        const c2TeamId = String(c2.team?.id ?? '')
+        const scoringTeamId = detailTeamId && detailTeamId === c1TeamId ? (flippedLive ? match.team2Id : match.team1Id)
+          : detailTeamId && detailTeamId === c2TeamId ? (flippedLive ? match.team1Id : match.team2Id)
           : ''
         liveGoals.push(...expandGoalDetail(detail, playerName, ownGoal, scoringTeamId))
       }
