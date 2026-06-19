@@ -175,7 +175,19 @@ export default function LeaderboardPage() {
     } else {
       // Check if already subscribed
       navigator.serviceWorker.ready.then(reg => reg.pushManager.getSubscription()).then(sub => {
-        if (sub) setNotifState('subscribed')
+        if (!sub) return
+        setNotifState('subscribed')
+        // Re-register with server in case it lost the subscription (e.g. redeploy)
+        const json = sub.toJSON()
+        const p256dh = json.keys?.p256dh
+        const auth = json.keys?.auth
+        if (p256dh && auth) {
+          fetch('/api/push/subscribe', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ endpoint: sub.endpoint, keys: { p256dh, auth } }),
+          }).catch(() => {})
+        }
       }).catch(() => {})
     }
   }, [])
