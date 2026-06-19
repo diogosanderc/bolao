@@ -49,6 +49,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
           groupId: m.groupId,
           team1: { id: m.team1Id, name: teamById[m.team1Id]?.name ?? m.team1Id, flag: teamById[m.team1Id]?.flag ?? '🏳' },
           team2: { id: m.team2Id, name: teamById[m.team2Id]?.name ?? m.team2Id, flag: teamById[m.team2Id]?.flag ?? '🏳' },
+          date: matchDates[m.id]?.date ?? null,
           dateBRT: matchDates[m.id]?.dateBRT ?? null,
           prediction: pred ? { score1: pred.score1, score2: pred.score2 } : null,
           result: result ? { score1: result.score1, score2: result.score2 } : null,

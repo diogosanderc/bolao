@@ -11,6 +11,7 @@ type PredEntry = {
   groupId?: string
   team1: { id: string; name: string; flag: string }
   team2: { id: string; name: string; flag: string }
+  date: string | null
   dateBRT: string | null
   prediction: { score1: number; score2: number } | null
   result: { score1: number; score2: number } | null
@@ -53,9 +54,10 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
   const upcoming = (data?.predictions.filter(p => p.result === null && p.prediction !== null) ?? [])
     .slice()
     .sort((a, b) => {
-      const aIsGroup = a.phase === 'group' ? 0 : 1
-      const bIsGroup = b.phase === 'group' ? 0 : 1
-      if (aIsGroup !== bIsGroup) return aIsGroup - bIsGroup
+      // Matches without a date (TBD) go to the end
+      if (a.date && !b.date) return -1
+      if (!a.date && b.date) return 1
+      if (a.date && b.date && a.date !== b.date) return a.date < b.date ? -1 : 1
       return a.matchNumber - b.matchNumber
     })
 
