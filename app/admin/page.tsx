@@ -75,6 +75,7 @@ export default function AdminPage() {
   const [syncError, setSyncError] = useState('')
   const [selectedDiffs, setSelectedDiffs] = useState<Set<string>>(new Set())
   const [visitStats, setVisitStats] = useState<{ today: number; total: number; days: { date: string; label: string; count: number }[] } | null>(null)
+  const [hoveredBar, setHoveredBar] = useState<number | null>(null)
   const [lastDateSync, setLastDateSync] = useState<string | null>(null)
 
   const showToast = (msg: string) => {
@@ -441,17 +442,31 @@ export default function AdminPage() {
                 <span>Total: <span className="text-gray-300 font-semibold">{visitStats.total}</span></span>
               </div>
             </div>
-            <div className="flex items-end gap-0.5" style={{ height: `${BAR_H}px` }}>
+            <div className="relative flex items-end gap-0.5" style={{ height: `${BAR_H + 24}px`, paddingTop: '24px' }}>
               {visitStats.days.map((d, i) => {
                 const isToday = i === visitStats.days.length - 1
                 const barH = d.count === 0 ? 1 : Math.max(Math.round((d.count / maxCount) * BAR_H), 3)
+                const isHovered = hoveredBar === i
                 return (
                   <div
                     key={d.date}
-                    className={`flex-1 rounded-sm ${isToday ? 'bg-yellow-500' : 'bg-gray-600'}`}
-                    style={{ height: `${barH}px` }}
-                    title={`${d.label}: ${d.count} visitas`}
-                  />
+                    className="relative flex-1 flex flex-col items-center justify-end"
+                    style={{ height: '100%' }}
+                    onMouseEnter={() => setHoveredBar(i)}
+                    onMouseLeave={() => setHoveredBar(null)}
+                    onTouchStart={() => setHoveredBar(i)}
+                    onTouchEnd={() => setTimeout(() => setHoveredBar(null), 1200)}
+                  >
+                    {isHovered && (
+                      <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 whitespace-nowrap bg-gray-700 text-white text-[10px] font-semibold px-1.5 py-0.5 rounded z-10 pointer-events-none">
+                        {d.count}
+                      </div>
+                    )}
+                    <div
+                      className={`w-full rounded-sm transition-colors ${isToday ? (isHovered ? 'bg-yellow-300' : 'bg-yellow-500') : (isHovered ? 'bg-gray-400' : 'bg-gray-600')}`}
+                      style={{ height: `${barH}px` }}
+                    />
+                  </div>
                 )
               })}
             </div>
