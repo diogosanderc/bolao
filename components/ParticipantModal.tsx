@@ -50,7 +50,14 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
   }, [onClose])
 
   const played = data?.predictions.filter(p => p.result !== null) ?? []
-  const upcoming = data?.predictions.filter(p => p.result === null && p.prediction !== null) ?? []
+  const upcoming = (data?.predictions.filter(p => p.result === null && p.prediction !== null) ?? [])
+    .slice()
+    .sort((a, b) => {
+      const aIsGroup = a.phase === 'group' ? 0 : 1
+      const bIsGroup = b.phase === 'group' ? 0 : 1
+      if (aIsGroup !== bIsGroup) return aIsGroup - bIsGroup
+      return a.matchNumber - b.matchNumber
+    })
 
   function rowColor(p: PredEntry) {
     if (!p.result) return ''
