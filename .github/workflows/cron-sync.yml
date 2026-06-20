@@ -10,8 +10,13 @@ jobs:
     steps:
       - name: Call auto-sync endpoint
         run: |
-          curl -s -X POST "${{ secrets.APP_URL }}/api/admin/sync/auto" \
+          response=$(curl -s -L -X POST "${{ secrets.APP_URL }}/api/admin/sync/auto" \
             -H "Content-Type: application/json" \
             -H "x-admin-key: ${{ secrets.ADMIN_KEY }}" \
             -d "{\"adminKey\": \"${{ secrets.ADMIN_KEY }}\"}" \
-            | jq .
+            -w "\n__HTTP_STATUS__%{http_code}")
+          http_status=$(echo "$response" | grep '__HTTP_STATUS__' | sed 's/__HTTP_STATUS__//')
+          body=$(echo "$response" | grep -v '__HTTP_STATUS__')
+          echo "HTTP Status: $http_status"
+          echo "Response: $body"
+          echo "$body" | jq . || echo "(response is not JSON)"
