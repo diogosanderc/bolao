@@ -1,9 +1,9 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { Header } from '@/components/Header'
-import { Rajdhani } from 'next/font/google'
+import { Plus_Jakarta_Sans } from 'next/font/google'
 
-const rajdhani = Rajdhani({ subsets: ['latin'], weight: ['400', '500', '600', '700'] })
+const font = Plus_Jakarta_Sans({ subsets: ['latin'], weight: ['400', '500', '600', '700', '800'] })
 
 export const metadata: Metadata = {
   title: 'Bolão Copa do Mundo 2026',
@@ -26,7 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="apple-touch-icon" href="/icon-192.png" />
         <meta name="theme-color" content="#166534" />
       </head>
-      <body className={`min-h-screen antialiased ${rajdhani.className}`}>
+      <body className={`min-h-screen antialiased ${font.className}`}>
         <script dangerouslySetInnerHTML={{ __html: `(function(){var t=localStorage.getItem('theme')||'dark';if(t==='dark')document.documentElement.classList.add('dark')})()` }} />
         <script dangerouslySetInnerHTML={{ __html: `if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js')}` }} />
         <Header />
