@@ -145,37 +145,32 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
             <div className="divide-y divide-gray-800/60">
               {played.length === 0 && <p className="text-center py-10 text-gray-600">Nenhum jogo disputado ainda.</p>}
               {played.map(p => (
-                <div key={p.matchId} className={`px-4 py-3 ${rowColor(p)}`}>
+                <div key={p.matchId} className={`px-3 py-2.5 ${rowColor(p)}`}>
                   <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-1.5 text-sm min-w-0">
-                      <Flag teamId={p.team1.id} size={16} />
-                      <span className="text-gray-300 truncate">{p.team1.name}</span>
-                      <span className="text-gray-600 text-xs mx-1">vs</span>
-                      <Flag teamId={p.team2.id} size={16} />
-                      <span className="text-gray-300 truncate">{p.team2.name}</span>
+                    <div className="flex items-center gap-1 text-xs min-w-0 shrink-0">
+                      <Flag teamId={p.team1.id} size={14} />
+                      <span className="text-gray-300 font-semibold">{p.team1.id}</span>
+                      <span className="text-gray-600 mx-0.5">×</span>
+                      <Flag teamId={p.team2.id} size={14} />
+                      <span className="text-gray-300 font-semibold">{p.team2.id}</span>
                     </div>
-                    <div className="flex items-center gap-3 shrink-0 text-sm">
-                      {/* Result */}
-                      <span className="text-gray-500 text-xs">
-                        {p.result!.score1} × {p.result!.score2}
-                      </span>
-                      {/* Prediction */}
-                      <span className={`font-bold px-2 py-0.5 rounded text-xs ${
+                    <div className="flex items-center gap-2 shrink-0 text-xs">
+                      <span className="text-gray-500">{p.result!.score1}–{p.result!.score2}</span>
+                      <span className={`font-bold px-2 py-0.5 rounded ${
                         p.correctScore ? 'text-green-300 bg-green-950' :
                         p.correctResult ? 'text-blue-300 bg-blue-950/50' :
                         'text-gray-400 bg-gray-800'
                       }`}>
-                        {p.prediction ? `${p.prediction.score1} × ${p.prediction.score2}` : '—'}
+                        {p.prediction ? `${p.prediction.score1}–${p.prediction.score2}` : '—'}
                       </span>
-                      {/* Points */}
-                      <span className={`w-10 text-right font-bold ${(p.points ?? 0) > 0 ? 'text-yellow-400' : 'text-gray-600'}`}>
+                      <span className={`w-8 text-right font-bold ${(p.points ?? 0) > 0 ? 'text-yellow-400' : 'text-gray-600'}`}>
                         {p.points !== undefined ? `+${p.points}` : '—'}
                       </span>
                     </div>
                   </div>
-                  {p.correctScore && <p className="text-xs text-green-500 mt-0.5 pl-0.5">🎯 Placar exato!</p>}
-                  {!p.correctScore && p.correctResult && <p className="text-xs text-blue-400 mt-0.5 pl-0.5">✅ Resultado certo</p>}
-                  {!p.correctResult && p.result && <p className="text-xs text-red-800 mt-0.5 pl-0.5">✗ Errou</p>}
+                  {p.correctScore && <p className="text-[10px] text-green-500 mt-0.5 pl-0.5">🎯 Placar exato!</p>}
+                  {!p.correctScore && p.correctResult && <p className="text-[10px] text-blue-400 mt-0.5 pl-0.5">✅ Resultado certo</p>}
+                  {!p.correctResult && p.result && <p className="text-[10px] text-red-800 mt-0.5 pl-0.5">✗ Errou</p>}
                 </div>
               ))}
             </div>
@@ -185,18 +180,18 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
             <div className="divide-y divide-gray-800/60">
               {upcoming.length === 0 && <p className="text-center py-10 text-gray-600">Sem palpites futuros registrados.</p>}
               {upcoming.map(p => (
-                <div key={p.matchId} className="px-4 py-3 flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-1.5 text-sm min-w-0">
-                    <Flag teamId={p.team1.id} size={16} />
-                    <span className="text-gray-300 truncate">{p.team1.name}</span>
-                    <span className="text-gray-600 text-xs mx-1">vs</span>
-                    <Flag teamId={p.team2.id} size={16} />
-                    <span className="text-gray-300 truncate">{p.team2.name}</span>
+                <div key={p.matchId} className="px-3 py-2.5 flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-1 text-xs min-w-0 shrink-0">
+                    <Flag teamId={p.team1.id} size={14} />
+                    <span className="text-gray-300 font-semibold">{p.team1.id}</span>
+                    <span className="text-gray-600 mx-0.5">×</span>
+                    <Flag teamId={p.team2.id} size={14} />
+                    <span className="text-gray-300 font-semibold">{p.team2.id}</span>
                   </div>
-                  <div className="flex items-center gap-3 shrink-0">
+                  <div className="flex items-center gap-2 shrink-0">
                     {p.dateBRT && <span className="text-xs text-gray-600">{p.dateBRT}</span>}
-                    <span className="font-bold text-yellow-400 text-sm px-2 py-0.5 bg-yellow-950/40 rounded">
-                      {p.prediction ? `${p.prediction.score1} × ${p.prediction.score2}` : '—'}
+                    <span className="font-bold text-yellow-400 text-xs px-2 py-0.5 bg-yellow-950/40 rounded">
+                      {p.prediction ? `${p.prediction.score1}–${p.prediction.score2}` : '—'}
                     </span>
                   </div>
                 </div>
