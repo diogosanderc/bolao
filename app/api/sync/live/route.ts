@@ -12,7 +12,8 @@ type MatchState = {
   sentHalftime?: boolean
   sentFinal?: boolean
   sentGoals?: number
-  sentVARKeys?: string[]  // deduplication keys for VAR/cancelled events already notified
+  sentVARKeys?: string[]      // deduplication keys for VAR/cancelled events already notified
+  sentRedCardKeys?: string[]  // deduplication keys for red card events already notified
 }
 
 type ESPNProcessed = {
@@ -23,7 +24,8 @@ type ESPNProcessed = {
   t1: string
   t2: string
   clock: string
-  varKeys: string[]  // unique keys for VAR/cancelled events found in ESPN details
+  varKeys: string[]      // unique keys for VAR/cancelled events found in ESPN details
+  redCardKeys: string[]  // unique keys for red card events found in ESPN details
 }
 
 let lastRunAt = 0
@@ -90,11 +92,13 @@ export async function POST() {
     const newStatus: MatchState['status'] = completed ? 'completed' : halftime ? 'halftime' : inProgress ? 'in' : 'pre'
     const clock: string = halftime ? 'Intervalo' : (status?.displayClock ?? '')
 
-    // Collect VAR / goal-cancelled event keys from ESPN competition details
+    // Collect VAR / goal-cancelled and red card event keys from ESPN competition details
     const varKeys: string[] = []
+    const redCardKeys: string[] = []
     for (const detail of competition?.details ?? []) {
       const typeText: string = detail.type?.text ?? ''
       const typeLower = typeText.toLowerCase()
+
       if (
         typeLower.includes('var') ||
         typeLower.includes('review') ||
@@ -104,6 +108,14 @@ export async function POST() {
       ) {
         const minute = detail.clock?.displayValue ?? ''
         varKeys.push(`${typeText}|${minute}`)
+      }
+
+      // Red Card or second Yellow (Yellow-Red)
+      if (typeLower === 'red card' || typeLower === 'yellow card - red') {
+        const player: string = detail.athletesInvolved?.[0]?.displayName ?? '?'
+        const minute = detail.clock?.displayValue ?? ''
+        const detailTeamId = String(detail.team?.id ?? '')
+        redCardKeys.push(`${detailTeamId}|${player}|${minute}`)
       }
     }
 
@@ -116,6 +128,7 @@ export async function POST() {
       t2: teamById[match.team2Id]?.name ?? match.team2Id,
       clock,
       varKeys,
+      redCardKeys,
     })
   }
 
@@ -132,7 +145,7 @@ export async function POST() {
     // Reset push queue so retries don't double-send
     pushQueue.length = 0
 
-    for (const { matchId, newStatus, score1, score2, t1, t2, clock, varKeys } of espnProcessed) {
+    for (const { matchId, newStatus, score1, score2, t1, t2, clock, varKeys, redCardKeys } of espnProcessed) {
       const prev = persistedStates[matchId]
 
       if (prev?.status === 'completed') continue
@@ -239,6 +252,24 @@ export async function POST() {
         if (newVARKeys.length > 0) {
           pushQueue.push({ title: '🔍 VAR em andamento', body: `${t1} x ${t2}` })
           newState.sentVARKeys = [...Array.from(alreadySent), ...newVARKeys]
+        }
+      }
+
+      // Red cards: notify once per unique player+minute event
+      if (newStatus !== 'pre' && redCardKeys.length > 0) {
+        const alreadySentRed = new Set(prev.sentRedCardKeys ?? [])
+        const newRedKeys: string[] = []
+        for (const key of redCardKeys) {
+          if (!alreadySentRed.has(key)) {
+            // key = "teamId|playerName|minute"
+            const [, player, minute] = key.split('|')
+            const clockLabel = minute ? ` · ${minute}` : ''
+            pushQueue.push({ title: `🟥 Cartão vermelho${clockLabel}`, body: `${player} — ${t1} x ${t2}` })
+            newRedKeys.push(key)
+          }
+        }
+        if (newRedKeys.length > 0) {
+          newState.sentRedCardKeys = [...Array.from(alreadySentRed), ...newRedKeys]
         }
       }
 
