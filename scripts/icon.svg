@@ -1,84 +1,71 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
     <clipPath id="bg"><rect width="512" height="512" rx="108"/></clipPath>
-    <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#7C3AED"/>
-      <stop offset="100%" stop-color="#2563EB"/>
-    </linearGradient>
-    <linearGradient id="ballGrad" x1="0.3" y1="0.1" x2="0.7" y2="0.9">
-      <stop offset="0%" stop-color="#ffffff"/>
-      <stop offset="100%" stop-color="#e2e8f0"/>
-    </linearGradient>
-    <linearGradient id="trophyGrad" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#FDE68A"/>
-      <stop offset="100%" stop-color="#F59E0B"/>
-    </linearGradient>
+    <clipPath id="shield">
+      <path d="M256 496 Q88 416 68 288 L56 132 Q56 72 120 72 L256 72 L392 72 Q456 72 456 132 L444 288 Q424 416 256 496 Z"/>
+    </clipPath>
   </defs>
 
-  <rect width="512" height="512" rx="108" fill="url(#grad)"/>
+  <!-- White background -->
+  <rect width="512" height="512" rx="108" fill="#FFFFFF"/>
+
   <g clip-path="url(#bg)">
+    <!-- Shield fill -->
+    <path d="M256 496 Q88 416 68 288 L56 132 Q56 72 120 72 L256 72 L392 72 Q456 72 456 132 L444 288 Q424 416 256 496 Z"
+          fill="#27A349"/>
 
-    <!-- Background decorative circles -->
-    <circle cx="60"  cy="60"  r="90"  fill="#ffffff" opacity="0.05"/>
-    <circle cx="460" cy="440" r="120" fill="#ffffff" opacity="0.05"/>
-    <circle cx="440" cy="80"  r="60"  fill="#ffffff" opacity="0.05"/>
+    <!-- Vertical stripes (darker green, clipped to shield) -->
+    <g clip-path="url(#shield)">
+      <rect x="56"  y="72" width="44" height="440" fill="#1E8C3D"/>
+      <rect x="144" y="72" width="44" height="440" fill="#1E8C3D"/>
+      <rect x="232" y="72" width="44" height="440" fill="#1E8C3D"/>
+      <rect x="320" y="72" width="44" height="440" fill="#1E8C3D"/>
+      <rect x="408" y="72" width="44" height="440" fill="#1E8C3D"/>
+    </g>
 
-    <!-- Confetti dots -->
-    <circle cx="68"  cy="180" r="9"  fill="#FCD34D"/>
-    <circle cx="108" cy="390" r="7"  fill="#34D399"/>
-    <circle cx="54"  cy="320" r="6"  fill="#F87171"/>
-    <circle cx="440" cy="190" r="8"  fill="#FCD34D"/>
-    <circle cx="460" cy="310" r="10" fill="#34D399"/>
-    <circle cx="420" cy="370" r="6"  fill="#F87171"/>
-    <circle cx="150" cy="68"  r="7"  fill="#F87171"/>
-    <circle cx="360" cy="58"  r="9"  fill="#34D399"/>
-    <circle cx="88"  cy="440" r="8"  fill="#93C5FD"/>
-    <circle cx="430" cy="460" r="7"  fill="#FCD34D"/>
+    <!-- Yellow outer border of shield -->
+    <path d="M256 496 Q88 416 68 288 L56 132 Q56 72 120 72 L256 72 L392 72 Q456 72 456 132 L444 288 Q424 416 256 496 Z"
+          fill="none" stroke="#F5C518" stroke-width="13"/>
 
-    <!-- Stars -->
-    <polygon points="90,260 94,273 108,273 97,281 101,294 90,286 79,294 83,281 72,273 86,273" fill="#FCD34D"/>
-    <polygon points="420,260 424,273 438,273 427,281 431,294 420,286 409,294 413,281 402,273 416,273" fill="#FCD34D"/>
-    <polygon points="188,44 191,53 200,53 193,58 196,67 188,62 180,67 183,58 176,53 185,53" fill="#FCD34D"/>
-    <polygon points="324,44 327,53 336,53 329,58 332,67 324,62 316,67 319,58 312,53 321,53" fill="#FCD34D"/>
+    <!-- Yellow inner border of shield (inset) -->
+    <path d="M256 470 Q108 398 90 282 L80 140 Q80 98 134 98 L256 98 L378 98 Q432 98 432 140 L422 282 Q404 398 256 470 Z"
+          fill="none" stroke="#F5C518" stroke-width="5.5"/>
 
-    <!-- Soccer ball -->
-    <circle cx="256" cy="300" r="148" fill="url(#ballGrad)" stroke="#cbd5e1" stroke-width="3"/>
-    <!-- Ball patches (simplified flat pentagons) -->
-    <!-- Center patch -->
-    <polygon points="256,200 282,218 272,248 240,248 230,218" fill="#1e293b"/>
-    <!-- Top-left -->
-    <polygon points="211,172 237,190 228,220 196,220 186,190" fill="#1e293b" transform="rotate(-38,219,196)"/>
-    <!-- Top-right -->
-    <polygon points="280,163 306,181 297,211 265,211 255,181" fill="#1e293b" transform="rotate(38,281,187)"/>
-    <!-- Left -->
-    <polygon points="168,262 194,280 185,310 153,310 143,280" fill="#1e293b" transform="rotate(-18,168,286)"/>
-    <!-- Right -->
-    <polygon points="316,262 342,280 333,310 301,310 291,280" fill="#1e293b" transform="rotate(18,317,286)"/>
-    <!-- Bottom-left -->
-    <polygon points="196,348 222,366 213,396 181,396 171,366" fill="#1e293b" transform="rotate(20,197,372)"/>
-    <!-- Bottom-right -->
-    <polygon points="288,348 314,366 305,396 273,396 263,366" fill="#1e293b" transform="rotate(-20,289,372)"/>
+    <!-- BOLÃO text -->
+    <text x="256" y="315"
+          font-family="'Arial Black', Arial, sans-serif"
+          font-weight="900" font-size="86"
+          fill="#F0EAD2" text-anchor="middle">BOLÃO</text>
 
-    <!-- Trophy -->
-    <!-- Cup bowl -->
-    <path d="M198 80 L314 80 L314 180 Q314 228 256 242 Q198 228 198 180 Z" fill="url(#trophyGrad)"/>
-    <!-- Left handle -->
-    <path d="M198 104 C168 104 158 126 158 144 C158 168 174 180 198 176"
-          fill="none" stroke="#F59E0B" stroke-width="20" stroke-linecap="round"/>
-    <!-- Right handle -->
-    <path d="M314 104 C344 104 354 126 354 144 C354 168 338 180 314 176"
-          fill="none" stroke="#F59E0B" stroke-width="20" stroke-linecap="round"/>
-    <!-- Cup inner shine -->
-    <path d="M218 90 L294 90 L294 170 Q294 206 256 216 Q234 210 224 196 Q218 182 218 168 Z"
-          fill="#FDE68A" opacity="0.45"/>
-    <!-- Stem -->
-    <rect x="240" y="242" width="32" height="32" rx="4" fill="#F59E0B"/>
-    <!-- Base -->
-    <rect x="204" y="272" width="104" height="22" rx="6" fill="#F59E0B"/>
-    <rect x="204" y="283" width="104" height="11" rx="6" fill="#D97706"/>
-
-    <!-- Trophy stars -->
-    <polygon points="256,52 261,67 277,67 264,76 269,91 256,82 243,91 248,76 235,67 251,67" fill="#FDE68A"/>
-
+    <!-- DA COPA with side dashes -->
+    <rect x="78"  y="348" width="46" height="9" rx="4.5" fill="#F5C518"/>
+    <rect x="388" y="348" width="46" height="9" rx="4.5" fill="#F5C518"/>
+    <text x="256" y="374"
+          font-family="'Arial Black', Arial, sans-serif"
+          font-weight="900" font-size="50"
+          fill="#F5C518" text-anchor="middle" letter-spacing="3">DA COPA</text>
   </g>
+
+  <!-- Soccer ball (on top, overlapping shield top) -->
+  <!-- Base circle: cream -->
+  <circle cx="256" cy="100" r="78" fill="#F0EAD2" stroke="#D8CEB8" stroke-width="2.5"/>
+
+  <!-- Dark green patches (pentagon shapes) -->
+  <!-- Top center pentagon -->
+  <polygon points="256,34 274,47 267,68 245,68 238,47" fill="#1A7A35"/>
+  <!-- Top-left pentagon -->
+  <polygon points="200,50 218,44 228,64 215,78 197,70" fill="#1A7A35"/>
+  <!-- Top-right pentagon -->
+  <polygon points="312,50 294,44 284,64 297,78 315,70" fill="#1A7A35"/>
+  <!-- Left pentagon -->
+  <polygon points="184,106 191,86 210,88 216,110 200,122" fill="#1A7A35"/>
+  <!-- Right pentagon -->
+  <polygon points="328,106 321,86 302,88 296,110 312,122" fill="#1A7A35"/>
+  <!-- Bottom-left pentagon -->
+  <polygon points="208,148 220,130 238,138 236,160 218,164" fill="#1A7A35"/>
+  <!-- Bottom-right pentagon -->
+  <polygon points="304,148 292,130 274,138 276,160 294,164" fill="#1A7A35"/>
+
+  <!-- Center yellow hexagon -->
+  <polygon points="256,76 272,85 272,103 256,112 240,103 240,85" fill="#F5C518"/>
 </svg>
