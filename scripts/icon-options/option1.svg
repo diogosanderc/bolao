@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Option 1: Green field — big flat soccer ball + bold text -->
+  <rect width="512" height="512" rx="112" fill="#15803D"/>
+
+  <!-- Ball base (white circle) -->
+  <circle cx="256" cy="196" r="162" fill="#FFFFFF"/>
+
+  <!-- Dark green flat pentagon patches — classic Telstar pattern -->
+  <!-- Top center -->
+  <polygon points="256,57 290,80 278,118 234,118 222,80" fill="#14532D"/>
+  <!-- Upper-left -->
+  <polygon points="157,96 189,78 208,116 187,147 152,136" fill="#14532D"/>
+  <!-- Upper-right -->
+  <polygon points="355,96 323,78 304,116 325,147 360,136" fill="#14532D"/>
+  <!-- Left -->
+  <polygon points="112,213 134,178 170,190 172,232 142,254" fill="#14532D"/>
+  <!-- Right -->
+  <polygon points="400,213 378,178 342,190 340,232 370,254" fill="#14532D"/>
+  <!-- Lower-left -->
+  <polygon points="158,305 172,268 210,272 216,312 188,330" fill="#14532D"/>
+  <!-- Lower-right -->
+  <polygon points="354,305 340,268 302,272 296,312 324,330" fill="#14532D"/>
+
+  <!-- BOLÃO text -->
+  <text x="256" y="432"
+        font-family="Impact, 'Arial Black', sans-serif"
+        font-size="90" font-weight="900"
+        fill="#FFFFFF" text-anchor="middle" letter-spacing="3">BOLÃO</text>
+
+  <!-- DA COPA text -->
+  <text x="256" y="485"
+        font-family="Impact, 'Arial Black', sans-serif"
+        font-size="44" font-weight="900"
+        fill="#86EFAC" text-anchor="middle" letter-spacing="8">DA COPA</text>
+</svg>
