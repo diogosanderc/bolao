@@ -150,7 +150,7 @@ export async function POST() {
       const newState: MatchState = { status: newStatus, score1, score2, sentStarted, sentHalftime, sentGoals, sentFinal }
 
       if (newStatus === 'in' && !sentStarted) {
-        pushQueue.push({ title: '🟢 Jogo começou!', body: `${t1} vs ${t2}` })
+        pushQueue.push({ title: '🟢 Jogo começou!', body: `${t1} x ${t2}` })
         newState.sentStarted = true
       }
 
