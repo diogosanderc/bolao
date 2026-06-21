@@ -260,11 +260,8 @@ export default function LeaderboardPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-yellow-600 dark:text-yellow-400 flex items-center gap-2">
+        <h2 className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
           Classificação
-          {leaderboardHasLive && (
-            <span className="text-xs font-bold text-white bg-red-600 px-1.5 py-0.5 rounded animate-pulse">AO VIVO</span>
-          )}
         </h2>
         <div className="flex items-center gap-3">
           {notifState !== 'unsupported' && (
@@ -404,6 +401,13 @@ export default function LeaderboardPage() {
         >
           📊 {projectionMode ? 'Ocultar Projeção' : 'Ver Projeção'}
         </button>
+      )}
+
+      {leaderboardHasLive && (
+        <div className="flex items-center justify-center gap-2 py-1.5">
+          <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+          <span className="text-xs font-semibold text-red-400">classificação ao vivo</span>
+        </div>
       )}
 
       {projectionMode && data.length > 0 && (
