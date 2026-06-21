@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Option 4: Dark premium — gold WC trophy + sports typography -->
+  <rect width="512" height="512" rx="112" fill="#0C1A0E"/>
+
+  <!-- Subtle green glow behind trophy -->
+  <ellipse cx="256" cy="260" rx="180" ry="200" fill="#1A3D1A" opacity="0.6"/>
+
+  <!-- ★★★ stars -->
+  <text x="256" y="68" font-family="sans-serif" font-size="36" fill="#F59E0B"
+        text-anchor="middle" letter-spacing="20">★★★</text>
+
+  <!-- === FIFA WC TROPHY === -->
+  <!-- Globe (green, top) -->
+  <circle cx="256" cy="138" r="58" fill="#16A34A"/>
+  <!-- Globe meridian lines -->
+  <ellipse cx="256" cy="138" rx="29" ry="58" fill="none" stroke="#15803D" stroke-width="2.5"/>
+  <line x1="198" y1="138" x2="314" y2="138" stroke="#15803D" stroke-width="2.5"/>
+  <line x1="203" y1="112" x2="309" y2="112" stroke="#15803D" stroke-width="1.5"/>
+  <line x1="203" y1="164" x2="309" y2="164" stroke="#15803D" stroke-width="1.5"/>
+  <!-- Globe gold ring border -->
+  <circle cx="256" cy="138" r="58" fill="none" stroke="#F59E0B" stroke-width="4"/>
+
+  <!-- Trophy body — two figures forming chalice -->
+  <path d="
+    M 222,192
+    C 178,208 138,242 146,272
+    C 154,300 188,308 216,320
+    L 214,350
+    L 298,350
+    L 296,320
+    C 324,308 358,300 366,272
+    C 374,242 334,208 290,192
+    Z
+  " fill="#F59E0B"/>
+  <!-- Inner shadow on body to hint at figure shape -->
+  <path d="
+    M 246,196 C 240,230 238,280 240,350
+    L 256,350 L 272,350
+    C 274,280 272,230 266,196 Z
+  " fill="#D97706" opacity="0.5"/>
+
+  <!-- Stem -->
+  <rect x="228" y="350" width="56" height="36" rx="3" fill="#F59E0B"/>
+  <!-- Base level 1 -->
+  <rect x="194" y="386" width="124" height="20" rx="4" fill="#F59E0B"/>
+  <!-- Base level 2 (wider, darker) -->
+  <rect x="172" y="406" width="168" height="24" rx="6" fill="#D97706"/>
+
+  <!-- BOLÃO text — condensed sport font -->
+  <text x="256" y="468"
+        font-family="Impact, 'Arial Black', Arial, sans-serif"
+        font-size="96" fill="#FFFFFF"
+        text-anchor="middle" letter-spacing="2">BOLÃO</text>
+
+  <!-- DA COPA -->
+  <text x="256" y="502"
+        font-family="Impact, 'Arial Black', Arial, sans-serif"
+        font-size="40" fill="#F59E0B"
+        text-anchor="middle" letter-spacing="10">DA COPA</text>
+</svg>

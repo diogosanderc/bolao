@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Option 5: Brazil green — white trophy + yellow bold text -->
+  <rect width="512" height="512" rx="112" fill="#15803D"/>
+
+  <!-- Top band (darker stripe) -->
+  <rect width="512" height="90" rx="0" fill="#166534"/>
+  <rect width="512" height="90" y="0" rx="112" fill="#166534"/>
+
+  <!-- Stars in top band -->
+  <text x="256" y="62" font-family="sans-serif" font-size="38" fill="#FACC15"
+        text-anchor="middle" letter-spacing="18">★★★★★</text>
+
+  <!-- === WC TROPHY in white === -->
+  <!-- Globe -->
+  <circle cx="256" cy="150" r="55" fill="#FFFFFF"/>
+  <!-- Globe lines in green -->
+  <ellipse cx="256" cy="150" rx="27" ry="55" fill="none" stroke="#16A34A" stroke-width="2.5"/>
+  <line x1="201" y1="150" x2="311" y2="150" stroke="#16A34A" stroke-width="2.5"/>
+  <line x1="206" y1="126" x2="306" y2="126" stroke="#16A34A" stroke-width="1.5"/>
+  <line x1="206" y1="174" x2="306" y2="174" stroke="#16A34A" stroke-width="1.5"/>
+  <!-- Gold rim on globe -->
+  <circle cx="256" cy="150" r="55" fill="none" stroke="#FACC15" stroke-width="3.5"/>
+
+  <!-- Trophy body (white) -->
+  <path d="
+    M 224,200
+    C 180,216 142,248 150,276
+    C 158,304 190,312 218,324
+    L 216,352
+    L 296,352
+    L 294,324
+    C 322,312 354,304 362,276
+    C 370,248 332,216 288,200
+    Z
+  " fill="#FFFFFF"/>
+  <!-- Subtle figure divide line -->
+  <line x1="256" y1="204" x2="256" y2="352" stroke="#D1FAE5" stroke-width="2" opacity="0.6"/>
+
+  <!-- Stem -->
+  <rect x="230" y="352" width="52" height="34" rx="3" fill="#FFFFFF"/>
+  <!-- Base 1 -->
+  <rect x="196" y="386" width="120" height="19" rx="4" fill="#FFFFFF"/>
+  <!-- Base 2 -->
+  <rect x="176" y="405" width="160" height="22" rx="5" fill="#D1FAE5"/>
+
+  <!-- BOLÃO text -->
+  <text x="256" y="466"
+        font-family="Impact, 'Arial Black', Arial, sans-serif"
+        font-size="92" fill="#FACC15"
+        text-anchor="middle" letter-spacing="2">BOLÃO</text>
+
+  <!-- DA COPA -->
+  <text x="256" y="502"
+        font-family="Impact, 'Arial Black', Arial, sans-serif"
+        font-size="40" fill="#FFFFFF"
+        text-anchor="middle" letter-spacing="10">DA COPA</text>
+</svg>
