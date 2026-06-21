@@ -1,48 +1,47 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
     <clipPath id="bg">
-      <rect width="512" height="512" rx="112"/>
+      <rect width="512" height="512" rx="100"/>
     </clipPath>
   </defs>
 
-  <!-- Background -->
-  <rect width="512" height="512" rx="112" fill="#001B5E"/>
+  <!-- Background black -->
+  <rect width="512" height="512" rx="100" fill="#000000"/>
 
-  <!-- Everything clipped to the rounded rect -->
   <g clip-path="url(#bg)">
-    <!-- Top red accent bar -->
-    <rect x="0" y="0" width="512" height="26" fill="#C8102E"/>
+    <!-- "26" numerals — bold, white, filling the frame -->
+    <text x="138" y="400"
+          font-family="Arial Black, Arial, sans-serif"
+          font-weight="900" font-size="320"
+          fill="white" text-anchor="middle">2</text>
+    <text x="374" y="400"
+          font-family="Arial Black, Arial, sans-serif"
+          font-weight="900" font-size="320"
+          fill="white" text-anchor="middle">6</text>
 
-    <!-- Bottom red accent bar -->
-    <rect x="0" y="486" width="512" height="26" fill="#C8102E"/>
-
-    <!-- Trophy cup body -->
-    <path d="M172 118 L340 118 L340 242 Q340 312 256 328 Q172 312 172 242 Z" fill="#FFB81C"/>
-
+    <!-- Flat trophy centered, overlapping the gap between 2 and 6 -->
+    <!-- Cup bowl -->
+    <path d="M206 68 L306 68 L306 180 Q306 228 256 240 Q206 228 206 180 Z" fill="#FFB81C"/>
     <!-- Left handle -->
-    <path d="M172 148 C128 148 118 178 118 200 C118 230 140 248 172 244"
-          fill="none" stroke="#FFB81C" stroke-width="28" stroke-linecap="round"/>
-
+    <path d="M206 92 C176 92 166 116 166 134 C166 158 182 170 206 166"
+          fill="none" stroke="#FFB81C" stroke-width="18" stroke-linecap="round"/>
     <!-- Right handle -->
-    <path d="M340 148 C384 148 394 178 394 200 C394 230 372 248 340 244"
-          fill="none" stroke="#FFB81C" stroke-width="28" stroke-linecap="round"/>
-
-    <!-- Inner cup highlight (flat) -->
-    <path d="M200 130 L312 130 L312 222 Q312 272 256 284 Q220 276 205 256 Q192 236 192 216 L192 130 Z"
-          fill="#FFC93C" opacity="0.3"/>
-
+    <path d="M306 92 C336 92 346 116 346 134 C346 158 330 170 306 166"
+          fill="none" stroke="#FFB81C" stroke-width="18" stroke-linecap="round"/>
+    <!-- Inner highlight (flat) -->
+    <path d="M224 78 L288 78 L288 168 Q288 208 256 218 Q238 212 230 200 Q224 188 224 174 Z"
+          fill="#FFC93C" opacity="0.28"/>
     <!-- Stem -->
-    <rect x="228" y="328" width="56" height="50" rx="5" fill="#FFB81C"/>
-
+    <rect x="242" y="240" width="28" height="30" rx="3" fill="#FFB81C"/>
     <!-- Base -->
-    <rect x="172" y="376" width="168" height="38" rx="10" fill="#FFB81C"/>
+    <rect x="210" y="268" width="92" height="18" rx="5" fill="#FFB81C"/>
+    <!-- Base shade -->
+    <rect x="210" y="278" width="92" height="8" rx="5" fill="#E6A010"/>
 
-    <!-- Base bottom shade -->
-    <rect x="172" y="400" width="168" height="14" rx="10" fill="#E6A010"/>
-
-    <!-- Stars — red · white · red -->
-    <polygon points="170,88 177,108 198,108 182,120 188,140 170,128 152,140 158,120 142,108 163,108" fill="#C8102E"/>
-    <polygon points="256,80 264,103 288,103 270,117 277,140 256,126 235,140 242,117 224,103 248,103" fill="#FFFFFF"/>
-    <polygon points="342,88 349,108 370,108 354,120 360,140 342,128 324,140 330,120 314,108 335,108" fill="#C8102E"/>
+    <!-- FIFA label -->
+    <text x="256" y="450"
+          font-family="Arial, sans-serif"
+          font-weight="700" font-size="46"
+          fill="white" text-anchor="middle" letter-spacing="10">FIFA</text>
   </g>
 </svg>
