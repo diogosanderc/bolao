@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Flag } from '@/components/Flag'
 import { PHASE_LABELS, Phase } from '@/lib/types'
 
@@ -33,11 +33,19 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
   const [data, setData] = useState<ParticipantData | null>(null)
   const [loading, setLoading] = useState(true)
   const [tab, setTab] = useState<'played' | 'upcoming'>('played')
+  const scrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     fetch(`/api/participante/${participantId}`)
       .then(r => r.json())
-      .then(d => { setData(d); setLoading(false) })
+      .then(d => {
+        setData(d)
+        setLoading(false)
+        // Scroll to bottom so most recent games are visible
+        requestAnimationFrame(() => {
+          if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+        })
+      })
       .catch(() => setLoading(false))
   }, [participantId])
 
@@ -130,7 +138,7 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
         </div>
 
         {/* Body */}
-        <div className="overflow-y-auto flex-1 px-1">
+        <div ref={scrollRef} className="overflow-y-auto flex-1 px-1">
           {loading && <div className="text-center py-12 text-gray-500">Carregando...</div>}
 
           {!loading && tab === 'played' && (
