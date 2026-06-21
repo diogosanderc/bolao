@@ -73,11 +73,18 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={onClose}>
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" />
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center"
+      onClick={onClose}
+      style={{ touchAction: 'none' }}
+    >
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm animate-fade-in" />
+
+      {/* Sheet */}
       <div
-        className="relative bg-gray-950 border border-gray-800 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-2xl flex flex-col"
-        style={{ maxHeight: '78vh', paddingBottom: 'env(safe-area-inset-bottom)' }}
+        className="relative bg-gray-950 border border-gray-800 border-b-0 rounded-t-2xl w-full max-w-2xl flex flex-col animate-slide-up"
+        style={{ maxHeight: '82vh', paddingBottom: 'env(safe-area-inset-bottom)', touchAction: 'pan-y' }}
         onClick={e => e.stopPropagation()}
       >
         {/* Drag handle (mobile only) */}
