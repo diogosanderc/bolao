@@ -208,7 +208,12 @@ export async function POST() {
       const sentGoals = prev.sentGoals ?? (prev.score1 + prev.score2)
       const sentFinal = prev.sentFinal ?? false
 
-      const newState: MatchState = { status: newStatus, score1, score2, sentStarted, sentHalftime, sentGoals, sentFinal }
+      const newState: MatchState = {
+        status: newStatus, score1, score2, sentStarted, sentHalftime, sentGoals, sentFinal,
+        // Always carry forward dedup keys — if omitted they become undefined and trigger re-notification
+        sentVARKeys: prev.sentVARKeys,
+        sentRedCardKeys: prev.sentRedCardKeys,
+      }
 
       if (newStatus === 'in' && !sentStarted) {
         pushQueue.push({ title: '🟢 Jogo começou!', body: `${t1} x ${t2}` })
