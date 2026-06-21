@@ -41,6 +41,7 @@ export default function LeaderboardPage() {
   const [loading, setLoading] = useState(true)
   const [projectionMode, setProjectionMode] = useState(false)
   const [remainingMatches, setRemainingMatches] = useState(0)
+  const [leaderboardHasLive, setLeaderboardHasLive] = useState(false)
   const [activeUsers, setActiveUsers] = useState<number | null>(null)
   const [selectedParticipant, setSelectedParticipant] = useState<{ id: string; name: string } | null>(null)
   const [matchModal, setMatchModal] = useState<{ matchId: string; label: string } | null>(null)
@@ -82,6 +83,7 @@ export default function LeaderboardPage() {
         setData(Array.isArray(d.leaderboard) ? d.leaderboard : [])
         setLastMatch(d.lastMatch ?? null)
         setRemainingMatches(d.remainingMatches ?? 0)
+        setLeaderboardHasLive(d.hasLive ?? false)
         setLastRefresh(new Date())
         setLoading(false)
       })
@@ -129,10 +131,10 @@ export default function LeaderboardPage() {
     }
   }, [])
 
-  // When there are live matches, refresh leaderboard every 30s and trigger ESPN sync every 60s
+  // When there are live matches, refresh leaderboard every 15s and trigger ESPN sync every 30s
   useEffect(() => {
     if (liveMatches.length === 0) return
-    const leaderboardInterval = setInterval(fetchLeaderboard, 30_000)
+    const leaderboardInterval = setInterval(fetchLeaderboard, 15_000)
     const syncInterval = setInterval(() => {
       fetch('/api/sync/live', { method: 'POST' }).catch(() => {})
     }, 30_000)
@@ -258,7 +260,12 @@ export default function LeaderboardPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">Classificação</h2>
+        <h2 className="text-2xl font-bold text-yellow-600 dark:text-yellow-400 flex items-center gap-2">
+          Classificação
+          {leaderboardHasLive && (
+            <span className="text-xs font-bold text-white bg-red-600 px-1.5 py-0.5 rounded animate-pulse">AO VIVO</span>
+          )}
+        </h2>
         <div className="flex items-center gap-3">
           {notifState !== 'unsupported' && (
             <div className="relative">

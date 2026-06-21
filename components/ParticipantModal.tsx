@@ -41,6 +41,12 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
       .catch(() => setLoading(false))
   }, [participantId])
 
+  // Lock body scroll while modal is open
+  useEffect(() => {
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = '' }
+  }, [])
+
   // Close on Escape
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }

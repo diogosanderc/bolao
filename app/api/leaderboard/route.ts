@@ -20,11 +20,26 @@ export async function GET() {
       return dateA.localeCompare(dateB)
     })
 
+    // Inject live match scores as provisional results so the leaderboard
+    // reflects in-progress matches in real time.
+    const liveStates: Record<string, any> = (db as any).liveMatchStates ?? {}
+    const playedMatchIds = new Set(db.results.map(r => r.matchId))
+    const provisionalResults: { matchId: string; score1: number; score2: number }[] = []
+    let hasLive = false
+    for (const [matchId, state] of Object.entries(liveStates)) {
+      if (playedMatchIds.has(matchId)) continue
+      if (state.status === 'in' || state.status === 'halftime' || state.status === 'completed') {
+        provisionalResults.push({ matchId, score1: state.score1, score2: state.score2 })
+        if (state.status === 'in' || state.status === 'halftime') hasLive = true
+      }
+    }
+    const allResults = [...sortedResults, ...provisionalResults]
+
     const leaderboard = computeLeaderboard(
       validParticipants,
       db.matchPredictions,
       db.groupPredictions,
-      sortedResults
+      allResults
     )
 
     // Compute previous leaderboard (all results except the last) for position change arrows
@@ -45,9 +60,9 @@ export async function GET() {
     }
 
     // Remaining matches (non-TBD only — group stage matches we can predict)
-    const playedMatchIds = new Set(db.results.map(r => r.matchId))
+    const allPlayedIds = new Set(allResults.map(r => r.matchId))
     const remainingMatches = ALL_MATCHES.filter(
-      m => !playedMatchIds.has(m.id) && m.team1Id !== 'TBD' && m.team2Id !== 'TBD'
+      m => !allPlayedIds.has(m.id) && m.team1Id !== 'TBD' && m.team2Id !== 'TBD'
     ).length
     const maxPerMatch = 8
 
@@ -78,13 +93,15 @@ export async function GET() {
         isInTop7: rank <= 7,
       }
     })
-    if (sortedResults.length > 1) {
-      const prevResults = sortedResults.slice(0, -1)
+    // Position change: during live → compare projected vs actual (base without provisional)
+    //                  otherwise   → compare current vs previous result
+    const baseForComparison = hasLive ? sortedResults : sortedResults.slice(0, -1)
+    if (hasLive || sortedResults.length > 1) {
       const prevLeaderboard = computeLeaderboard(
         validParticipants,
         db.matchPredictions,
         db.groupPredictions,
-        prevResults
+        baseForComparison
       )
       const prevRankMap = new Map<string, number>()
       for (const entry of prevLeaderboard) {
@@ -114,7 +131,7 @@ export async function GET() {
       }
     }
 
-    return NextResponse.json({ leaderboard: leaderboardWithChanges, lastMatch, remainingMatches })
+    return NextResponse.json({ leaderboard: leaderboardWithChanges, lastMatch, remainingMatches, hasLive })
   } catch (err) {
     console.error('[leaderboard]', err)
     return NextResponse.json({ leaderboard: [], lastMatch: null }, { status: 200 })
