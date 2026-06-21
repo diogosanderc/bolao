@@ -124,13 +124,13 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
         {/* Tabs */}
         <div className="flex border-b border-gray-800 shrink-0">
           <button
-            onClick={() => setTab('played')}
+            onClick={() => { setTab('played'); requestAnimationFrame(() => { if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight }) }}
             className={`flex-1 py-2.5 text-sm font-medium transition-colors ${tab === 'played' ? 'text-yellow-400 border-b-2 border-yellow-400' : 'text-gray-500 hover:text-gray-300'}`}
           >
             Jogados ({played.length})
           </button>
           <button
-            onClick={() => setTab('upcoming')}
+            onClick={() => { setTab('upcoming'); requestAnimationFrame(() => { if (scrollRef.current) scrollRef.current.scrollTop = 0 }) }}
             className={`flex-1 py-2.5 text-sm font-medium transition-colors ${tab === 'upcoming' ? 'text-yellow-400 border-b-2 border-yellow-400' : 'text-gray-500 hover:text-gray-300'}`}
           >
             Próximos palpites ({upcoming.length})
