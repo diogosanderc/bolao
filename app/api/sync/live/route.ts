@@ -12,6 +12,7 @@ type MatchState = {
   sentHalftime?: boolean
   sentFinal?: boolean
   sentGoals?: number
+  sentVARKeys?: string[]  // deduplication keys for VAR/cancelled events already notified
 }
 
 type ESPNProcessed = {
@@ -22,6 +23,7 @@ type ESPNProcessed = {
   t1: string
   t2: string
   clock: string
+  varKeys: string[]  // unique keys for VAR/cancelled events found in ESPN details
 }
 
 let lastRunAt = 0
@@ -88,6 +90,23 @@ export async function POST() {
     const newStatus: MatchState['status'] = completed ? 'completed' : halftime ? 'halftime' : inProgress ? 'in' : 'pre'
     const clock: string = halftime ? 'Intervalo' : (status?.displayClock ?? '')
 
+    // Collect VAR / goal-cancelled event keys from ESPN competition details
+    const varKeys: string[] = []
+    for (const detail of competition?.details ?? []) {
+      const typeText: string = detail.type?.text ?? ''
+      const typeLower = typeText.toLowerCase()
+      if (
+        typeLower.includes('var') ||
+        typeLower.includes('review') ||
+        typeLower.includes('cancel') ||
+        typeLower.includes('disallow') ||
+        typeLower.includes('offside - goal')
+      ) {
+        const minute = detail.clock?.displayValue ?? ''
+        varKeys.push(`${typeText}|${minute}`)
+      }
+    }
+
     espnProcessed.push({
       matchId: match.id,
       newStatus,
@@ -96,6 +115,7 @@ export async function POST() {
       t1: teamById[match.team1Id]?.name ?? match.team1Id,
       t2: teamById[match.team2Id]?.name ?? match.team2Id,
       clock,
+      varKeys,
     })
   }
 
@@ -112,7 +132,7 @@ export async function POST() {
     // Reset push queue so retries don't double-send
     pushQueue.length = 0
 
-    for (const { matchId, newStatus, score1, score2, t1, t2, clock } of espnProcessed) {
+    for (const { matchId, newStatus, score1, score2, t1, t2, clock, varKeys } of espnProcessed) {
       const prev = persistedStates[matchId]
 
       if (prev?.status === 'completed') continue
@@ -145,9 +165,29 @@ export async function POST() {
         continue
       }
 
-      // Guard against ESPN stale/regression data
+      // Guard: ESPN sometimes briefly sends 'pre' for in-progress matches (stale data)
       if (prev.status !== 'pre' && newStatus === 'pre') continue
-      if (score1 < prev.score1 || score2 < prev.score2) continue
+
+      // Score dropped → goal was cancelled (VAR) or ESPN sent stale data.
+      // We notify only when we had already alerted users about more goals than ESPN now shows.
+      if (score1 < prev.score1 || score2 < prev.score2) {
+        const sentGoalsNow = prev.sentGoals ?? (prev.score1 + prev.score2)
+        const currentGoals = score1 + score2
+        if (newStatus !== 'pre' && !prev.sentFinal && currentGoals < sentGoalsNow) {
+          const clockLabel = clock && clock !== 'Intervalo' ? ` · ${clock}` : ''
+          pushQueue.push({
+            title: '🔍 Gol anulado!',
+            body: `${t1} ${score1}×${score2} ${t2}${clockLabel}`,
+          })
+          newPersistedStates[matchId] = {
+            ...prev,
+            score1,
+            score2,
+            sentGoals: currentGoals,
+          }
+        }
+        continue
+      }
 
       // Infer sent flags for backward compat with old DB entries
       const sentStarted = prev.sentStarted ?? (prev.status !== 'pre')
@@ -186,6 +226,19 @@ export async function POST() {
         // but the DB write failed or the process was killed before it committed
         if (!dbResult || dbResult.score1 !== score1 || dbResult.score2 !== score2) {
           dbResultUpdates.push({ matchId, score1, score2 })
+        }
+      }
+
+      // VAR in-progress: notify about new VAR/review events from ESPN details
+      if (newStatus === 'in' && varKeys.length > 0) {
+        const alreadySent = new Set(prev.sentVARKeys ?? [])
+        const newVARKeys: string[] = []
+        for (const key of varKeys) {
+          if (!alreadySent.has(key)) newVARKeys.push(key)
+        }
+        if (newVARKeys.length > 0) {
+          pushQueue.push({ title: '🔍 VAR em andamento', body: `${t1} x ${t2}` })
+          newState.sentVARKeys = [...Array.from(alreadySent), ...newVARKeys]
         }
       }
 
