@@ -133,7 +133,15 @@ export async function POST() {
       }
 
       if (!prev) {
-        newPersistedStates[matchId] = { status: 'pre', score1: 0, score2: 0 }
+        if (newStatus === 'completed') {
+          // Match already finished on first encounter — save result silently, no notification
+          newPersistedStates[matchId] = { status: 'completed', score1, score2, sentStarted: true, sentFinal: true, sentGoals: score1 + score2 }
+          if (!dbResult || dbResult.score1 !== score1 || dbResult.score2 !== score2) {
+            dbResultUpdates.push({ matchId, score1, score2 })
+          }
+        } else {
+          newPersistedStates[matchId] = { status: 'pre', score1: 0, score2: 0 }
+        }
         continue
       }
 
@@ -169,9 +177,13 @@ export async function POST() {
         newState.sentGoals = currentGoals
       }
 
-      if (newStatus === 'completed' && !sentFinal) {
-        pushQueue.push({ title: '🏁 Resultado final', body: scoreStr })
-        newState.sentFinal = true
+      if (newStatus === 'completed') {
+        if (!sentFinal) {
+          pushQueue.push({ title: '🏁 Resultado final', body: scoreStr })
+          newState.sentFinal = true
+        }
+        // Always ensure result is persisted — covers case where sentFinal was set
+        // but the DB write failed or the process was killed before it committed
         if (!dbResult || dbResult.score1 !== score1 || dbResult.score2 !== score2) {
           dbResultUpdates.push({ matchId, score1, score2 })
         }

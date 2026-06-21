@@ -26,11 +26,17 @@ export async function GET() {
     const playedMatchIds = new Set(db.results.map(r => r.matchId))
     const provisionalResults: { matchId: string; score1: number; score2: number }[] = []
     let hasLive = false
+    const now = Date.now()
     for (const [matchId, state] of Object.entries(liveStates)) {
       if (playedMatchIds.has(matchId)) continue
       if (state.status === 'in' || state.status === 'halftime' || state.status === 'completed') {
         provisionalResults.push({ matchId, score1: state.score1, score2: state.score2 })
-        if (state.status === 'in' || state.status === 'halftime') hasLive = true
+        // Only mark as live if match isn't stale (started > 3h ago means it likely ended)
+        if (state.status === 'in' || state.status === 'halftime') {
+          const matchDate = matchDates[matchId]?.date
+          const stale = matchDate && (now - new Date(matchDate).getTime()) > 3 * 3_600_000
+          if (!stale) hasLive = true
+        }
       }
     }
     const allResults = [...sortedResults, ...provisionalResults]
