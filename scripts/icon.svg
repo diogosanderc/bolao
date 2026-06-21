@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <clipPath id="bg">
+      <rect width="512" height="512" rx="112"/>
+    </clipPath>
+  </defs>
+
+  <!-- Background -->
+  <rect width="512" height="512" rx="112" fill="#001B5E"/>
+
+  <!-- Everything clipped to the rounded rect -->
+  <g clip-path="url(#bg)">
+    <!-- Top red accent bar -->
+    <rect x="0" y="0" width="512" height="26" fill="#C8102E"/>
+
+    <!-- Bottom red accent bar -->
+    <rect x="0" y="486" width="512" height="26" fill="#C8102E"/>
+
+    <!-- Trophy cup body -->
+    <path d="M172 118 L340 118 L340 242 Q340 312 256 328 Q172 312 172 242 Z" fill="#FFB81C"/>
+
+    <!-- Left handle -->
+    <path d="M172 148 C128 148 118 178 118 200 C118 230 140 248 172 244"
+          fill="none" stroke="#FFB81C" stroke-width="28" stroke-linecap="round"/>
+
+    <!-- Right handle -->
+    <path d="M340 148 C384 148 394 178 394 200 C394 230 372 248 340 244"
+          fill="none" stroke="#FFB81C" stroke-width="28" stroke-linecap="round"/>
+
+    <!-- Inner cup highlight (flat) -->
+    <path d="M200 130 L312 130 L312 222 Q312 272 256 284 Q220 276 205 256 Q192 236 192 216 L192 130 Z"
+          fill="#FFC93C" opacity="0.3"/>
+
+    <!-- Stem -->
+    <rect x="228" y="328" width="56" height="50" rx="5" fill="#FFB81C"/>
+
+    <!-- Base -->
+    <rect x="172" y="376" width="168" height="38" rx="10" fill="#FFB81C"/>
+
+    <!-- Base bottom shade -->
+    <rect x="172" y="400" width="168" height="14" rx="10" fill="#E6A010"/>
+
+    <!-- Stars — red · white · red -->
+    <polygon points="170,88 177,108 198,108 182,120 188,140 170,128 152,140 158,120 142,108 163,108" fill="#C8102E"/>
+    <polygon points="256,80 264,103 288,103 270,117 277,140 256,126 235,140 242,117 224,103 248,103" fill="#FFFFFF"/>
+    <polygon points="342,88 349,108 370,108 354,120 360,140 342,128 324,140 330,120 314,108 335,108" fill="#C8102E"/>
+  </g>
+</svg>
