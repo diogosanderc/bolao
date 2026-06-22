@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { LeaderboardEntry } from '@/lib/types'
 import { Flag } from '@/components/Flag'
 import { ParticipantModal } from '@/components/ParticipantModal'
@@ -160,6 +160,33 @@ export default function LeaderboardPage() {
   const isWarning = (pts: number) => !isRelated(pts) && data.length >= 7 && pts <= cutoffScore + 2
 
   const isFirstOfRank = data.map((_, idx) => idx === 0 || ranks[idx] !== ranks[idx - 1])
+
+  const prevRanksRef = useRef<Map<string, number>>(new Map())
+  const [flashMap, setFlashMap] = useState<Record<string, 'up' | 'down'>>({})
+
+  // Detect rank changes to trigger flash animation
+  useEffect(() => {
+    if (data.length === 0) return
+    const newRanks = new Map<string, number>()
+    data.forEach(entry => {
+      newRanks.set(entry.participant.id, data.filter(e => e.totalPoints > entry.totalPoints).length + 1)
+    })
+    const changes: Record<string, 'up' | 'down'> = {}
+    if (prevRanksRef.current.size > 0) {
+      for (const [id, newRank] of newRanks) {
+        const prev = prevRanksRef.current.get(id)
+        if (prev !== undefined && prev !== newRank) {
+          changes[id] = prev > newRank ? 'up' : 'down'
+        }
+      }
+    }
+    prevRanksRef.current = newRanks
+    if (Object.keys(changes).length > 0) {
+      setFlashMap(changes)
+      const t = setTimeout(() => setFlashMap({}), 2200)
+      return () => clearTimeout(t)
+    }
+  }, [data])
 
   const [notifState, setNotifState] = useState<'default' | 'subscribed' | 'denied' | 'unsupported'>('default')
   const [notifToast, setNotifToast] = useState<string | null>(null)
@@ -466,6 +493,7 @@ export default function LeaderboardPage() {
                 const rank = ranks[idx]
                 const tier = tierOf(entry.totalPoints)
                 const p = entry as any
+                const flash = flashMap[entry.participant.id]
                 return (
                 <tr
                   key={entry.participant.id}
@@ -477,7 +505,7 @@ export default function LeaderboardPage() {
                     tier === 2 ? 'bg-gray-800/30 hover:bg-gray-800/60' :
                     tier === 3 ? 'bg-orange-50 hover:bg-orange-100 dark:bg-orange-950/30 dark:hover:bg-orange-950/50' :
                     'hover:bg-gray-900/50'
-                  }`}
+                  } ${flash === 'up' ? 'animate-flash-up' : flash === 'down' ? 'animate-flash-down' : ''}`}
                 >
                   <td className="px-4 py-3 text-center font-bold text-lg">
                     {isRelated(entry.totalPoints)

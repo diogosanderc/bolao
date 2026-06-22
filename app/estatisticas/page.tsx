@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
-  Legend, ResponsiveContainer,
+  ResponsiveContainer,
 } from 'recharts'
 
 type ParticipantInfo = { id: string; name: string }
@@ -67,6 +67,18 @@ export default function EstatisticasPage() {
         dateBRT: snap.dateBRT,
       }
       for (const p of data.participants) row[p.id] = snap.points[p.id] ?? 0
+      return row
+    })
+  }, [data])
+
+  const rankChartData = useMemo(() => {
+    if (!data || data.snapshots.length === 0) return []
+    return data.snapshots.map((snap, idx) => {
+      const sorted = [...data.participants].sort(
+        (a, b) => (snap.points[b.id] ?? 0) - (snap.points[a.id] ?? 0)
+      )
+      const row: Record<string, string | number> = { name: `J${idx + 1}`, label: snap.label }
+      sorted.forEach((p, rankIdx) => { row[p.id] = rankIdx + 1 })
       return row
     })
   }, [data])
@@ -189,6 +201,67 @@ export default function EstatisticasPage() {
           Cada ponto representa um jogo finalizado · Passe o mouse para ver os detalhes
         </p>
       </div>
+
+      {/* Rank History Chart */}
+      {rankChartData.length > 0 && (
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+          <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">Histórico de Posições</h3>
+          <p className="text-xs text-gray-600 mb-4">Selecione participantes acima para ver a evolução da posição no ranking (1º = topo)</p>
+
+          {activeIds.size === 0 ? (
+            <div className="flex items-center justify-center h-48 text-gray-500 text-sm">
+              Selecione um participante acima para visualizar
+            </div>
+          ) : (
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={rankChartData} margin={{ top: 5, right: 5, bottom: 5, left: -20 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-gray-700)" />
+                <XAxis dataKey="name" tick={{ fill: 'var(--color-gray-500)', fontSize: 11 }} />
+                <YAxis
+                  reversed
+                  domain={[1, participants.length]}
+                  tickCount={Math.min(participants.length, 8)}
+                  allowDecimals={false}
+                  tick={{ fill: 'var(--color-gray-500)', fontSize: 11 }}
+                  tickFormatter={(v: number) => `#${v}`}
+                />
+                <Tooltip
+                  content={({ active, payload, label }) => {
+                    if (!active || !payload || !payload.length) return null
+                    const snap = rankChartData[rankChartData.findIndex(d => d.name === label)]
+                    const sorted = [...payload].sort((a, b) => (a.value as number) - (b.value as number))
+                    return (
+                      <div className="bg-gray-800 border border-gray-700 rounded-lg p-3 text-xs max-w-xs shadow-lg">
+                        <p className="text-gray-200 font-semibold mb-2 truncate">{snap?.label ?? label}</p>
+                        {sorted.map((entry: any) => (
+                          <div key={entry.dataKey} className="flex justify-between gap-4 items-center">
+                            <span style={{ color: entry.color }} className="truncate">{entry.name}</span>
+                            <span className="font-bold text-gray-200">#{entry.value}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )
+                  }}
+                />
+                {participants.map((p, idx) =>
+                  activeIds.has(p.id) ? (
+                    <Line
+                      key={p.id}
+                      type="monotone"
+                      dataKey={p.id}
+                      name={p.name}
+                      stroke={LINE_COLORS[idx % LINE_COLORS.length]}
+                      strokeWidth={2}
+                      dot={{ r: 3, fill: LINE_COLORS[idx % LINE_COLORS.length] }}
+                      activeDot={{ r: 5 }}
+                    />
+                  ) : null
+                )}
+              </LineChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+      )}
 
       {/* Comparison panel — shown when exactly 2 participants selected */}
       {activeIds.size === 2 && (() => {

@@ -64,6 +64,19 @@ html.dark {
   animation: fade-in 0.25s ease both;
 }
 
+@keyframes flash-green {
+  0%   { background-color: rgba(34, 197, 94, 0.25); }
+  100% { background-color: transparent; }
+}
+
+@keyframes flash-red {
+  0%   { background-color: rgba(239, 68, 68, 0.25); }
+  100% { background-color: transparent; }
+}
+
+.animate-flash-up   { animation: flash-green 2s ease-out both; }
+.animate-flash-down { animation: flash-red   2s ease-out both; }
+
 /* Dark mode: restore original Tailwind grays */
 .dark {
   --color-gray-950: oklch(13% 0.028 261.692);

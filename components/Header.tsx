@@ -75,6 +75,13 @@ export function Header() {
         Estatísticas
       </a>
       <a
+        href="/regras"
+        onClick={() => setOpen(false)}
+        className={`hover:text-yellow-300 transition-colors text-white font-semibold tracking-wide uppercase ${mobile ? 'py-2 text-base' : 'text-sm'} ${pathname === '/regras' ? 'text-yellow-300' : ''}`}
+      >
+        Regras
+      </a>
+      <a
         href="/admin"
         onClick={() => setOpen(false)}
         className={`hover:text-yellow-300 transition-colors text-white opacity-50 hover:opacity-100 uppercase ${mobile ? 'py-2 text-sm' : 'text-xs'}`}
