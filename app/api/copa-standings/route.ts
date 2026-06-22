@@ -133,7 +133,6 @@ export async function GET() {
           })
         return { phase, label: PHASE_LABELS_PT[phase] ?? phase, matches: phaseMatches }
       })
-      .filter(p => p.matches.some(m => m.team1Id !== 'TBD' || m.status === 'played'))
 
     return NextResponse.json({ groups, knockout, hasLive: hasLiveRef.value })
   } catch (err) {

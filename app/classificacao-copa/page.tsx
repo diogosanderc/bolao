@@ -45,14 +45,14 @@ function MatchRow({ m, compact = false }: { m: MatchInfo; compact?: boolean }) {
         {!tbd ? <Flag teamId={m.team1Id} size={16} /> : <span className="text-gray-600">🏳</span>}
       </div>
 
-      {/* Score / date */}
+      {/* Score */}
       <div className="shrink-0 text-center min-w-[3.4rem]">
         {played || live ? (
           <span className={`font-bold px-1.5 py-0.5 rounded tabular-nums ${live ? 'bg-red-950 text-red-300' : 'bg-gray-800 text-gray-100'}`}>
             {m.score1}–{m.score2}
           </span>
         ) : (
-          <span className="text-gray-600 text-[11px]">{m.date ?? '—'}</span>
+          <span className="text-gray-600 text-[11px]">×</span>
         )}
       </div>
 
@@ -269,9 +269,7 @@ export default function ClassificacaoCopaPage() {
       )}
 
       {!loading && tab === 'knockout' && (
-        knockout.length === 0
-          ? <p className="text-center py-12 text-gray-600">O mata-mata começa quando os grupos terminarem.</p>
-          : <KnockoutSection phases={knockout} />
+        <KnockoutSection phases={knockout} />
       )}
     </div>
   )
