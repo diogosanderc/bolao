@@ -55,7 +55,7 @@ export async function GET() {
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
 
     const nextMatch = upcoming[0] ?? null
-    const live = events.filter(e => e.inProgress)
+    const live = events.filter(e => e.inProgress || e.suspended)
 
     return NextResponse.json({
       nextMatch: nextMatch ? {
@@ -70,6 +70,7 @@ export async function GET() {
         liveScore1: e.liveScore1,
         liveScore2: e.liveScore2,
         clock: e.clock,
+        suspended: e.suspended,
         goals: e.goals,
       })),
       upcoming: upcoming.slice(0, 20).map(e => ({

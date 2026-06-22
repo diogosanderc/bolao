@@ -27,6 +27,7 @@ type ScheduleMatch = {
   dateBRT: string
   venue: string
   inProgress: boolean
+  suspended?: boolean
   liveScore1?: number
   liveScore2?: number
   clock?: string
@@ -333,11 +334,13 @@ export default function LeaderboardPage() {
       {liveMatches.length > 0 && (
         <div className="space-y-1.5">
           {liveMatches.map(m => (
-            <div key={m.matchId} className="bg-red-950/60 border border-red-700 rounded-lg px-4 py-2.5 animate-pulse">
+            <div key={m.matchId} className={`border rounded-lg px-4 py-2.5 ${m.suspended ? 'bg-yellow-950/60 border-yellow-700' : 'bg-red-950/60 border-red-700 animate-pulse'}`}>
               <div className="flex items-center justify-between mb-1">
-                <span className="text-xs text-red-400 uppercase tracking-wider font-bold">🔴 Ao vivo</span>
+                {m.suspended
+                  ? <span className="text-xs text-yellow-400 uppercase tracking-wider font-bold">⛈️ Paralisado</span>
+                  : <span className="text-xs text-red-400 uppercase tracking-wider font-bold">🔴 Ao vivo</span>}
                 <span className="flex items-center gap-2">
-                  {m.clock && <span className="text-xs text-red-300 font-semibold">{m.clock}</span>}
+                  {m.clock && <span className={`text-xs font-semibold ${m.suspended ? 'text-yellow-300' : 'text-red-300'}`}>{m.clock}</span>}
                   {lastRefresh && <span className="text-xs text-gray-500">atualizado {lastRefresh.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>}
                 </span>
               </div>

@@ -56,6 +56,7 @@ export type ESPNEvent = {
   venue: string
   completed: boolean
   inProgress: boolean
+  suspended: boolean
   score1?: number
   score2?: number
   liveScore1?: number
@@ -95,7 +96,19 @@ function toBRT(isoDate: string): string {
   }
 }
 
-type LiveInfo = { score1: number; score2: number; clock: string; goals: GoalEvent[] }
+type LiveInfo = { score1: number; score2: number; clock: string; goals: GoalEvent[]; suspended: boolean }
+
+function isSuspendedStatus(typeName: string, desc: string): boolean {
+  const d = desc.toLowerCase()
+  return (
+    typeName === 'STATUS_RAIN_DELAY' ||
+    typeName === 'STATUS_DELAYED' ||
+    typeName === 'STATUS_SUSPENDED' ||
+    typeName === 'STATUS_POSTPONED' ||
+    d.includes('delay') ||
+    d.includes('suspend')
+  )
+}
 
 function parseEvents(rawEvents: any[], liveMap: Map<string, LiveInfo>): ESPNEvent[] {
   const result: ESPNEvent[] = []
@@ -156,13 +169,13 @@ function parseEvents(rawEvents: any[], liveMap: Map<string, LiveInfo>): ESPNEven
       dateBRT: toBRT(event.date ?? ''),
       venue: competition.venue?.fullName ?? competition.venue?.address?.city ?? '',
       completed,
-      inProgress: !!live,
+      inProgress: !!live && !live.suspended,
+      suspended: !!live?.suspended,
       score1: completed ? finalScore1 : undefined,
       score2: completed ? finalScore2 : undefined,
       liveScore1: live ? (flipped ? live.score2 : live.score1) : undefined,
       liveScore2: live ? (flipped ? live.score1 : live.score2) : undefined,
       clock: live?.clock,
-      // For live matches use real-time goals from today endpoint; fall back to schedule details
       goals: (live?.goals?.length ? live.goals : goals.length > 0 ? goals : undefined),
     })
   }
@@ -182,13 +195,17 @@ async function fetchLiveMap(): Promise<Map<string, LiveInfo>> {
     for (const event of data.events ?? []) {
       const competition = event.competitions?.[0]
       const status = competition?.status ?? event.status
+      const typeName: string = status?.type?.name ?? ''
+      const typeDesc: string = status?.type?.description ?? status?.type?.shortDetail ?? ''
+      const suspended = isSuspendedStatus(typeName, typeDesc)
       const isLive = !status?.type?.completed && (
+        suspended ||
         status?.type?.state === 'in' ||
-        status?.type?.name === 'STATUS_IN_PROGRESS' ||
-        status?.type?.name === 'STATUS_HALFTIME' ||
-        status?.type?.name === 'STATUS_SECOND_HALF' ||
-        status?.type?.name === 'STATUS_EXTRA_TIME' ||
-        status?.type?.name === 'STATUS_PENALTY'
+        typeName === 'STATUS_IN_PROGRESS' ||
+        typeName === 'STATUS_HALFTIME' ||
+        typeName === 'STATUS_SECOND_HALF' ||
+        typeName === 'STATUS_EXTRA_TIME' ||
+        typeName === 'STATUS_PENALTY'
       )
       if (!isLive) continue
       const competitors: any[] = competition?.competitors ?? []
@@ -225,11 +242,18 @@ async function fetchLiveMap(): Promise<Map<string, LiveInfo>> {
         liveGoals.push(...expandGoalDetail(detail, playerName, ownGoal, scoringTeamId))
       }
 
+      const clockRaw = suspended
+        ? (typeDesc || 'Paralisado')
+        : typeName === 'STATUS_HALFTIME'
+        ? 'Intervalo'
+        : (status?.displayClock ?? '')
+
       liveMap.set(match.id, {
         score1: rawLiveS1,
         score2: rawLiveS2,
-        clock: status?.type?.name === 'STATUS_HALFTIME' ? 'Intervalo' : (status?.displayClock ?? ''),
+        clock: clockRaw,
         goals: liveGoals,
+        suspended,
       })
     }
     return liveMap
