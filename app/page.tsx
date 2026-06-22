@@ -339,10 +339,7 @@ export default function LeaderboardPage() {
                 {m.suspended
                   ? <span className="text-xs text-yellow-400 uppercase tracking-wider font-bold">⛈️ Paralisado</span>
                   : <span className="text-xs text-red-400 uppercase tracking-wider font-bold">🔴 Ao vivo</span>}
-                <span className="flex items-center gap-2">
-                  {m.clock && <span className={`text-xs font-semibold ${m.suspended ? 'text-yellow-300' : 'text-red-300'}`}>{m.clock}</span>}
-                  {lastRefresh && <span className="text-xs text-gray-500">atualizado {lastRefresh.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}</span>}
-                </span>
+                {m.clock && <span className={`text-xs font-semibold ${m.suspended ? 'text-yellow-300' : 'text-red-300'}`}>{m.clock}</span>}
               </div>
               <div className="flex items-center gap-2 text-sm text-white">
                 <span className="flex items-center gap-1.5"><Flag teamId={m.team1.id} size={18} />{m.team1.name}</span>
@@ -375,6 +372,11 @@ export default function LeaderboardPage() {
               })()}
             </div>
           ))}
+          {lastRefresh && (
+            <p className="text-right text-xs text-gray-600 pr-1">
+              atualizado {lastRefresh.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+            </p>
+          )}
         </div>
       )}
 
