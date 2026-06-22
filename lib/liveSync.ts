@@ -193,19 +193,33 @@ export async function runLiveSync(): Promise<SyncResult> {
 
       if (prev.status !== 'pre' && newStatus === 'pre') continue
 
-      // Suspended / rain delay
+      // ── Suspended / rain delay ────────────────────────────────────────────
+      // Must be checked BEFORE score regression — ESPN often resets scores to
+      // 0-0 during a delay, which would otherwise trigger a false "gol anulado".
       if (newStatus === 'suspended') {
         if (!prev.sentSuspended) {
-          pushQueue.push({ title: '⛈️ Jogo paralisado', body: `${t1} ${score1}×${score2} ${t2} · ${clock}` })
+          // Use prev scores: ESPN may have zeroed them during the delay
+          const s1 = prev.score1, s2 = prev.score2
+          pushQueue.push({ title: '⛈️ Jogo paralisado', body: `${t1} ${s1}×${s2} ${t2} · ${clock}` })
+          // Preserve prev scores and sentGoals so resumption doesn't re-notify old goals
           newPersistedStates[matchId] = { ...prev, status: 'suspended', sentSuspended: true }
         }
         continue
       }
 
-      // Match resumed after suspension
+      // ── Match resumed after suspension ────────────────────────────────────
       if (prev.status === 'suspended' && (newStatus === 'in' || newStatus === 'halftime')) {
         pushQueue.push({ title: '▶️ Jogo retomado!', body: `${t1} ${score1}×${score2} ${t2}` })
-        newPersistedStates[matchId] = { ...prev, status: newStatus, sentSuspended: false }
+        // Restore correct scores from ESPN now that match is live again.
+        // Keep sentGoals from prev so goals scored before delay aren't re-notified.
+        newPersistedStates[matchId] = {
+          ...prev,
+          status: newStatus,
+          score1,
+          score2,
+          sentSuspended: false,
+          sentGoals: Math.max(prev.sentGoals ?? 0, score1 + score2),
+        }
         continue
       }
 
