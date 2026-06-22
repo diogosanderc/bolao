@@ -269,7 +269,7 @@ export async function runLiveSync(): Promise<SyncResult> {
 
     const map = Object.fromEntries(db.results.map(r => [r.matchId, r]))
     for (const u of dbResultUpdates) map[u.matchId] = u
-    return { ...db, results: Object.values(map), liveMatchStates: newPersistedStates } as any
+    return { ...db, results: Object.values(map), liveMatchStates: newPersistedStates, lastPollerRun: new Date().toISOString() } as any
   })
 
   // 4. Send notifications after DB write committed

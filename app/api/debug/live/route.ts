@@ -1,15 +1,22 @@
 import { NextResponse } from 'next/server'
 import { readDB } from '@/lib/db'
-import { getPollerStatus } from '@/lib/livePoller'
 
 export async function GET() {
   const db = await readDB()
   const liveStates = (db as any).liveMatchStates ?? {}
+  const lastPollerRun: string | null = (db as any).lastPollerRun ?? null
   const subs = (db.pushSubscriptions ?? []).length
-  const { started, tickCount, lastTickAt, lastSyncAt } = getPollerStatus()
+
+  const secondsSinceRun = lastPollerRun
+    ? Math.round((Date.now() - new Date(lastPollerRun).getTime()) / 1000)
+    : null
 
   return NextResponse.json({
-    poller: { started, tickCount, lastTickAt, lastSyncAt },
+    poller: {
+      lastRunAt: lastPollerRun,
+      secondsAgo: secondsSinceRun,
+      healthy: secondsSinceRun !== null && secondsSinceRun < 30,
+    },
     pushSubscriptions: subs,
     liveMatchStates: liveStates,
     runtime: process.env.NEXT_RUNTIME ?? 'undefined',
