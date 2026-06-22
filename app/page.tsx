@@ -124,7 +124,7 @@ export default function LeaderboardPage() {
         .catch(() => {})
     }
     fetchSchedule()
-    const interval = setInterval(fetchSchedule, 30_000)
+    const interval = setInterval(fetchSchedule, 10_000)
     return () => {
       clearInterval(presenceInterval)
       clearInterval(interval)
@@ -134,10 +134,10 @@ export default function LeaderboardPage() {
   // When there are live matches, refresh leaderboard every 15s and trigger ESPN sync every 30s
   useEffect(() => {
     if (liveMatches.length === 0) return
-    const leaderboardInterval = setInterval(fetchLeaderboard, 15_000)
+    const leaderboardInterval = setInterval(fetchLeaderboard, 10_000)
     const syncInterval = setInterval(() => {
       fetch('/api/sync/live', { method: 'POST' }).catch(() => {})
-    }, 30_000)
+    }, 30_000) // background poller handles real-time; this is a fallback only
     // Trigger sync immediately when a live match is first detected
     fetch('/api/sync/live', { method: 'POST' }).catch(() => {})
     return () => {
