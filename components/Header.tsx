@@ -47,6 +47,13 @@ export function Header() {
         Classificação
       </a>
       <a
+        href="/classificacao-copa"
+        onClick={() => setOpen(false)}
+        className={`hover:text-yellow-300 transition-colors text-white font-semibold tracking-wide uppercase ${mobile ? 'py-2 text-base' : 'text-sm'} ${pathname === '/classificacao-copa' ? 'text-yellow-300' : ''}`}
+      >
+        Tabela Copa
+      </a>
+      <a
         href="/simulador"
         onClick={() => setOpen(false)}
         className={`hover:text-yellow-300 transition-colors text-white font-semibold tracking-wide uppercase ${mobile ? 'py-2 text-base' : 'text-sm'} ${pathname === '/simulador' ? 'text-yellow-300' : ''}`}
