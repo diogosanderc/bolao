@@ -4,11 +4,12 @@ import { resolveTeam } from './espn'
 import { sendPushToAll } from './push'
 
 type MatchState = {
-  status: 'pre' | 'in' | 'halftime' | 'completed'
+  status: 'pre' | 'in' | 'halftime' | 'suspended' | 'completed'
   score1: number
   score2: number
   sentStarted?: boolean
   sentHalftime?: boolean
+  sentSuspended?: boolean
   sentFinal?: boolean
   sentGoals?: number
   sentVARKeys?: string[]
@@ -25,6 +26,7 @@ type ESPNProcessed = {
   clock: string
   varKeys: string[]
   redCardKeys: string[]
+  espnStatusName: string
 }
 
 let lastRunAt = 0
@@ -61,7 +63,14 @@ export async function runLiveSync(): Promise<SyncResult> {
     const typeName: string = status?.type?.name ?? ''
     const completed = status?.type?.completed === true || typeName === 'STATUS_FINAL'
     const halftime = typeName === 'STATUS_HALFTIME'
-    const inProgress = !completed && (
+    const suspended =
+      typeName === 'STATUS_RAIN_DELAY' ||
+      typeName === 'STATUS_DELAYED' ||
+      typeName === 'STATUS_SUSPENDED' ||
+      typeName === 'STATUS_POSTPONED' ||
+      (status?.type?.description ?? '').toLowerCase().includes('delay') ||
+      (status?.type?.description ?? '').toLowerCase().includes('suspend')
+    const inProgress = !completed && !suspended && (
       status?.type?.state === 'in' ||
       typeName === 'STATUS_IN_PROGRESS' ||
       typeName === 'STATUS_SECOND_HALF' ||
@@ -90,8 +99,8 @@ export async function runLiveSync(): Promise<SyncResult> {
     const rawS2 = parseInt(c2.score ?? '0', 10)
     const score1 = flipped ? rawS2 : rawS1
     const score2 = flipped ? rawS1 : rawS2
-    const newStatus: MatchState['status'] = completed ? 'completed' : halftime ? 'halftime' : inProgress ? 'in' : 'pre'
-    const clock: string = halftime ? 'Intervalo' : (status?.displayClock ?? '')
+    const newStatus: MatchState['status'] = completed ? 'completed' : halftime ? 'halftime' : inProgress ? 'in' : suspended ? 'suspended' : 'pre'
+    const clock: string = halftime ? 'Intervalo' : suspended ? (status?.type?.shortDetail ?? status?.type?.description ?? 'Paralisado') : (status?.displayClock ?? '')
 
     const varKeys: string[] = []
     const redCardKeys: string[] = []
@@ -122,7 +131,7 @@ export async function runLiveSync(): Promise<SyncResult> {
       matchId: match.id, newStatus, score1, score2,
       t1: teamById[match.team1Id]?.name ?? match.team1Id,
       t2: teamById[match.team2Id]?.name ?? match.team2Id,
-      clock, varKeys, redCardKeys,
+      clock, varKeys, redCardKeys, espnStatusName: typeName,
     })
   }
 
@@ -183,6 +192,22 @@ export async function runLiveSync(): Promise<SyncResult> {
       }
 
       if (prev.status !== 'pre' && newStatus === 'pre') continue
+
+      // Suspended / rain delay
+      if (newStatus === 'suspended') {
+        if (!prev.sentSuspended) {
+          pushQueue.push({ title: '⛈️ Jogo paralisado', body: `${t1} ${score1}×${score2} ${t2} · ${clock}` })
+          newPersistedStates[matchId] = { ...prev, status: 'suspended', sentSuspended: true }
+        }
+        continue
+      }
+
+      // Match resumed after suspension
+      if (prev.status === 'suspended' && (newStatus === 'in' || newStatus === 'halftime')) {
+        pushQueue.push({ title: '▶️ Jogo retomado!', body: `${t1} ${score1}×${score2} ${t2}` })
+        newPersistedStates[matchId] = { ...prev, status: newStatus, sentSuspended: false }
+        continue
+      }
 
       if (score1 < prev.score1 || score2 < prev.score2) {
         const sentGoalsNow = prev.sentGoals ?? (prev.score1 + prev.score2)
