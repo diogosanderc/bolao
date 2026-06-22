@@ -5,41 +5,85 @@ import { Flag } from '@/components/Flag'
 import { teamById } from '@/lib/copa2026'
 
 type GroupRow = {
-  teamId: string
-  pos: number
+  teamId: string; pos: number
   p: number; j: number; v: number; e: number; d: number
   gp: number; gc: number; sg: number
 }
 
 type MatchInfo = {
-  matchId: string
-  matchNumber: number
-  team1Id: string
-  team2Id: string
-  date: string | null
-  venue: string | null
-  score1: number | null
-  score2: number | null
+  matchId: string; matchNumber: number; phase: string
+  team1Id: string; team2Id: string
+  date: string | null; venue: string | null
+  score1: number | null; score2: number | null
+  advancingTeamId?: string
   status: 'played' | 'live' | 'upcoming'
   clock: string | null
 }
 
-type GroupData = {
-  id: string
-  name: string
-  standings: GroupRow[]
-  matches: MatchInfo[]
+type GroupData  = { id: string; name: string; standings: GroupRow[]; matches: MatchInfo[] }
+type KnockoutPhase = { phase: string; label: string; matches: MatchInfo[] }
+
+// ─── Shared match row ────────────────────────────────────────────────────────
+
+function MatchRow({ m, compact = false }: { m: MatchInfo; compact?: boolean }) {
+  const played = m.status === 'played'
+  const live   = m.status === 'live'
+  const tbd    = m.team1Id === 'TBD' || m.team2Id === 'TBD'
+
+  // Determine winner for styling
+  const adv = m.advancingTeamId
+  const w1 = played && !tbd && (m.score1! > m.score2! || adv === m.team1Id)
+  const w2 = played && !tbd && (m.score2! > m.score1! || adv === m.team2Id)
+
+  return (
+    <div className={`flex items-center gap-2 px-3 py-1.5 text-xs ${tbd ? 'opacity-40' : ''}`}>
+      {/* Team 1 */}
+      <div className="flex items-center gap-1.5 flex-1 justify-end min-w-0">
+        <span className={`truncate text-right font-semibold ${w1 ? 'text-white' : played ? 'text-gray-400' : live ? 'text-gray-200' : 'text-gray-500'}`}>
+          {compact ? m.team1Id : (teamById[m.team1Id]?.name ?? m.team1Id)}
+        </span>
+        {!tbd ? <Flag teamId={m.team1Id} size={16} /> : <span className="text-gray-600">🏳</span>}
+      </div>
+
+      {/* Score / date */}
+      <div className="shrink-0 text-center min-w-[3.4rem]">
+        {played || live ? (
+          <span className={`font-bold px-1.5 py-0.5 rounded tabular-nums ${live ? 'bg-red-950 text-red-300' : 'bg-gray-800 text-gray-100'}`}>
+            {m.score1}–{m.score2}
+          </span>
+        ) : (
+          <span className="text-gray-600 text-[11px]">{m.date ?? '—'}</span>
+        )}
+      </div>
+
+      {/* Team 2 */}
+      <div className="flex items-center gap-1.5 flex-1 min-w-0">
+        {!tbd ? <Flag teamId={m.team2Id} size={16} /> : <span className="text-gray-600">🏳</span>}
+        <span className={`truncate font-semibold ${w2 ? 'text-white' : played ? 'text-gray-400' : live ? 'text-gray-200' : 'text-gray-500'}`}>
+          {compact ? m.team2Id : (teamById[m.team2Id]?.name ?? m.team2Id)}
+        </span>
+      </div>
+
+      {/* Live badge */}
+      {live && (
+        <span className="shrink-0 flex items-center gap-1">
+          <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+          <span className="text-[10px] font-semibold text-red-400">{m.clock ?? 'AO VIVO'}</span>
+        </span>
+      )}
+    </div>
+  )
 }
+
+// ─── Group card ──────────────────────────────────────────────────────────────
 
 function GroupCard({ group }: { group: GroupData }) {
   return (
     <div className="rounded-xl border border-gray-800 bg-gray-950 overflow-hidden">
-      {/* Group title */}
       <div className="bg-green-800 px-4 py-2">
         <h3 className="font-bold text-white text-sm tracking-wide uppercase">{group.name}</h3>
       </div>
 
-      {/* Standings table */}
       <table className="w-full text-xs">
         <thead>
           <tr className="bg-gray-900 text-gray-500 uppercase tracking-wider">
@@ -49,20 +93,18 @@ function GroupCard({ group }: { group: GroupData }) {
             <th className="px-1 py-1.5 text-center w-6 hidden sm:table-cell" title="Vitórias">V</th>
             <th className="px-1 py-1.5 text-center w-6 hidden sm:table-cell" title="Empates">E</th>
             <th className="px-1 py-1.5 text-center w-6 hidden sm:table-cell" title="Derrotas">D</th>
-            <th className="px-1 py-1.5 text-center w-7" title="Saldo de gols">SG</th>
+            <th className="px-1 py-1.5 text-center w-7" title="Saldo">SG</th>
             <th className="px-2 py-1.5 text-right w-8 text-yellow-500" title="Pontos">Pts</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-800/60">
           {group.standings.map(row => {
             const team = teamById[row.teamId]
-            // pos 1-2 qualify directly (green), pos 3 may advance as best 3rd (amber)
-            const border =
-              row.pos <= 2 ? 'border-l-2 border-green-500' :
-              row.pos === 3 ? 'border-l-2 border-amber-500/60' :
-              'border-l-2 border-transparent'
+            const border = row.pos <= 2 ? 'border-l-2 border-green-500'
+              : row.pos === 3 ? 'border-l-2 border-amber-500/60'
+              : 'border-l-2 border-transparent'
             return (
-              <tr key={row.teamId} className={`${border}`}>
+              <tr key={row.teamId} className={border}>
                 <td className="px-2 py-1.5 text-gray-500 font-semibold">{row.pos}</td>
                 <td className="px-1 py-1.5">
                   <div className="flex items-center gap-1.5 min-w-0">
@@ -85,55 +127,80 @@ function GroupCard({ group }: { group: GroupData }) {
         </tbody>
       </table>
 
-      {/* Match results */}
       <div className="border-t border-gray-800 divide-y divide-gray-800/40">
-        {group.matches.map(m => {
-          const played = m.status === 'played'
-          const live = m.status === 'live'
-          return (
-            <div key={m.matchId} className="flex items-center gap-2 px-3 py-1.5 text-xs">
-              {/* Team 1 */}
-              <div className="flex items-center gap-1.5 flex-1 justify-end min-w-0">
-                <span className={`truncate text-right ${played || live ? 'text-gray-200' : 'text-gray-500'}`}>{m.team1Id}</span>
-                <Flag teamId={m.team1Id} size={16} />
-              </div>
-
-              {/* Score / date */}
-              <div className="shrink-0 text-center min-w-[3.2rem]">
-                {played || live ? (
-                  <span className={`font-bold px-1.5 py-0.5 rounded ${live ? 'bg-red-950 text-red-300' : 'bg-gray-800 text-gray-100'}`}>
-                    {m.score1}–{m.score2}
-                  </span>
-                ) : (
-                  <span className="text-gray-600">{m.date ?? '—'}</span>
-                )}
-              </div>
-
-              {/* Team 2 */}
-              <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                <Flag teamId={m.team2Id} size={16} />
-                <span className={`truncate ${played || live ? 'text-gray-200' : 'text-gray-500'}`}>{m.team2Id}</span>
-              </div>
-
-              {/* Live badge */}
-              {live && (
-                <span className="shrink-0 flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-                  <span className="text-[10px] font-semibold text-red-400">{m.clock ?? 'AO VIVO'}</span>
-                </span>
-              )}
-            </div>
-          )
-        })}
+        {group.matches.map(m => <MatchRow key={m.matchId} m={m} compact />)}
       </div>
     </div>
   )
 }
 
+// ─── Knockout section ────────────────────────────────────────────────────────
+
+function KnockoutSection({ phases }: { phases: KnockoutPhase[] }) {
+  const [activePhase, setActivePhase] = useState(() => phases[0]?.phase ?? '')
+
+  // keep selection valid as data loads
+  useEffect(() => {
+    if (phases.length && !phases.find(p => p.phase === activePhase)) {
+      setActivePhase(phases[0].phase)
+    }
+  }, [phases, activePhase])
+
+  const current = phases.find(p => p.phase === activePhase)
+
+  return (
+    <div className="space-y-3">
+      {/* Phase tabs */}
+      <div className="flex flex-wrap gap-1.5">
+        {phases.map(p => (
+          <button
+            key={p.phase}
+            onClick={() => setActivePhase(p.phase)}
+            className={`text-xs px-3 py-1 rounded-full border transition-colors ${
+              activePhase === p.phase
+                ? 'bg-yellow-500 text-black border-yellow-500 font-bold'
+                : 'border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-200'
+            }`}
+          >
+            {p.label}
+          </button>
+        ))}
+      </div>
+
+      {current && (
+        <div className="rounded-xl border border-gray-800 bg-gray-950 overflow-hidden">
+          <div className="bg-yellow-600 px-4 py-2">
+            <h3 className="font-bold text-white text-sm tracking-wide uppercase">{current.label}</h3>
+          </div>
+          <div className="divide-y divide-gray-800/50">
+            {current.matches.map((m, i) => (
+              <div key={m.matchId}>
+                {/* Pair label for R32: show match number in bracket */}
+                {current.phase === 'round_of_32' && i % 2 === 0 && (
+                  <div className="px-3 pt-2 pb-0.5 text-[10px] text-gray-600 font-semibold uppercase tracking-wider">
+                    Jogo {Math.floor(i / 2) + 1}
+                  </div>
+                )}
+                <MatchRow key={m.matchId} m={m} compact={false} />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── Page ────────────────────────────────────────────────────────────────────
+
+type Tab = 'groups' | 'knockout'
+
 export default function ClassificacaoCopaPage() {
-  const [groups, setGroups] = useState<GroupData[]>([])
-  const [hasLive, setHasLive] = useState(false)
-  const [loading, setLoading] = useState(true)
+  const [groups,   setGroups]   = useState<GroupData[]>([])
+  const [knockout, setKnockout] = useState<KnockoutPhase[]>([])
+  const [hasLive,  setHasLive]  = useState(false)
+  const [loading,  setLoading]  = useState(true)
+  const [tab,      setTab]      = useState<Tab>('groups')
 
   useEffect(() => {
     let active = true
@@ -142,7 +209,8 @@ export default function ClassificacaoCopaPage() {
         .then(r => r.json())
         .then(d => {
           if (!active) return
-          setGroups(d.groups ?? [])
+          setGroups(d.groups   ?? [])
+          setKnockout(d.knockout ?? [])
           setHasLive(!!d.hasLive)
           setLoading(false)
         })
@@ -159,7 +227,7 @@ export default function ClassificacaoCopaPage() {
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <h2 className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">Classificação da Copa</h2>
-          <p className="text-xs text-gray-500 mt-0.5">Tabela de pontos dos grupos e resultados dos jogos</p>
+          <p className="text-xs text-gray-500 mt-0.5">Tabela dos grupos e resultados do mata-mata</p>
         </div>
         {hasLive && (
           <div className="flex items-center gap-2">
@@ -169,18 +237,41 @@ export default function ClassificacaoCopaPage() {
         )}
       </div>
 
-      {/* Legend */}
-      <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-gray-500">
-        <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-green-500 inline-block" /> Classificados (1º e 2º)</span>
-        <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-amber-500/60 inline-block" /> Possível vaga (3º)</span>
+      {/* Main tabs */}
+      <div className="flex border-b border-gray-800">
+        {([['groups', 'Fase de Grupos'], ['knockout', 'Mata-Mata']] as [Tab, string][]).map(([key, label]) => (
+          <button
+            key={key}
+            onClick={() => setTab(key)}
+            className={`px-5 py-2.5 text-sm font-semibold transition-colors ${
+              tab === key
+                ? 'text-yellow-400 border-b-2 border-yellow-400 -mb-px'
+                : 'text-gray-500 hover:text-gray-300'
+            }`}
+          >
+            {label}
+          </button>
+        ))}
       </div>
 
       {loading && <div className="text-center py-12 text-gray-500">Carregando…</div>}
 
-      {!loading && (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {groups.map(g => <GroupCard key={g.id} group={g} />)}
-        </div>
+      {!loading && tab === 'groups' && (
+        <>
+          <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-gray-500">
+            <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-green-500 inline-block" /> Classificados (1º e 2º)</span>
+            <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-amber-500/60 inline-block" /> Possível vaga como melhor 3º</span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {groups.map(g => <GroupCard key={g.id} group={g} />)}
+          </div>
+        </>
+      )}
+
+      {!loading && tab === 'knockout' && (
+        knockout.length === 0
+          ? <p className="text-center py-12 text-gray-600">O mata-mata começa quando os grupos terminarem.</p>
+          : <KnockoutSection phases={knockout} />
       )}
     </div>
   )
