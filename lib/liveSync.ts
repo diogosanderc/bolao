@@ -158,11 +158,25 @@ export async function runLiveSync(): Promise<SyncResult> {
 
       if (!prev) {
         if (newStatus === 'completed') {
+          // Match already finished on first encounter — save result silently
           newPersistedStates[matchId] = { status: 'completed', score1, score2, sentStarted: true, sentFinal: true, sentGoals: score1 + score2 }
           if (!dbResult || dbResult.score1 !== score1 || dbResult.score2 !== score2) {
             dbResultUpdates.push({ matchId, score1, score2 })
           }
+        } else if (newStatus === 'in' || newStatus === 'halftime') {
+          // Match already in progress on first encounter — notify immediately.
+          // sentGoals = current score so we don't re-alert for goals already scored.
+          const currentGoals = score1 + score2
+          pushQueue.push({ title: '🟢 Jogo em andamento!', body: `${t1} ${score1}×${score2} ${t2}` })
+          newPersistedStates[matchId] = {
+            status: newStatus, score1, score2,
+            sentStarted: true,
+            sentHalftime: newStatus === 'halftime',
+            sentGoals: currentGoals,
+            sentFinal: false,
+          }
         } else {
+          // 'pre' — upcoming match seen for the first time
           newPersistedStates[matchId] = { status: 'pre', score1: 0, score2: 0 }
         }
         continue
