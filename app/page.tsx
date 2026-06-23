@@ -399,7 +399,7 @@ export default function LeaderboardPage() {
         </div>
       )}
 
-      {nextMatch && liveMatches.length > 0 && (
+      {nextMatch && liveMatches.length > 0 && !liveMatches.some(m => m.matchId === nextMatch.matchId) && (
         <div className="bg-gray-900 border border-gray-800 rounded-lg px-4 py-2.5">
           <div className="flex items-center justify-between mb-1">
             <span className="text-xs text-gray-500 uppercase tracking-wider">Próximo jogo</span>
