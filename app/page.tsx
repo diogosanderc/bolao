@@ -455,11 +455,12 @@ export default function LeaderboardPage() {
                   {liveGain > 0 && (
                     <span className="text-green-400 text-xs font-bold shrink-0">+{liveGain}</span>
                   )}
-                  {change !== undefined && change !== 0 && (
-                    change > 0
+                  {change === undefined || change === 0
+                    ? <span className="w-2 h-2 rounded-sm bg-gray-600 shrink-0 inline-block" />
+                    : change > 0
                       ? <span className="text-blue-300 text-[10px] font-bold shrink-0">▲{change}</span>
                       : <span className="text-red-400 text-[10px] font-bold shrink-0">▼{Math.abs(change)}</span>
-                  )}
+                  }
                   <span className="text-yellow-400 font-bold text-sm shrink-0 w-10 text-right">{entry.totalPoints}</span>
                 </div>
               )
