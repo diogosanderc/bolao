@@ -449,7 +449,11 @@ export default function LeaderboardPage() {
               const change: number | undefined = p.positionChange
               const liveGain: number = p.livePoints ?? 0
               return (
-                <div key={entry.participant.id} className="flex items-center gap-2 px-4 py-2">
+                <div
+                  key={entry.participant.id}
+                  className="flex items-center gap-2 px-4 py-2 cursor-pointer hover:bg-red-950/40 transition-colors"
+                  onClick={() => setSelectedParticipant({ id: entry.participant.id, name: entry.participant.name })}
+                >
                   <span className="text-gray-500 text-xs w-5 text-right shrink-0 font-semibold">{rank}</span>
                   <span className="text-gray-200 text-sm font-semibold flex-1 min-w-0 truncate">{entry.participant.name}</span>
                   {liveGain > 0 && (
