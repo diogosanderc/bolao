@@ -99,8 +99,7 @@ export async function GET() {
         isInTop7: rank <= 7,
       }
     })
-    // Position change: during live → compare projected vs actual (base without provisional)
-    //                  otherwise   → compare current vs previous result
+    // Position change + livePoints (points gained exclusively from current live matches)
     const baseForComparison = hasLive ? sortedResults : sortedResults.slice(0, -1)
     if (hasLive || sortedResults.length > 1) {
       const prevLeaderboard = computeLeaderboard(
@@ -109,16 +108,20 @@ export async function GET() {
         db.groupPredictions,
         baseForComparison
       )
+      const prevPointsMap = new Map<string, number>()
       const prevRankMap = new Map<string, number>()
       for (const entry of prevLeaderboard) {
         const prevRank = prevLeaderboard.filter(e => e.totalPoints > entry.totalPoints).length + 1
         prevRankMap.set(entry.participant.id, prevRank)
+        prevPointsMap.set(entry.participant.id, entry.totalPoints)
       }
       leaderboardWithChanges = leaderboardWithChanges.map(entry => {
         const currentRank = leaderboard.filter(e => e.totalPoints > entry.totalPoints).length + 1
         const prevRank = prevRankMap.get(entry.participant.id)
         const positionChange = prevRank !== undefined ? prevRank - currentRank : undefined
-        return { ...entry, positionChange }
+        const prevPts = prevPointsMap.get(entry.participant.id) ?? entry.totalPoints
+        const livePoints = hasLive ? Math.max(0, entry.totalPoints - prevPts) : 0
+        return { ...entry, positionChange, livePoints }
       })
     }
 

@@ -435,10 +435,36 @@ export default function LeaderboardPage() {
         </button>
       )}
 
-      {leaderboardHasLive && (
-        <div className="flex items-center justify-center gap-2 py-1.5">
-          <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-          <span className="text-xs font-semibold text-red-400">classificação ao vivo</span>
+      {leaderboardHasLive && data.length > 0 && (
+        <div className="rounded-xl border border-red-900/50 bg-red-950/20 overflow-hidden">
+          <div className="px-4 py-2 border-b border-red-900/30 flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse shrink-0" />
+            <span className="text-xs font-bold text-red-400 uppercase tracking-wider flex-1">Classificação ao vivo</span>
+            <span className="text-xs text-gray-600">se acabasse agora</span>
+          </div>
+          <div className="divide-y divide-red-900/20">
+            {data.map((entry, idx) => {
+              const rank = ranks[idx]
+              const p = entry as any
+              const change: number | undefined = p.positionChange
+              const liveGain: number = p.livePoints ?? 0
+              return (
+                <div key={entry.participant.id} className="flex items-center gap-2 px-4 py-2">
+                  <span className="text-gray-500 text-xs w-5 text-right shrink-0 font-semibold">{rank}</span>
+                  <span className="text-gray-200 text-sm font-semibold flex-1 min-w-0 truncate">{entry.participant.name}</span>
+                  {liveGain > 0 && (
+                    <span className="text-green-400 text-xs font-bold shrink-0">+{liveGain}</span>
+                  )}
+                  {change !== undefined && change !== 0 && (
+                    change > 0
+                      ? <span className="text-green-400 text-[10px] font-bold shrink-0">▲{change}</span>
+                      : <span className="text-red-400 text-[10px] font-bold shrink-0">▼{Math.abs(change)}</span>
+                  )}
+                  <span className="text-yellow-400 font-bold text-sm shrink-0 w-10 text-right">{entry.totalPoints}</span>
+                </div>
+              )
+            })}
+          </div>
         </div>
       )}
 
