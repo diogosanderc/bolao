@@ -342,7 +342,7 @@ export default function LeaderboardPage() {
           )}
           <button
             onClick={() => location.reload()}
-            className="text-sm text-gray-400 hover:text-gray-200 transition-colors"
+            className="text-xl text-gray-400 hover:text-gray-200 transition-colors"
             aria-label="Atualizar"
           >
             ↻
