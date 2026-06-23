@@ -237,7 +237,7 @@ export default function TodosPalpitesPage() {
                                 </div>
                                 <div className="flex flex-wrap gap-1.5 text-xs text-gray-400">
                                   {names.sort().map(name => (
-                                    <span key={name} className="bg-gray-800 rounded px-2 py-0.5" title={name}>{name.substring(0, 4)}</span>
+                                    <span key={name} className="bg-gray-800 rounded px-2 py-0.5" title={name}>{name === 'LUCILIO' ? 'LCLI' : name.substring(0, 4)}</span>
                                   ))}
                                 </div>
                               </div>
