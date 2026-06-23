@@ -356,8 +356,8 @@ export default function LeaderboardPage() {
               <div className="flex items-center justify-between mb-1">
                 {m.suspended
                   ? <span className="text-xs text-yellow-700 dark:text-yellow-400 uppercase tracking-wider font-bold">⛈️ Paralisado</span>
-                  : <span className="text-xs text-red-600 dark:text-red-400 uppercase tracking-wider font-bold">🔴 Ao vivo</span>}
-                {m.clock && <span className={`text-xs font-semibold ${m.suspended ? 'text-yellow-700 dark:text-yellow-300' : 'text-red-700 dark:text-red-300'}`}>{m.clock}</span>}
+                  : <span className="text-xs text-red-700 dark:text-red-400 uppercase tracking-wider font-bold">🔴 Ao vivo</span>}
+                {m.clock && <span className={`text-xs font-semibold ${m.suspended ? 'text-yellow-700 dark:text-yellow-300' : 'text-red-800 dark:text-red-300'}`}>{m.clock}</span>}
               </div>
               <div className="flex items-center gap-2 text-sm text-gray-900 dark:text-white">
                 <span className="flex items-center gap-1.5"><Flag teamId={m.team1.id} size={18} />{m.team1.name}</span>
@@ -378,8 +378,8 @@ export default function LeaderboardPage() {
                         <div key={team.id} className="flex items-center gap-1.5 flex-wrap">
                           <Flag teamId={team.id} size={14} />
                           {goals.map((g, i) => (
-                            <span key={i} className="text-xs text-red-600 dark:text-red-200">
-                              ⚽{g.minute && <span className="text-red-500 dark:text-red-400"> {g.minute}</span>} {g.playerName}
+                            <span key={i} className="text-xs text-red-800 dark:text-red-200">
+                              ⚽{g.minute && <span className="text-red-700 dark:text-red-400"> {g.minute}</span>} {g.playerName}
                             </span>
                           ))}
                         </div>
@@ -475,18 +475,18 @@ export default function LeaderboardPage() {
                   <span className="text-gray-500 text-xs w-5 text-right shrink-0 font-semibold">{rank}</span>
                   <span className="text-gray-800 dark:text-gray-200 text-sm font-semibold flex-1 min-w-0 truncate">{entry.participant.name}</span>
                   {liveGain > 0
-                    ? <span className="text-green-600 dark:text-green-400 text-xs font-bold w-9 text-right shrink-0 tabular-nums">+{liveGain}</span>
+                    ? <span className="text-green-700 dark:text-green-400 text-xs font-bold w-9 text-right shrink-0 tabular-nums">+{liveGain}</span>
                     : <span className="text-gray-500 dark:text-gray-600 text-xs font-bold w-9 text-right shrink-0">0</span>
                   }
                   <span className="w-9 text-right shrink-0 flex items-center justify-end">
                     {change === undefined || change === 0
                       ? <span className="w-2 h-2 rounded-sm bg-gray-400 dark:bg-gray-600 inline-block" />
                       : change > 0
-                        ? <span className="text-blue-600 dark:text-blue-300 text-[10px] font-bold tabular-nums">▲{change}</span>
-                        : <span className="text-red-500 dark:text-red-400 text-[10px] font-bold tabular-nums">▼{Math.abs(change)}</span>
+                        ? <span className="text-blue-700 dark:text-blue-300 text-[10px] font-bold tabular-nums">▲{change}</span>
+                        : <span className="text-red-700 dark:text-red-400 text-[10px] font-bold tabular-nums">▼{Math.abs(change)}</span>
                     }
                   </span>
-                  <span className="text-yellow-600 dark:text-yellow-400 font-bold text-sm shrink-0 w-10 text-right tabular-nums">{entry.totalPoints}</span>
+                  <span className="text-gray-900 dark:text-yellow-400 font-bold text-sm shrink-0 w-10 text-right tabular-nums">{entry.totalPoints}</span>
                 </div>
               )
             })}
