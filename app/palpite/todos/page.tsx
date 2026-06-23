@@ -22,11 +22,18 @@ export default function TodosPalpitesPage() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [expandedMatches, setExpandedMatches] = useState<Set<string>>(new Set())
+  const [playedMatchIds, setPlayedMatchIds] = useState<Set<string>>(new Set())
 
   useEffect(() => {
-    fetch('/api/predictions/all')
-      .then(r => r.json())
-      .then(d => { setData(d); setLoading(false) })
+    Promise.all([
+      fetch('/api/predictions/all').then(r => r.json()),
+      fetch('/api/results').then(r => r.json()),
+    ])
+      .then(([d, results]) => {
+        setData(d)
+        setPlayedMatchIds(new Set(Array.isArray(results) ? results.map((r: any) => r.matchId) : []))
+        setLoading(false)
+      })
       .catch(() => setLoading(false))
   }, [])
 
@@ -53,6 +60,7 @@ export default function TodosPalpitesPage() {
   const filteredMatches = useMemo(() => {
     const q = search.trim().toUpperCase()
     return ALL_MATCHES.filter(m => {
+      if (playedMatchIds.has(m.id)) return false
       if (!q) return true
       const team1 = teamById[m.team1Id]
       const team2 = teamById[m.team2Id]
@@ -63,7 +71,7 @@ export default function TodosPalpitesPage() {
         (m.groupId && `GRUPO ${m.groupId}`.includes(q))
       )
     })
-  }, [search])
+  }, [search, playedMatchIds])
 
   function toggleMatch(matchId: string) {
     setExpandedMatches(prev => {
@@ -184,11 +192,11 @@ export default function TodosPalpitesPage() {
                   <div key={match.id} className="border border-gray-800 rounded-xl overflow-hidden">
                     <button
                       onClick={() => toggleMatch(match.id)}
-                      className="w-full flex items-center justify-between px-4 py-3 bg-gray-900 hover:bg-gray-800 transition-colors text-left"
+                      className="w-full flex items-center justify-between px-4 py-3 bg-gray-900 hover:bg-gray-800 transition-colors text-left text-gray-200"
                     >
                       <div className="flex items-center gap-2 min-w-0">
                         <span className="text-xs text-gray-600 shrink-0">#{match.matchNumber}</span>
-                        <span className="font-semibold text-white text-sm">
+                        <span className="font-semibold text-gray-200 text-sm">
                           {team1 ? <><Flag teamId={match.team1Id} size={18} /> {team1.name}</> : match.team1Id}
                           <span className="text-gray-500 mx-2">vs</span>
                           {team2 ? <><Flag teamId={match.team2Id} size={18} /> {team2.name}</> : match.team2Id}
@@ -224,12 +232,12 @@ export default function TodosPalpitesPage() {
                             return (
                               <div key={key} className="px-4 py-3 flex gap-4 items-start">
                                 <div className="shrink-0 w-14 text-center">
-                                  <span className="font-bold text-lg text-yellow-400">{s1} × {s2}</span>
+                                  <span className="font-bold text-lg text-green-700 dark:text-yellow-400">{s1} × {s2}</span>
                                   <div className="text-xs text-gray-600 mt-0.5">{names.length} ({pct}%)</div>
                                 </div>
                                 <div className="flex flex-wrap gap-1.5 text-xs text-gray-400">
                                   {names.sort().map(name => (
-                                    <span key={name} className="bg-gray-800 rounded px-2 py-0.5">{name}</span>
+                                    <span key={name} className="bg-gray-800 rounded px-2 py-0.5" title={name}>{name.substring(0, 4)}</span>
                                   ))}
                                 </div>
                               </div>

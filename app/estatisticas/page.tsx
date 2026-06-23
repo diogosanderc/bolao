@@ -117,7 +117,7 @@ export default function EstatisticasPage() {
     const snap = snapshots[chartData.findIndex(d => d.name === label)]
     const sorted = [...payload].sort((a, b) => (b.value as number) - (a.value as number))
     return (
-      <div className="bg-gray-800 border border-gray-700 rounded-lg p-3 text-xs max-w-xs shadow-lg">
+      <div className="bg-white dark:bg-gray-800 border border-gray-700 rounded-lg p-3 text-xs max-w-xs shadow-lg">
         <p className="text-gray-200 font-semibold mb-1 truncate">{snap?.label ?? label}</p>
         {snap?.dateBRT && <p className="text-gray-400 mb-2">{snap.dateBRT}</p>}
         {sorted.map((entry: any) => (
@@ -231,7 +231,7 @@ export default function EstatisticasPage() {
                     const snap = rankChartData[rankChartData.findIndex(d => d.name === label)]
                     const sorted = [...payload].sort((a, b) => (a.value as number) - (b.value as number))
                     return (
-                      <div className="bg-gray-800 border border-gray-700 rounded-lg p-3 text-xs max-w-xs shadow-lg">
+                      <div className="bg-white dark:bg-gray-800 border border-gray-700 rounded-lg p-3 text-xs max-w-xs shadow-lg">
                         <p className="text-gray-200 font-semibold mb-2 truncate">{snap?.label ?? label}</p>
                         {sorted.map((entry: any) => (
                           <div key={entry.dataKey} className="flex justify-between gap-4 items-center">
@@ -281,17 +281,17 @@ export default function EstatisticasPage() {
             </div>
             <div className="grid grid-cols-2 divide-x divide-gray-800">
               {[{ s: s1, c: c1, win: leader === 0 }, { s: s2, c: c2, win: leader === 1 }].map(({ s, c, win }) => (
-                <div key={s.id} className={`p-4 text-center ${win ? 'bg-green-950/20' : ''}`}>
+                <div key={s.id} className={`p-4 text-center ${win ? 'bg-green-50 dark:bg-green-950/20' : ''}`}>
                   <p className="font-bold text-sm mb-3 truncate" style={{ color: c }}>{s.name}</p>
                   <div className="space-y-2 text-sm">
-                    <div className={`text-2xl font-black ${win ? 'text-yellow-400' : 'text-gray-300'}`}>{s.totalPoints}<span className="text-xs font-normal text-gray-500 ml-1">pts</span></div>
+                    <div className={`text-2xl font-black ${win ? 'text-yellow-600 dark:text-yellow-400' : 'text-gray-300'}`}>{s.totalPoints}<span className="text-xs font-normal text-gray-500 ml-1">pts</span></div>
                     <div className="flex justify-around text-xs text-gray-500 pt-1">
-                      <span><span className="text-green-400 font-bold text-base">{s.correctResults}</span><br/>resultados</span>
-                      <span><span className="text-yellow-400 font-bold text-base">{s.correctScores}</span><br/>placares</span>
+                      <span><span className="text-green-600 dark:text-green-400 font-bold text-base">{s.correctResults}</span><br/>resultados</span>
+                      <span><span className="text-yellow-600 dark:text-yellow-400 font-bold text-base">{s.correctScores}</span><br/>placares</span>
                       <span><span className="text-gray-300 font-bold text-base">{s.pointsPerMatch}</span><br/>pts/jogo</span>
                     </div>
                   </div>
-                  {win && <div className="mt-3 text-xs text-green-400 font-semibold">👑 Na frente</div>}
+                  {win && <div className="mt-3 text-xs text-green-600 dark:text-green-400 font-semibold">👑 Na frente</div>}
                 </div>
               ))}
             </div>
@@ -333,16 +333,16 @@ export default function EstatisticasPage() {
               {sortedStats.map((s, idx) => {
                 const pct = matchesPlayed > 0 ? Math.round((s.correctResults / matchesPlayed) * 100) : 0
                 return (
-                  <tr key={s.id} className={idx === 0 ? 'bg-yellow-950/30' : ''}>
+                  <tr key={s.id} className={idx === 0 ? 'bg-yellow-50 dark:bg-yellow-950/30' : ''}>
                     <td className="px-4 py-3 text-gray-500 text-xs">{idx + 1}</td>
-                    <td className="px-4 py-3 font-semibold text-white">{s.name}</td>
+                    <td className="px-4 py-3 font-semibold text-gray-200">{s.name}</td>
                     <td className="px-4 py-3 text-right">
-                      <span className="text-green-400">{s.correctResults}</span>
+                      <span className="text-green-600 dark:text-green-400">{s.correctResults}</span>
                       <span className="text-gray-600 text-xs ml-1">({pct}%)</span>
                     </td>
-                    <td className="px-4 py-3 text-right text-yellow-400 font-semibold">{s.correctScores}</td>
+                    <td className="px-4 py-3 text-right text-yellow-600 dark:text-yellow-400 font-semibold">{s.correctScores}</td>
                     <td className="px-4 py-3 text-right text-gray-300">{s.pointsPerMatch}</td>
-                    <td className="px-4 py-3 text-right font-bold text-yellow-500">{s.totalPoints}</td>
+                    <td className="px-4 py-3 text-right font-bold text-yellow-600 dark:text-yellow-500">{s.totalPoints}</td>
                   </tr>
                 )
               })}
@@ -369,13 +369,13 @@ export default function EstatisticasPage() {
                   </div>
                   <div className="text-right shrink-0">
                     <div className="flex items-center gap-2">
-                      {isSurprise && <span className="text-xs text-orange-400">😱 Surpresa!</span>}
-                      <span className={`text-sm font-bold px-2 py-0.5 rounded ${topHit ? 'text-green-400 bg-green-950' : 'text-gray-300 bg-gray-800'}`}>
+                      {isSurprise && <span className="text-xs text-orange-600 dark:text-orange-400">😱 Surpresa!</span>}
+                      <span className={`text-sm font-bold px-2 py-0.5 rounded ${topHit ? 'text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-950' : 'text-gray-300 bg-gray-800'}`}>
                         {pp.topPrediction}
                       </span>
                       <span className="text-xs text-gray-500">
                         {pp.count}/{pp.totalPredictions}
-                        {topHit && <span className="ml-1 text-green-500">✓</span>}
+                        {topHit && <span className="ml-1 text-green-600 dark:text-green-500">✓</span>}
                       </span>
                     </div>
                   </div>
@@ -388,7 +388,7 @@ export default function EstatisticasPage() {
 
       {/* Surprise summary */}
       {surprises.length > 0 && (
-        <div className="bg-orange-950/30 border border-orange-900/50 rounded-xl px-4 py-3 text-sm text-orange-300">
+        <div className="bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-900/50 rounded-xl px-4 py-3 text-sm text-orange-700 dark:text-orange-300">
           😱 <span className="font-semibold">{surprises.length} jogo{surprises.length !== 1 ? 's' : ''} sem nenhum palpite exato</span>
           {' '}— ninguém acertou o placar correto nesses jogos.
         </div>
