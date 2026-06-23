@@ -359,9 +359,9 @@ export default function LeaderboardPage() {
                   : <span className="text-xs text-red-700 dark:text-red-400 uppercase tracking-wider font-bold">🔴 Ao vivo</span>}
                 {m.clock && <span className={`text-xs font-semibold ${m.suspended ? 'text-yellow-700 dark:text-yellow-300' : 'text-red-800 dark:text-red-300'}`}>{m.clock}</span>}
               </div>
-              <div className="flex items-center gap-2 text-sm text-gray-900 dark:text-white">
+              <div className="flex items-center gap-2 text-sm text-gray-200 dark:text-white">
                 <span className="flex items-center gap-1.5"><Flag teamId={m.team1.id} size={18} />{m.team1.name}</span>
-                <span className="font-bold text-gray-900 dark:text-white text-base px-1">
+                <span className="font-bold text-gray-200 dark:text-white text-base px-1">
                   {m.liveScore1 !== undefined && m.liveScore2 !== undefined
                     ? `${m.liveScore1} × ${m.liveScore2}`
                     : <span className="text-red-500 dark:text-red-300">vs</span>}
@@ -473,7 +473,7 @@ export default function LeaderboardPage() {
                   onClick={() => setSelectedParticipant({ id: entry.participant.id, name: entry.participant.name })}
                 >
                   <span className="text-gray-500 text-xs w-5 text-right shrink-0 font-semibold">{rank}</span>
-                  <span className="text-gray-800 dark:text-gray-200 text-sm font-semibold flex-1 min-w-0 truncate">{entry.participant.name}</span>
+                  <span className="text-gray-200 text-sm font-semibold flex-1 min-w-0 truncate">{entry.participant.name}</span>
                   {liveGain > 0
                     ? <span className="text-green-700 dark:text-green-400 text-xs font-bold w-9 text-right shrink-0 tabular-nums">+{liveGain}</span>
                     : <span className="text-gray-500 dark:text-gray-600 text-xs font-bold w-9 text-right shrink-0">0</span>
@@ -486,7 +486,7 @@ export default function LeaderboardPage() {
                         : <span className="text-red-700 dark:text-red-400 text-[10px] font-bold tabular-nums">▼{Math.abs(change)}</span>
                     }
                   </span>
-                  <span className="text-gray-900 dark:text-yellow-400 font-bold text-sm shrink-0 w-10 text-right tabular-nums">{entry.totalPoints}</span>
+                  <span className="text-gray-200 dark:text-yellow-400 font-bold text-sm shrink-0 w-10 text-right tabular-nums">{entry.totalPoints}</span>
                 </div>
               )
             })}
