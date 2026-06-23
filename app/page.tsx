@@ -553,7 +553,7 @@ export default function LeaderboardPage() {
                       ? (isFirstOfRank[idx] ? <span className="text-yellow-500 text-sm">{rank}</span> : null)
                       : trophies[tier]
                       ?? (rank >= 4 && rank <= 7
-                          ? '⭐'
+                          ? (isFirstOfRank[idx] ? <span className="text-green-400 text-sm">{rank}</span> : null)
                           : (isFirstOfRank[idx] ? <span className="text-gray-500 text-sm">{rank}</span> : null))}
                   </td>
                   <td className={`px-4 py-3 font-semibold ${
@@ -562,6 +562,7 @@ export default function LeaderboardPage() {
                     tier === 1 ? 'text-yellow-700 dark:text-yellow-300' :
                     tier === 2 ? 'text-gray-300' :
                     tier === 3 ? 'text-amber-600' :
+                    (rank >= 4 && rank <= 7) ? 'text-green-400' :
                     ''
                   }`}>
                     <span className="flex items-center gap-1.5">
