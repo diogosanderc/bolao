@@ -507,7 +507,7 @@ export default function LeaderboardPage() {
         </div>
       )}
 
-      {!loading && data.length > 0 && (
+      {!loading && data.length > 0 && !leaderboardHasLive && (
         <div className="overflow-x-auto rounded-xl border border-gray-800">
           <table className="w-full text-sm">
             <thead>
