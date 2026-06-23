@@ -103,7 +103,7 @@ export function Header() {
   )
 
   return (
-    <header className="bg-green-800 shadow-lg relative z-50">
+    <header className="bg-[#00bf63] shadow-lg relative z-50">
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
         <a href="/" className="flex items-center gap-2 no-underline">
           <span className="text-3xl">🏆</span>
@@ -143,7 +143,7 @@ export function Header() {
 
       {/* Mobile dropdown */}
       {!isAuthPage && open && (
-        <nav className="sm:hidden bg-green-900 border-t border-green-700 px-4 py-2 flex flex-col">
+        <nav className="sm:hidden bg-[#009f50] border-t border-[#00bf63]/60 px-4 py-2 flex flex-col">
           {navLinks(true)}
         </nav>
       )}
