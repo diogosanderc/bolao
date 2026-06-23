@@ -456,9 +456,10 @@ export default function LeaderboardPage() {
                 >
                   <span className="text-gray-500 text-xs w-5 text-right shrink-0 font-semibold">{rank}</span>
                   <span className="text-gray-200 text-sm font-semibold flex-1 min-w-0 truncate">{entry.participant.name}</span>
-                  {liveGain > 0 && (
-                    <span className="text-green-400 text-xs font-bold shrink-0">+{liveGain}</span>
-                  )}
+                  {liveGain > 0
+                    ? <span className="text-green-400 text-xs font-bold shrink-0">+{liveGain}</span>
+                    : <span className="text-gray-600 text-xs font-bold shrink-0">0</span>
+                  }
                   {change === undefined || change === 0
                     ? <span className="w-2 h-2 rounded-sm bg-gray-600 shrink-0 inline-block" />
                     : change > 0
