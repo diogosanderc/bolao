@@ -565,16 +565,7 @@ export default function LeaderboardPage() {
                     (rank >= 4 && rank <= 7) ? 'text-green-400' :
                     ''
                   }`}>
-                    <span className="flex items-center gap-1.5">
-                      {entry.participant.name}
-                      {(() => {
-                        const change = p.positionChange
-                        if (!change) return null
-                        return change > 0
-                          ? <span className="text-green-400 text-[10px] font-bold">▲{change}</span>
-                          : <span className="text-red-400 text-[10px] font-bold">▼{Math.abs(change)}</span>
-                      })()}
-                    </span>
+                    {entry.participant.name}
                   </td>
                   <td className="px-4 py-3 text-right text-gray-300">
                     {entry.lastMatchPoints > 0
