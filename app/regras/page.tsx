@@ -25,7 +25,7 @@ export default function RegrasPage() {
               ['⚽', 'Gols exatos do time visitante', '+1 pt'],
               ['🎯', 'Placar exato completo', '+2 pts'],
               ['🔥', 'Gols de um time ≥ 4 e você acertou quantos', '+2 pts/time'],
-              ['📊', 'Classificação correta do grupo (1º ou 2º lugar)', '+2 pts/grupo'],
+              ['📊', 'Classificação completa do grupo (1º, 2º, 3º e 4º lugar todos certos)', '+2 pts/grupo'],
             ].map(([icon, desc, pts]) => (
               <tr key={desc}>
                 <td className="px-4 py-3 text-gray-300">
