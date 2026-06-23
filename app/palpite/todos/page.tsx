@@ -150,7 +150,7 @@ export default function TodosPalpitesPage() {
     <div className="space-y-4">
       <div className="flex items-center gap-3">
         <Link href="/palpite" className="text-gray-400 hover:text-white text-sm">← Voltar</Link>
-        <h2 className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">Palpites de Todos</h2>
+        <h2 className="text-2xl font-bold text-gray-200 dark:text-yellow-400">Palpites de Todos</h2>
         <span className="text-xs text-gray-500 ml-1">({totalParticipants} participantes)</span>
       </div>
 

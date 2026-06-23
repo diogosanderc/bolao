@@ -132,7 +132,7 @@ export default function EstatisticasPage() {
 
   return (
     <div className="space-y-8">
-      <h2 className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">Estatísticas do Bolão</h2>
+      <h2 className="text-2xl font-bold text-gray-200 dark:text-yellow-400">Estatísticas do Bolão</h2>
 
       {/* Evolution Chart */}
       <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">

@@ -2,7 +2,7 @@ export default function RegrasPage() {
   return (
     <div className="space-y-6 max-w-2xl mx-auto">
       <div>
-        <h2 className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">Regras e Pontuação</h2>
+        <h2 className="text-2xl font-bold text-gray-200 dark:text-yellow-400">Regras e Pontuação</h2>
         <p className="text-sm text-gray-500 mt-1">Como funciona o Bolão Copa do Mundo 2026</p>
       </div>
 

@@ -226,7 +226,7 @@ export default function ClassificacaoCopaPage() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
-          <h2 className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">Classificação da Copa</h2>
+          <h2 className="text-2xl font-bold text-gray-200 dark:text-yellow-400">Classificação da Copa</h2>
           <p className="text-xs text-gray-500 mt-0.5">Tabela dos grupos e resultados do mata-mata</p>
         </div>
         {hasLive && (

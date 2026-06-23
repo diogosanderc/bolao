@@ -127,7 +127,7 @@ export default function SimuladorPage() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
-          <h2 className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">Simulador</h2>
+          <h2 className="text-2xl font-bold text-gray-200 dark:text-yellow-400">Simulador</h2>
           <p className="text-xs text-gray-500 mt-0.5">Insira resultados hipotéticos e veja como a classificação muda — nada é salvo</p>
         </div>
         <div className="flex gap-2 items-center">
