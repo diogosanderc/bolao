@@ -30,12 +30,12 @@ export default function RegrasPage() {
                 <td className="px-4 py-3 text-gray-300">
                   <span className="mr-2">{icon}</span>{desc}
                 </td>
-                <td className="px-4 py-3 text-right font-bold text-green-400 whitespace-nowrap">{pts}</td>
+                <td className="px-4 py-3 text-right font-bold text-green-600 dark:text-green-400 whitespace-nowrap">{pts}</td>
               </tr>
             ))}
           </tbody>
         </table>
-        <div className="px-4 py-3 bg-yellow-950/20 border-t border-gray-800 text-xs text-yellow-500">
+        <div className="px-4 py-3 bg-yellow-50 dark:bg-yellow-950/20 border-t border-gray-800 text-xs text-yellow-700 dark:text-yellow-500">
           Máximo por jogo: 4 + 1 + 1 + 2 = <strong>8 pontos</strong> (+ até 4 bônus se algum time fizer ≥4 gols)
         </div>
       </section>
@@ -56,7 +56,7 @@ export default function RegrasPage() {
             ].map(({ pred, pts, reason }) => (
               <div key={pred} className="flex items-start gap-3 py-1.5 border-b border-gray-800/50 last:border-0">
                 <span className="text-gray-300 flex-1">{pred}</span>
-                <span className="text-green-400 font-bold shrink-0">{pts} pts</span>
+                <span className="text-green-600 dark:text-green-400 font-bold shrink-0">{pts} pts</span>
                 <span className="text-gray-600 text-xs shrink-0 hidden sm:block">({reason})</span>
               </div>
             ))}
@@ -90,7 +90,7 @@ export default function RegrasPage() {
             ].map(([phase, pts]) => (
               <tr key={phase}>
                 <td className="px-4 py-3 text-gray-300">{phase}</td>
-                <td className="px-4 py-3 text-right font-bold text-yellow-400">{pts}</td>
+                <td className="px-4 py-3 text-right font-bold text-yellow-600 dark:text-yellow-400">{pts}</td>
               </tr>
             ))}
           </tbody>
@@ -111,15 +111,15 @@ export default function RegrasPage() {
       <section className="bg-gray-900 border border-gray-800 rounded-xl px-4 py-4 space-y-2">
         <h3 className="font-semibold text-gray-200">💸 Zona de Rebaixamento</h3>
         <p className="text-sm text-gray-400">
-          Os <strong className="text-red-400">7 últimos colocados</strong> ao final do torneio ficam na zona de rebaixamento (💸).
-          Os <strong className="text-yellow-400">2 acima</strong> estão em alerta (⚠️).
+          Os <strong className="text-red-600 dark:text-red-400">7 últimos colocados</strong> ao final do torneio ficam na zona de rebaixamento (💸).
+          Os <strong className="text-yellow-600 dark:text-yellow-400">2 acima</strong> estão em alerta (⚠️).
         </p>
       </section>
 
       {/* Tips */}
-      <section className="bg-green-950/30 border border-green-900/50 rounded-xl px-4 py-4 space-y-1.5">
-        <h3 className="font-semibold text-green-300 text-sm">💡 Dicas</h3>
-        <ul className="text-sm text-green-400/80 space-y-1 list-disc list-inside">
+      <section className="bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-900/50 rounded-xl px-4 py-4 space-y-1.5">
+        <h3 className="font-semibold text-green-700 dark:text-green-300 text-sm">💡 Dicas</h3>
+        <ul className="text-sm text-green-700 dark:text-green-400/80 space-y-1 list-disc list-inside">
           <li>Apostar no placar exato vale muito mais — priorize jogos onde você tem convicção</li>
           <li>Os pontos de classificação no mata-mata podem virar o jogo no final do torneio</li>
           <li>Acertar o campeão vale 12 pontos extras!</li>

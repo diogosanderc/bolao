@@ -334,19 +334,19 @@ export default function LeaderboardPage() {
       {liveMatches.length > 0 && (
         <div className="space-y-1.5">
           {liveMatches.map(m => (
-            <div key={m.matchId} className={`border rounded-lg px-4 py-2.5 ${m.suspended ? 'bg-yellow-950/60 border-yellow-700' : 'bg-red-950/60 border-red-700 animate-pulse'}`}>
+            <div key={m.matchId} className={`border rounded-lg px-4 py-2.5 ${m.suspended ? 'bg-yellow-50 dark:bg-yellow-950/60 border-yellow-400 dark:border-yellow-700' : 'bg-red-50 dark:bg-red-950/60 border-red-400 dark:border-red-700 animate-pulse'}`}>
               <div className="flex items-center justify-between mb-1">
                 {m.suspended
-                  ? <span className="text-xs text-yellow-400 uppercase tracking-wider font-bold">⛈️ Paralisado</span>
-                  : <span className="text-xs text-red-400 uppercase tracking-wider font-bold">🔴 Ao vivo</span>}
-                {m.clock && <span className={`text-xs font-semibold ${m.suspended ? 'text-yellow-300' : 'text-red-300'}`}>{m.clock}</span>}
+                  ? <span className="text-xs text-yellow-700 dark:text-yellow-400 uppercase tracking-wider font-bold">⛈️ Paralisado</span>
+                  : <span className="text-xs text-red-600 dark:text-red-400 uppercase tracking-wider font-bold">🔴 Ao vivo</span>}
+                {m.clock && <span className={`text-xs font-semibold ${m.suspended ? 'text-yellow-700 dark:text-yellow-300' : 'text-red-700 dark:text-red-300'}`}>{m.clock}</span>}
               </div>
-              <div className="flex items-center gap-2 text-sm text-white">
+              <div className="flex items-center gap-2 text-sm text-gray-900 dark:text-white">
                 <span className="flex items-center gap-1.5"><Flag teamId={m.team1.id} size={18} />{m.team1.name}</span>
-                <span className="font-bold text-white text-base px-1">
+                <span className="font-bold text-gray-900 dark:text-white text-base px-1">
                   {m.liveScore1 !== undefined && m.liveScore2 !== undefined
                     ? `${m.liveScore1} × ${m.liveScore2}`
-                    : <span className="text-red-300">vs</span>}
+                    : <span className="text-red-500 dark:text-red-300">vs</span>}
                 </span>
                 <span className="flex items-center gap-1.5"><Flag teamId={m.team2.id} size={18} />{m.team2.name}</span>
               </div>
@@ -360,8 +360,8 @@ export default function LeaderboardPage() {
                         <div key={team.id} className="flex items-center gap-1.5 flex-wrap">
                           <Flag teamId={team.id} size={14} />
                           {goals.map((g, i) => (
-                            <span key={i} className="text-xs text-red-200">
-                              ⚽{g.minute && <span className="text-red-400"> {g.minute}</span>} {g.playerName}
+                            <span key={i} className="text-xs text-red-600 dark:text-red-200">
+                              ⚽{g.minute && <span className="text-red-500 dark:text-red-400"> {g.minute}</span>} {g.playerName}
                             </span>
                           ))}
                         </div>
@@ -436,13 +436,13 @@ export default function LeaderboardPage() {
       )}
 
       {leaderboardHasLive && data.length > 0 && (
-        <div className="rounded-xl border border-red-900/50 bg-red-950/20 overflow-hidden">
-          <div className="px-4 py-2 border-b border-red-900/30 flex items-center gap-2">
+        <div className="rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50/80 dark:bg-red-950/20 overflow-hidden">
+          <div className="px-4 py-2 border-b border-red-200/60 dark:border-red-900/30 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse shrink-0" />
-            <span className="text-xs font-bold text-red-400 uppercase tracking-wider flex-1">Classificação ao vivo</span>
-            <span className="text-xs text-gray-600">se acabasse agora</span>
+            <span className="text-xs font-bold text-red-600 dark:text-red-400 uppercase tracking-wider flex-1">Classificação ao vivo</span>
+            <span className="text-xs text-gray-500 dark:text-gray-600">se acabasse agora</span>
           </div>
-          <div className="divide-y divide-red-900/20">
+          <div className="divide-y divide-red-100 dark:divide-red-900/20">
             {data.map((entry, idx) => {
               const rank = ranks[idx]
               const p = entry as any
@@ -451,24 +451,24 @@ export default function LeaderboardPage() {
               return (
                 <div
                   key={entry.participant.id}
-                  className="flex items-center gap-2 px-4 py-2 cursor-pointer hover:bg-red-950/40 transition-colors"
+                  className="flex items-center gap-2 px-4 py-2 cursor-pointer hover:bg-red-100 dark:hover:bg-red-950/40 transition-colors"
                   onClick={() => setSelectedParticipant({ id: entry.participant.id, name: entry.participant.name })}
                 >
                   <span className="text-gray-500 text-xs w-5 text-right shrink-0 font-semibold">{rank}</span>
-                  <span className="text-gray-200 text-sm font-semibold flex-1 min-w-0 truncate">{entry.participant.name}</span>
+                  <span className="text-gray-800 dark:text-gray-200 text-sm font-semibold flex-1 min-w-0 truncate">{entry.participant.name}</span>
                   {liveGain > 0
-                    ? <span className="text-green-400 text-xs font-bold w-9 text-right shrink-0 tabular-nums">+{liveGain}</span>
-                    : <span className="text-gray-600 text-xs font-bold w-9 text-right shrink-0">0</span>
+                    ? <span className="text-green-600 dark:text-green-400 text-xs font-bold w-9 text-right shrink-0 tabular-nums">+{liveGain}</span>
+                    : <span className="text-gray-500 dark:text-gray-600 text-xs font-bold w-9 text-right shrink-0">0</span>
                   }
                   <span className="w-9 text-right shrink-0 flex items-center justify-end">
                     {change === undefined || change === 0
-                      ? <span className="w-2 h-2 rounded-sm bg-gray-600 inline-block" />
+                      ? <span className="w-2 h-2 rounded-sm bg-gray-400 dark:bg-gray-600 inline-block" />
                       : change > 0
-                        ? <span className="text-blue-300 text-[10px] font-bold tabular-nums">▲{change}</span>
-                        : <span className="text-red-400 text-[10px] font-bold tabular-nums">▼{Math.abs(change)}</span>
+                        ? <span className="text-blue-600 dark:text-blue-300 text-[10px] font-bold tabular-nums">▲{change}</span>
+                        : <span className="text-red-500 dark:text-red-400 text-[10px] font-bold tabular-nums">▼{Math.abs(change)}</span>
                     }
                   </span>
-                  <span className="text-yellow-400 font-bold text-sm shrink-0 w-10 text-right tabular-nums">{entry.totalPoints}</span>
+                  <span className="text-yellow-600 dark:text-yellow-400 font-bold text-sm shrink-0 w-10 text-right tabular-nums">{entry.totalPoints}</span>
                 </div>
               )
             })}
@@ -477,35 +477,35 @@ export default function LeaderboardPage() {
       )}
 
       {projectionMode && data.length > 0 && (
-        <div className="rounded-xl border border-purple-800 overflow-hidden">
-          <div className="bg-purple-950/60 px-4 py-2.5 border-b border-purple-800">
-            <p className="text-xs text-purple-300 font-semibold uppercase tracking-wider">📊 Projeção — {remainingMatches} jogos restantes</p>
+        <div className="rounded-xl border border-purple-200 dark:border-purple-800 overflow-hidden">
+          <div className="bg-purple-50 dark:bg-purple-950/60 px-4 py-2.5 border-b border-purple-200 dark:border-purple-800">
+            <p className="text-xs text-purple-700 dark:text-purple-300 font-semibold uppercase tracking-wider">📊 Projeção — {remainingMatches} jogos restantes</p>
             <p className="text-xs text-purple-500 mt-0.5">Máximo estimado: pts atuais + {remainingMatches} × 8 pts/jogo</p>
           </div>
-          <div className="divide-y divide-purple-900/40">
+          <div className="divide-y divide-purple-100 dark:divide-purple-900/40">
             {data.map((entry, idx) => {
               const p = entry as any
               const rank = ranks[idx]
               return (
-                <div key={entry.participant.id} className="px-4 py-3 bg-gray-950/40 flex items-center gap-3">
+                <div key={entry.participant.id} className="px-4 py-3 bg-white dark:bg-gray-950/40 flex items-center gap-3">
                   <span className="text-gray-500 text-xs w-5 text-right shrink-0">{rank}</span>
-                  <span className="text-gray-200 text-sm font-semibold flex-1 min-w-0 truncate">{entry.participant.name}</span>
+                  <span className="text-gray-800 dark:text-gray-200 text-sm font-semibold flex-1 min-w-0 truncate">{entry.participant.name}</span>
                   <div className="flex items-center gap-3 shrink-0 text-sm">
-                    <span className="text-purple-300 font-bold">{p.maxPossiblePoints ?? '—'}</span>
-                    <span className="text-gray-600 text-xs">máx.</span>
+                    <span className="text-purple-700 dark:text-purple-300 font-bold">{p.maxPossiblePoints ?? '—'}</span>
+                    <span className="text-gray-500 dark:text-gray-600 text-xs">máx.</span>
                     <span className="w-16 text-right">
                       {p.pointsToFirst === 0
-                        ? <span className="text-yellow-400 font-bold text-xs">Líder</span>
+                        ? <span className="text-yellow-600 dark:text-yellow-400 font-bold text-xs">Líder</span>
                         : p.canReachFirst
-                        ? <span className="text-green-400 text-xs">+{p.pointsToFirst} p/ 1º</span>
-                        : <span className="text-gray-600 text-xs">+{p.pointsToFirst} p/ 1º</span>}
+                        ? <span className="text-green-600 dark:text-green-400 text-xs">+{p.pointsToFirst} p/ 1º</span>
+                        : <span className="text-gray-500 dark:text-gray-600 text-xs">+{p.pointsToFirst} p/ 1º</span>}
                     </span>
                     <span className="w-16 text-right">
                       {p.isInTop7
-                        ? <span className="text-green-400 text-xs font-bold">Top 7 ✓</span>
+                        ? <span className="text-green-600 dark:text-green-400 text-xs font-bold">Top 7 ✓</span>
                         : p.canReachTop7
-                        ? <span className="text-yellow-400 text-xs">+{p.pointsToTop7} p/ T7</span>
-                        : <span className="text-red-500 text-xs">fora</span>}
+                        ? <span className="text-yellow-600 dark:text-yellow-400 text-xs">+{p.pointsToTop7} p/ T7</span>
+                        : <span className="text-red-600 dark:text-red-500 text-xs">fora</span>}
                     </span>
                   </div>
                 </div>
@@ -553,32 +553,32 @@ export default function LeaderboardPage() {
                       ? (isFirstOfRank[idx] ? <span className="text-yellow-500 text-sm">{rank}</span> : null)
                       : trophies[tier]
                       ?? (rank >= 4 && rank <= 7
-                          ? (isFirstOfRank[idx] ? <span className="text-green-400 text-sm">{rank}</span> : null)
+                          ? (isFirstOfRank[idx] ? <span className="text-green-600 dark:text-green-400 text-sm">{rank}</span> : null)
                           : (isFirstOfRank[idx] ? <span className="text-gray-500 text-sm">{rank}</span> : null))}
                   </td>
                   <td className={`px-4 py-3 font-semibold ${
                     isRelated(entry.totalPoints) ? 'text-red-700 dark:text-red-300' :
                     isWarning(entry.totalPoints) ? 'text-yellow-600 dark:text-yellow-400' :
                     tier === 1 ? 'text-yellow-700 dark:text-yellow-300' :
-                    tier === 2 ? 'text-gray-300' :
-                    tier === 3 ? 'text-amber-600' :
-                    (rank >= 4 && rank <= 7) ? 'text-green-400' :
+                    tier === 2 ? 'text-gray-800 dark:text-gray-300' :
+                    tier === 3 ? 'text-amber-700 dark:text-amber-600' :
+                    (rank >= 4 && rank <= 7) ? 'text-green-600 dark:text-green-400' :
                     ''
                   }`}>
                     {entry.participant.name}
                   </td>
-                  <td className="px-4 py-3 text-right text-gray-300">
+                  <td className="px-4 py-3 text-right">
                     {entry.lastMatchPoints > 0
-                      ? <span className="text-green-400 font-semibold">+{entry.lastMatchPoints}</span>
-                      : <span className="text-gray-500">0</span>}
+                      ? <span className="text-green-600 dark:text-green-400 font-semibold">+{entry.lastMatchPoints}</span>
+                      : <span className="text-gray-400 dark:text-gray-500">0</span>}
                   </td>
                   <td className="px-4 py-3 text-right">
                     {(() => {
                       const pts = p.last4Points ?? 0
-                      return <span className={pts > 0 ? 'text-blue-400 font-semibold' : 'text-gray-500'}>{pts}</span>
+                      return <span className={pts > 0 ? 'text-blue-600 dark:text-blue-400 font-semibold' : 'text-gray-400 dark:text-gray-500'}>{pts}</span>
                     })()}
                   </td>
-                  <td className={`px-4 py-3 text-right font-bold text-base ${isRelated(entry.totalPoints) ? 'text-red-600 dark:text-red-400' : isWarning(entry.totalPoints) ? 'text-yellow-500 dark:text-yellow-400' : 'text-yellow-600 dark:text-yellow-400'}`}>
+                  <td className={`px-4 py-3 text-right font-bold text-base ${isRelated(entry.totalPoints) ? 'text-red-600 dark:text-red-400' : isWarning(entry.totalPoints) ? 'text-yellow-600 dark:text-yellow-500' : 'text-yellow-600 dark:text-yellow-400'}`}>
                     {entry.totalPoints}
                   </td>
                 </tr>
@@ -608,7 +608,7 @@ export default function LeaderboardPage() {
           <div key={item.label} className="bg-gray-900 rounded-lg p-3 text-center border border-gray-800">
             <div className="text-2xl mb-1">{item.icon}</div>
             <div className="text-xs text-gray-400">{item.label}</div>
-            <div className="text-green-400 font-bold text-sm">{item.pts}</div>
+            <div className="text-green-600 dark:text-green-400 font-bold text-sm">{item.pts}</div>
           </div>
         ))}
       </div>
@@ -621,12 +621,12 @@ export default function LeaderboardPage() {
         <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={() => setMatchModal(null)}>
           <div className="absolute inset-0 bg-black/60" />
           <div
-            className="relative w-full max-w-lg bg-gray-950 border border-gray-800 rounded-t-2xl p-4 pb-8 max-h-[80vh] overflow-y-auto"
+            className="relative w-full max-w-lg bg-white dark:bg-gray-950 border border-gray-800 rounded-t-2xl p-4 pb-8 max-h-[80vh] overflow-y-auto"
             onClick={e => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-3">
-              <h3 className="font-bold text-gray-200 text-base">{matchModal.label}</h3>
-              <button onClick={() => setMatchModal(null)} className="text-gray-500 hover:text-gray-300 text-lg leading-none">✕</button>
+              <h3 className="font-bold text-gray-800 dark:text-gray-200 text-base">{matchModal.label}</h3>
+              <button onClick={() => setMatchModal(null)} className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-lg leading-none">✕</button>
             </div>
 
             {matchPredLoading ? (
@@ -635,7 +635,7 @@ export default function LeaderboardPage() {
               <p className="text-center text-gray-500 py-6">Nenhum palpite registrado ainda.</p>
             ) : (
               <>
-                <div className="divide-y divide-gray-800 mb-4">
+                <div className="divide-y divide-gray-200 dark:divide-gray-800 mb-4">
                   {Object.entries(
                     matchPredictions.reduce<Record<string, string[]>>((acc, p) => {
                       const key = `${p.score1}×${p.score2}`
@@ -646,8 +646,8 @@ export default function LeaderboardPage() {
                     .sort((a, b) => b[1].length - a[1].length)
                     .map(([score, names]) => (
                       <div key={score} className="flex items-start justify-between gap-4 py-2.5">
-                        <span className="text-sm text-gray-300">{names.join(', ')}</span>
-                        <span className="text-sm font-bold text-yellow-400 shrink-0">{score}</span>
+                        <span className="text-sm text-gray-700 dark:text-gray-300">{names.join(', ')}</span>
+                        <span className="text-sm font-bold text-yellow-600 dark:text-yellow-400 shrink-0">{score}</span>
                       </div>
                     ))}
                 </div>
