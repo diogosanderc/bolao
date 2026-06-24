@@ -558,9 +558,9 @@ export default function LeaderboardPage() {
               <tr className="bg-gray-900 text-gray-400 text-xs uppercase tracking-wider">
                 <th className="px-4 py-3 text-left w-10">#</th>
                 <th className="px-4 py-3 text-left">Participante</th>
-                <th className="px-4 py-3 text-right">Último</th>
-                <th className="px-4 py-3 text-right">Últ. 4</th>
-                <th className="px-4 py-3 text-right">Total</th>
+                <th className="px-4 py-3 text-right cursor-help" title="Pontuação do último jogo">UJ</th>
+                <th className="px-4 py-3 text-right cursor-help" title="Soma dos 4 últimos jogos">U4</th>
+                <th className="px-4 py-3 text-right">PTS</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-800">
@@ -615,7 +615,7 @@ export default function LeaderboardPage() {
                       return <span className={pts > 0 ? 'text-blue-600 dark:text-blue-400 font-semibold' : 'text-gray-400 dark:text-gray-500'}>{pts}</span>
                     })()}
                   </td>
-                  <td className={`px-4 py-3 text-right font-bold text-base ${isRelated(entry.totalPoints) ? 'text-red-600 dark:text-red-400' : isWarning(entry.totalPoints) ? 'text-yellow-600 dark:text-yellow-500' : 'text-yellow-600 dark:text-yellow-400'}`}>
+                  <td className={`px-4 py-3 text-right font-bold text-base ${isRelated(entry.totalPoints) ? 'text-red-600 dark:text-red-400' : isWarning(entry.totalPoints) ? 'text-gray-200 dark:text-yellow-500' : 'text-gray-200 dark:text-yellow-400'}`}>
                     {entry.totalPoints}
                   </td>
                 </tr>
@@ -655,15 +655,15 @@ export default function LeaderboardPage() {
       </div>
 
       {matchModal && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center" style={{ touchAction: 'none' }} onClick={() => setMatchModal(null)}>
-          <div className="absolute inset-0 bg-black/60" />
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center" style={{ touchAction: 'none' }} onClick={() => setMatchModal(null)}>
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
           <div
-            className="relative w-full max-w-lg bg-white dark:bg-gray-950 border border-gray-800 rounded-t-2xl p-4 pb-8 max-h-[80vh] overflow-y-auto"
+            className="relative w-full sm:max-w-2xl bg-gray-900 border border-gray-700 rounded-t-2xl sm:rounded-2xl p-4 pb-8 sm:pb-4 max-h-[85vh] overflow-y-auto"
             onClick={e => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-3">
-              <h3 className="font-bold text-gray-800 dark:text-gray-200 text-base">{matchModal.label}</h3>
-              <button onClick={() => setMatchModal(null)} className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 text-lg leading-none">✕</button>
+              <h3 className="font-bold text-gray-200 text-base">{matchModal.label}</h3>
+              <button onClick={() => setMatchModal(null)} className="text-gray-500 hover:text-gray-300 text-lg leading-none">✕</button>
             </div>
 
             {matchPredLoading ? (
@@ -672,7 +672,7 @@ export default function LeaderboardPage() {
               <p className="text-center text-gray-500 py-6">Nenhum palpite registrado ainda.</p>
             ) : (
               <>
-                <div className="divide-y divide-gray-200 dark:divide-gray-800 mb-4">
+                <div className="divide-y divide-gray-800 mb-4">
                   {Object.entries(
                     matchPredictions.reduce<Record<string, string[]>>((acc, p) => {
                       const key = `${p.score1}×${p.score2}`
@@ -685,10 +685,10 @@ export default function LeaderboardPage() {
                       <div key={score} className="flex items-start justify-between gap-3 py-2.5">
                         <div className="flex flex-wrap gap-1 flex-1">
                           {names.sort().map(name => (
-                            <span key={name} title={name} className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded px-1.5 py-0.5">{name === 'LUCILIO' ? 'LCLI' : name === 'MORELLI' ? 'MRLI' : name.substring(0, 4)}</span>
+                            <span key={name} title={name} className="text-xs bg-gray-800 text-gray-300 rounded px-1.5 py-0.5">{name === 'LUCILIO' ? 'LCLI' : name === 'MORELLI' ? 'MRLI' : name.substring(0, 4)}</span>
                           ))}
                         </div>
-                        <span className="text-sm font-bold text-green-700 dark:text-yellow-400 shrink-0">{score}</span>
+                        <span className="text-sm font-bold text-green-400 shrink-0">{score}</span>
                       </div>
                     ))}
                 </div>
