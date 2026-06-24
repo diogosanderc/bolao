@@ -55,6 +55,14 @@ export async function GET() {
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
 
     const nextMatch = upcoming[0] ?? null
+    // All matches starting at the same time as the first upcoming match
+    const nextMatches = nextMatch
+      ? upcoming.filter(e => e.date === nextMatch.date).map(e => ({
+          ...e,
+          team1: { id: e.team1Id, name: teamById[e.team1Id]?.name ?? e.team1Id, flag: teamById[e.team1Id]?.flag ?? '🏳' },
+          team2: { id: e.team2Id, name: teamById[e.team2Id]?.name ?? e.team2Id, flag: teamById[e.team2Id]?.flag ?? '🏳' },
+        }))
+      : []
     const live = events.filter(e => e.inProgress || e.suspended)
 
     return NextResponse.json({
@@ -63,6 +71,7 @@ export async function GET() {
         team1: { id: nextMatch.team1Id, name: teamById[nextMatch.team1Id]?.name ?? nextMatch.team1Id, flag: teamById[nextMatch.team1Id]?.flag ?? '🏳' },
         team2: { id: nextMatch.team2Id, name: teamById[nextMatch.team2Id]?.name ?? nextMatch.team2Id, flag: teamById[nextMatch.team2Id]?.flag ?? '🏳' },
       } : null,
+      nextMatches,
       live: live.map(e => ({
         ...e,
         team1: { id: e.team1Id, name: teamById[e.team1Id]?.name ?? e.team1Id },

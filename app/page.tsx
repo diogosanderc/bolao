@@ -38,6 +38,7 @@ export default function LeaderboardPage() {
   const [data, setData] = useState<LeaderboardEntry[]>([])
   const [lastMatch, setLastMatch] = useState<LastMatch>(null)
   const [nextMatch, setNextMatch] = useState<ScheduleMatch | null>(null)
+  const [nextMatches, setNextMatches] = useState<ScheduleMatch[]>([])
   const [liveMatches, setLiveMatches] = useState<ScheduleMatch[]>([])
   const [loading, setLoading] = useState(true)
   const [projectionMode, setProjectionMode] = useState(false)
@@ -120,6 +121,7 @@ export default function LeaderboardPage() {
         .then(r => r.json())
         .then(d => {
           setNextMatch(d.nextMatch ?? null)
+          setNextMatches(Array.isArray(d.nextMatches) ? d.nextMatches : [])
           setLiveMatches(Array.isArray(d.live) ? d.live : [])
         })
         .catch(() => {})
@@ -399,19 +401,19 @@ export default function LeaderboardPage() {
         </div>
       )}
 
-      {nextMatch && liveMatches.length > 0 && !liveMatches.some(m => m.matchId === nextMatch.matchId) && (
-        <div className="bg-gray-900 border border-gray-800 rounded-lg px-4 py-2.5">
+      {liveMatches.length > 0 && nextMatches.filter(m => !liveMatches.some(l => l.matchId === m.matchId)).map(m => (
+        <div key={m.matchId} className="bg-gray-900 border border-gray-800 rounded-lg px-4 py-2.5">
           <div className="flex items-center justify-between mb-1">
             <span className="text-xs text-gray-500 uppercase tracking-wider">Próximo jogo</span>
-            <span className="text-xs text-yellow-500 font-semibold">{nextMatch.dateBRT}</span>
+            <span className="text-xs text-yellow-500 font-semibold">{m.dateBRT}</span>
           </div>
           <div className="flex items-center gap-2 text-sm text-gray-300">
-            <span className="flex items-center gap-1.5"><Flag teamId={nextMatch.team1.id} size={18} />{nextMatch.team1.name}</span>
+            <span className="flex items-center gap-1.5"><Flag teamId={m.team1.id} size={18} />{m.team1.name}</span>
             <span className="text-gray-600">vs</span>
-            <span className="flex items-center gap-1.5"><Flag teamId={nextMatch.team2.id} size={18} />{nextMatch.team2.name}</span>
+            <span className="flex items-center gap-1.5"><Flag teamId={m.team2.id} size={18} />{m.team2.name}</span>
           </div>
         </div>
-      )}
+      ))}
 
       {lastMatch && (
         <div className="bg-gray-900 border border-gray-800 rounded-lg px-4 py-2.5">
@@ -424,22 +426,23 @@ export default function LeaderboardPage() {
         </div>
       )}
 
-      {nextMatch && liveMatches.length === 0 && (
+      {liveMatches.length === 0 && nextMatches.map(m => (
         <button
-          onClick={() => openMatchPredictions(nextMatch.matchId, `${nextMatch.team1.name} vs ${nextMatch.team2.name}`)}
+          key={m.matchId}
+          onClick={() => openMatchPredictions(m.matchId, `${m.team1.name} vs ${m.team2.name}`)}
           className="w-full bg-gray-900 border border-gray-800 hover:border-gray-600 rounded-lg px-4 py-2.5 text-left transition-colors"
         >
           <div className="flex items-center justify-between mb-1">
             <span className="text-xs text-gray-500 uppercase tracking-wider">Próximo jogo</span>
-            <span className="text-xs text-yellow-500 font-semibold">{nextMatch.dateBRT} →</span>
+            <span className="text-xs text-yellow-500 font-semibold">{m.dateBRT} →</span>
           </div>
           <div className="flex items-center gap-2 text-sm text-gray-300">
-            <span className="flex items-center gap-1.5"><Flag teamId={nextMatch.team1.id} size={18} />{nextMatch.team1.name}</span>
+            <span className="flex items-center gap-1.5"><Flag teamId={m.team1.id} size={18} />{m.team1.name}</span>
             <span className="text-gray-600">vs</span>
-            <span className="flex items-center gap-1.5"><Flag teamId={nextMatch.team2.id} size={18} />{nextMatch.team2.name}</span>
+            <span className="flex items-center gap-1.5"><Flag teamId={m.team2.id} size={18} />{m.team2.name}</span>
           </div>
         </button>
-      )}
+      ))}
 
       {loading && (
         <div className="text-center py-20 text-gray-400">Carregando...</div>
