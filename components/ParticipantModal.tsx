@@ -81,8 +81,8 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
 
   function rowColor(p: PredEntry) {
     if (!p.result) return ''
-    if (p.correctScore) return 'bg-green-950/50 border-l-2 border-green-500'
-    if (p.correctResult) return 'bg-blue-950/30 border-l-2 border-blue-700'
+    if (p.correctScore) return 'bg-green-100 dark:bg-green-950/50 border-l-2 border-green-500'
+    if (p.correctResult) return 'bg-blue-100 dark:bg-blue-950/30 border-l-2 border-blue-500 dark:border-blue-700'
     return 'border-l-2 border-transparent'
   }
 
@@ -112,9 +112,9 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
             <h2 className="text-lg font-bold text-white">{name}</h2>
             {data && (
               <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-xs text-gray-500">
-                <span><span className="text-yellow-400 font-bold">{data.summary.totalPoints}pts</span> totais</span>
-                <span><span className="text-green-400 font-semibold">{data.summary.correctResults}</span> resultados certos</span>
-                <span><span className="text-yellow-300 font-semibold">{data.summary.correctScores}</span> placares exatos</span>
+                <span><span className="text-yellow-600 dark:text-yellow-400 font-bold">{data.summary.totalPoints}pts</span> totais</span>
+                <span><span className="text-green-700 dark:text-green-400 font-semibold">{data.summary.correctResults}</span> resultados certos</span>
+                <span><span className="text-yellow-700 dark:text-yellow-300 font-semibold">{data.summary.correctScores}</span> placares exatos</span>
               </div>
             )}
           </div>
@@ -131,13 +131,13 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
         <div className="flex border-b border-gray-800 shrink-0">
           <button
             onClick={() => { setTab('played'); requestAnimationFrame(() => { if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight }) }}
-            className={`flex-1 py-2.5 text-sm font-medium transition-colors ${tab === 'played' ? 'text-yellow-400 border-b-2 border-yellow-400' : 'text-gray-500 hover:text-gray-300'}`}
+            className={`flex-1 py-2.5 text-sm font-medium transition-colors ${tab === 'played' ? 'text-yellow-600 dark:text-yellow-400 border-b-2 border-yellow-600 dark:border-yellow-400' : 'text-gray-500 hover:text-gray-300'}`}
           >
             Jogados ({played.length})
           </button>
           <button
             onClick={() => { setTab('upcoming'); requestAnimationFrame(() => { if (scrollRef.current) scrollRef.current.scrollTop = 0 }) }}
-            className={`flex-1 py-2.5 text-sm font-medium transition-colors ${tab === 'upcoming' ? 'text-yellow-400 border-b-2 border-yellow-400' : 'text-gray-500 hover:text-gray-300'}`}
+            className={`flex-1 py-2.5 text-sm font-medium transition-colors ${tab === 'upcoming' ? 'text-yellow-600 dark:text-yellow-400 border-b-2 border-yellow-600 dark:border-yellow-400' : 'text-gray-500 hover:text-gray-300'}`}
           >
             Próximos palpites ({upcoming.length})
           </button>
@@ -163,20 +163,20 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
                     <div className="flex items-center gap-2 shrink-0 text-xs">
                       <span className="text-gray-500">{p.result!.score1}–{p.result!.score2}</span>
                       <span className={`font-bold px-2 py-0.5 rounded ${
-                        p.correctScore ? 'text-green-300 bg-green-950' :
-                        p.correctResult ? 'text-blue-300 bg-blue-950/50' :
+                        p.correctScore ? 'text-green-800 bg-green-200 dark:text-green-300 dark:bg-green-950' :
+                        p.correctResult ? 'text-blue-800 bg-blue-200 dark:text-blue-300 dark:bg-blue-950/50' :
                         'text-gray-400 bg-gray-800'
                       }`}>
                         {p.prediction ? `${p.prediction.score1}–${p.prediction.score2}` : '—'}
                       </span>
-                      <span className={`w-8 text-right font-bold ${(p.points ?? 0) > 0 ? 'text-yellow-400' : 'text-gray-600'}`}>
+                      <span className={`w-8 text-right font-bold ${(p.points ?? 0) > 0 ? 'text-yellow-600 dark:text-yellow-400' : 'text-gray-600'}`}>
                         {p.points !== undefined ? `+${p.points}` : '—'}
                       </span>
                     </div>
                   </div>
-                  {p.correctScore && <p className="text-[10px] text-green-400 mt-0.5 pl-0.5">🎯 Placar exato!</p>}
-                  {!p.correctScore && p.correctResult && <p className="text-[10px] text-blue-400 mt-0.5 pl-0.5">✅ Resultado certo</p>}
-                  {!p.correctResult && p.result && <p className="text-[10px] text-red-500 mt-0.5 pl-0.5">✗ Errou</p>}
+                  {p.correctScore && <p className="text-[10px] text-green-700 dark:text-green-400 mt-0.5 pl-0.5">🎯 Placar exato!</p>}
+                  {!p.correctScore && p.correctResult && <p className="text-[10px] text-blue-700 dark:text-blue-400 mt-0.5 pl-0.5">✅ Resultado certo</p>}
+                  {!p.correctResult && p.result && <p className="text-[10px] text-red-600 dark:text-red-500 mt-0.5 pl-0.5">✗ Errou</p>}
                 </div>
               ))}
             </div>
@@ -196,7 +196,7 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     {p.dateBRT && <span className="text-xs text-gray-600">{p.dateBRT}</span>}
-                    <span className="font-bold text-yellow-400 text-xs px-2 py-0.5 bg-yellow-950/40 rounded">
+                    <span className="font-bold text-yellow-800 bg-yellow-200 dark:text-yellow-400 dark:bg-yellow-950/40 text-xs px-2 py-0.5 rounded">
                       {p.prediction ? `${p.prediction.score1}–${p.prediction.score2}` : '—'}
                     </span>
                   </div>
