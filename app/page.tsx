@@ -405,7 +405,7 @@ export default function LeaderboardPage() {
         <div key={m.matchId} className="bg-gray-900 border border-gray-800 rounded-lg px-4 py-2.5">
           <div className="flex items-center justify-between mb-1">
             <span className="text-xs text-gray-500 uppercase tracking-wider">Próximo jogo</span>
-            <span className="text-xs text-yellow-500 font-semibold">{m.dateBRT}</span>
+            <span className="text-xs text-green-700 dark:text-yellow-500 font-semibold">{m.dateBRT}</span>
           </div>
           <div className="flex items-center gap-2 text-sm text-gray-300">
             <span className="flex items-center gap-1.5"><Flag teamId={m.team1.id} size={18} />{m.team1.name}</span>
@@ -434,7 +434,7 @@ export default function LeaderboardPage() {
         >
           <div className="flex items-center justify-between mb-1">
             <span className="text-xs text-gray-500 uppercase tracking-wider">Próximo jogo</span>
-            <span className="text-xs text-yellow-500 font-semibold">{m.dateBRT} →</span>
+            <span className="text-xs text-green-700 dark:text-yellow-500 font-semibold">{m.dateBRT} →</span>
           </div>
           <div className="flex items-center gap-2 text-sm text-gray-300">
             <span className="flex items-center gap-1.5"><Flag teamId={m.team1.id} size={18} />{m.team1.name}</span>
@@ -523,9 +523,9 @@ export default function LeaderboardPage() {
               const p = entry as any
               const rank = ranks[idx]
               return (
-                <div key={entry.participant.id} className="px-4 py-3 bg-white dark:bg-gray-950/40 flex items-center gap-3">
+                <div key={entry.participant.id} className="px-4 py-3 bg-gray-900 dark:bg-gray-950/40 flex items-center gap-3">
                   <span className="text-gray-500 text-xs w-5 text-right shrink-0">{rank}</span>
-                  <span className="text-gray-800 dark:text-gray-200 text-sm font-semibold flex-1 min-w-0 truncate">{entry.participant.name}</span>
+                  <span className="text-gray-200 text-sm font-semibold flex-1 min-w-0 truncate">{entry.participant.name}</span>
                   <div className="flex items-center gap-3 shrink-0 text-sm">
                     <span className="text-purple-700 dark:text-purple-300 font-bold">{p.maxPossiblePoints ?? '—'}</span>
                     <span className="text-gray-500 dark:text-gray-600 text-xs">máx.</span>
@@ -579,6 +579,7 @@ export default function LeaderboardPage() {
                     tier === 1 ? 'bg-yellow-100 hover:bg-yellow-200 dark:bg-yellow-950/40 dark:hover:bg-yellow-950/60' :
                     tier === 2 ? 'bg-gray-800/30 hover:bg-gray-800/60' :
                     tier === 3 ? 'bg-orange-50 hover:bg-orange-100 dark:bg-orange-950/30 dark:hover:bg-orange-950/50' :
+                    (rank >= 4 && rank <= 7) ? 'bg-green-50 hover:bg-green-100 dark:bg-green-950/40 dark:hover:bg-green-950/60' :
                     'hover:bg-gray-900/50'
                   } ${flash === 'up' ? 'animate-flash-up' : flash === 'down' ? 'animate-flash-down' : ''}`}
                 >
