@@ -41,7 +41,6 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
       .then(d => {
         setData(d)
         setLoading(false)
-        // Scroll to bottom so most recent games are visible
         requestAnimationFrame(() => {
           if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight
         })
@@ -49,7 +48,6 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
       .catch(() => setLoading(false))
   }, [participantId])
 
-  // Lock body scroll while modal is open (iOS-safe: position:fixed approach)
   useEffect(() => {
     const scrollY = window.scrollY
     document.body.style.position = 'fixed'
@@ -65,7 +63,6 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
     }
   }, [])
 
-  // Close on Escape
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
     window.addEventListener('keydown', handler)
@@ -76,7 +73,6 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
   const upcoming = (data?.predictions.filter(p => p.result === null && p.prediction !== null) ?? [])
     .slice()
     .sort((a, b) => {
-      // Matches without a date (TBD) go to the end
       if (a.date && !b.date) return -1
       if (!a.date && b.date) return 1
       if (a.date && b.date && a.date !== b.date) return a.date < b.date ? -1 : 1
@@ -85,8 +81,8 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
 
   function rowColor(p: PredEntry) {
     if (!p.result) return ''
-    if (p.correctScore) return 'bg-green-50 dark:bg-green-950/50 border-l-2 border-green-500'
-    if (p.correctResult) return 'bg-blue-50 dark:bg-blue-950/30 border-l-2 border-blue-400 dark:border-blue-700'
+    if (p.correctScore) return 'bg-green-950/50 border-l-2 border-green-500'
+    if (p.correctResult) return 'bg-blue-950/30 border-l-2 border-blue-700'
     return 'border-l-2 border-transparent'
   }
 
@@ -101,11 +97,11 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
 
       {/* Sheet */}
       <div
-        className="relative bg-white dark:bg-gray-950 border border-gray-800 border-b-0 rounded-t-2xl w-full max-w-2xl flex flex-col animate-slide-up"
+        className="relative bg-gray-950 border border-gray-800 border-b-0 rounded-t-2xl w-full max-w-2xl flex flex-col animate-slide-up"
         style={{ maxHeight: '82vh', paddingBottom: 'env(safe-area-inset-bottom)', touchAction: 'pan-y' }}
         onClick={e => e.stopPropagation()}
       >
-        {/* Drag handle (mobile only) */}
+        {/* Drag handle */}
         <div className="flex justify-center pt-3 pb-1 sm:hidden shrink-0">
           <div className="w-10 h-1 rounded-full bg-gray-700" />
         </div>
@@ -113,18 +109,18 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
         {/* Header */}
         <div className="flex items-start justify-between px-5 py-3 border-b border-gray-800 shrink-0">
           <div className="flex-1 min-w-0 pr-3">
-            <h2 className="text-lg font-bold text-gray-900 dark:text-white">{name}</h2>
+            <h2 className="text-lg font-bold text-white">{name}</h2>
             {data && (
               <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-xs text-gray-500">
-                <span><span className="text-yellow-600 dark:text-yellow-400 font-bold">{data.summary.totalPoints}pts</span> totais</span>
-                <span><span className="text-green-600 dark:text-green-400 font-semibold">{data.summary.correctResults}</span> resultados certos</span>
-                <span><span className="text-yellow-700 dark:text-yellow-300 font-semibold">{data.summary.correctScores}</span> placares exatos</span>
+                <span><span className="text-yellow-400 font-bold">{data.summary.totalPoints}pts</span> totais</span>
+                <span><span className="text-green-400 font-semibold">{data.summary.correctResults}</span> resultados certos</span>
+                <span><span className="text-yellow-300 font-semibold">{data.summary.correctScores}</span> placares exatos</span>
               </div>
             )}
           </div>
           <button
             onClick={onClose}
-            className="shrink-0 w-9 h-9 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white text-xl font-bold transition-colors"
+            className="shrink-0 w-9 h-9 flex items-center justify-center rounded-full bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white text-xl font-bold transition-colors"
             aria-label="Fechar"
           >
             ×
@@ -135,13 +131,13 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
         <div className="flex border-b border-gray-800 shrink-0">
           <button
             onClick={() => { setTab('played'); requestAnimationFrame(() => { if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight }) }}
-            className={`flex-1 py-2.5 text-sm font-medium transition-colors ${tab === 'played' ? 'text-yellow-600 dark:text-yellow-400 border-b-2 border-yellow-600 dark:border-yellow-400' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}
+            className={`flex-1 py-2.5 text-sm font-medium transition-colors ${tab === 'played' ? 'text-yellow-400 border-b-2 border-yellow-400' : 'text-gray-500 hover:text-gray-300'}`}
           >
             Jogados ({played.length})
           </button>
           <button
             onClick={() => { setTab('upcoming'); requestAnimationFrame(() => { if (scrollRef.current) scrollRef.current.scrollTop = 0 }) }}
-            className={`flex-1 py-2.5 text-sm font-medium transition-colors ${tab === 'upcoming' ? 'text-yellow-600 dark:text-yellow-400 border-b-2 border-yellow-600 dark:border-yellow-400' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}
+            className={`flex-1 py-2.5 text-sm font-medium transition-colors ${tab === 'upcoming' ? 'text-yellow-400 border-b-2 border-yellow-400' : 'text-gray-500 hover:text-gray-300'}`}
           >
             Próximos palpites ({upcoming.length})
           </button>
@@ -167,20 +163,20 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
                     <div className="flex items-center gap-2 shrink-0 text-xs">
                       <span className="text-gray-500">{p.result!.score1}–{p.result!.score2}</span>
                       <span className={`font-bold px-2 py-0.5 rounded ${
-                        p.correctScore ? 'text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-950' :
-                        p.correctResult ? 'text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-950/50' :
-                        'text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800'
+                        p.correctScore ? 'text-green-300 bg-green-950' :
+                        p.correctResult ? 'text-blue-300 bg-blue-950/50' :
+                        'text-gray-400 bg-gray-800'
                       }`}>
                         {p.prediction ? `${p.prediction.score1}–${p.prediction.score2}` : '—'}
                       </span>
-                      <span className={`w-8 text-right font-bold ${(p.points ?? 0) > 0 ? 'text-yellow-600 dark:text-yellow-400' : 'text-gray-500 dark:text-gray-600'}`}>
+                      <span className={`w-8 text-right font-bold ${(p.points ?? 0) > 0 ? 'text-yellow-400' : 'text-gray-600'}`}>
                         {p.points !== undefined ? `+${p.points}` : '—'}
                       </span>
                     </div>
                   </div>
-                  {p.correctScore && <p className="text-[10px] text-green-600 mt-0.5 pl-0.5">🎯 Placar exato!</p>}
-                  {!p.correctScore && p.correctResult && <p className="text-[10px] text-blue-600 dark:text-blue-400 mt-0.5 pl-0.5">✅ Resultado certo</p>}
-                  {!p.correctResult && p.result && <p className="text-[10px] text-red-600 dark:text-red-800 mt-0.5 pl-0.5">✗ Errou</p>}
+                  {p.correctScore && <p className="text-[10px] text-green-400 mt-0.5 pl-0.5">🎯 Placar exato!</p>}
+                  {!p.correctScore && p.correctResult && <p className="text-[10px] text-blue-400 mt-0.5 pl-0.5">✅ Resultado certo</p>}
+                  {!p.correctResult && p.result && <p className="text-[10px] text-red-500 mt-0.5 pl-0.5">✗ Errou</p>}
                 </div>
               ))}
             </div>
@@ -200,7 +196,7 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     {p.dateBRT && <span className="text-xs text-gray-600">{p.dateBRT}</span>}
-                    <span className="font-bold text-yellow-700 dark:text-yellow-400 text-xs px-2 py-0.5 bg-yellow-100 dark:bg-yellow-950/40 rounded">
+                    <span className="font-bold text-yellow-400 text-xs px-2 py-0.5 bg-yellow-950/40 rounded">
                       {p.prediction ? `${p.prediction.score1}–${p.prediction.score2}` : '—'}
                     </span>
                   </div>
@@ -212,14 +208,14 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
 
         {/* Footer */}
         <div className="border-t border-gray-800 px-5 py-3 shrink-0 space-y-2">
-          <div className="flex gap-4 text-xs text-gray-600">
-            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-green-600 inline-block" /> Placar exato</span>
+          <div className="flex gap-4 text-xs text-gray-500">
+            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-green-500 inline-block" /> Placar exato</span>
             <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-blue-700 inline-block" /> Resultado certo</span>
-            <span className="text-gray-700">Resultado | Palpite | Pts</span>
+            <span>Resultado | Palpite | Pts</span>
           </div>
           <button
             onClick={onClose}
-            className="w-full py-2.5 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-800 dark:text-white font-semibold text-sm transition-colors"
+            className="w-full py-2.5 rounded-xl bg-gray-800 hover:bg-gray-700 text-white font-semibold text-sm transition-colors"
           >
             Fechar
           </button>
