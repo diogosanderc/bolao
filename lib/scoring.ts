@@ -125,14 +125,24 @@ export function computeLeaderboard(
     }
   }
 
-  // Group stage qualified (round_of_32 entrants) — derived from matches with known teams
+  // Group standings from group results (for group order bonus + round_of_32 qualified)
+  const { standings: groupStandings, thirdPlaceStats } = computeGroupStandingsWithStats(results)
+
+  // Top 2 from each completed group always qualify for round_of_32
+  for (const standing of Object.values(groupStandings)) {
+    if (standing[0]) qualifiedByPhase.round_of_32.add(standing[0])
+    if (standing[1]) qualifiedByPhase.round_of_32.add(standing[1])
+  }
+  // 8 best 3rd-place finishers also qualify
+  const best8Third = [...thirdPlaceStats]
+    .sort((a, b) => b.pts !== a.pts ? b.pts - a.pts : b.gd !== a.gd ? b.gd - a.gd : b.gf - a.gf)
+    .slice(0, 8)
+  for (const t of best8Third) qualifiedByPhase.round_of_32.add(t.teamId)
+  // Also keep any round_of_32 match teams already set by admin (non-TBD)
   for (const match of ALL_MATCHES.filter(m => m.phase === 'round_of_32')) {
     if (match.team1Id !== 'TBD') qualifiedByPhase.round_of_32.add(match.team1Id)
     if (match.team2Id !== 'TBD') qualifiedByPhase.round_of_32.add(match.team2Id)
   }
-
-  // Group standings from group results (for group order bonus)
-  const groupStandings = computeGroupStandings(results)
 
   return participants.map(participant => {
     const myPreds = matchPredictions.filter(p => p.participantId === participant.id)
@@ -166,8 +176,11 @@ export function computeLeaderboard(
       const qualified = qualifiedByPhase[phase]
       if (qualified.size === 0) continue
 
-      // Predicted teams for this phase: from participant's match predictions for prior phase
-      const predictedForPhase = predictedTeamsForPhase(phase, myPreds)
+      // For round_of_32: use group predictions (top 2 always qualify, 3rd might)
+      // For other phases: use match prediction winners from prior phase
+      const predictedForPhase = phase === 'round_of_32'
+        ? predictedTeamsForRoundOf32(myGroupPreds)
+        : predictedTeamsForPhase(phase, myPreds)
       let pts = 0
       for (const teamId of predictedForPhase) {
         if (qualified.has(teamId)) {
@@ -221,7 +234,9 @@ export function computeLeaderboard(
     for (const phase of phases) {
       const qualified = qualifiedByPhase[phase]
       if (qualified.size === 0) continue
-      const predicted = predictedTeamsForPhase(phase, myPreds)
+      const predicted = phase === 'round_of_32'
+        ? predictedTeamsForRoundOf32(myGroupPreds)
+        : predictedTeamsForPhase(phase, myPreds)
       if (predicted.size >= qualified.size && [...qualified].every(t => predicted.has(t))) {
         phasePoints += GROUP_ORDER_BONUS
       }
@@ -290,15 +305,21 @@ function priorPhaseOf(phase: Phase): Phase | null {
   return idx > 0 ? order[idx - 1] : null
 }
 
-function computeGroupStandings(results: MatchResult[]): Record<string, string[]> {
+type ThirdPlaceStat = { teamId: string; groupId: string; pts: number; gd: number; gf: number }
+
+function computeGroupStandingsWithStats(results: MatchResult[]): {
+  standings: Record<string, string[]>
+  thirdPlaceStats: ThirdPlaceStat[]
+} {
   const standings: Record<string, string[]> = {}
+  const thirdPlaceStats: ThirdPlaceStat[] = []
   const resultMap = Object.fromEntries(results.map(r => [r.matchId, r]))
 
   for (const group of GROUPS) {
-    const points: Record<string, number> = {}
+    const pts: Record<string, number> = {}
     const gd: Record<string, number> = {}
     const gf: Record<string, number> = {}
-    for (const id of group.teamIds) { points[id] = 0; gd[id] = 0; gf[id] = 0 }
+    for (const id of group.teamIds) { pts[id] = 0; gd[id] = 0; gf[id] = 0 }
 
     const groupMatchList = ALL_MATCHES.filter(m => m.groupId === group.id)
     let allPlayed = true
@@ -310,18 +331,32 @@ function computeGroupStandings(results: MatchResult[]): Record<string, string[]>
       gf[match.team2Id] += score2
       gd[match.team1Id] += score1 - score2
       gd[match.team2Id] += score2 - score1
-      if (score1 > score2) { points[match.team1Id] += 3 }
-      else if (score2 > score1) { points[match.team2Id] += 3 }
-      else { points[match.team1Id] += 1; points[match.team2Id] += 1 }
+      if (score1 > score2) { pts[match.team1Id] += 3 }
+      else if (score2 > score1) { pts[match.team2Id] += 3 }
+      else { pts[match.team1Id] += 1; pts[match.team2Id] += 1 }
     }
 
     if (!allPlayed) continue
 
-    standings[group.id] = [...group.teamIds].sort((a, b) => {
-      if (points[b] !== points[a]) return points[b] - points[a]
+    const sorted = [...group.teamIds].sort((a, b) => {
+      if (pts[b] !== pts[a]) return pts[b] - pts[a]
       if (gd[b] !== gd[a]) return gd[b] - gd[a]
       return gf[b] - gf[a]
     })
+    standings[group.id] = sorted
+    if (sorted[2]) {
+      thirdPlaceStats.push({ teamId: sorted[2], groupId: group.id, pts: pts[sorted[2]], gd: gd[sorted[2]], gf: gf[sorted[2]] })
+    }
   }
-  return standings
+  return { standings, thirdPlaceStats }
+}
+
+function predictedTeamsForRoundOf32(myGroupPreds: GroupPrediction[]): Set<string> {
+  const teams = new Set<string>()
+  for (const gp of myGroupPreds) {
+    if (gp.order[0]) teams.add(gp.order[0]) // 1st place — always qualifies
+    if (gp.order[1]) teams.add(gp.order[1]) // 2nd place — always qualifies
+    if (gp.order[2]) teams.add(gp.order[2]) // 3rd place — qualifies if top-8 across groups
+  }
+  return teams
 }
