@@ -1,8 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { readDB } from '@/lib/db'
 import { scoreMatch } from '@/lib/scoring'
-import { ALL_MATCHES, matchById, teamById, GROUPS } from '@/lib/copa2026'
-import { Phase } from '@/lib/types'
+import { ALL_MATCHES, GROUP_MATCHES, matchById, teamById, GROUPS } from '@/lib/copa2026'
+import { MatchPrediction } from '@/lib/types'
+
+function deriveGroupStandings(myPreds: MatchPrediction[]): Record<string, string[]> {
+  const predMap = Object.fromEntries(myPreds.map(p => [p.matchId, p]))
+  const standings: Record<string, string[]> = {}
+  for (const group of GROUPS) {
+    const pts: Record<string, number> = {}
+    const gd: Record<string, number> = {}
+    const gf: Record<string, number> = {}
+    for (const id of group.teamIds) { pts[id] = 0; gd[id] = 0; gf[id] = 0 }
+    let hasAny = false
+    for (const m of GROUP_MATCHES.filter(mm => mm.groupId === group.id)) {
+      const pred = predMap[m.id]; if (!pred) continue
+      hasAny = true
+      gf[m.team1Id] += pred.score1; gf[m.team2Id] += pred.score2
+      gd[m.team1Id] += pred.score1 - pred.score2; gd[m.team2Id] += pred.score2 - pred.score1
+      if (pred.score1 > pred.score2) pts[m.team1Id] += 3
+      else if (pred.score2 > pred.score1) pts[m.team2Id] += 3
+      else { pts[m.team1Id]++; pts[m.team2Id]++ }
+    }
+    if (!hasAny) continue
+    standings[group.id] = [...group.teamIds].sort((a, b) =>
+      pts[b] !== pts[a] ? pts[b] - pts[a] : gd[b] !== gd[a] ? gd[b] - gd[a] : gf[b] - gf[a]
+    )
+  }
+  return standings
+}
 
 // GET /api/debug/scoring?name=IVERSON  (or ?all=1 for everyone)
 export async function GET(req: NextRequest) {
@@ -90,36 +116,60 @@ export async function GET(req: NextRequest) {
       }
     }
 
+    // Derive predicted group order from match predictions (since groupPredictions may be empty)
+    const predictedStandings = deriveGroupStandings(myPreds)
+
     // --- Group order bonus ---
     let groupOrderPoints = 0
     const groupDetail: any[] = []
-    for (const gp of myGroupPreds) {
-      const actual = groupStandings[gp.groupId]
+    for (const [groupId, predicted] of Object.entries(predictedStandings)) {
+      const actual = groupStandings[groupId]
       if (!actual) {
-        groupDetail.push({ group: gp.groupId, status: 'incompleto', predicted: gp.order, actual: null, pts: 0 })
+        groupDetail.push({ group: groupId, status: 'incompleto', predicted: predicted.map(id => teamById[id]?.name ?? id), actual: null, pts: 0 })
         continue
       }
-      const match = JSON.stringify(gp.order) === JSON.stringify(actual)
+      const match = JSON.stringify(predicted) === JSON.stringify(actual)
       if (match) groupOrderPoints += 2
       groupDetail.push({
-        group: gp.groupId,
+        group: groupId,
         status: match ? 'ACERTOU' : 'errou',
-        predicted: gp.order.map(id => teamById[id]?.name ?? id),
+        predicted: predicted.map(id => teamById[id]?.name ?? id),
         actual: actual.map(id => teamById[id]?.name ?? id),
         pts: match ? 2 : 0,
       })
     }
 
     // --- Round of 32 advancement ---
+    // top 2 per group always qualify, best 8 third-place also qualify
+    const predictedThird: { teamId: string; groupId: string; pts: number; gd: number; gf: number }[] = []
+    for (const group of GROUPS) {
+      const predMap = Object.fromEntries(myPreds.map(p => [p.matchId, p]))
+      const pp: Record<string, number> = {}; const pgd: Record<string, number> = {}; const pgf: Record<string, number> = {}
+      for (const id of group.teamIds) { pp[id] = 0; pgd[id] = 0; pgf[id] = 0 }
+      for (const m of GROUP_MATCHES.filter(mm => mm.groupId === group.id)) {
+        const pred = predMap[m.id]; if (!pred) continue
+        pgf[m.team1Id] += pred.score1; pgf[m.team2Id] += pred.score2
+        pgd[m.team1Id] += pred.score1 - pred.score2; pgd[m.team2Id] += pred.score2 - pred.score1
+        if (pred.score1 > pred.score2) pp[m.team1Id] += 3
+        else if (pred.score2 > pred.score1) pp[m.team2Id] += 3
+        else { pp[m.team1Id]++; pp[m.team2Id]++ }
+      }
+      const sorted = predictedStandings[group.id]
+      if (sorted && sorted[2]) predictedThird.push({ teamId: sorted[2], groupId: group.id, pts: pp[sorted[2]], gd: pgd[sorted[2]], gf: pgf[sorted[2]] })
+    }
+    const predictedBest8Third = [...predictedThird]
+      .sort((a, b) => b.pts !== a.pts ? b.pts - a.pts : b.gd !== a.gd ? b.gd - a.gd : b.gf - a.gf)
+      .slice(0, 8)
+      .map(t => t.teamId)
+
     let r32Points = 0
     const r32Detail: any[] = []
-    for (const gp of myGroupPreds) {
-      const candidates = [gp.order[0], gp.order[1], gp.order[2]].filter(Boolean)
+    for (const [groupId, predicted] of Object.entries(predictedStandings)) {
+      const candidates = [predicted[0], predicted[1], predictedBest8Third.includes(predicted[2]) ? predicted[2] : null].filter(Boolean) as string[]
       for (const teamId of candidates) {
-        const qualified = qualifiedR32.has(teamId)
-        if (qualified) {
+        if (qualifiedR32.has(teamId)) {
           r32Points += 3
-          r32Detail.push({ team: teamById[teamId]?.name ?? teamId, group: gp.groupId, pts: 3 })
+          r32Detail.push({ team: teamById[teamId]?.name ?? teamId, group: groupId, pts: 3 })
         }
       }
     }
@@ -138,6 +188,7 @@ export async function GET(req: NextRequest) {
       matchDetail,
       groupDetail,
       r32Detail,
+      usingDerivedGroupPreds: myGroupPreds.length === 0,
     }
   }).sort((a, b) => b.total - a.total)
 

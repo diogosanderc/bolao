@@ -7,7 +7,7 @@ import {
   LeaderboardEntry,
   Phase,
 } from './types'
-import { GROUPS, ALL_MATCHES, matchById } from './copa2026'
+import { GROUPS, ALL_MATCHES, GROUP_MATCHES, matchById } from './copa2026'
 
 function getResult(score1: number, score2: number): 'home' | 'draw' | 'away' {
   if (score1 > score2) return 'home'
@@ -176,10 +176,10 @@ export function computeLeaderboard(
       const qualified = qualifiedByPhase[phase]
       if (qualified.size === 0) continue
 
-      // For round_of_32: use group predictions (top 2 always qualify, 3rd might)
+      // For round_of_32: derive from group predictions or match predictions
       // For other phases: use match prediction winners from prior phase
       const predictedForPhase = phase === 'round_of_32'
-        ? predictedTeamsForRoundOf32(myGroupPreds)
+        ? predictedTeamsForRoundOf32(myPreds, myGroupPreds)
         : predictedTeamsForPhase(phase, myPreds)
       let pts = 0
       for (const teamId of predictedForPhase) {
@@ -220,13 +220,21 @@ export function computeLeaderboard(
       phasePoints += pts
     }
 
-    // Group order bonus
+    // Group order bonus: compare predicted group order vs actual
+    // Use DB group predictions if available; otherwise derive from match predictions
     let groupOrderPoints = 0
-    for (const gp of myGroupPreds) {
-      const actual = groupStandings[gp.groupId]
-      if (!actual) continue
-      if (JSON.stringify(gp.order) === JSON.stringify(actual)) {
-        groupOrderPoints += 2
+    if (myGroupPreds.length > 0) {
+      for (const gp of myGroupPreds) {
+        const actual = groupStandings[gp.groupId]
+        if (!actual) continue
+        if (JSON.stringify(gp.order) === JSON.stringify(actual)) groupOrderPoints += 2
+      }
+    } else {
+      const { standings: predictedStandings } = computePredictedGroupStandings(myPreds)
+      for (const [groupId, predicted] of Object.entries(predictedStandings)) {
+        const actual = groupStandings[groupId]
+        if (!actual) continue
+        if (JSON.stringify(predicted) === JSON.stringify(actual)) groupOrderPoints += 2
       }
     }
 
@@ -235,7 +243,7 @@ export function computeLeaderboard(
       const qualified = qualifiedByPhase[phase]
       if (qualified.size === 0) continue
       const predicted = phase === 'round_of_32'
-        ? predictedTeamsForRoundOf32(myGroupPreds)
+        ? predictedTeamsForRoundOf32(myPreds, myGroupPreds)
         : predictedTeamsForPhase(phase, myPreds)
       if (predicted.size >= qualified.size && [...qualified].every(t => predicted.has(t))) {
         phasePoints += GROUP_ORDER_BONUS
@@ -351,12 +359,73 @@ function computeGroupStandingsWithStats(results: MatchResult[]): {
   return { standings, thirdPlaceStats }
 }
 
-function predictedTeamsForRoundOf32(myGroupPreds: GroupPrediction[]): Set<string> {
-  const teams = new Set<string>()
-  for (const gp of myGroupPreds) {
-    if (gp.order[0]) teams.add(gp.order[0]) // 1st place — always qualifies
-    if (gp.order[1]) teams.add(gp.order[1]) // 2nd place — always qualifies
-    if (gp.order[2]) teams.add(gp.order[2]) // 3rd place — qualifies if top-8 across groups
+// Derive predicted group standings from a participant's match predictions
+// (mirrors the computeGroupStandings logic in lib/bracket.ts)
+function computePredictedGroupStandings(
+  myPreds: MatchPrediction[]
+): { standings: Record<string, string[]>; thirdPlaceStats: ThirdPlaceStat[] } {
+  const predMap = Object.fromEntries(myPreds.map(p => [p.matchId, p]))
+  const standings: Record<string, string[]> = {}
+  const thirdPlaceStats: ThirdPlaceStat[] = []
+
+  for (const group of GROUPS) {
+    const pts: Record<string, number> = {}
+    const gd: Record<string, number> = {}
+    const gf: Record<string, number> = {}
+    for (const id of group.teamIds) { pts[id] = 0; gd[id] = 0; gf[id] = 0 }
+
+    let hasAny = false
+    for (const m of GROUP_MATCHES.filter(mm => mm.groupId === group.id)) {
+      const pred = predMap[m.id]
+      if (!pred) continue
+      hasAny = true
+      gf[m.team1Id] += pred.score1; gf[m.team2Id] += pred.score2
+      gd[m.team1Id] += pred.score1 - pred.score2; gd[m.team2Id] += pred.score2 - pred.score1
+      if (pred.score1 > pred.score2) pts[m.team1Id] += 3
+      else if (pred.score2 > pred.score1) pts[m.team2Id] += 3
+      else { pts[m.team1Id] += 1; pts[m.team2Id] += 1 }
+    }
+
+    if (!hasAny) continue
+
+    const sorted = [...group.teamIds].sort((a, b) => {
+      if (pts[b] !== pts[a]) return pts[b] - pts[a]
+      if (gd[b] !== gd[a]) return gd[b] - gd[a]
+      return gf[b] - gf[a]
+    })
+    standings[group.id] = sorted
+    if (sorted[2]) {
+      thirdPlaceStats.push({ teamId: sorted[2], groupId: group.id, pts: pts[sorted[2]], gd: gd[sorted[2]], gf: gf[sorted[2]] })
+    }
   }
+  return { standings, thirdPlaceStats }
+}
+
+function predictedTeamsForRoundOf32(
+  myPreds: MatchPrediction[],
+  myGroupPreds: GroupPrediction[]
+): Set<string> {
+  // If DB has explicit group predictions, use them; otherwise derive from match predictions
+  if (myGroupPreds.length > 0) {
+    const teams = new Set<string>()
+    for (const gp of myGroupPreds) {
+      if (gp.order[0]) teams.add(gp.order[0])
+      if (gp.order[1]) teams.add(gp.order[1])
+      if (gp.order[2]) teams.add(gp.order[2])
+    }
+    return teams
+  }
+
+  // Derive from match predictions: top 2 per group always qualify + best 8 third-place
+  const { standings, thirdPlaceStats } = computePredictedGroupStandings(myPreds)
+  const teams = new Set<string>()
+  for (const sorted of Object.values(standings)) {
+    if (sorted[0]) teams.add(sorted[0])
+    if (sorted[1]) teams.add(sorted[1])
+  }
+  const best8Third = [...thirdPlaceStats]
+    .sort((a, b) => b.pts !== a.pts ? b.pts - a.pts : b.gd !== a.gd ? b.gd - a.gd : b.gf - a.gf)
+    .slice(0, 8)
+  for (const t of best8Third) teams.add(t.teamId)
   return teams
 }
