@@ -353,7 +353,7 @@ export default function LeaderboardPage() {
       </div>
 
       {liveMatches.length > 0 && (
-        <div className="space-y-1.5">
+        <div className="space-y-3">
           {liveMatches.map(m => (
             <div key={m.matchId} className={`border rounded-lg px-4 py-2.5 ${m.suspended ? 'bg-yellow-50 dark:bg-yellow-950/60 border-yellow-400 dark:border-yellow-700' : 'bg-red-50 dark:bg-red-950/60 border-red-400 dark:border-red-700 animate-pulse'}`}>
               <div className="flex items-center justify-between mb-1">
