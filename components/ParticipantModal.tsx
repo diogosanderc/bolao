@@ -149,7 +149,7 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
                 <span><span className="text-green-700 dark:text-green-400 font-semibold">{data.summary.correctResults}</span> resultados certos</span>
                 <span><span className="text-yellow-700 dark:text-yellow-300 font-semibold">{data.summary.correctScores}</span> placares exatos</span>
                 {data.summary.phasePoints > 0 && (
-                  <span><span className="text-purple-600 dark:text-purple-400 font-semibold">+{data.summary.phasePoints}</span> bônus fase</span>
+                  <span><span className="text-gray-300 font-semibold">+{data.summary.phasePoints}</span> bônus fase</span>
                 )}
               </div>
             )}
@@ -221,18 +221,14 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
                 <div className="px-3 pt-4 pb-3 space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">📊 Ordem dos Grupos</span>
-                    <span className={`text-xs font-bold ${data!.summary.groupOrderPoints > 0 ? 'text-purple-400' : 'text-gray-600'}`}>
-                      +{data!.summary.groupOrderPoints} pts
-                    </span>
+                    <span className="text-xs font-bold text-gray-300">+{data!.summary.groupOrderPoints} pts</span>
                   </div>
                   <div className="space-y-1.5">
                     {data!.groupDetail.map(g => (
-                      <div key={g.groupId} className={`rounded-lg px-3 py-2 text-xs ${g.correct ? 'bg-purple-950/40 border border-purple-800/50' : 'bg-gray-900 border border-gray-800'}`}>
+                      <div key={g.groupId} className="rounded-lg px-3 py-2 text-xs bg-gray-900 border border-gray-800">
                         <div className="flex items-center justify-between mb-1">
-                          <span className={`font-bold ${g.correct ? 'text-purple-300' : 'text-gray-400'}`}>
-                            Grupo {g.groupId}
-                          </span>
-                          <span className={`font-bold ${g.correct ? 'text-purple-400' : 'text-gray-600'}`}>
+                          <span className="font-bold text-gray-400">Grupo {g.groupId}</span>
+                          <span className={`font-bold ${g.correct ? 'text-gray-200' : 'text-gray-600'}`}>
                             {g.correct ? '✓ +2' : '✗ 0'}
                           </span>
                         </div>
@@ -241,7 +237,7 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
                             <p className="text-gray-600 mb-0.5">Seu palpite</p>
                             <div className="flex gap-1 flex-wrap">
                               {g.predicted.map((t, i) => (
-                                <span key={t.id} className={`${g.correct ? 'text-purple-300' : i < 2 ? 'text-gray-300' : 'text-gray-500'}`}>
+                                <span key={t.id} className={i < 2 ? 'text-gray-300' : 'text-gray-500'}>
                                   {i + 1}º {t.flag}
                                 </span>
                               ))}
@@ -269,14 +265,14 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
                 <div className="px-3 pt-3 pb-4 space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">🏆 Classificados para 16-avos</span>
-                    <span className="text-xs font-bold text-yellow-400">+{data!.summary.r32Points} pts</span>
+                    <span className="text-xs font-bold text-gray-300">+{data!.summary.r32Points} pts</span>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {data!.r32Detail.map(t => (
-                      <div key={`${t.groupId}-${t.teamId}`} className="flex items-center gap-1 bg-yellow-950/30 border border-yellow-800/40 rounded-lg px-2.5 py-1.5 text-xs">
+                      <div key={`${t.groupId}-${t.teamId}`} className="flex items-center gap-1 bg-gray-900 border border-gray-800 rounded-lg px-2.5 py-1.5 text-xs">
                         <span>{t.flag}</span>
                         <span className="text-gray-300 font-medium">{t.name}</span>
-                        <span className="text-yellow-400 font-bold ml-1">+3</span>
+                        <span className="text-gray-400 font-bold ml-1">+3</span>
                       </div>
                     ))}
                   </div>
