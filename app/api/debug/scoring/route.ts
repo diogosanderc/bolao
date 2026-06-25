@@ -73,16 +73,19 @@ export async function GET(req: NextRequest) {
     if (sorted[2]) thirdPlaceStats.push({ teamId: sorted[2], groupId: group.id, pts: pts[sorted[2]], gd: gd[sorted[2]], gf: gf[sorted[2]] })
   }
 
-  // round_of_32 qualified
+  // round_of_32 qualified: top-2 from each completed group always qualify
+  // best-8 thirds only determined once ALL 12 groups are complete
   const qualifiedR32 = new Set<string>()
   for (const s of Object.values(groupStandings)) {
     if (s[0]) qualifiedR32.add(s[0])
     if (s[1]) qualifiedR32.add(s[1])
   }
-  const best8Third = [...thirdPlaceStats]
-    .sort((a, b) => b.pts !== a.pts ? b.pts - a.pts : b.gd !== a.gd ? b.gd - a.gd : b.gf - a.gf)
-    .slice(0, 8)
-  for (const t of best8Third) qualifiedR32.add(t.teamId)
+  if (Object.keys(groupStandings).length === GROUPS.length) {
+    const best8Third = [...thirdPlaceStats]
+      .sort((a, b) => b.pts !== a.pts ? b.pts - a.pts : b.gd !== a.gd ? b.gd - a.gd : b.gf - a.gf)
+      .slice(0, 8)
+    for (const t of best8Third) qualifiedR32.add(t.teamId)
+  }
 
   const participants = db.participants.filter(p =>
     showAll || (nameFilter && p.name.toUpperCase().includes(nameFilter))

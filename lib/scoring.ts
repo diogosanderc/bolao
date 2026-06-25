@@ -132,11 +132,13 @@ export function computeLeaderboard(
     if (standing[0]) qualifiedByPhase.round_of_32.add(standing[0])
     if (standing[1]) qualifiedByPhase.round_of_32.add(standing[1])
   }
-  // 8 best 3rd-place finishers also qualify
-  const best8Third = [...thirdPlaceStats]
-    .sort((a, b) => b.pts !== a.pts ? b.pts - a.pts : b.gd !== a.gd ? b.gd - a.gd : b.gf - a.gf)
-    .slice(0, 8)
-  for (const t of best8Third) qualifiedByPhase.round_of_32.add(t.teamId)
+  // Best-8 3rd-place finishers: only determined when ALL 12 groups are complete
+  if (Object.keys(groupStandings).length === GROUPS.length) {
+    const best8Third = [...thirdPlaceStats]
+      .sort((a, b) => b.pts !== a.pts ? b.pts - a.pts : b.gd !== a.gd ? b.gd - a.gd : b.gf - a.gf)
+      .slice(0, 8)
+    for (const t of best8Third) qualifiedByPhase.round_of_32.add(t.teamId)
+  }
   // Also keep any round_of_32 match teams already set by admin (non-TBD)
   for (const match of ALL_MATCHES.filter(m => m.phase === 'round_of_32')) {
     if (match.team1Id !== 'TBD') qualifiedByPhase.round_of_32.add(match.team1Id)
