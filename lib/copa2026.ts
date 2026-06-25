@@ -112,24 +112,42 @@ export const GROUP_MATCHES: Match[] = GROUPS.flatMap(g =>
 )
 
 export const KNOCKOUT_MATCHES: Match[] = [
-  ...Array.from({ length: 16 }, (_, i) => ({
-    id: `R32_${i + 1}`, phase: 'round_of_32' as const,
-    matchNumber: 73 + i, team1Id: 'TBD', team2Id: 'TBD',
-  })),
-  ...Array.from({ length: 8 }, (_, i) => ({
-    id: `R16_${i + 1}`, phase: 'round_of_16' as const,
-    matchNumber: 89 + i, team1Id: 'TBD', team2Id: 'TBD',
-  })),
-  ...Array.from({ length: 4 }, (_, i) => ({
-    id: `QF_${i + 1}`, phase: 'quarterfinal' as const,
-    matchNumber: 97 + i, team1Id: 'TBD', team2Id: 'TBD',
-  })),
-  ...Array.from({ length: 2 }, (_, i) => ({
-    id: `SF_${i + 1}`, phase: 'semifinal' as const,
-    matchNumber: 101 + i, team1Id: 'TBD', team2Id: 'TBD',
-  })),
-  { id: 'TP_1', phase: 'third_place' as const, matchNumber: 103, team1Id: 'TBD', team2Id: 'TBD' },
-  { id: 'F_1',  phase: 'final' as const,       matchNumber: 104, team1Id: 'TBD', team2Id: 'TBD' },
+  // R32 - team IDs set per MACALISTER bracket
+  { id: 'R32_1',  phase: 'round_of_32' as const, matchNumber:  73, team1Id: 'MEX', team2Id: 'BIH' },
+  { id: 'R32_2',  phase: 'round_of_32' as const, matchNumber:  74, team1Id: 'GER', team2Id: 'CIV' },
+  { id: 'R32_3',  phase: 'round_of_32' as const, matchNumber:  75, team1Id: 'NED', team2Id: 'MAR' },
+  { id: 'R32_4',  phase: 'round_of_32' as const, matchNumber:  76, team1Id: 'BRA', team2Id: 'JPN' },
+  { id: 'R32_5',  phase: 'round_of_32' as const, matchNumber:  77, team1Id: 'SUI', team2Id: 'CAN' },
+  { id: 'R32_6',  phase: 'round_of_32' as const, matchNumber:  78, team1Id: 'ECU', team2Id: 'SEN' },
+  { id: 'R32_7',  phase: 'round_of_32' as const, matchNumber:  79, team1Id: 'KOR', team2Id: 'EGY' },
+  { id: 'R32_8',  phase: 'round_of_32' as const, matchNumber:  80, team1Id: 'ENG', team2Id: 'GHA' },
+  { id: 'R32_9',  phase: 'round_of_32' as const, matchNumber:  81, team1Id: 'BEL', team2Id: 'SCO' },
+  { id: 'R32_10', phase: 'round_of_32' as const, matchNumber:  82, team1Id: 'TUR', team2Id: 'KSA' },
+  { id: 'R32_11', phase: 'round_of_32' as const, matchNumber:  83, team1Id: 'COL', team2Id: 'CRO' },
+  { id: 'R32_12', phase: 'round_of_32' as const, matchNumber:  84, team1Id: 'ESP', team2Id: 'ALG' },
+  { id: 'R32_13', phase: 'round_of_32' as const, matchNumber:  85, team1Id: 'ARG', team2Id: 'URU' },
+  { id: 'R32_14', phase: 'round_of_32' as const, matchNumber:  86, team1Id: 'FRA', team2Id: 'NOR' },
+  { id: 'R32_15', phase: 'round_of_32' as const, matchNumber:  87, team1Id: 'POR', team2Id: 'AUT' },
+  { id: 'R32_16', phase: 'round_of_32' as const, matchNumber:  88, team1Id: 'USA', team2Id: 'IRN' },
+  // R16
+  { id: 'R16_1', phase: 'round_of_16' as const, matchNumber:  89, team1Id: 'GER', team2Id: 'FRA' },
+  { id: 'R16_2', phase: 'round_of_16' as const, matchNumber:  90, team1Id: 'MEX', team2Id: 'MAR' },
+  { id: 'R16_3', phase: 'round_of_16' as const, matchNumber:  91, team1Id: 'COL', team2Id: 'ESP' },
+  { id: 'R16_4', phase: 'round_of_16' as const, matchNumber:  92, team1Id: 'TUR', team2Id: 'BEL' },
+  { id: 'R16_5', phase: 'round_of_16' as const, matchNumber:  93, team1Id: 'BRA', team2Id: 'SEN' },
+  { id: 'R16_6', phase: 'round_of_16' as const, matchNumber:  94, team1Id: 'KOR', team2Id: 'ENG' },
+  { id: 'R16_7', phase: 'round_of_16' as const, matchNumber:  95, team1Id: 'ARG', team2Id: 'IRN' },
+  { id: 'R16_8', phase: 'round_of_16' as const, matchNumber:  96, team1Id: 'SUI', team2Id: 'POR' },
+  // QF
+  { id: 'QF_1', phase: 'quarterfinal' as const, matchNumber:  97, team1Id: 'FRA', team2Id: 'MAR' },
+  { id: 'QF_2', phase: 'quarterfinal' as const, matchNumber:  98, team1Id: 'ESP', team2Id: 'BEL' },
+  { id: 'QF_3', phase: 'quarterfinal' as const, matchNumber:  99, team1Id: 'ENG', team2Id: 'BRA' },
+  { id: 'QF_4', phase: 'quarterfinal' as const, matchNumber: 100, team1Id: 'POR', team2Id: 'ARG' },
+  // SF
+  { id: 'SF_1', phase: 'semifinal' as const, matchNumber: 101, team1Id: 'FRA', team2Id: 'ESP' },
+  { id: 'SF_2', phase: 'semifinal' as const, matchNumber: 102, team1Id: 'ENG', team2Id: 'POR' },
+  { id: 'TP_1', phase: 'third_place' as const, matchNumber: 103, team1Id: 'ESP', team2Id: 'ENG' },
+  { id: 'F_1',  phase: 'final' as const,       matchNumber: 104, team1Id: 'FRA', team2Id: 'POR' },
 ]
 
 export const ALL_MATCHES: Match[] = [...GROUP_MATCHES, ...KNOCKOUT_MATCHES]
