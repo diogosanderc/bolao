@@ -77,6 +77,10 @@ export default function AdminPage() {
   const [visitStats, setVisitStats] = useState<{ today: number; total: number; days: { date: string; label: string; count: number }[] } | null>(null)
   const [hoveredBar, setHoveredBar] = useState<number | null>(null)
   const [lastDateSync, setLastDateSync] = useState<string | null>(null)
+  const [bulkImportOpen, setBulkImportOpen] = useState(false)
+  const [bulkText, setBulkText] = useState('')
+  const [bulkSaving, setBulkSaving] = useState(false)
+  const [bulkMsg, setBulkMsg] = useState('')
 
   const showToast = (msg: string) => {
     setToast(msg)
@@ -237,6 +241,41 @@ export default function AdminPage() {
     setSaving(false)
   }
 
+  async function bulkImport() {
+    setBulkSaving(true)
+    setBulkMsg('')
+    try {
+      // Accept lines like: GA3 2 1  OR  GA3:2-1  OR JSON array
+      let parsed: { matchId: string; score1: number; score2: number }[] = []
+      const trimmed = bulkText.trim()
+      if (trimmed.startsWith('[')) {
+        parsed = JSON.parse(trimmed)
+      } else {
+        for (const line of trimmed.split('\n')) {
+          const l = line.trim()
+          if (!l || l.startsWith('#')) continue
+          // formats: "GA3 2 1" or "GA3:2-1" or "GA3 2-1" or "GA3: 2-1"
+          const m = l.match(/^([A-Z0-9_]+)[\s:]+(\d+)[-\s]+(\d+)/)
+          if (!m) { setBulkMsg(`Linha inválida: "${l}"`); setBulkSaving(false); return }
+          parsed.push({ matchId: m[1], score1: parseInt(m[2]), score2: parseInt(m[3]) })
+        }
+      }
+      const r = await fetch('/api/results/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ adminKey: key, results: parsed }),
+      })
+      const data = await r.json()
+      if (!r.ok) { setBulkMsg('Erro: ' + (data.error ?? 'falhou')); setBulkSaving(false); return }
+      for (const entry of parsed) setResults(prev => ({ ...prev, [entry.matchId]: entry }))
+      setBulkMsg(`✅ ${data.saved} resultados salvos!${data.invalid?.length ? ` ⚠️ Inválidos: ${data.invalid.join(', ')}` : ''}`)
+      showToast(`${data.saved} resultados importados!`)
+    } catch (e: any) {
+      setBulkMsg('Erro: ' + e.message)
+    }
+    setBulkSaving(false)
+  }
+
   if (!confirmed) {
     return (
       <div className="max-w-sm mx-auto mt-20 space-y-4">
@@ -391,6 +430,52 @@ export default function AdminPage() {
         </div>
       )}
 
+      {/* Bulk Import Modal */}
+      {bulkImportOpen && (
+        <div className="fixed inset-0 bg-black/70 z-40 flex items-center justify-center p-4">
+          <div className="bg-gray-900 border border-gray-700 rounded-xl w-full max-w-lg max-h-[80vh] flex flex-col shadow-2xl">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-800">
+              <h3 className="font-bold text-white">📥 Importar Resultados em Lote</h3>
+              <button onClick={() => setBulkImportOpen(false)} className="text-gray-500 hover:text-white text-lg leading-none">×</button>
+            </div>
+            <div className="p-4 space-y-3 overflow-y-auto flex-1">
+              <p className="text-xs text-gray-400">
+                Cole os resultados, um por linha. Formatos aceitos:
+              </p>
+              <pre className="text-xs text-gray-500 bg-gray-800 rounded p-2">GA3 2 1{'\n'}GD5 0 0{'\n'}GE5:3-2</pre>
+              <p className="text-xs text-gray-500">IDs dos jogos: GA1-GA6, GB1-GB6, ... GL1-GL6 para grupos. R32_1-R32_16 para mata-mata.</p>
+              <textarea
+                value={bulkText}
+                onChange={e => setBulkText(e.target.value)}
+                rows={12}
+                placeholder={'GA3 2 1\nGB3 1 0\nGC3 3 1\n...'}
+                className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:border-green-500 resize-none"
+              />
+              {bulkMsg && (
+                <div className={`text-sm px-3 py-2 rounded-lg ${bulkMsg.startsWith('✅') ? 'bg-green-950/50 text-green-300 border border-green-800' : 'bg-red-950/50 text-red-300 border border-red-800'}`}>
+                  {bulkMsg}
+                </div>
+              )}
+            </div>
+            <div className="flex gap-2 px-4 pb-4">
+              <button
+                onClick={() => setBulkImportOpen(false)}
+                className="flex-1 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm font-semibold transition-colors"
+              >
+                Fechar
+              </button>
+              <button
+                onClick={bulkImport}
+                disabled={bulkSaving || !bulkText.trim()}
+                className="flex-1 py-2 rounded-lg bg-green-700 hover:bg-green-600 disabled:bg-gray-700 disabled:text-gray-500 text-white text-sm font-semibold transition-colors"
+              >
+                {bulkSaving ? 'Salvando...' : 'Importar'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
         <div>
           <h2 className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">Painel Administrativo</h2>
@@ -424,6 +509,12 @@ export default function AdminPage() {
             className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-800 hover:bg-blue-700 disabled:bg-gray-800 disabled:text-gray-600 text-blue-100 rounded-lg font-semibold transition-colors text-xs"
           >
             {syncing ? '⟳ Buscando...' : '⟳ Sincronizar Resultados'}
+          </button>
+          <button
+            onClick={() => { setBulkImportOpen(true); setBulkMsg('') }}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-green-800 hover:bg-green-700 text-green-100 rounded-lg font-semibold transition-colors text-xs"
+          >
+            📥 Importar em Lote
           </button>
           <button onClick={() => { localStorage.removeItem(ADMIN_KEY_STORAGE); location.reload() }} className="hover:text-gray-200">Sair</button>
         </div>
