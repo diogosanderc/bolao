@@ -126,6 +126,7 @@ export function computeLeaderboard(
 
   // Group standings from group results (for group order bonus + round_of_32 qualified)
   const { standings: groupStandings, thirdPlaceStats } = computeGroupStandingsWithStats(results)
+  const allGroupsComplete = Object.keys(groupStandings).length === GROUPS.length
 
   // Top 2 from each completed group always qualify for round_of_32
   for (const standing of Object.values(groupStandings)) {
@@ -180,7 +181,7 @@ export function computeLeaderboard(
       // For round_of_32: derive from group predictions or match predictions
       // For other phases: use match prediction winners from prior phase
       const predictedForPhase = phase === 'round_of_32'
-        ? predictedTeamsForRoundOf32(myPreds, myGroupPreds)
+        ? predictedTeamsForRoundOf32(myPreds, myGroupPreds, allGroupsComplete)
         : predictedTeamsForPhase(phase, myPreds)
       let pts = 0
       for (const teamId of predictedForPhase) {
@@ -392,28 +393,27 @@ function computePredictedGroupStandings(
 
 function predictedTeamsForRoundOf32(
   myPreds: MatchPrediction[],
-  myGroupPreds: GroupPrediction[]
+  myGroupPreds: GroupPrediction[],
+  allGroupsComplete: boolean
 ): Set<string> {
-  // If DB has explicit group predictions, use them; otherwise derive from match predictions
+  // If DB has explicit group predictions, use them; otherwise derive from match predictions.
+  // Predicted 3rd-place teams only earn r32 bonus once ALL groups finish (best-8 3rds determined).
   if (myGroupPreds.length > 0) {
     const teams = new Set<string>()
     for (const gp of myGroupPreds) {
       if (gp.order[0]) teams.add(gp.order[0])
       if (gp.order[1]) teams.add(gp.order[1])
-      if (gp.order[2]) teams.add(gp.order[2])
+      if (allGroupsComplete && gp.order[2]) teams.add(gp.order[2])
     }
     return teams
   }
 
-  // Derive from match predictions: give +3 for any predicted top-3 that actually qualified
-  // Top-2 always advance; 3rd-place teams need to be in actual best-8, but the participant
-  // just needs to have predicted that team in 3rd — actual qualification is checked via qualified.has()
   const { standings } = computePredictedGroupStandings(myPreds)
   const teams = new Set<string>()
   for (const sorted of Object.values(standings)) {
     if (sorted[0]) teams.add(sorted[0])
     if (sorted[1]) teams.add(sorted[1])
-    if (sorted[2]) teams.add(sorted[2]) // include all predicted 3rds; qualified.has() filters
+    if (allGroupsComplete && sorted[2]) teams.add(sorted[2])
   }
   return teams
 }

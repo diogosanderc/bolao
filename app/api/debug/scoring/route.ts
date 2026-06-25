@@ -143,12 +143,15 @@ export async function GET(req: NextRequest) {
     }
 
     // --- Round of 32 advancement ---
-    // Give +3 for any team predicted in positions 1, 2, or 3 that actually qualified to r32
-    // Actual qualification (best-8 thirds) is determined by qualifiedR32 set from real results
+    // Give +3 for teams predicted 1st or 2nd that actually qualified to r32.
+    // Predicted 3rd only earns bonus once ALL 12 groups are complete (best-8 3rds determined).
+    const allGroupsDone = Object.keys(groupStandings).length === GROUPS.length
     let r32Points = 0
     const r32Detail: any[] = []
     for (const [groupId, predicted] of Object.entries(predictedStandings)) {
-      const candidates = [predicted[0], predicted[1], predicted[2]].filter(Boolean)
+      const candidates = allGroupsDone
+        ? [predicted[0], predicted[1], predicted[2]].filter(Boolean)
+        : [predicted[0], predicted[1]].filter(Boolean)
       for (const teamId of candidates) {
         if (qualifiedR32.has(teamId)) {
           r32Points += 3
