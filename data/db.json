@@ -1048,7 +1048,7 @@
     },
     {
       "participantId": "moreatico-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 0,
       "score2": 1
     },
@@ -1060,7 +1060,7 @@
     },
     {
       "participantId": "moreatico-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 1,
       "score2": 0
     },
@@ -1677,7 +1677,7 @@
     },
     {
       "participantId": "aladim-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 1,
       "score2": 1,
       "advancingTeamId": "ESP"
@@ -1690,7 +1690,7 @@
     },
     {
       "participantId": "aladim-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 1,
       "score2": 0
     },
@@ -2309,7 +2309,7 @@
     },
     {
       "participantId": "alexandre-pedroni-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 1,
       "score2": 3
     },
@@ -2321,7 +2321,7 @@
     },
     {
       "participantId": "alexandre-pedroni-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 2,
       "score2": 1
     },
@@ -2936,7 +2936,7 @@
     },
     {
       "participantId": "andre-shark-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 1,
       "score2": 1,
       "advancingTeamId": "ESP"
@@ -2949,7 +2949,7 @@
     },
     {
       "participantId": "andre-shark-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 2,
       "score2": 0
     },
@@ -3563,7 +3563,7 @@
     },
     {
       "participantId": "antonio-pai-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 1,
       "score2": 2
     },
@@ -3575,7 +3575,7 @@
     },
     {
       "participantId": "antonio-pai-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 2,
       "score2": 1
     },
@@ -4189,7 +4189,7 @@
     },
     {
       "participantId": "avila-pedroni-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 1,
       "score2": 2
     },
@@ -4201,7 +4201,7 @@
     },
     {
       "participantId": "avila-pedroni-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 2,
       "score2": 0
     },
@@ -4819,7 +4819,7 @@
     },
     {
       "participantId": "bebeto-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 1,
       "score2": 3
     },
@@ -4831,7 +4831,7 @@
     },
     {
       "participantId": "bebeto-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 2,
       "score2": 2,
       "advancingTeamId": "SEN"
@@ -5446,7 +5446,7 @@
     },
     {
       "participantId": "biro-claude-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 0,
       "score2": 3
     },
@@ -5459,7 +5459,7 @@
     },
     {
       "participantId": "biro-claude-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 2,
       "score2": 1
     },
@@ -6074,7 +6074,7 @@
     },
     {
       "participantId": "biula-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 1,
       "score2": 2
     },
@@ -6086,7 +6086,7 @@
     },
     {
       "participantId": "biula-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 3,
       "score2": 0
     },
@@ -6702,7 +6702,7 @@
     },
     {
       "participantId": "caca-candeia-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 1,
       "score2": 2
     },
@@ -6714,7 +6714,7 @@
     },
     {
       "participantId": "caca-candeia-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 2,
       "score2": 1
     },
@@ -7330,7 +7330,7 @@
     },
     {
       "participantId": "capelli-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 1,
       "score2": 2
     },
@@ -7342,7 +7342,7 @@
     },
     {
       "participantId": "capelli-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 2,
       "score2": 0
     },
@@ -7961,7 +7961,7 @@
     },
     {
       "participantId": "champinha-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 0,
       "score2": 2
     },
@@ -7973,7 +7973,7 @@
     },
     {
       "participantId": "champinha-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 2,
       "score2": 1
     },
@@ -8590,7 +8590,7 @@
     },
     {
       "participantId": "damasio-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 0,
       "score2": 2
     },
@@ -8602,7 +8602,7 @@
     },
     {
       "participantId": "damasio-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 2,
       "score2": 1
     },
@@ -9217,7 +9217,7 @@
     },
     {
       "participantId": "danniel-benevides-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 0,
       "score2": 2
     },
@@ -9229,7 +9229,7 @@
     },
     {
       "participantId": "danniel-benevides-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 2,
       "score2": 1
     },
@@ -9842,7 +9842,7 @@
     },
     {
       "participantId": "davi-cade-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 1,
       "score2": 2
     },
@@ -9854,7 +9854,7 @@
     },
     {
       "participantId": "davi-cade-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 2,
       "score2": 0
     },
@@ -10469,7 +10469,7 @@
     },
     {
       "participantId": "doug-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 1,
       "score2": 2
     },
@@ -10481,7 +10481,7 @@
     },
     {
       "participantId": "doug-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 2,
       "score2": 2,
       "advancingTeamId": "BRA"
@@ -11097,7 +11097,7 @@
     },
     {
       "participantId": "dudu-rocha-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 0,
       "score2": 1
     },
@@ -11109,7 +11109,7 @@
     },
     {
       "participantId": "dudu-rocha-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 1,
       "score2": 0
     },
@@ -11723,7 +11723,7 @@
     },
     {
       "participantId": "edinho-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 0,
       "score2": 1
     },
@@ -11735,7 +11735,7 @@
     },
     {
       "participantId": "edinho-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 1,
       "score2": 0
     },
@@ -12351,7 +12351,7 @@
     },
     {
       "participantId": "eduardo-campeol-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 1,
       "score2": 3
     },
@@ -12364,7 +12364,7 @@
     },
     {
       "participantId": "eduardo-campeol-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 2,
       "score2": 0
     },
@@ -12983,7 +12983,7 @@
     },
     {
       "participantId": "enzo-magliano-queiroz-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 1,
       "score2": 2
     },
@@ -12995,7 +12995,7 @@
     },
     {
       "participantId": "enzo-magliano-queiroz-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 1,
       "score2": 0
     },
@@ -13612,7 +13612,7 @@
     },
     {
       "participantId": "everton-wutke-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 1,
       "score2": 3
     },
@@ -13624,7 +13624,7 @@
     },
     {
       "participantId": "everton-wutke-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 2,
       "score2": 1
     },
@@ -14237,7 +14237,7 @@
     },
     {
       "participantId": "felipim-candelotti-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 1,
       "score2": 2
     },
@@ -14249,7 +14249,7 @@
     },
     {
       "participantId": "felipim-candelotti-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 1,
       "score2": 0
     },
@@ -14864,7 +14864,7 @@
     },
     {
       "participantId": "gazela-marcelinho-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 1,
       "score2": 2
     },
@@ -14876,7 +14876,7 @@
     },
     {
       "participantId": "gazela-marcelinho-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 2,
       "score2": 1
     },
@@ -15490,7 +15490,7 @@
     },
     {
       "participantId": "giani-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 1,
       "score2": 3
     },
@@ -15503,7 +15503,7 @@
     },
     {
       "participantId": "giani-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 2,
       "score2": 1
     },
@@ -16122,7 +16122,7 @@
     },
     {
       "participantId": "gilberto-papito-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 1,
       "score2": 3
     },
@@ -16134,7 +16134,7 @@
     },
     {
       "participantId": "gilberto-papito-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 2,
       "score2": 1
     },
@@ -16748,7 +16748,7 @@
     },
     {
       "participantId": "guilherme-dal-piaz-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 1,
       "score2": 2
     },
@@ -16760,7 +16760,7 @@
     },
     {
       "participantId": "guilherme-dal-piaz-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 2,
       "score2": 0
     },
@@ -17376,7 +17376,7 @@
     },
     {
       "participantId": "indio-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 0,
       "score2": 1
     },
@@ -17389,7 +17389,7 @@
     },
     {
       "participantId": "indio-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 2,
       "score2": 1
     },
@@ -18003,7 +18003,7 @@
     },
     {
       "participantId": "iverson-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 0,
       "score2": 2
     },
@@ -18016,7 +18016,7 @@
     },
     {
       "participantId": "iverson-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 1,
       "score2": 1,
       "advancingTeamId": "NOR"
@@ -18633,7 +18633,7 @@
     },
     {
       "participantId": "jamir-nogueira-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 0,
       "score2": 2
     },
@@ -18646,7 +18646,7 @@
     },
     {
       "participantId": "jamir-nogueira-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 2,
       "score2": 1
     },
@@ -19262,7 +19262,7 @@
     },
     {
       "participantId": "jefinho-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 0,
       "score2": 1
     },
@@ -19275,7 +19275,7 @@
     },
     {
       "participantId": "jefinho-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 3,
       "score2": 1
     },
@@ -19890,7 +19890,7 @@
     },
     {
       "participantId": "joao-paulo-martinelli-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 0,
       "score2": 2
     },
@@ -19902,7 +19902,7 @@
     },
     {
       "participantId": "joao-paulo-martinelli-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 3,
       "score2": 2
     },
@@ -20516,7 +20516,7 @@
     },
     {
       "participantId": "jorjao-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 1,
       "score2": 3
     },
@@ -20528,7 +20528,7 @@
     },
     {
       "participantId": "jorjao-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 2,
       "score2": 2,
       "advancingTeamId": "BRA"
@@ -21145,7 +21145,7 @@
     },
     {
       "participantId": "kabelao-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 1,
       "score2": 3
     },
@@ -21157,7 +21157,7 @@
     },
     {
       "participantId": "kabelao-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 2,
       "score2": 1
     },
@@ -21776,7 +21776,7 @@
     },
     {
       "participantId": "konrad-campos-salomao-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 1,
       "score2": 2
     },
@@ -21789,7 +21789,7 @@
     },
     {
       "participantId": "konrad-campos-salomao-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 2,
       "score2": 1
     },
@@ -22408,7 +22408,7 @@
     },
     {
       "participantId": "leandro-leite-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 1,
       "score2": 2
     },
@@ -22420,7 +22420,7 @@
     },
     {
       "participantId": "leandro-leite-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 1,
       "score2": 0
     },
@@ -23039,7 +23039,7 @@
     },
     {
       "participantId": "lirio-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 1,
       "score2": 2
     },
@@ -23051,7 +23051,7 @@
     },
     {
       "participantId": "lirio-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 3,
       "score2": 1
     },
@@ -23664,7 +23664,7 @@
     },
     {
       "participantId": "lucao-aredes-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 0,
       "score2": 2
     },
@@ -23676,7 +23676,7 @@
     },
     {
       "participantId": "lucao-aredes-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 2,
       "score2": 0
     },
@@ -24291,7 +24291,7 @@
     },
     {
       "participantId": "lucilio-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 0,
       "score2": 1
     },
@@ -24303,7 +24303,7 @@
     },
     {
       "participantId": "lucilio-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 2,
       "score2": 1
     },
@@ -24921,7 +24921,7 @@
     },
     {
       "participantId": "lucio-venturim-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 1,
       "score2": 2
     },
@@ -24934,7 +24934,7 @@
     },
     {
       "participantId": "lucio-venturim-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 2,
       "score2": 1
     },
@@ -25551,7 +25551,7 @@
     },
     {
       "participantId": "macalister-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 0,
       "score2": 2
     },
@@ -25563,7 +25563,7 @@
     },
     {
       "participantId": "macalister-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 2,
       "score2": 1
     },
@@ -26182,7 +26182,7 @@
     },
     {
       "participantId": "malone-marco-aur-lio-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 1,
       "score2": 2
     },
@@ -26194,7 +26194,7 @@
     },
     {
       "participantId": "malone-marco-aur-lio-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 1,
       "score2": 0
     },
@@ -26813,7 +26813,7 @@
     },
     {
       "participantId": "mansoni-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 1,
       "score2": 2
     },
@@ -26825,7 +26825,7 @@
     },
     {
       "participantId": "mansoni-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 3,
       "score2": 1
     },
@@ -27444,7 +27444,7 @@
     },
     {
       "participantId": "markim-coco-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 1,
       "score2": 1,
       "advancingTeamId": "ESP"
@@ -27457,7 +27457,7 @@
     },
     {
       "participantId": "markim-coco-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 2,
       "score2": 1
     },
@@ -28077,7 +28077,7 @@
     },
     {
       "participantId": "milena-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 1,
       "score2": 2
     },
@@ -28089,7 +28089,7 @@
     },
     {
       "participantId": "milena-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 3,
       "score2": 2
     },
@@ -28704,7 +28704,7 @@
     },
     {
       "participantId": "tainha-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 0,
       "score2": 1
     },
@@ -28717,7 +28717,7 @@
     },
     {
       "participantId": "tainha-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 1,
       "score2": 0
     },
@@ -29332,7 +29332,7 @@
     },
     {
       "participantId": "morelli-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 1,
       "score2": 1,
       "advancingTeamId": "ESP"
@@ -29345,7 +29345,7 @@
     },
     {
       "participantId": "morelli-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 2,
       "score2": 1
     },
@@ -29960,7 +29960,7 @@
     },
     {
       "participantId": "nandinho-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 0,
       "score2": 2
     },
@@ -29973,7 +29973,7 @@
     },
     {
       "participantId": "nandinho-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 2,
       "score2": 0
     },
@@ -30589,7 +30589,7 @@
     },
     {
       "participantId": "octavio-pereira-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 0,
       "score2": 2
     },
@@ -30601,7 +30601,7 @@
     },
     {
       "participantId": "octavio-pereira-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 2,
       "score2": 1
     },
@@ -31218,7 +31218,7 @@
     },
     {
       "participantId": "otori-bittencourt-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 1,
       "score2": 3
     },
@@ -31230,7 +31230,7 @@
     },
     {
       "participantId": "otori-bittencourt-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 1,
       "score2": 1,
       "advancingTeamId": "BRA"
@@ -31848,7 +31848,7 @@
     },
     {
       "participantId": "phillipe-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 1,
       "score2": 2
     },
@@ -31860,7 +31860,7 @@
     },
     {
       "participantId": "phillipe-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 2,
       "score2": 1
     },
@@ -32478,7 +32478,7 @@
     },
     {
       "participantId": "polo-marco-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 0,
       "score2": 1
     },
@@ -32490,7 +32490,7 @@
     },
     {
       "participantId": "polo-marco-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 1,
       "score2": 0
     },
@@ -33105,7 +33105,7 @@
     },
     {
       "participantId": "ramon-poldi-guimar-es-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 0,
       "score2": 2
     },
@@ -33117,7 +33117,7 @@
     },
     {
       "participantId": "ramon-poldi-guimar-es-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 2,
       "score2": 1
     },
@@ -33732,7 +33732,7 @@
     },
     {
       "participantId": "ricardo-rocha-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 1,
       "score2": 2
     },
@@ -33744,7 +33744,7 @@
     },
     {
       "participantId": "ricardo-rocha-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 2,
       "score2": 1
     },
@@ -34356,7 +34356,7 @@
     },
     {
       "participantId": "sandro-aredes-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 1,
       "score2": 2
     },
@@ -34368,7 +34368,7 @@
     },
     {
       "participantId": "sandro-aredes-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 1,
       "score2": 0
     },
@@ -34981,7 +34981,7 @@
     },
     {
       "participantId": "silvio-roberto-lessa-amin-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 0,
       "score2": 2
     },
@@ -34993,7 +34993,7 @@
     },
     {
       "participantId": "silvio-roberto-lessa-amin-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 2,
       "score2": 1
     },
@@ -35610,7 +35610,7 @@
     },
     {
       "participantId": "spag-mytho-tiago-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 1,
       "score2": 3
     },
@@ -35623,7 +35623,7 @@
     },
     {
       "participantId": "spag-mytho-tiago-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 3,
       "score2": 1
     },
@@ -36235,7 +36235,7 @@
     },
     {
       "participantId": "stelzer-marcel-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 0,
       "score2": 2
     },
@@ -36247,7 +36247,7 @@
     },
     {
       "participantId": "stelzer-marcel-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 2,
       "score2": 0
     },
@@ -36861,7 +36861,7 @@
     },
     {
       "participantId": "teo-castro-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 0,
       "score2": 3
     },
@@ -36874,7 +36874,7 @@
     },
     {
       "participantId": "teo-castro-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 1,
       "score2": 0
     },
@@ -37492,7 +37492,7 @@
     },
     {
       "participantId": "thiago-negao-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 1,
       "score2": 1,
       "advancingTeamId": "COL"
@@ -37505,7 +37505,7 @@
     },
     {
       "participantId": "thiago-negao-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 2,
       "score2": 0
     },
@@ -38122,7 +38122,7 @@
     },
     {
       "participantId": "tiagao-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 0,
       "score2": 1
     },
@@ -38134,7 +38134,7 @@
     },
     {
       "participantId": "tiagao-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 2,
       "score2": 1
     },
@@ -38748,7 +38748,7 @@
     },
     {
       "participantId": "tinoco-fernando-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 2,
       "score2": 0
     },
@@ -38760,7 +38760,7 @@
     },
     {
       "participantId": "tinoco-fernando-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 0,
       "score2": 1
     },
@@ -39376,7 +39376,7 @@
     },
     {
       "participantId": "venzel-alex-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 1,
       "score2": 3
     },
@@ -39389,7 +39389,7 @@
     },
     {
       "participantId": "venzel-alex-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 2,
       "score2": 0
     },
@@ -40009,7 +40009,7 @@
     },
     {
       "participantId": "vitim-001",
-      "matchId": "R16_3",
+      "matchId": "R16_5",
       "score1": 1,
       "score2": 2
     },
@@ -40021,7 +40021,7 @@
     },
     {
       "participantId": "vitim-001",
-      "matchId": "R16_5",
+      "matchId": "R16_3",
       "score1": 1,
       "score2": 0
     },
@@ -40101,31 +40101,11 @@
     {
       "matchId": "GA1",
       "score1": 2,
-      "score2": 1
+      "score2": 0
     },
     {
       "matchId": "GA2",
-      "score1": 1,
-      "score2": 0
-    },
-    {
-      "matchId": "GA3",
-      "score1": 1,
-      "score2": 2
-    },
-    {
-      "matchId": "GA4",
-      "score1": 1,
-      "score2": 1
-    },
-    {
-      "matchId": "GA5",
       "score1": 2,
-      "score2": 0
-    },
-    {
-      "matchId": "GA6",
-      "score1": 1,
       "score2": 1
     },
     {
@@ -40135,18 +40115,78 @@
     },
     {
       "matchId": "GB2",
+      "score1": 1,
+      "score2": 1
+    },
+    {
+      "matchId": "GC1",
+      "score1": 1,
+      "score2": 1
+    },
+    {
+      "matchId": "GC2",
       "score1": 0,
+      "score2": 1
+    },
+    {
+      "matchId": "GD1",
+      "score1": 4,
+      "score2": 1
+    },
+    {
+      "matchId": "GD2",
+      "score1": 2,
+      "score2": 0
+    },
+    {
+      "matchId": "GE3",
+      "score1": 7,
+      "score2": 1
+    },
+    {
+      "matchId": "GE4",
+      "score1": 1,
+      "score2": 0
+    },
+    {
+      "matchId": "GF1",
+      "score1": 2,
       "score2": 2
     },
     {
-      "matchId": "GB3",
+      "matchId": "GF2",
+      "score1": 5,
+      "score2": 1
+    },
+    {
+      "matchId": "GA3",
       "score1": 1,
+      "score2": 0
+    },
+    {
+      "matchId": "GA4",
+      "score1": 1,
+      "score2": 1
+    },
+    {
+      "matchId": "GA5",
+      "score1": 3,
+      "score2": 0
+    },
+    {
+      "matchId": "GA6",
+      "score1": 1,
+      "score2": 0
+    },
+    {
+      "matchId": "GB3",
+      "score1": 6,
       "score2": 0
     },
     {
       "matchId": "GB4",
       "score1": 1,
-      "score2": 2
+      "score2": 3
     },
     {
       "matchId": "GB5",
@@ -40155,47 +40195,27 @@
     },
     {
       "matchId": "GB6",
-      "score1": 2,
+      "score1": 3,
       "score2": 1
-    },
-    {
-      "matchId": "GC1",
-      "score1": 2,
-      "score2": 1
-    },
-    {
-      "matchId": "GC2",
-      "score1": 0,
-      "score2": 2
     },
     {
       "matchId": "GC3",
-      "score1": 4,
-      "score2": 0
-    },
-    {
-      "matchId": "GC4",
-      "score1": 2,
-      "score2": 1
-    },
-    {
-      "matchId": "GC5",
-      "score1": 2,
-      "score2": 0
-    },
-    {
-      "matchId": "GC6",
       "score1": 3,
       "score2": 0
     },
     {
-      "matchId": "GD1",
-      "score1": 2,
-      "score2": 1
+      "matchId": "GC4",
+      "score1": 1,
+      "score2": 0
     },
     {
-      "matchId": "GD2",
-      "score1": 0,
+      "matchId": "GC5",
+      "score1": 3,
+      "score2": 0
+    },
+    {
+      "matchId": "GC6",
+      "score1": 4,
       "score2": 2
     },
     {
@@ -40206,17 +40226,7 @@
     {
       "matchId": "GD4",
       "score1": 1,
-      "score2": 3
-    },
-    {
-      "matchId": "GD5",
-      "score1": 1,
-      "score2": 2
-    },
-    {
-      "matchId": "GD6",
-      "score1": 1,
-      "score2": 1
+      "score2": 0
     },
     {
       "matchId": "GE1",
@@ -40226,127 +40236,67 @@
     {
       "matchId": "GE2",
       "score1": 0,
-      "score2": 3
+      "score2": 0
     },
     {
-      "matchId": "GE3",
+      "matchId": "GF3",
+      "score1": 5,
+      "score2": 1
+    },
+    {
+      "matchId": "GF4",
       "score1": 4,
       "score2": 0
     },
     {
-      "matchId": "GE4",
-      "score1": 1,
-      "score2": 1
-    },
-    {
-      "matchId": "GE5",
-      "score1": 3,
-      "score2": 1
-    },
-    {
-      "matchId": "GE6",
-      "score1": 2,
-      "score2": 0
-    },
-    {
-      "matchId": "GF1",
-      "score1": 2,
-      "score2": 1
-    },
-    {
-      "matchId": "GF2",
-      "score1": 1,
-      "score2": 1
-    },
-    {
-      "matchId": "GF3",
-      "score1": 2,
-      "score2": 0
-    },
-    {
-      "matchId": "GF4",
-      "score1": 2,
-      "score2": 1
-    },
-    {
-      "matchId": "GF5",
-      "score1": 2,
-      "score2": 0
-    },
-    {
-      "matchId": "GF6",
-      "score1": 2,
-      "score2": 0
-    },
-    {
       "matchId": "GG1",
-      "score1": 3,
+      "score1": 1,
       "score2": 1
     },
     {
       "matchId": "GG2",
-      "score1": 1,
-      "score2": 0
-    },
-    {
-      "matchId": "GG3",
       "score1": 2,
-      "score2": 1
-    },
-    {
-      "matchId": "GG4",
-      "score1": 2,
-      "score2": 0
-    },
-    {
-      "matchId": "GG5",
-      "score1": 2,
-      "score2": 0
-    },
-    {
-      "matchId": "GG6",
-      "score1": 1,
       "score2": 2
     },
     {
-      "matchId": "GH1",
+      "matchId": "GG3",
+      "score1": 0,
+      "score2": 0
+    },
+    {
+      "matchId": "GG4",
       "score1": 3,
+      "score2": 1
+    },
+    {
+      "matchId": "GH1",
+      "score1": 0,
       "score2": 0
     },
     {
       "matchId": "GH2",
-      "score1": 0,
-      "score2": 2
-    },
-    {
-      "matchId": "GH3",
-      "score1": 3,
+      "score1": 1,
       "score2": 1
     },
     {
-      "matchId": "GH4",
-      "score1": 0,
-      "score2": 2
-    },
-    {
-      "matchId": "GH5",
-      "score1": 2,
+      "matchId": "GH3",
+      "score1": 4,
       "score2": 0
     },
     {
-      "matchId": "GH6",
-      "score1": 0,
+      "matchId": "GH4",
+      "score1": 2,
       "score2": 2
     },
     {
       "matchId": "GI1",
-      "score1": 2,
-      "score2": 0
+      "score1": 3,
+      "score2": 1
     },
     {
       "matchId": "GI2",
-      "score1": 0,
-      "score2": 2
+      "score1": 1,
+      "score2": 4
     },
     {
       "matchId": "GI3",
@@ -40356,274 +40306,67 @@
     {
       "matchId": "GI4",
       "score1": 2,
-      "score2": 1
-    },
-    {
-      "matchId": "GI5",
-      "score1": 2,
-      "score2": 0
-    },
-    {
-      "matchId": "GI6",
-      "score1": 1,
-      "score2": 0
+      "score2": 3
     },
     {
       "matchId": "GJ1",
-      "score1": 2,
+      "score1": 3,
       "score2": 0
     },
     {
       "matchId": "GJ2",
-      "score1": 1,
-      "score2": 0
+      "score1": 3,
+      "score2": 1
     },
     {
       "matchId": "GJ3",
-      "score1": 3,
+      "score1": 2,
       "score2": 0
     },
     {
       "matchId": "GJ4",
       "score1": 2,
-      "score2": 0
-    },
-    {
-      "matchId": "GJ5",
-      "score1": 3,
-      "score2": 0
-    },
-    {
-      "matchId": "GJ6",
-      "score1": 1,
-      "score2": 0
+      "score2": 1
     },
     {
       "matchId": "GK1",
-      "score1": 3,
-      "score2": 0
+      "score1": 1,
+      "score2": 1
     },
     {
       "matchId": "GK2",
-      "score1": 0,
-      "score2": 2
+      "score1": 1,
+      "score2": 3
     },
     {
       "matchId": "GK3",
-      "score1": 3,
+      "score1": 5,
       "score2": 0
     },
     {
       "matchId": "GK4",
       "score1": 0,
-      "score2": 3
+      "score2": 1
     },
     {
-      "matchId": "GK5",
-      "score1": 2,
-      "score2": 0
+      "matchId": "GL1",
+      "score1": 4,
+      "score2": 2
     },
     {
-      "matchId": "GK6",
+      "matchId": "GL2",
       "score1": 1,
       "score2": 0
     },
     {
-      "matchId": "GL1",
-      "score1": 2,
-      "score2": 1
-    },
-    {
-      "matchId": "GL2",
-      "score1": 2,
-      "score2": 1
-    },
-    {
       "matchId": "GL3",
-      "score1": 2,
+      "score1": 0,
       "score2": 0
     },
     {
       "matchId": "GL4",
-      "score1": 2,
-      "score2": 0
-    },
-    {
-      "matchId": "GL5",
-      "score1": 3,
-      "score2": 0
-    },
-    {
-      "matchId": "GL6",
       "score1": 1,
       "score2": 0
-    },
-    {
-      "matchId": "R32_1",
-      "score1": 2,
-      "score2": 1
-    },
-    {
-      "matchId": "R32_2",
-      "score1": 2,
-      "score2": 0
-    },
-    {
-      "matchId": "R32_3",
-      "score1": 1,
-      "score2": 1,
-      "advancingTeamId": "MAR"
-    },
-    {
-      "matchId": "R32_4",
-      "score1": 2,
-      "score2": 1
-    },
-    {
-      "matchId": "R32_5",
-      "score1": 2,
-      "score2": 1
-    },
-    {
-      "matchId": "R32_6",
-      "score1": 1,
-      "score2": 1,
-      "advancingTeamId": "SEN"
-    },
-    {
-      "matchId": "R32_7",
-      "score1": 2,
-      "score2": 1
-    },
-    {
-      "matchId": "R32_8",
-      "score1": 2,
-      "score2": 1
-    },
-    {
-      "matchId": "R32_9",
-      "score1": 2,
-      "score2": 0
-    },
-    {
-      "matchId": "R32_10",
-      "score1": 1,
-      "score2": 1,
-      "advancingTeamId": "TUR"
-    },
-    {
-      "matchId": "R32_11",
-      "score1": 2,
-      "score2": 1
-    },
-    {
-      "matchId": "R32_12",
-      "score1": 3,
-      "score2": 0
-    },
-    {
-      "matchId": "R32_13",
-      "score1": 2,
-      "score2": 0
-    },
-    {
-      "matchId": "R32_14",
-      "score1": 3,
-      "score2": 0
-    },
-    {
-      "matchId": "R32_15",
-      "score1": 2,
-      "score2": 0
-    },
-    {
-      "matchId": "R32_16",
-      "score1": 1,
-      "score2": 1,
-      "advancingTeamId": "IRN"
-    },
-    {
-      "matchId": "R16_1",
-      "score1": 1,
-      "score2": 2
-    },
-    {
-      "matchId": "R16_2",
-      "score1": 1,
-      "score2": 2
-    },
-    {
-      "matchId": "R16_3",
-      "score1": 0,
-      "score2": 2
-    },
-    {
-      "matchId": "R16_4",
-      "score1": 1,
-      "score2": 2
-    },
-    {
-      "matchId": "R16_5",
-      "score1": 2,
-      "score2": 1
-    },
-    {
-      "matchId": "R16_6",
-      "score1": 1,
-      "score2": 2
-    },
-    {
-      "matchId": "R16_7",
-      "score1": 2,
-      "score2": 0
-    },
-    {
-      "matchId": "R16_8",
-      "score1": 1,
-      "score2": 2
-    },
-    {
-      "matchId": "QF_1",
-      "score1": 2,
-      "score2": 0
-    },
-    {
-      "matchId": "QF_2",
-      "score1": 2,
-      "score2": 2,
-      "advancingTeamId": "ESP"
-    },
-    {
-      "matchId": "QF_3",
-      "score1": 1,
-      "score2": 0
-    },
-    {
-      "matchId": "QF_4",
-      "score1": 1,
-      "score2": 1,
-      "advancingTeamId": "POR"
-    },
-    {
-      "matchId": "SF_1",
-      "score1": 2,
-      "score2": 1
-    },
-    {
-      "matchId": "SF_2",
-      "score1": 1,
-      "score2": 1,
-      "advancingTeamId": "POR"
-    },
-    {
-      "matchId": "TP_1",
-      "score1": 2,
-      "score2": 0
-    },
-    {
-      "matchId": "F_1",
-      "score1": 2,
-      "score2": 1
     }
   ]
 }
