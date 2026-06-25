@@ -41,6 +41,9 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     const myPreds = Object.fromEntries(
       db.matchPredictions.filter(p => p.participantId === id).map(p => [p.matchId, p])
     )
+    const myGroupPreds = Object.fromEntries(
+      db.groupPredictions.filter(p => p.participantId === id).map(p => [p.groupId, p.order])
+    )
 
     const sortedMatches = [...ALL_MATCHES].sort((a, b) => {
       const dateA = matchDates[a.id]?.date ?? ''
@@ -131,7 +134,11 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     }
 
     // --- Predicted group standings ---
-    const predictedStandings = deriveGroupStandings(myPreds)
+    // Use stored groupPredictions when available (authoritative), otherwise derive from match preds
+    const hasStoredGroupPreds = Object.keys(myGroupPreds).length > 0
+    const predictedStandings = hasStoredGroupPreds
+      ? myGroupPreds
+      : deriveGroupStandings(myPreds)
 
     // --- Group order bonus ---
     type TeamRef = { id: string; name: string; flag: string }

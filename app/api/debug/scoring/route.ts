@@ -119,8 +119,10 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    // Derive predicted group order from match predictions (since groupPredictions may be empty)
-    const predictedStandings = deriveGroupStandings(myPreds)
+    // Use stored groupPredictions when available (authoritative), otherwise derive from match preds
+    const myGroupPredsMap = Object.fromEntries(myGroupPreds.map(p => [p.groupId, p.order]))
+    const hasStoredGroupPreds = myGroupPreds.length > 0
+    const predictedStandings = hasStoredGroupPreds ? myGroupPredsMap : deriveGroupStandings(myPreds)
 
     // --- Group order bonus ---
     let groupOrderPoints = 0
