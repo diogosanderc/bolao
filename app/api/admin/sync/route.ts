@@ -3,6 +3,7 @@ import { readDB, updateDB } from '@/lib/db'
 import { ALL_MATCHES, teamById } from '@/lib/copa2026'
 import { resolveTeam } from '@/lib/espn'
 import { MatchResult } from '@/lib/types'
+import { computeBracketFromResults } from '@/lib/bracket'
 
 type SyncDiff = {
   matchId: string
@@ -62,6 +63,7 @@ export async function GET(req: NextRequest) {
 
   const db = await readDB()
   const resultMap = Object.fromEntries(db.results.map(r => [r.matchId, r]))
+  const resolvedKnockout = computeBracketFromResults(db.results)
 
   const events: any[] = espnData.events ?? []
   const diffs: SyncDiff[] = []
@@ -90,15 +92,18 @@ export async function GET(req: NextRequest) {
     const espnScore1 = parseInt(c1.score ?? '0', 10)
     const espnScore2 = parseInt(c2.score ?? '0', 10)
 
-    // Find matching match in our system (regardless of home/away order)
-    const match = ALL_MATCHES.find(m =>
-      (m.team1Id === id1 && m.team2Id === id2) ||
-      (m.team1Id === id2 && m.team2Id === id1)
-    )
+    // Find matching match in our system — for knockout matches use resolved team IDs
+    const match = ALL_MATCHES.find(m => {
+      const t1 = m.team1Id !== 'TBD' ? m.team1Id : resolvedKnockout[m.id]?.team1Id
+      const t2 = m.team2Id !== 'TBD' ? m.team2Id : resolvedKnockout[m.id]?.team2Id
+      if (!t1 || !t2 || t1 === 'TBD' || t2 === 'TBD') return false
+      return (t1 === id1 && t2 === id2) || (t1 === id2 && t2 === id1)
+    })
     if (!match) continue
 
-    // Flip scores if teams are in reverse order in our system
-    const flipped = match.team1Id === id2
+    const resolved = resolvedKnockout[match.id]
+    const effectiveTeam1 = match.team1Id !== 'TBD' ? match.team1Id : resolved?.team1Id ?? match.team1Id
+    const flipped = effectiveTeam1 === id2
     const ourScore1 = flipped ? espnScore2 : espnScore1
     const ourScore2 = flipped ? espnScore1 : espnScore2
 
@@ -108,10 +113,12 @@ export async function GET(req: NextRequest) {
 
     if (!isNew && !isDivergent) continue
 
+    const eff1 = resolved?.team1Id ?? match.team1Id
+    const eff2 = resolved?.team2Id ?? match.team2Id
     diffs.push({
       matchId: match.id,
-      team1: { id: match.team1Id, name: teamById[match.team1Id]?.name ?? match.team1Id, flag: teamById[match.team1Id]?.flag ?? '🏳' },
-      team2: { id: match.team2Id, name: teamById[match.team2Id]?.name ?? match.team2Id, flag: teamById[match.team2Id]?.flag ?? '🏳' },
+      team1: { id: eff1, name: teamById[eff1]?.name ?? eff1, flag: teamById[eff1]?.flag ?? '🏳' },
+      team2: { id: eff2, name: teamById[eff2]?.name ?? eff2, flag: teamById[eff2]?.flag ?? '🏳' },
       espnScore1: ourScore1,
       espnScore2: ourScore2,
       currentScore1: current?.score1,

@@ -1,7 +1,8 @@
-import { updateDB } from './db'
+import { updateDB, readDB } from './db'
 import { ALL_MATCHES, teamById } from './copa2026'
 import { resolveTeam } from './espn'
 import { sendPushToAll } from './push'
+import { computeBracketFromResults } from './bracket'
 
 type MatchState = {
   status: 'pre' | 'in' | 'halftime' | 'suspended' | 'completed'
@@ -53,7 +54,11 @@ export async function runLiveSync(): Promise<SyncResult> {
     return { ok: false, error: err.message }
   }
 
-  // 2. Pre-process ESPN events into matchId-keyed data (no DB needed)
+  // 2. Pre-process ESPN events into matchId-keyed data
+  // Resolve knockout teams from current results so live knockout matches can be matched
+  const currentDB = await readDB()
+  const resolvedKnockout = computeBracketFromResults(currentDB.results)
+
   const espnProcessed: ESPNProcessed[] = []
   for (const event of espnData.events ?? []) {
     const competition = event.competitions?.[0]
@@ -88,13 +93,17 @@ export async function runLiveSync(): Promise<SyncResult> {
     const id2 = resolveTeam(c2.team?.abbreviation ?? '', c2.team?.displayName ?? '')
     if (!id1 || !id2) continue
 
-    const match = ALL_MATCHES.find(m =>
-      (m.team1Id === id1 && m.team2Id === id2) ||
-      (m.team1Id === id2 && m.team2Id === id1)
-    )
+    const match = ALL_MATCHES.find(m => {
+      const t1 = m.team1Id !== 'TBD' ? m.team1Id : resolvedKnockout[m.id]?.team1Id
+      const t2 = m.team2Id !== 'TBD' ? m.team2Id : resolvedKnockout[m.id]?.team2Id
+      if (!t1 || !t2 || t1 === 'TBD' || t2 === 'TBD') return false
+      return (t1 === id1 && t2 === id2) || (t1 === id2 && t2 === id1)
+    })
     if (!match) continue
 
-    const flipped = match.team1Id === id2
+    const resolvedM = resolvedKnockout[match.id]
+    const effectiveTeam1 = match.team1Id !== 'TBD' ? match.team1Id : resolvedM?.team1Id ?? match.team1Id
+    const flipped = effectiveTeam1 === id2
     const rawS1 = parseInt(c1.score ?? '0', 10)
     const rawS2 = parseInt(c2.score ?? '0', 10)
     const score1 = flipped ? rawS2 : rawS1
@@ -129,8 +138,8 @@ export async function runLiveSync(): Promise<SyncResult> {
 
     espnProcessed.push({
       matchId: match.id, newStatus, score1, score2,
-      t1: teamById[match.team1Id]?.name ?? match.team1Id,
-      t2: teamById[match.team2Id]?.name ?? match.team2Id,
+      t1: teamById[resolvedM?.team1Id ?? match.team1Id]?.name ?? (resolvedM?.team1Id ?? match.team1Id),
+      t2: teamById[resolvedM?.team2Id ?? match.team2Id]?.name ?? (resolvedM?.team2Id ?? match.team2Id),
       clock, varKeys, redCardKeys, espnStatusName: typeName,
     })
   }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { readDB, updateDB } from '@/lib/db'
 import { ALL_MATCHES, teamById } from '@/lib/copa2026'
 import { resolveTeam } from '@/lib/espn'
+import { computeBracketFromResults } from '@/lib/bracket'
 
 // POST /api/admin/sync/auto — called by GitHub Actions cron
 export async function POST(req: NextRequest) {
@@ -25,6 +26,7 @@ export async function POST(req: NextRequest) {
 
   const db = await readDB()
   const resultMap = Object.fromEntries(db.results.map(r => [r.matchId, r]))
+  const resolvedKnockout = computeBracketFromResults(db.results)
 
   const events: any[] = espnData.events ?? []
   const updates: { matchId: string; score1: number; score2: number; label: string }[] = []
@@ -48,21 +50,27 @@ export async function POST(req: NextRequest) {
     const espnScore1 = parseInt(c1.score ?? '0', 10)
     const espnScore2 = parseInt(c2.score ?? '0', 10)
 
-    const match = ALL_MATCHES.find(m =>
-      (m.team1Id === id1 && m.team2Id === id2) ||
-      (m.team1Id === id2 && m.team2Id === id1)
-    )
+    const match = ALL_MATCHES.find(m => {
+      const t1 = m.team1Id !== 'TBD' ? m.team1Id : resolvedKnockout[m.id]?.team1Id
+      const t2 = m.team2Id !== 'TBD' ? m.team2Id : resolvedKnockout[m.id]?.team2Id
+      if (!t1 || !t2 || t1 === 'TBD' || t2 === 'TBD') return false
+      return (t1 === id1 && t2 === id2) || (t1 === id2 && t2 === id1)
+    })
     if (!match) continue
 
-    const flipped = match.team1Id === id2
+    const resolved = resolvedKnockout[match.id]
+    const effectiveTeam1 = match.team1Id !== 'TBD' ? match.team1Id : resolved?.team1Id ?? match.team1Id
+    const flipped = effectiveTeam1 === id2
     const ourScore1 = flipped ? espnScore2 : espnScore1
     const ourScore2 = flipped ? espnScore1 : espnScore2
 
     const current = resultMap[match.id]
     if (current && current.score1 === ourScore1 && current.score2 === ourScore2) continue
 
-    const t1 = teamById[match.team1Id]?.name ?? match.team1Id
-    const t2 = teamById[match.team2Id]?.name ?? match.team2Id
+    const eff1 = resolved?.team1Id ?? match.team1Id
+    const eff2 = resolved?.team2Id ?? match.team2Id
+    const t1 = teamById[eff1]?.name ?? eff1
+    const t2 = teamById[eff2]?.name ?? eff2
     updates.push({
       matchId: match.id,
       score1: ourScore1,

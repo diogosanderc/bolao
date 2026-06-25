@@ -8,6 +8,7 @@ import {
   Phase,
 } from './types'
 import { GROUPS, ALL_MATCHES, GROUP_MATCHES, matchById } from './copa2026'
+import { computeBracketFromResults } from './bracket'
 
 function getResult(score1: number, score2: number): 'home' | 'draw' | 'away' {
   if (score1 > score2) return 'home'
@@ -128,6 +129,9 @@ export function computeLeaderboard(
   const { standings: groupStandings, thirdPlaceStats } = computeGroupStandingsWithStats(results)
   const allGroupsComplete = Object.keys(groupStandings).length === GROUPS.length
 
+  // Resolve actual teams for all knockout slots (needed for advancement scoring)
+  const resolvedKnockoutTeams = computeBracketFromResults(results)
+
   // Top 2 from each completed group always qualify for round_of_32
   for (const standing of Object.values(groupStandings)) {
     if (standing[0]) qualifiedByPhase.round_of_32.add(standing[0])
@@ -182,7 +186,7 @@ export function computeLeaderboard(
       // For other phases: use match prediction winners from prior phase
       const predictedForPhase = phase === 'round_of_32'
         ? predictedTeamsForRoundOf32(myPreds, myGroupPreds, allGroupsComplete)
-        : predictedTeamsForPhase(phase, myPreds)
+        : predictedTeamsForPhase(phase, myPreds, resolvedKnockoutTeams)
       let pts = 0
       for (const teamId of predictedForPhase) {
         if (qualified.has(teamId)) {
@@ -278,8 +282,11 @@ function nextPhaseOf(phase: Phase): Phase | null {
   return idx >= 0 && idx < order.length - 1 ? order[idx + 1] : null
 }
 
-function predictedTeamsForPhase(phase: Phase, myPreds: MatchPrediction[]): Set<string> {
-  // Teams predicted to reach this phase = winners of previous phase matches
+function predictedTeamsForPhase(
+  phase: Phase,
+  myPreds: MatchPrediction[],
+  resolvedTeams: Record<string, { team1Id: string; team2Id: string }>
+): Set<string> {
   const priorPhase = priorPhaseOf(phase)
   if (!priorPhase) return new Set()
 
@@ -287,11 +294,12 @@ function predictedTeamsForPhase(phase: Phase, myPreds: MatchPrediction[]): Set<s
   const teams = new Set<string>()
 
   for (const match of priorMatches) {
-    if (match.team1Id === 'TBD' || match.team2Id === 'TBD') continue
+    const t = resolvedTeams[match.id]
+    if (!t || t.team1Id === 'TBD' || t.team2Id === 'TBD') continue
     const pred = myPreds.find(p => p.matchId === match.id)
     if (!pred) continue
-    if (pred.score1 > pred.score2) teams.add(match.team1Id)
-    else if (pred.score2 > pred.score1) teams.add(match.team2Id)
+    if (pred.score1 > pred.score2) teams.add(t.team1Id)
+    else if (pred.score2 > pred.score1) teams.add(t.team2Id)
     else if (pred.advancingTeamId) teams.add(pred.advancingTeamId)
   }
   return teams
