@@ -4,13 +4,15 @@ import { useEffect, useRef, useState } from 'react'
 import { Flag } from '@/components/Flag'
 import { PHASE_LABELS, Phase } from '@/lib/types'
 
+type TeamRef = { id: string; name: string; flag: string }
+
 type PredEntry = {
   matchId: string
   matchNumber: number
   phase: Phase
   groupId?: string
-  team1: { id: string; name: string; flag: string }
-  team2: { id: string; name: string; flag: string }
+  team1: TeamRef
+  team2: TeamRef
   date: string | null
   dateBRT: string | null
   prediction: { score1: number; score2: number } | null
@@ -21,10 +23,37 @@ type PredEntry = {
   correctGoals?: [boolean, boolean]
 }
 
+type GroupDetail = {
+  groupId: string
+  predicted: TeamRef[]
+  actual: TeamRef[]
+  correct: boolean
+  pts: number
+}
+
+type R32Entry = {
+  teamId: string
+  name: string
+  flag: string
+  groupId: string
+  pts: number
+}
+
 type ParticipantData = {
   participant: { id: string; name: string }
   predictions: PredEntry[]
-  summary: { totalPoints: number; correctResults: number; correctScores: number; matchesPlayed: number }
+  summary: {
+    totalPoints: number
+    matchPoints: number
+    correctResults: number
+    correctScores: number
+    matchesPlayed: number
+    groupOrderPoints: number
+    r32Points: number
+    phasePoints: number
+  }
+  groupDetail: GroupDetail[]
+  r32Detail: R32Entry[]
 }
 
 type Props = { participantId: string; name: string; onClose: () => void }
@@ -86,6 +115,10 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
     return 'border-l-2 border-transparent'
   }
 
+  const hasPhaseBonus = (data?.summary.phasePoints ?? 0) > 0
+  const hasGroupDetail = (data?.groupDetail.length ?? 0) > 0
+  const hasR32Detail = (data?.r32Detail.length ?? 0) > 0
+
   return (
     <div
       className="fixed inset-0 z-50 flex items-end justify-center"
@@ -115,6 +148,9 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
                 <span><span className="text-yellow-600 dark:text-yellow-400 font-bold">{data.summary.totalPoints}pts</span> totais</span>
                 <span><span className="text-green-700 dark:text-green-400 font-semibold">{data.summary.correctResults}</span> resultados certos</span>
                 <span><span className="text-yellow-700 dark:text-yellow-300 font-semibold">{data.summary.correctScores}</span> placares exatos</span>
+                {data.summary.phasePoints > 0 && (
+                  <span><span className="text-purple-600 dark:text-purple-400 font-semibold">+{data.summary.phasePoints}</span> bônus fase</span>
+                )}
               </div>
             )}
           </div>
@@ -179,6 +215,73 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
                   {!p.correctResult && p.result && <p className="text-[10px] text-red-600 dark:text-red-500 mt-0.5 pl-0.5">✗ Errou</p>}
                 </div>
               ))}
+
+              {/* Group order bonus section */}
+              {hasGroupDetail && (
+                <div className="px-3 pt-4 pb-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">📊 Ordem dos Grupos</span>
+                    <span className={`text-xs font-bold ${data!.summary.groupOrderPoints > 0 ? 'text-purple-400' : 'text-gray-600'}`}>
+                      +{data!.summary.groupOrderPoints} pts
+                    </span>
+                  </div>
+                  <div className="space-y-1.5">
+                    {data!.groupDetail.map(g => (
+                      <div key={g.groupId} className={`rounded-lg px-3 py-2 text-xs ${g.correct ? 'bg-purple-950/40 border border-purple-800/50' : 'bg-gray-900 border border-gray-800'}`}>
+                        <div className="flex items-center justify-between mb-1">
+                          <span className={`font-bold ${g.correct ? 'text-purple-300' : 'text-gray-400'}`}>
+                            Grupo {g.groupId}
+                          </span>
+                          <span className={`font-bold ${g.correct ? 'text-purple-400' : 'text-gray-600'}`}>
+                            {g.correct ? '✓ +2' : '✗ 0'}
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-1 text-[10px]">
+                          <div>
+                            <p className="text-gray-600 mb-0.5">Seu palpite</p>
+                            <div className="flex gap-1 flex-wrap">
+                              {g.predicted.map((t, i) => (
+                                <span key={t.id} className={`${g.correct ? 'text-purple-300' : i < 2 ? 'text-gray-300' : 'text-gray-500'}`}>
+                                  {i + 1}º {t.flag}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                          <div>
+                            <p className="text-gray-600 mb-0.5">Real</p>
+                            <div className="flex gap-1 flex-wrap">
+                              {g.actual.map((t, i) => (
+                                <span key={t.id} className={i < 2 ? 'text-gray-300' : 'text-gray-500'}>
+                                  {i + 1}º {t.flag}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* R32 advancement bonus section */}
+              {hasR32Detail && (
+                <div className="px-3 pt-3 pb-4 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">🏆 Classificados para 16-avos</span>
+                    <span className="text-xs font-bold text-yellow-400">+{data!.summary.r32Points} pts</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {data!.r32Detail.map(t => (
+                      <div key={`${t.groupId}-${t.teamId}`} className="flex items-center gap-1 bg-yellow-950/30 border border-yellow-800/40 rounded-lg px-2.5 py-1.5 text-xs">
+                        <span>{t.flag}</span>
+                        <span className="text-gray-300 font-medium">{t.name}</span>
+                        <span className="text-yellow-400 font-bold ml-1">+3</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

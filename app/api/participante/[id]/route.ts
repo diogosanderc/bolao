@@ -1,8 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { readDB } from '@/lib/db'
-import { matchById, teamById } from '@/lib/copa2026'
+import { matchById, teamById, ALL_MATCHES, GROUP_MATCHES, GROUPS } from '@/lib/copa2026'
 import { scoreMatch } from '@/lib/scoring'
-import { ALL_MATCHES } from '@/lib/copa2026'
+
+function deriveGroupStandings(predMap: Record<string, { score1: number; score2: number }>) {
+  const standings: Record<string, string[]> = {}
+  for (const group of GROUPS) {
+    const pts: Record<string, number> = {}
+    const gd: Record<string, number> = {}
+    const gf: Record<string, number> = {}
+    for (const id of group.teamIds) { pts[id] = 0; gd[id] = 0; gf[id] = 0 }
+    let hasAny = false
+    for (const m of GROUP_MATCHES.filter(mm => mm.groupId === group.id)) {
+      const pred = predMap[m.id]
+      if (!pred) continue
+      hasAny = true
+      gf[m.team1Id] += pred.score1; gf[m.team2Id] += pred.score2
+      gd[m.team1Id] += pred.score1 - pred.score2; gd[m.team2Id] += pred.score2 - pred.score1
+      if (pred.score1 > pred.score2) pts[m.team1Id] += 3
+      else if (pred.score2 > pred.score1) pts[m.team2Id] += 3
+      else { pts[m.team1Id] += 1; pts[m.team2Id] += 1 }
+    }
+    if (!hasAny) continue
+    standings[group.id] = [...group.teamIds].sort((a, b) =>
+      pts[b] !== pts[a] ? pts[b] - pts[a] : gd[b] !== gd[a] ? gd[b] - gd[a] : gf[b] - gf[a]
+    )
+  }
+  return standings
+}
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -61,14 +86,91 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
       })
 
     const played = predictions.filter(p => p.result !== null)
-    const totalPoints = played.reduce((sum, p) => sum + (p.points ?? 0), 0)
+    const matchPoints = played.reduce((sum, p) => sum + (p.points ?? 0), 0)
     const correctResults = played.filter(p => p.correctResult).length
     const correctScores = played.filter(p => p.correctScore).length
+
+    // --- Group standings from actual results ---
+    const groupStandings: Record<string, string[]> = {}
+    const thirdPlaceStats: { teamId: string; pts: number; gd: number; gf: number }[] = []
+    for (const group of GROUPS) {
+      const pts: Record<string, number> = {}
+      const gd: Record<string, number> = {}
+      const gf: Record<string, number> = {}
+      for (const id of group.teamIds) { pts[id] = 0; gd[id] = 0; gf[id] = 0 }
+      const groupMatchList = GROUP_MATCHES.filter(m => m.groupId === group.id)
+      let allPlayed = true
+      for (const m of groupMatchList) {
+        const res = resultMap[m.id]
+        if (!res) { allPlayed = false; continue }
+        gf[m.team1Id] += res.score1; gf[m.team2Id] += res.score2
+        gd[m.team1Id] += res.score1 - res.score2; gd[m.team2Id] += res.score2 - res.score1
+        if (res.score1 > res.score2) pts[m.team1Id] += 3
+        else if (res.score2 > res.score1) pts[m.team2Id] += 3
+        else { pts[m.team1Id] += 1; pts[m.team2Id] += 1 }
+      }
+      if (!allPlayed) continue
+      const sorted = [...group.teamIds].sort((a, b) =>
+        pts[b] !== pts[a] ? pts[b] - pts[a] : gd[b] !== gd[a] ? gd[b] - gd[a] : gf[b] - gf[a]
+      )
+      groupStandings[group.id] = sorted
+      if (sorted[2]) thirdPlaceStats.push({ teamId: sorted[2], pts: pts[sorted[2]], gd: gd[sorted[2]], gf: gf[sorted[2]] })
+    }
+
+    const allGroupsDone = Object.keys(groupStandings).length === GROUPS.length
+    const qualifiedR32 = new Set<string>()
+    for (const s of Object.values(groupStandings)) {
+      if (s[0]) qualifiedR32.add(s[0])
+      if (s[1]) qualifiedR32.add(s[1])
+    }
+    if (allGroupsDone) {
+      const best8 = [...thirdPlaceStats]
+        .sort((a, b) => b.pts !== a.pts ? b.pts - a.pts : b.gd !== a.gd ? b.gd - a.gd : b.gf - a.gf)
+        .slice(0, 8)
+      for (const t of best8) qualifiedR32.add(t.teamId)
+    }
+
+    // --- Predicted group standings ---
+    const predictedStandings = deriveGroupStandings(myPreds)
+
+    // --- Group order bonus ---
+    type TeamRef = { id: string; name: string; flag: string }
+    const groupDetail: { groupId: string; predicted: TeamRef[]; actual: TeamRef[]; correct: boolean; pts: number }[] = []
+    let groupOrderPoints = 0
+    for (const [groupId, predicted] of Object.entries(predictedStandings)) {
+      const actual = groupStandings[groupId]
+      if (!actual) continue
+      const correct = JSON.stringify(predicted) === JSON.stringify(actual)
+      if (correct) groupOrderPoints += 2
+      const toRef = (ids: string[]) => ids.map(tid => ({ id: tid, name: teamById[tid]?.name ?? tid, flag: teamById[tid]?.flag ?? '🏳' }))
+      groupDetail.push({ groupId, predicted: toRef(predicted), actual: toRef(actual), correct, pts: correct ? 2 : 0 })
+    }
+
+    // --- R32 advancement bonus ---
+    const r32Detail: { teamId: string; name: string; flag: string; groupId: string; pts: number }[] = []
+    let r32Points = 0
+    for (const [groupId, predicted] of Object.entries(predictedStandings)) {
+      if (!groupStandings[groupId]) continue
+      const candidates = allGroupsDone
+        ? [predicted[0], predicted[1], predicted[2]].filter(Boolean)
+        : [predicted[0], predicted[1]].filter(Boolean)
+      for (const teamId of candidates) {
+        if (qualifiedR32.has(teamId)) {
+          r32Points += 3
+          r32Detail.push({ teamId, name: teamById[teamId]?.name ?? teamId, flag: teamById[teamId]?.flag ?? '🏳', groupId, pts: 3 })
+        }
+      }
+    }
+
+    const phasePoints = groupOrderPoints + r32Points
+    const totalPoints = matchPoints + phasePoints
 
     return NextResponse.json({
       participant: { id: participant.id, name: participant.name },
       predictions,
-      summary: { totalPoints, correctResults, correctScores, matchesPlayed: played.length },
+      summary: { totalPoints, matchPoints, correctResults, correctScores, matchesPlayed: played.length, groupOrderPoints, r32Points, phasePoints },
+      groupDetail,
+      r32Detail,
     })
   } catch (err) {
     console.error('[participante]', err)
