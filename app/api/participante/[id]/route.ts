@@ -57,12 +57,14 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
         let points: number | undefined
         let correctResult: boolean | undefined
         let correctScore: boolean | undefined
+        let correctGoals: [boolean, boolean] | undefined
 
         if (pred && result && match) {
           const sc = scoreMatch(pred, result, match)
           points = sc.total
           correctResult = sc.correctResult
           correctScore = sc.correctScore
+          correctGoals = sc.correctGoals
         }
 
         return {
@@ -79,6 +81,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
           points,
           correctResult,
           correctScore,
+          correctGoals,
         }
       })
 
@@ -89,6 +92,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 
     // --- Group standings from actual results ---
     const groupStandings: Record<string, string[]> = {}
+    const thirdPlaceStats: { teamId: string; pts: number; gd: number; gf: number }[] = []
     for (const group of GROUPS) {
       const pts: Record<string, number> = {}
       const gd: Record<string, number> = {}
@@ -106,15 +110,30 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
         else { pts[m.team1Id] += 1; pts[m.team2Id] += 1 }
       }
       if (!allPlayed) continue
-      groupStandings[group.id] = [...group.teamIds].sort((a, b) =>
+      const sorted = [...group.teamIds].sort((a, b) =>
         pts[b] !== pts[a] ? pts[b] - pts[a] : gd[b] !== gd[a] ? gd[b] - gd[a] : gf[b] - gf[a]
       )
+      groupStandings[group.id] = sorted
+      if (sorted[2]) thirdPlaceStats.push({ teamId: sorted[2], pts: pts[sorted[2]], gd: gd[sorted[2]], gf: gf[sorted[2]] })
+    }
+
+    const allGroupsDone = Object.keys(groupStandings).length === GROUPS.length
+    const qualifiedR32 = new Set<string>()
+    for (const s of Object.values(groupStandings)) {
+      if (s[0]) qualifiedR32.add(s[0])
+      if (s[1]) qualifiedR32.add(s[1])
+    }
+    if (allGroupsDone) {
+      const best8 = [...thirdPlaceStats]
+        .sort((a, b) => b.pts !== a.pts ? b.pts - a.pts : b.gd !== a.gd ? b.gd - a.gd : b.gf - a.gf)
+        .slice(0, 8)
+      for (const t of best8) qualifiedR32.add(t.teamId)
     }
 
     // --- Predicted group standings ---
     const predictedStandings = deriveGroupStandings(myPreds)
 
-    // --- Group order bonus: +2 per group where all 4 positions match exactly ---
+    // --- Group order bonus ---
     type TeamRef = { id: string; name: string; flag: string }
     const groupDetail: { groupId: string; predicted: TeamRef[]; actual: TeamRef[]; correct: boolean; pts: number }[] = []
     let groupOrderPoints = 0
@@ -127,41 +146,31 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
       groupDetail.push({ groupId, predicted: toRef(predicted), actual: toRef(actual), correct, pts: correct ? 2 : 0 })
     }
 
-    // --- Champion bonus: +6 ---
-    const finalResult = db.results.find(r => {
-      const m = matchById[r.matchId]
-      return m?.phase === 'final'
-    })
-    let championPoints = 0
-    let champion: string | null = null
-    if (finalResult) {
-      const finalMatch = matchById[finalResult.matchId]
-      champion = finalResult.score1 > finalResult.score2
-        ? (finalMatch?.team1Id ?? null)
-        : finalResult.score2 > finalResult.score1
-        ? (finalMatch?.team2Id ?? null)
-        : (finalResult.advancingTeamId ?? null)
-      const myFinalPred = myPreds[finalResult.matchId]
-      if (myFinalPred && champion) {
-        const finalMatch2 = matchById[myFinalPred.matchId]
-        const predictedChampion =
-          myFinalPred.score1 > myFinalPred.score2
-            ? finalMatch2?.team1Id
-            : myFinalPred.score2 > myFinalPred.score1
-            ? finalMatch2?.team2Id
-            : myFinalPred.advancingTeamId
-        if (predictedChampion === champion) championPoints = 6
+    // --- R32 advancement bonus ---
+    const r32Detail: { teamId: string; name: string; flag: string; groupId: string; pts: number }[] = []
+    let r32Points = 0
+    for (const [groupId, predicted] of Object.entries(predictedStandings)) {
+      if (!groupStandings[groupId]) continue
+      const candidates = allGroupsDone
+        ? [predicted[0], predicted[1], predicted[2]].filter(Boolean)
+        : [predicted[0], predicted[1]].filter(Boolean)
+      for (const teamId of candidates) {
+        if (qualifiedR32.has(teamId)) {
+          r32Points += 3
+          r32Detail.push({ teamId, name: teamById[teamId]?.name ?? teamId, flag: teamById[teamId]?.flag ?? '🏳', groupId, pts: 3 })
+        }
       }
     }
 
-    const phasePoints = groupOrderPoints + championPoints
+    const phasePoints = groupOrderPoints + r32Points
     const totalPoints = matchPoints + phasePoints
 
     return NextResponse.json({
       participant: { id: participant.id, name: participant.name },
       predictions,
-      summary: { totalPoints, matchPoints, correctResults, correctScores, matchesPlayed: played.length, groupOrderPoints, championPoints, phasePoints },
+      summary: { totalPoints, matchPoints, correctResults, correctScores, matchesPlayed: played.length, groupOrderPoints, r32Points, phasePoints },
       groupDetail,
+      r32Detail,
     })
   } catch (err) {
     console.error('[participante]', err)

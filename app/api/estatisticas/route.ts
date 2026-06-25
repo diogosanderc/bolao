@@ -77,6 +77,7 @@ export async function GET() {
         const sc = scoreMatch(pred, result, match)
         if (sc.correctResult) s.correctResults++
         if (sc.correctScore) s.correctScores++
+        if (sc.correctGoals[0] || sc.correctGoals[1]) s.correctGoals++
         s.totalPoints += sc.total
       }
     }
