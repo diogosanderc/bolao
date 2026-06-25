@@ -228,7 +228,7 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
                       <div key={g.groupId} className="rounded-lg px-3 py-2 text-xs bg-gray-900 border border-gray-800">
                         <div className="flex items-center justify-between mb-1">
                           <span className="font-bold text-gray-400">Grupo {g.groupId}</span>
-                          <span className={`font-bold ${g.correct ? 'text-gray-200' : 'text-gray-600'}`}>
+                          <span className={`font-bold ${g.correct ? 'text-green-400' : 'text-red-500'}`}>
                             {g.correct ? '✓ +2' : '✗ 0'}
                           </span>
                         </div>
