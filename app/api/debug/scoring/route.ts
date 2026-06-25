@@ -48,7 +48,6 @@ export async function GET(req: NextRequest) {
 
   // Compute actual group standings (only complete groups)
   const groupStandings: Record<string, string[]> = {}
-  const thirdPlaceStats: { teamId: string; groupId: string; pts: number; gd: number; gf: number }[] = []
   for (const group of GROUPS) {
     const pts: Record<string, number> = {}
     const gd: Record<string, number> = {}
@@ -66,25 +65,24 @@ export async function GET(req: NextRequest) {
       else { pts[m.team1Id] += 1; pts[m.team2Id] += 1 }
     }
     if (!allPlayed) continue
-    const sorted = [...group.teamIds].sort((a, b) =>
+    groupStandings[group.id] = [...group.teamIds].sort((a, b) =>
       pts[b] !== pts[a] ? pts[b] - pts[a] : gd[b] !== gd[a] ? gd[b] - gd[a] : gf[b] - gf[a]
     )
-    groupStandings[group.id] = sorted
-    if (sorted[2]) thirdPlaceStats.push({ teamId: sorted[2], groupId: group.id, pts: pts[sorted[2]], gd: gd[sorted[2]], gf: gf[sorted[2]] })
   }
 
-  // round_of_32 qualified: top-2 from each completed group always qualify
-  // best-8 thirds only determined once ALL 12 groups are complete
-  const qualifiedR32 = new Set<string>()
-  for (const s of Object.values(groupStandings)) {
-    if (s[0]) qualifiedR32.add(s[0])
-    if (s[1]) qualifiedR32.add(s[1])
-  }
-  if (Object.keys(groupStandings).length === GROUPS.length) {
-    const best8Third = [...thirdPlaceStats]
-      .sort((a, b) => b.pts !== a.pts ? b.pts - a.pts : b.gd !== a.gd ? b.gd - a.gd : b.gf - a.gf)
-      .slice(0, 8)
-    for (const t of best8Third) qualifiedR32.add(t.teamId)
+  // Champion: winner of the final match
+  const finalResult = db.results.find(r => {
+    const m = matchById[r.matchId]
+    return m?.phase === 'final'
+  })
+  let champion: string | null = null
+  if (finalResult) {
+    const finalMatch = matchById[finalResult.matchId]
+    champion = finalResult.score1 > finalResult.score2
+      ? (finalMatch?.team1Id ?? null)
+      : finalResult.score2 > finalResult.score1
+      ? (finalMatch?.team2Id ?? null)
+      : (finalResult.advancingTeamId ?? null)
   }
 
   const participants = db.participants.filter(p =>
@@ -114,15 +112,15 @@ export async function GET(req: NextRequest) {
           match: `${teamById[match.team1Id]?.name ?? match.team1Id} ${res.score1}×${res.score2} ${teamById[match.team2Id]?.name ?? match.team2Id}`,
           pred: `${pred.score1}×${pred.score2}`,
           pts: s.total,
-          flags: [s.correctResult && 'resultado', s.correctScore && 'placar_exato', s.highScoreBonus && 'highscore'].filter(Boolean),
+          flags: [s.correctResult && 'resultado', s.correctScore && 'placar_exato'].filter(Boolean),
         })
       }
     }
 
-    // Derive predicted group order from match predictions (since groupPredictions may be empty)
+    // Derive predicted group order from match predictions
     const predictedStandings = deriveGroupStandings(myPreds)
 
-    // --- Group order bonus ---
+    // --- Group order bonus: +2 if all 4 positions exactly correct ---
     let groupOrderPoints = 0
     const groupDetail: any[] = []
     for (const [groupId, predicted] of Object.entries(predictedStandings)) {
@@ -142,45 +140,41 @@ export async function GET(req: NextRequest) {
       })
     }
 
-    // --- Round of 32 advancement ---
-    // Give +3 for teams predicted 1st or 2nd that actually qualified to r32.
-    // Predicted 3rd only earns bonus once ALL 12 groups are complete (best-8 3rds determined).
-    const allGroupsDone = Object.keys(groupStandings).length === GROUPS.length
-    let r32Points = 0
-    const r32Detail: any[] = []
-    for (const [groupId, predicted] of Object.entries(predictedStandings)) {
-      const candidates = allGroupsDone
-        ? [predicted[0], predicted[1], predicted[2]].filter(Boolean)
-        : [predicted[0], predicted[1]].filter(Boolean)
-      for (const teamId of candidates) {
-        if (qualifiedR32.has(teamId)) {
-          r32Points += 3
-          r32Detail.push({ team: teamById[teamId]?.name ?? teamId, group: groupId, pts: 3 })
-        }
+    // --- Champion bonus: +6 ---
+    let championPoints = 0
+    if (champion) {
+      const myFinalPred = myPreds.find(p => matchById[p.matchId]?.phase === 'final')
+      if (myFinalPred) {
+        const finalMatch = matchById[myFinalPred.matchId]
+        const predictedChampion =
+          myFinalPred.score1 > myFinalPred.score2
+            ? finalMatch?.team1Id
+            : myFinalPred.score2 > myFinalPred.score1
+            ? finalMatch?.team2Id
+            : myFinalPred.advancingTeamId
+        if (predictedChampion === champion) championPoints = 6
       }
     }
 
-    const total = matchPoints + groupOrderPoints + r32Points
+    const total = matchPoints + groupOrderPoints + championPoints
 
     return {
       name: participant.name,
       total,
       matchPoints,
       groupOrderPoints,
-      r32Points,
-      phasePoints: groupOrderPoints + r32Points,
+      championPoints,
+      champion: champion ? (teamById[champion]?.name ?? champion) : null,
       completedGroups: Object.keys(groupStandings),
-      qualifiedR32teams: Array.from(qualifiedR32).map(id => teamById[id]?.name ?? id),
       matchDetail,
       groupDetail,
-      r32Detail,
       usingDerivedGroupPreds: myGroupPreds.length === 0,
     }
   }).sort((a, b) => b.total - a.total)
 
   return NextResponse.json({
     completedGroups: Object.keys(groupStandings),
-    qualifiedR32count: qualifiedR32.size,
+    champion: champion ? (teamById[champion]?.name ?? champion) : null,
     participants: output,
   })
 }

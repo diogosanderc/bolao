@@ -20,7 +20,6 @@ type PredEntry = {
   points?: number
   correctResult?: boolean
   correctScore?: boolean
-  correctGoals?: [boolean, boolean]
 }
 
 type GroupDetail = {
@@ -28,14 +27,6 @@ type GroupDetail = {
   predicted: TeamRef[]
   actual: TeamRef[]
   correct: boolean
-  pts: number
-}
-
-type R32Entry = {
-  teamId: string
-  name: string
-  flag: string
-  groupId: string
   pts: number
 }
 
@@ -49,11 +40,10 @@ type ParticipantData = {
     correctScores: number
     matchesPlayed: number
     groupOrderPoints: number
-    r32Points: number
+    championPoints: number
     phasePoints: number
   }
   groupDetail: GroupDetail[]
-  r32Detail: R32Entry[]
 }
 
 type Props = { participantId: string; name: string; onClose: () => void }
@@ -117,7 +107,6 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
 
   const hasPhaseBonus = (data?.summary.phasePoints ?? 0) > 0
   const hasGroupDetail = (data?.groupDetail.length ?? 0) > 0
-  const hasR32Detail = (data?.r32Detail.length ?? 0) > 0
 
   return (
     <div
@@ -260,21 +249,12 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
                 </div>
               )}
 
-              {/* R32 advancement bonus section */}
-              {hasR32Detail && (
+              {/* Champion bonus section */}
+              {(data?.summary.championPoints ?? 0) > 0 && (
                 <div className="px-3 pt-3 pb-4 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">🏆 Classificados para 16-avos</span>
-                    <span className="text-xs font-bold text-gray-300">+{data!.summary.r32Points} pts</span>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {data!.r32Detail.map(t => (
-                      <div key={`${t.groupId}-${t.teamId}`} className="flex items-center gap-1 bg-gray-900 border border-gray-800 rounded-lg px-2.5 py-1.5 text-xs">
-                        <span>{t.flag}</span>
-                        <span className="text-gray-300 font-medium">{t.name}</span>
-                        <span className="text-gray-400 font-bold ml-1">+3</span>
-                      </div>
-                    ))}
+                    <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">🏆 Bônus Campeão</span>
+                    <span className="text-xs font-bold text-yellow-400">+{data!.summary.championPoints} pts</span>
                   </div>
                 </div>
               )}
