@@ -140,32 +140,12 @@ export async function GET(req: NextRequest) {
     }
 
     // --- Round of 32 advancement ---
-    // top 2 per group always qualify, best 8 third-place also qualify
-    const predictedThird: { teamId: string; groupId: string; pts: number; gd: number; gf: number }[] = []
-    for (const group of GROUPS) {
-      const predMap = Object.fromEntries(myPreds.map(p => [p.matchId, p]))
-      const pp: Record<string, number> = {}; const pgd: Record<string, number> = {}; const pgf: Record<string, number> = {}
-      for (const id of group.teamIds) { pp[id] = 0; pgd[id] = 0; pgf[id] = 0 }
-      for (const m of GROUP_MATCHES.filter(mm => mm.groupId === group.id)) {
-        const pred = predMap[m.id]; if (!pred) continue
-        pgf[m.team1Id] += pred.score1; pgf[m.team2Id] += pred.score2
-        pgd[m.team1Id] += pred.score1 - pred.score2; pgd[m.team2Id] += pred.score2 - pred.score1
-        if (pred.score1 > pred.score2) pp[m.team1Id] += 3
-        else if (pred.score2 > pred.score1) pp[m.team2Id] += 3
-        else { pp[m.team1Id]++; pp[m.team2Id]++ }
-      }
-      const sorted = predictedStandings[group.id]
-      if (sorted && sorted[2]) predictedThird.push({ teamId: sorted[2], groupId: group.id, pts: pp[sorted[2]], gd: pgd[sorted[2]], gf: pgf[sorted[2]] })
-    }
-    const predictedBest8Third = [...predictedThird]
-      .sort((a, b) => b.pts !== a.pts ? b.pts - a.pts : b.gd !== a.gd ? b.gd - a.gd : b.gf - a.gf)
-      .slice(0, 8)
-      .map(t => t.teamId)
-
+    // Give +3 for any team predicted in positions 1, 2, or 3 that actually qualified to r32
+    // Actual qualification (best-8 thirds) is determined by qualifiedR32 set from real results
     let r32Points = 0
     const r32Detail: any[] = []
     for (const [groupId, predicted] of Object.entries(predictedStandings)) {
-      const candidates = [predicted[0], predicted[1], predictedBest8Third.includes(predicted[2]) ? predicted[2] : null].filter(Boolean) as string[]
+      const candidates = [predicted[0], predicted[1], predicted[2]].filter(Boolean)
       for (const teamId of candidates) {
         if (qualifiedR32.has(teamId)) {
           r32Points += 3

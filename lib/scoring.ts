@@ -80,7 +80,6 @@ const ADVANCEMENT_POINTS: Record<Phase, number> = {
 }
 
 const CHAMPION_POINTS = 12
-const GROUP_ORDER_BONUS = 6 // bonus for getting ALL classified in any phase
 
 export function computeLeaderboard(
   participants: Participant[],
@@ -235,18 +234,6 @@ export function computeLeaderboard(
         const actual = groupStandings[groupId]
         if (!actual) continue
         if (JSON.stringify(predicted) === JSON.stringify(actual)) groupOrderPoints += 2
-      }
-    }
-
-    // Bonus for all classified in any phase
-    for (const phase of phases) {
-      const qualified = qualifiedByPhase[phase]
-      if (qualified.size === 0) continue
-      const predicted = phase === 'round_of_32'
-        ? predictedTeamsForRoundOf32(myPreds, myGroupPreds)
-        : predictedTeamsForPhase(phase, myPreds)
-      if (predicted.size >= qualified.size && [...qualified].every(t => predicted.has(t))) {
-        phasePoints += GROUP_ORDER_BONUS
       }
     }
 
@@ -416,16 +403,15 @@ function predictedTeamsForRoundOf32(
     return teams
   }
 
-  // Derive from match predictions: top 2 per group always qualify + best 8 third-place
-  const { standings, thirdPlaceStats } = computePredictedGroupStandings(myPreds)
+  // Derive from match predictions: give +3 for any predicted top-3 that actually qualified
+  // Top-2 always advance; 3rd-place teams need to be in actual best-8, but the participant
+  // just needs to have predicted that team in 3rd — actual qualification is checked via qualified.has()
+  const { standings } = computePredictedGroupStandings(myPreds)
   const teams = new Set<string>()
   for (const sorted of Object.values(standings)) {
     if (sorted[0]) teams.add(sorted[0])
     if (sorted[1]) teams.add(sorted[1])
+    if (sorted[2]) teams.add(sorted[2]) // include all predicted 3rds; qualified.has() filters
   }
-  const best8Third = [...thirdPlaceStats]
-    .sort((a, b) => b.pts !== a.pts ? b.pts - a.pts : b.gd !== a.gd ? b.gd - a.gd : b.gf - a.gf)
-    .slice(0, 8)
-  for (const t of best8Third) teams.add(t.teamId)
   return teams
 }
