@@ -373,18 +373,27 @@ export default function LeaderboardPage() {
           ctx.fillStyle = nameColor
           ctx.font = 'bold 11px system-ui'
           ctx.textAlign = 'left'
-          const maxNameW = colW - 75
+          const maxNameW = colW - 100
           let name = entry.participant.name
           while (ctx.measureText(name).width > maxNameW && name.length > 3) name = name.slice(0, -1)
           if (name !== entry.participant.name) name = name.trimEnd() + '…'
           ctx.fillText(name, x + 26, midY)
+
+          // Position change arrow
+          const change: number | undefined = (entry as any).positionChange
+          if (change && change !== 0) {
+            ctx.font = 'bold 10px system-ui'
+            ctx.textAlign = 'left'
+            ctx.fillStyle = change > 0 ? '#60a5fa' : '#f87171'
+            ctx.fillText(change > 0 ? `▲${change}` : `▼${Math.abs(change)}`, x + colW - 88, midY)
+          }
 
           // Last match points — left-aligned in its own slot before total
           if (entry.lastMatchPoints > 0) {
             ctx.fillStyle = '#4ade80'
             ctx.font = '10px system-ui'
             ctx.textAlign = 'left'
-            ctx.fillText(`+${entry.lastMatchPoints}`, x + colW - 64, midY)
+            ctx.fillText(`+${entry.lastMatchPoints}`, x + colW - 56, midY)
           }
 
           // Total points
@@ -485,7 +494,7 @@ export default function LeaderboardPage() {
               </button>
               <button
                 onClick={shareWhatsApp}
-                className="flex items-center gap-1.5 text-sm bg-[#00bf63] hover:bg-[#00a854] text-[white] px-3 py-1.5 rounded-lg transition-colors font-semibold"
+                className="flex items-center gap-1.5 text-sm bg-[#00bf63] hover:bg-[#00a854] text-white px-3 py-1.5 rounded-lg transition-colors font-semibold"
               >
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
                 Texto
