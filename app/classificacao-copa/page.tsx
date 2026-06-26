@@ -191,9 +191,108 @@ function KnockoutSection({ phases }: { phases: KnockoutPhase[] }) {
   )
 }
 
+// ─── Third-place ranking ─────────────────────────────────────────────────────
+
+function ThirdsSection({ groups }: { groups: GroupData[] }) {
+  // Extract 3rd-place team from each group that has standings
+  const thirds = groups
+    .map(g => {
+      const row = g.standings.find(r => r.pos === 3)
+      if (!row) return null
+      const complete = g.standings.every(r => r.j >= 3)
+      return { ...row, groupId: g.id, groupName: g.name, complete }
+    })
+    .filter(Boolean) as (GroupRow & { groupId: string; groupName: string; complete: boolean })[]
+
+  // Sort: pts → sg → gp
+  const sorted = [...thirds].sort((a, b) => {
+    if (b.p !== a.p) return b.p - a.p
+    if (b.sg !== a.sg) return b.sg - a.sg
+    return b.gp - a.gp
+  })
+
+  const total = 12 // total groups in Copa 2026
+
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-gray-500">
+        <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-amber-500 inline-block" /> Top 8 se classificam</span>
+        <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-gray-700 inline-block" /> Grupo ainda em disputa</span>
+      </div>
+
+      {thirds.length === 0 && (
+        <p className="text-center py-10 text-gray-500">Nenhum grupo fechado ainda.</p>
+      )}
+
+      {sorted.length > 0 && (
+        <div className="rounded-xl border border-gray-800 bg-gray-950 overflow-hidden">
+          <div className="bg-amber-700 px-4 py-2 flex items-center justify-between">
+            <h3 className="font-bold text-white text-sm tracking-wide uppercase">Melhores 3ºs Lugares</h3>
+            <span className="text-xs text-amber-200">{thirds.length}/{total} grupos</span>
+          </div>
+          <table className="w-full text-xs">
+            <thead>
+              <tr className="bg-gray-900 text-gray-500 uppercase tracking-wider">
+                <th className="px-2 py-1.5 text-left w-6">#</th>
+                <th className="px-1 py-1.5 text-left">Time</th>
+                <th className="px-1 py-1.5 text-center w-8">Grp</th>
+                <th className="px-1 py-1.5 text-center w-6">J</th>
+                <th className="px-1 py-1.5 text-center w-6 hidden sm:table-cell">V</th>
+                <th className="px-1 py-1.5 text-center w-6 hidden sm:table-cell">E</th>
+                <th className="px-1 py-1.5 text-center w-6 hidden sm:table-cell">D</th>
+                <th className="px-1 py-1.5 text-center w-7">SG</th>
+                <th className="px-1 py-1.5 text-center w-7 hidden sm:table-cell">GP</th>
+                <th className="px-2 py-1.5 text-right w-8 text-gray-200 dark:text-yellow-500">Pts</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-800/60">
+              {sorted.map((row, idx) => {
+                const team = teamById[row.teamId]
+                const qualifies = idx < 8
+                const border = qualifies
+                  ? 'border-l-2 border-amber-500'
+                  : 'border-l-2 border-transparent'
+                const rowBg = !row.complete ? 'opacity-70' : ''
+                return (
+                  <tr key={row.teamId} className={`${border} ${rowBg}`}>
+                    <td className="px-2 py-1.5 text-gray-500 font-semibold">{idx + 1}</td>
+                    <td className="px-1 py-1.5">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <Flag teamId={row.teamId} size={16} />
+                        <span className="text-gray-200 font-semibold truncate">
+                          <span className="sm:hidden">{row.teamId}</span>
+                          <span className="hidden sm:inline">{team?.name ?? row.teamId}</span>
+                        </span>
+                        {!row.complete && <span className="text-[10px] text-amber-500 font-semibold ml-1">em jogo</span>}
+                      </div>
+                    </td>
+                    <td className="px-1 py-1.5 text-center text-gray-500 font-semibold">{row.groupId}</td>
+                    <td className="px-1 py-1.5 text-center text-gray-400">{row.j}</td>
+                    <td className="px-1 py-1.5 text-center text-gray-400 hidden sm:table-cell">{row.v}</td>
+                    <td className="px-1 py-1.5 text-center text-gray-400 hidden sm:table-cell">{row.e}</td>
+                    <td className="px-1 py-1.5 text-center text-gray-400 hidden sm:table-cell">{row.d}</td>
+                    <td className="px-1 py-1.5 text-center text-gray-400">{row.sg > 0 ? `+${row.sg}` : row.sg}</td>
+                    <td className="px-1 py-1.5 text-center text-gray-400 hidden sm:table-cell">{row.gp}</td>
+                    <td className="px-2 py-1.5 text-right font-bold text-gray-200 dark:text-yellow-400">{row.p}</td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+          {thirds.length < total && (
+            <p className="text-[11px] text-gray-600 text-center py-2 border-t border-gray-800">
+              {total - thirds.length} grupo(s) ainda não fechado(s) — classificação pode mudar
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ─── Page ────────────────────────────────────────────────────────────────────
 
-type Tab = 'groups' | 'knockout'
+type Tab = 'groups' | 'knockout' | 'thirds'
 
 export default function ClassificacaoCopaPage() {
   const [groups,   setGroups]   = useState<GroupData[]>([])
@@ -239,7 +338,7 @@ export default function ClassificacaoCopaPage() {
 
       {/* Main tabs */}
       <div className="flex border-b border-gray-800">
-        {([['groups', 'Fase de Grupos'], ['knockout', 'Mata-Mata']] as [Tab, string][]).map(([key, label]) => (
+        {([['groups', 'Fase de Grupos'], ['thirds', 'Terceiros'], ['knockout', 'Mata-Mata']] as [Tab, string][]).map(([key, label]) => (
           <button
             key={key}
             onClick={() => setTab(key)}
@@ -266,6 +365,10 @@ export default function ClassificacaoCopaPage() {
             {groups.map(g => <GroupCard key={g.id} group={g} />)}
           </div>
         </>
+      )}
+
+      {!loading && tab === 'thirds' && (
+        <ThirdsSection groups={groups} />
       )}
 
       {!loading && tab === 'knockout' && (
