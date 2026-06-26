@@ -45,7 +45,8 @@ export async function GET() {
       validParticipants,
       db.matchPredictions,
       db.groupPredictions,
-      allResults
+      allResults,
+      db.r32TeamPicks
     )
 
     // Compute previous leaderboard (all results except the last) for position change arrows
@@ -149,7 +150,8 @@ export async function GET() {
         validParticipants,
         db.matchPredictions,
         db.groupPredictions,
-        baseForComparison
+        baseForComparison,
+        db.r32TeamPicks
       )
       const prevPointsMap = new Map<string, number>()
       const prevRankMap = new Map<string, number>()

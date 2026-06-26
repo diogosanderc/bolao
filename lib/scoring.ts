@@ -6,6 +6,7 @@ import {
   Participant,
   LeaderboardEntry,
   Phase,
+  R32TeamPick,
 } from './types'
 import { GROUPS, ALL_MATCHES, GROUP_MATCHES, matchById } from './copa2026'
 import { computeBracketFromResults } from './bracket'
@@ -86,7 +87,8 @@ export function computeLeaderboard(
   participants: Participant[],
   matchPredictions: MatchPrediction[],
   groupPredictions: GroupPrediction[],
-  results: MatchResult[]
+  results: MatchResult[],
+  r32TeamPicks?: R32TeamPick[]
 ): LeaderboardEntry[] {
   const resultMap = Object.fromEntries(results.map(r => [r.matchId, r]))
   const lastResult = results.length > 0 ? results[results.length - 1] : null
@@ -183,10 +185,13 @@ export function computeLeaderboard(
       const qualified = qualifiedByPhase[phase]
       if (qualified.size === 0) continue
 
-      // For round_of_32: derive from group predictions or match predictions
+      // For round_of_32: use explicit r32TeamPicks if available, else derive from group predictions
       // For other phases: use match prediction winners from prior phase
+      const myR32Picks = r32TeamPicks?.find(p => p.participantId === participant.id)
       const predictedForPhase = phase === 'round_of_32'
-        ? predictedTeamsForRoundOf32(myPreds, myGroupPreds, completedGroupIds)
+        ? (myR32Picks
+            ? new Set(myR32Picks.teamIds)
+            : predictedTeamsForRoundOf32(myPreds, myGroupPreds, completedGroupIds))
         : predictedTeamsForPhase(phase, myPreds, resolvedKnockoutTeams)
       let pts = 0
       for (const teamId of predictedForPhase) {

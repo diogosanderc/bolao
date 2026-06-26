@@ -93,6 +93,11 @@ export interface PushSubscriptionRecord {
   createdAt: string
 }
 
+export interface R32TeamPick {
+  participantId: string
+  teamIds: string[] // 32 teams explicitly predicted to qualify for round of 32
+}
+
 export interface Database {
   participants: Participant[]
   matchPredictions: MatchPrediction[]
@@ -101,6 +106,7 @@ export interface Database {
   matchDates: Record<string, { date: string; dateBRT: string; venue: string }>
   pushSubscriptions?: PushSubscriptionRecord[]
   liveMatchStates?: Record<string, { status: 'pre' | 'in' | 'halftime' | 'completed'; score1: number; score2: number }>
+  r32TeamPicks?: R32TeamPick[]
 }
 
 export interface LeaderboardEntry {

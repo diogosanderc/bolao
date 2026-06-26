@@ -3,6 +3,12 @@ import { readDB } from '@/lib/db'
 import { matchById, teamById, ALL_MATCHES, GROUP_MATCHES, GROUPS } from '@/lib/copa2026'
 import { scoreMatch } from '@/lib/scoring'
 
+// Build a map from teamId → groupId for lookup
+const teamGroupMap: Record<string, string> = {}
+for (const group of GROUPS) {
+  for (const tid of group.teamIds) teamGroupMap[tid] = group.id
+}
+
 function deriveGroupStandings(predMap: Record<string, { score1: number; score2: number }>) {
   const standings: Record<string, string[]> = {}
   for (const group of GROUPS) {
@@ -157,13 +163,27 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     // --- R32 advancement bonus ---
     const r32Detail: { teamId: string; name: string; flag: string; groupId: string; pts: number }[] = []
     let r32Points = 0
-    for (const [groupId, predicted] of Object.entries(predictedStandings)) {
-      if (!completedGroupIds.has(groupId)) continue
-      const candidates = [predicted[0], predicted[1], predicted[2]].filter(Boolean)
-      for (const teamId of candidates) {
+    const myR32Picks = db.r32TeamPicks?.find(p => p.participantId === id)
+    if (myR32Picks) {
+      // Use explicit R32 bracket picks from aposta26.arq
+      for (const teamId of myR32Picks.teamIds) {
         if (qualifiedR32.has(teamId)) {
-          r32Points += 3
-          r32Detail.push({ teamId, name: teamById[teamId]?.name ?? teamId, flag: teamById[teamId]?.flag ?? '🏳', groupId, pts: 3 })
+          const groupId = teamGroupMap[teamId] ?? ''
+          if (groupId && completedGroupIds.has(groupId)) {
+            r32Points += 3
+            r32Detail.push({ teamId, name: teamById[teamId]?.name ?? teamId, flag: teamById[teamId]?.flag ?? '🏳', groupId, pts: 3 })
+          }
+        }
+      }
+    } else {
+      for (const [groupId, predicted] of Object.entries(predictedStandings)) {
+        if (!completedGroupIds.has(groupId)) continue
+        const candidates = [predicted[0], predicted[1], predicted[2]].filter(Boolean)
+        for (const teamId of candidates) {
+          if (qualifiedR32.has(teamId)) {
+            r32Points += 3
+            r32Detail.push({ teamId, name: teamById[teamId]?.name ?? teamId, flag: teamById[teamId]?.flag ?? '🏳', groupId, pts: 3 })
+          }
         }
       }
     }
@@ -173,6 +193,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 
     // --- Group predictions for all 12 groups (for "Seleções" tab) ---
     const toRef = (tid: string) => ({ id: tid, name: teamById[tid]?.name ?? tid, flag: teamById[tid]?.flag ?? '🏳' })
+    const r32PickSet = myR32Picks ? new Set(myR32Picks.teamIds) : null
     const groupPredictions = GROUPS.map(group => {
       const predicted = predictedStandings[group.id] ?? []
       const actual = groupStandings[group.id] ?? null
@@ -181,7 +202,10 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
         predicted: predicted.map(toRef),
         actual: actual ? actual.map(toRef) : null,
         complete: !!actual,
-        r32Qualified: predicted.map(tid => qualifiedR32.has(tid)),
+        // r32Qualified: true when team is in explicit R32 picks (if available) AND actually qualified
+        r32Qualified: predicted.map(tid =>
+          r32PickSet ? (r32PickSet.has(tid) && qualifiedR32.has(tid)) : qualifiedR32.has(tid)
+        ),
       }
     })
 
