@@ -558,8 +558,8 @@ export default function LeaderboardPage() {
               <tr className="bg-gray-900 text-gray-400 text-xs uppercase tracking-wider">
                 <th className="px-4 py-3 text-left w-10">#</th>
                 <th className="px-4 py-3 text-left">Participante</th>
-                <th className="px-4 py-3 text-right cursor-help" title="Pontuação do último jogo">UJ</th>
-                <th className="px-4 py-3 text-right cursor-help" title="Soma dos 4 últimos jogos">U4</th>
+                <th className="px-4 py-3 text-right cursor-help hidden sm:table-cell" title="Pontuação do último jogo">UJ</th>
+                <th className="px-4 py-3 text-right cursor-help hidden sm:table-cell" title="Soma dos 4 últimos jogos">U4</th>
                 <th className="px-4 py-3 text-right">PTS</th>
               </tr>
             </thead>
@@ -604,12 +604,12 @@ export default function LeaderboardPage() {
                   }`}>
                     {entry.participant.name}
                   </td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="px-4 py-3 text-right hidden sm:table-cell">
                     {entry.lastMatchPoints > 0
                       ? <span className="text-green-600 dark:text-green-400 font-semibold">+{entry.lastMatchPoints}</span>
                       : <span className="text-gray-400 dark:text-gray-500">0</span>}
                   </td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="px-4 py-3 text-right hidden sm:table-cell">
                     {(() => {
                       const pts = p.last4Points ?? 0
                       return <span className={pts > 0 ? 'text-blue-600 dark:text-blue-400 font-semibold' : 'text-gray-400 dark:text-gray-500'}>{pts}</span>
