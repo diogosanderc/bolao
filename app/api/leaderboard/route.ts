@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { readDB } from '@/lib/db'
 import { computeLeaderboard, scoreMatch, computeGroupStandingsWithStats } from '@/lib/scoring'
-import { ALL_MATCHES, GROUPS, matchById, teamById } from '@/lib/copa2026'
+import { ALL_MATCHES, matchById, teamById } from '@/lib/copa2026'
 
 export async function GET() {
   try {
@@ -76,7 +76,7 @@ export async function GET() {
     }
 
     // Last completed group bonus: bonus earned from the most recently closed group only
-    const { standings: groupStandings, thirdPlaceStats } = computeGroupStandingsWithStats(allResults)
+    const { standings: groupStandings } = computeGroupStandingsWithStats(allResults)
     // Find the group whose last match was played most recently
     let lastGroupId: string | null = null
     for (let i = sortedResults.length - 1; i >= 0; i--) {
@@ -89,27 +89,13 @@ export async function GET() {
     const lastGroupBonusMap = new Map<string, number>()
     if (lastGroupId) {
       const actualOrder = groupStandings[lastGroupId] ?? []
-      const top2OfLastGroup = new Set([actualOrder[0], actualOrder[1]].filter(Boolean))
-      const allGroupsDone = Object.keys(groupStandings).length === GROUPS.length
-      // 3rd-place qualifier from this group (only when all groups done and best-8 known)
-      let third3rdQualifier: string | null = null
-      if (allGroupsDone && actualOrder[2]) {
-        const best8Thirds = [...thirdPlaceStats]
-          .sort((a, b) => b.pts !== a.pts ? b.pts - a.pts : b.gd !== a.gd ? b.gd - a.gd : b.gf - a.gf)
-          .slice(0, 8)
-          .map(t => t.teamId)
-        if (best8Thirds.includes(actualOrder[2])) third3rdQualifier = actualOrder[2]
-      }
+      const actualTop2 = new Set([actualOrder[0], actualOrder[1]].filter(Boolean))
       for (const participant of validParticipants) {
         const gp = db.groupPredictions.find(p => p.participantId === participant.id && p.groupId === lastGroupId)
         let bonus = 0
         if (gp) {
-          // +3 for predicted 1st/2nd that actually finished 1st/2nd
-          if (gp.order[0] && top2OfLastGroup.has(gp.order[0])) bonus += 3
-          if (gp.order[1] && top2OfLastGroup.has(gp.order[1])) bonus += 3
-          // +3 for predicted 3rd that qualifies as best-3rd (after all groups done)
-          if (third3rdQualifier && gp.order[2] === third3rdQualifier) bonus += 3
-          // +2 for correct full group order
+          if (gp.order[0] && actualTop2.has(gp.order[0])) bonus += 3
+          if (gp.order[1] && actualTop2.has(gp.order[1])) bonus += 3
           if (actualOrder.length > 0 && JSON.stringify(gp.order) === JSON.stringify(actualOrder)) bonus += 2
         }
         lastGroupBonusMap.set(participant.id, bonus)
