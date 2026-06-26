@@ -419,12 +419,13 @@ export default function LeaderboardPage() {
           } else if (selectedCol === 'u2grupos') {
             const a = p.secondLastMatchPts ?? 0
             const b = p.lastMatchPts ?? 0
+            const u2 = a + b
             const z = p.groupBonus ?? 0
             ctx.fillStyle = '#4ade80'
-            ctx.fillText(`(${a}+${b})`, x + colW - 84, midY)
+            ctx.fillText(String(u2), x + colW - 72, midY)
             if (z > 0) {
               ctx.fillStyle = '#facc15'
-              ctx.fillText(` +${z}`, x + colW - 44, midY)
+              ctx.fillText(` +${z}`, x + colW - 55, midY)
             }
           }
 
