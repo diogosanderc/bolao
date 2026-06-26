@@ -7,7 +7,7 @@ import {
   LeaderboardEntry,
   Phase,
 } from './types'
-import { GROUPS, ALL_MATCHES, GROUP_MATCHES, matchById } from './copa2026'
+import { GROUPS, ALL_MATCHES, GROUP_MATCHES, R32_BRACKET, matchById } from './copa2026'
 import { computeBracketFromResults } from './bracket'
 
 function getResult(score1: number, score2: number): 'home' | 'draw' | 'away' {
@@ -132,23 +132,41 @@ export function computeLeaderboard(
   // Resolve actual teams for all knockout slots (needed for advancement scoring)
   const resolvedKnockoutTeams = computeBracketFromResults(results)
 
-  // Top 2 from each completed group always qualify for round_of_32
+  // Two separate qualifier sets for round_of_32 (mirrors BASIC scoring):
+  //   top2R32  — actual 1st/2nd place teams from each group
+  //   best3rdR32 — 8 best 3rd-place qualifiers (determined only after ALL groups finish)
+  // Predicted 1st/2nd earn +3 only if the team ends up in top2R32.
+  // Predicted 3rd earns +3 only if the team ends up in best3rdR32.
+  // A team predicted as 1st/2nd but finishing 3rd gets NO +3 here.
+  const top2R32 = new Set<string>()
+  const best3rdR32 = new Set<string>()
+
   for (const standing of Object.values(groupStandings)) {
-    if (standing[0]) qualifiedByPhase.round_of_32.add(standing[0])
-    if (standing[1]) qualifiedByPhase.round_of_32.add(standing[1])
+    if (standing[0]) top2R32.add(standing[0])
+    if (standing[1]) top2R32.add(standing[1])
   }
-  // Best-8 3rd-place finishers: only determined when ALL 12 groups are complete
-  if (Object.keys(groupStandings).length === GROUPS.length) {
+  if (allGroupsComplete) {
     const best8Third = [...thirdPlaceStats]
       .sort((a, b) => b.pts !== a.pts ? b.pts - a.pts : b.gd !== a.gd ? b.gd - a.gd : b.gf - a.gf)
       .slice(0, 8)
-    for (const t of best8Third) qualifiedByPhase.round_of_32.add(t.teamId)
+    for (const t of best8Third) best3rdR32.add(t.teamId)
   }
-  // Also keep any round_of_32 match teams already set by admin (non-TBD)
-  for (const match of ALL_MATCHES.filter(m => m.phase === 'round_of_32')) {
-    if (match.team1Id !== 'TBD') qualifiedByPhase.round_of_32.add(match.team1Id)
-    if (match.team2Id !== 'TBD') qualifiedByPhase.round_of_32.add(match.team2Id)
+  // Admin-entered non-TBD bracket teams: classify by bracket slot type
+  for (const entry of R32_BRACKET) {
+    const match = matchById[entry.id]
+    if (!match) continue
+    if (match.team1Id !== 'TBD') {
+      if (entry.s1.type === 'best3rd') best3rdR32.add(match.team1Id)
+      else top2R32.add(match.team1Id)
+    }
+    if (match.team2Id !== 'TBD') {
+      if (entry.s2.type === 'best3rd') best3rdR32.add(match.team2Id)
+      else top2R32.add(match.team2Id)
+    }
   }
+  // Combined set used by other phases' advancement tracking
+  for (const t of top2R32) qualifiedByPhase.round_of_32.add(t)
+  for (const t of best3rdR32) qualifiedByPhase.round_of_32.add(t)
 
   return participants.map(participant => {
     const myPreds = matchPredictions.filter(p => p.participantId === participant.id)
@@ -182,16 +200,34 @@ export function computeLeaderboard(
       const qualified = qualifiedByPhase[phase]
       if (qualified.size === 0) continue
 
-      // For round_of_32: derive from group predictions or match predictions
-      // For other phases: use match prediction winners from prior phase
-      const predictedForPhase = phase === 'round_of_32'
-        ? predictedTeamsForRoundOf32(myPreds, myGroupPreds, allGroupsComplete)
-        : predictedTeamsForPhase(phase, myPreds, resolvedKnockoutTeams)
       let pts = 0
-      for (const teamId of predictedForPhase) {
-        if (qualified.has(teamId)) {
-          const p = ADVANCEMENT_POINTS[phase]
-          pts += p
+      if (phase === 'round_of_32') {
+        // +3 for each team predicted as 1st or 2nd that actually finishes 1st or 2nd
+        const predTop2 = myGroupPreds.length > 0
+          ? new Set(myGroupPreds.flatMap(gp => [gp.order[0], gp.order[1]].filter(Boolean) as string[]))
+          : (() => {
+              const { standings } = computePredictedGroupStandings(myPreds)
+              return new Set(Object.values(standings).flatMap(s => [s[0], s[1]].filter(Boolean) as string[]))
+            })()
+        for (const teamId of predTop2) {
+          if (top2R32.has(teamId)) pts += 3
+        }
+        // +3 for each team predicted as 3rd that qualifies as a best-8 3rd-place team
+        if (best3rdR32.size > 0) {
+          const predThirds = myGroupPreds.length > 0
+            ? new Set(myGroupPreds.map(gp => gp.order[2]).filter(Boolean) as string[])
+            : (() => {
+                const { standings } = computePredictedGroupStandings(myPreds)
+                return new Set(Object.values(standings).map(s => s[2]).filter(Boolean) as string[])
+              })()
+          for (const teamId of predThirds) {
+            if (best3rdR32.has(teamId)) pts += 3
+          }
+        }
+      } else {
+        const predictedForPhase = predictedTeamsForPhase(phase, myPreds, resolvedKnockoutTeams)
+        for (const teamId of predictedForPhase) {
+          if (qualified.has(teamId)) pts += ADVANCEMENT_POINTS[phase]
         }
       }
 
@@ -399,27 +435,3 @@ function computePredictedGroupStandings(
   return { standings, thirdPlaceStats }
 }
 
-function predictedTeamsForRoundOf32(
-  myPreds: MatchPrediction[],
-  myGroupPreds: GroupPrediction[],
-  _allGroupsComplete: boolean
-): Set<string> {
-  // +3pts for each team predicted as 1st or 2nd that actually qualifies for round_of_32,
-  // regardless of whether they finish 1st, 2nd, or as a best-8 3rd-place team.
-  if (myGroupPreds.length > 0) {
-    const teams = new Set<string>()
-    for (const gp of myGroupPreds) {
-      if (gp.order[0]) teams.add(gp.order[0])
-      if (gp.order[1]) teams.add(gp.order[1])
-    }
-    return teams
-  }
-
-  const { standings } = computePredictedGroupStandings(myPreds)
-  const teams = new Set<string>()
-  for (const sorted of Object.values(standings)) {
-    if (sorted[0]) teams.add(sorted[0])
-    if (sorted[1]) teams.add(sorted[1])
-  }
-  return teams
-}

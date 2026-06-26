@@ -89,22 +89,27 @@ export async function GET() {
     const lastGroupBonusMap = new Map<string, number>()
     if (lastGroupId) {
       const actualOrder = groupStandings[lastGroupId] ?? []
-      // Qualifiers from this group: always 1st and 2nd; also 3rd if all groups done and they're best-8
-      const lastGroupQualifiers = new Set([actualOrder[0], actualOrder[1]].filter(Boolean))
+      const top2OfLastGroup = new Set([actualOrder[0], actualOrder[1]].filter(Boolean))
       const allGroupsDone = Object.keys(groupStandings).length === GROUPS.length
+      // 3rd-place qualifier from this group (only when all groups done and best-8 known)
+      let third3rdQualifier: string | null = null
       if (allGroupsDone && actualOrder[2]) {
         const best8Thirds = [...thirdPlaceStats]
           .sort((a, b) => b.pts !== a.pts ? b.pts - a.pts : b.gd !== a.gd ? b.gd - a.gd : b.gf - a.gf)
           .slice(0, 8)
           .map(t => t.teamId)
-        if (best8Thirds.includes(actualOrder[2])) lastGroupQualifiers.add(actualOrder[2])
+        if (best8Thirds.includes(actualOrder[2])) third3rdQualifier = actualOrder[2]
       }
       for (const participant of validParticipants) {
         const gp = db.groupPredictions.find(p => p.participantId === participant.id && p.groupId === lastGroupId)
         let bonus = 0
         if (gp) {
-          if (gp.order[0] && lastGroupQualifiers.has(gp.order[0])) bonus += 3
-          if (gp.order[1] && lastGroupQualifiers.has(gp.order[1])) bonus += 3
+          // +3 for predicted 1st/2nd that actually finished 1st/2nd
+          if (gp.order[0] && top2OfLastGroup.has(gp.order[0])) bonus += 3
+          if (gp.order[1] && top2OfLastGroup.has(gp.order[1])) bonus += 3
+          // +3 for predicted 3rd that qualifies as best-3rd (after all groups done)
+          if (third3rdQualifier && gp.order[2] === third3rdQualifier) bonus += 3
+          // +2 for correct full group order
           if (actualOrder.length > 0 && JSON.stringify(gp.order) === JSON.stringify(actualOrder)) bonus += 2
         }
         lastGroupBonusMap.set(participant.id, bonus)
