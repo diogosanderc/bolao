@@ -288,32 +288,35 @@ export default function LeaderboardPage() {
   }
 
   async function shareImage() {
-    if (!leaderboardRef.current || sharingImage) return
+    if (sharingImage) return
+    const target = leaderboardRef.current
+    if (!target) { alert('Tabela não encontrada. Tente novamente.'); return }
     setSharingImage(true)
     try {
       const html2canvas = (await import('html2canvas')).default
-      const canvas = await html2canvas(leaderboardRef.current, {
-        backgroundColor: '#0a0a0a',
+      const canvas = await html2canvas(target, {
+        backgroundColor: '#111827',
         scale: 2,
         useCORS: true,
         logging: false,
+        removeContainer: true,
       })
-      canvas.toBlob(async (blob) => {
-        if (!blob) { setSharingImage(false); return }
-        const file = new File([blob], 'classificacao-bolao.png', { type: 'image/png' })
-        if (navigator.canShare?.({ files: [file] })) {
-          await navigator.share({ files: [file], title: 'Classificação Bolão Copa 2026' })
-        } else {
-          const url = URL.createObjectURL(blob)
-          const a = document.createElement('a')
-          a.href = url
-          a.download = 'classificacao-bolao.png'
-          a.click()
-          URL.revokeObjectURL(url)
-        }
-        setSharingImage(false)
-      }, 'image/png')
-    } catch {
+      const blob: Blob | null = await new Promise(res => canvas.toBlob(res, 'image/png'))
+      if (!blob) throw new Error('Falha ao gerar imagem')
+      const file = new File([blob], 'classificacao-bolao.png', { type: 'image/png' })
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: 'Classificação Bolão Copa 2026' })
+      } else {
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = 'classificacao-bolao.png'
+        a.click()
+        URL.revokeObjectURL(url)
+      }
+    } catch (err: any) {
+      if (err?.name !== 'AbortError') alert(`Erro ao compartilhar: ${err?.message ?? err}`)
+    } finally {
       setSharingImage(false)
     }
   }
@@ -520,7 +523,7 @@ export default function LeaderboardPage() {
       )}
 
       {leaderboardHasLive && data.length > 0 && (
-        <div className="rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50/80 dark:bg-red-950/20 overflow-hidden">
+        <div ref={leaderboardRef} className="rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50/80 dark:bg-red-950/20 overflow-hidden">
           <div className="px-4 py-2 border-b border-red-200/60 dark:border-red-900/30 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse shrink-0" />
             <span className="text-xs font-bold text-red-600 dark:text-red-400 uppercase tracking-wider flex-1">Classificação ao vivo</span>
