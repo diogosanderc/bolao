@@ -128,6 +128,7 @@ export function computeLeaderboard(
   // Group standings from group results (for group order bonus + round_of_32 qualified)
   const { standings: groupStandings, thirdPlaceStats } = computeGroupStandingsWithStats(results)
   const allGroupsComplete = Object.keys(groupStandings).length === GROUPS.length
+  const completedGroupIds = new Set(Object.keys(groupStandings))
 
   // Resolve actual teams for all knockout slots (needed for advancement scoring)
   const resolvedKnockoutTeams = computeBracketFromResults(results)
@@ -185,7 +186,7 @@ export function computeLeaderboard(
       // For round_of_32: derive from group predictions or match predictions
       // For other phases: use match prediction winners from prior phase
       const predictedForPhase = phase === 'round_of_32'
-        ? predictedTeamsForRoundOf32(myPreds, myGroupPreds, allGroupsComplete)
+        ? predictedTeamsForRoundOf32(myPreds, myGroupPreds, completedGroupIds)
         : predictedTeamsForPhase(phase, myPreds, resolvedKnockoutTeams)
       let pts = 0
       for (const teamId of predictedForPhase) {
@@ -402,28 +403,27 @@ function computePredictedGroupStandings(
 function predictedTeamsForRoundOf32(
   myPreds: MatchPrediction[],
   myGroupPreds: GroupPrediction[],
-  _allGroupsComplete: boolean
+  completedGroupIds: Set<string>
 ): Set<string> {
-  // If DB has explicit group predictions, use them; otherwise derive from match predictions.
-  // A team predicted in any top-3 slot earns +3 if it actually qualifies for R32 by any means
-  // (1st, 2nd, or best 3rd-place). The R32 qualification set handles the actual check.
+  // 1st/2nd picks always count. 3rd pick counts once that specific group finishes —
+  // the R32 qualification set then determines whether the team actually made it
+  // (as group winner, runner-up, or best 3rd-place).
   if (myGroupPreds.length > 0) {
     const teams = new Set<string>()
     for (const gp of myGroupPreds) {
       if (gp.order[0]) teams.add(gp.order[0])
       if (gp.order[1]) teams.add(gp.order[1])
-      // 3rd-place picks only scored after all groups finish
-      if (_allGroupsComplete && gp.order[2]) teams.add(gp.order[2])
+      if (completedGroupIds.has(gp.groupId) && gp.order[2]) teams.add(gp.order[2])
     }
     return teams
   }
 
   const { standings } = computePredictedGroupStandings(myPreds)
   const teams = new Set<string>()
-  for (const sorted of Object.values(standings)) {
+  for (const [groupId, sorted] of Object.entries(standings)) {
     if (sorted[0]) teams.add(sorted[0])
     if (sorted[1]) teams.add(sorted[1])
-    if (_allGroupsComplete && sorted[2]) teams.add(sorted[2])
+    if (completedGroupIds.has(groupId) && sorted[2]) teams.add(sorted[2])
   }
   return teams
 }
