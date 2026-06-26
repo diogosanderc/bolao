@@ -289,15 +289,89 @@ export default function LeaderboardPage() {
 
   async function shareImage() {
     if (sharingImage) return
-    const target = leaderboardRef.current
-    if (!target) { alert('Tabela não encontrada. Tente novamente.'); return }
     setSharingImage(true)
+    const container = document.createElement('div')
+    container.style.cssText = 'position:fixed;left:-9999px;top:0;background:#111827;padding:14px 12px 10px;font-family:system-ui,sans-serif;width:680px;'
     try {
+      // Title
+      const title = document.createElement('div')
+      title.style.cssText = 'color:#facc15;font-size:16px;font-weight:700;text-align:center;margin-bottom:10px;'
+      title.textContent = '🏆 Classificação Bolão Copa 2026'
+      container.appendChild(title)
+
+      if (lastMatch) {
+        const sub = document.createElement('div')
+        sub.style.cssText = 'color:#9ca3af;font-size:11px;text-align:center;margin-bottom:10px;'
+        sub.textContent = `Último jogo: ${lastMatch.team1.name} ${lastMatch.score1}×${lastMatch.score2} ${lastMatch.team2.name}`
+        container.appendChild(sub)
+      }
+
+      // Two columns
+      const cols = document.createElement('div')
+      cols.style.cssText = 'display:flex;gap:8px;align-items:flex-start;'
+      const half = Math.ceil(data.length / 2)
+
+      for (let c = 0; c < 2; c++) {
+        const colData = data.slice(c === 0 ? 0 : half, c === 0 ? half : data.length)
+        const col = document.createElement('div')
+        col.style.cssText = 'flex:1;min-width:0;'
+
+        for (const entry of colData) {
+          const idx = data.indexOf(entry)
+          const rank = ranks[idx]
+          const tier = tierOf(entry.totalPoints)
+          const isBot = isRelated(entry.totalPoints)
+          const isWarn = isWarning(entry.totalPoints)
+          const first = isFirstOfRank[idx]
+
+          const bg = isBot ? '#3b0a0a' : isWarn ? '#2d1a06' : tier === 1 ? '#2d1f06' : idx % 2 === 0 ? '#1f2937' : '#1a2231'
+          const nameColor = isBot ? '#fca5a5' : isWarn ? '#fde68a' : tier === 1 ? '#fde68a' : tier === 2 ? '#d1d5db' : tier === 3 ? '#d97706' : '#e5e7eb'
+          const ptsColor = isBot ? '#f87171' : '#facc15'
+
+          const row = document.createElement('div')
+          row.style.cssText = `display:flex;align-items:center;padding:4px 6px;border-radius:4px;margin-bottom:2px;background:${bg};`
+
+          const medal = tier === 1 && first ? '🥇' : tier === 2 && first ? '🥈' : tier === 3 && first ? '🥉' : ''
+          const rankEl = document.createElement('span')
+          rankEl.style.cssText = 'font-size:11px;width:22px;text-align:center;flex-shrink:0;margin-right:4px;'
+          rankEl.textContent = medal || (first ? String(rank) : '')
+          if (!medal) rankEl.style.color = isBot ? '#f87171' : '#6b7280'
+          row.appendChild(rankEl)
+
+          const nameEl = document.createElement('span')
+          nameEl.style.cssText = `flex:1;font-size:11px;font-weight:600;color:${nameColor};overflow:hidden;white-space:nowrap;text-overflow:ellipsis;`
+          nameEl.textContent = entry.participant.name
+          row.appendChild(nameEl)
+
+          if (entry.lastMatchPoints > 0) {
+            const lastEl = document.createElement('span')
+            lastEl.style.cssText = 'font-size:10px;color:#4ade80;margin-left:4px;flex-shrink:0;'
+            lastEl.textContent = `+${entry.lastMatchPoints}`
+            row.appendChild(lastEl)
+          }
+
+          const ptsEl = document.createElement('span')
+          ptsEl.style.cssText = `font-size:12px;font-weight:700;color:${ptsColor};margin-left:5px;flex-shrink:0;min-width:26px;text-align:right;`
+          ptsEl.textContent = String(entry.totalPoints)
+          row.appendChild(ptsEl)
+
+          col.appendChild(row)
+        }
+        cols.appendChild(col)
+      }
+      container.appendChild(cols)
+
+      const footer = document.createElement('div')
+      footer.style.cssText = 'color:#4b5563;font-size:10px;text-align:center;margin-top:8px;'
+      footer.textContent = `Bolão Copa 2026 · ${new Date().toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}`
+      container.appendChild(footer)
+
+      document.body.appendChild(container)
+
       const { toPng } = await import('html-to-image')
-      const dataUrl = await toPng(target, { pixelRatio: 2, backgroundColor: '#111827' })
+      const dataUrl = await toPng(container, { pixelRatio: 2 })
       const res = await fetch(dataUrl)
       const blob = await res.blob()
-      if (!blob) throw new Error('Falha ao gerar imagem')
       const file = new File([blob], 'classificacao-bolao.png', { type: 'image/png' })
       if (navigator.canShare?.({ files: [file] })) {
         await navigator.share({ files: [file], title: 'Classificação Bolão Copa 2026' })
@@ -312,6 +386,7 @@ export default function LeaderboardPage() {
     } catch (err: any) {
       if (err?.name !== 'AbortError') alert(`Erro ao compartilhar: ${err?.message ?? err}`)
     } finally {
+      document.body.removeChild(container)
       setSharingImage(false)
     }
   }
