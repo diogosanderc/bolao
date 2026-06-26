@@ -50,6 +50,9 @@ export default function LeaderboardPage() {
   const [matchPredictions, setMatchPredictions] = useState<{ name: string; score1: number; score2: number }[]>([])
   const [matchPredLoading, setMatchPredLoading] = useState(false)
   const [sharingImage, setSharingImage] = useState(false)
+  const [imagePicker, setImagePicker] = useState(false)
+  type ImageColumn = 'uj' | 'u2' | 'grupos' | 'r16' | 'total'
+  const [imageColumn, setImageColumn] = useState<ImageColumn>('uj')
   const leaderboardRef = useRef<HTMLDivElement>(null)
 
   function openMatchPredictions(matchId: string, label: string) {
@@ -287,9 +290,10 @@ export default function LeaderboardPage() {
     }
   }
 
-  async function shareImage() {
+  async function shareImage(col: ImageColumn = imageColumn) {
     if (sharingImage) return
     setSharingImage(true)
+    const selectedCol = col
     try {
       const DPR = 2
       const W = 700
@@ -297,7 +301,7 @@ export default function LeaderboardPage() {
       const PAD = 12
       const half = Math.ceil(data.length / 2)
       const colH = half * ROW_H
-      const headerH = lastMatch ? 64 : 44
+      const headerH = (lastMatch ? 56 : 40) + (selectedCol !== 'total' ? 18 : 0)
       const H = headerH + colH + 28
       const canvas = document.createElement('canvas')
       canvas.width = W * DPR
@@ -315,13 +319,27 @@ export default function LeaderboardPage() {
       ctx.textAlign = 'center'
       ctx.fillText('🏆 Classificação Bolão Copa 2026', W / 2, 26)
 
+      const colLabel: Record<ImageColumn, string> = {
+        uj: 'UJ = pts último jogo',
+        u2: 'U2 = pts últimos 2 jogos',
+        grupos: 'Grupos = acerto classificados',
+        r16: 'R16 = acerto classificados oitavas',
+        total: 'Classificação geral',
+      }
       let headerY = 40
       if (lastMatch) {
         ctx.font = '11px system-ui'
         ctx.fillStyle = '#9ca3af'
         ctx.fillText(`Último jogo: ${lastMatch.team1.name} ${lastMatch.score1}×${lastMatch.score2} ${lastMatch.team2.name}`, W / 2, headerY)
-        headerY += 18
+        headerY += 16
       }
+      if (selectedCol !== 'total') {
+        ctx.font = '10px system-ui'
+        ctx.fillStyle = '#4ade80'
+        ctx.fillText(colLabel[selectedCol], W / 2, headerY)
+        headerY += 14
+      }
+      headerY += 4
 
       const colW = (W - PAD * 3) / 2
       const medals: Record<number, string> = { 1: '🥇', 2: '🥈', 3: '🥉' }
@@ -388,15 +406,24 @@ export default function LeaderboardPage() {
             ctx.fillText(change > 0 ? `▲${change}` : `▼${Math.abs(change)}`, x + colW - 88, midY)
           }
 
-          // Last match points — left-aligned in its own slot before total
-          if (entry.lastMatchPoints > 0) {
-            ctx.fillStyle = '#4ade80'
-            ctx.font = '10px system-ui'
-            ctx.textAlign = 'left'
-            ctx.fillText(`+${entry.lastMatchPoints}`, x + colW - 56, midY)
+          // Extra column based on selected mode (not shown in 'total' mode — pts already on right)
+          const p = entry as any
+          if (selectedCol !== 'total') {
+            const extraVal: number =
+              selectedCol === 'uj' ? entry.lastMatchPoints :
+              selectedCol === 'u2' ? (p.last2Points ?? 0) :
+              selectedCol === 'grupos' ? (p.groupOrderPoints ?? 0) :
+              (p.advancementR16Points ?? 0)
+            if (extraVal > 0) {
+              ctx.fillStyle = '#4ade80'
+              ctx.font = '10px system-ui'
+              ctx.textAlign = 'left'
+              const prefix = selectedCol === 'uj' || selectedCol === 'u2' ? '+' : ''
+              ctx.fillText(`${prefix}${extraVal}`, x + colW - 56, midY)
+            }
           }
 
-          // Total points
+          // Total points (right column)
           ctx.fillStyle = isBot ? '#f87171' : '#facc15'
           ctx.font = 'bold 12px system-ui'
           ctx.textAlign = 'right'
@@ -478,9 +505,31 @@ export default function LeaderboardPage() {
             </div>
           )}
           {!loading && data.length > 0 && (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 relative">
+              {imagePicker && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setImagePicker(false)} />
+                  <div className="absolute right-0 top-full mt-1 z-50 bg-gray-800 border border-gray-700 rounded-xl shadow-xl p-2 flex flex-col gap-1 min-w-[200px]">
+                  {([
+                    ['uj', '+UJ — último jogo'],
+                    ['u2', '+U2 — últimos 2 jogos'],
+                    ['grupos', 'Grupos — classificados'],
+                    ['r16', 'R16 — oitavas'],
+                    ['total', 'Total — classificação geral'],
+                  ] as [ImageColumn, string][]).map(([val, label]) => (
+                    <button
+                      key={val}
+                      onClick={() => { setImageColumn(val); setImagePicker(false); shareImage(val) }}
+                      className={`text-left text-sm px-3 py-2 rounded-lg transition-colors font-medium ${imageColumn === val ? 'bg-[#00bf63] text-white' : 'text-gray-300 hover:bg-gray-700'}`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                  </div>
+                </>
+              )}
               <button
-                onClick={shareImage}
+                onClick={() => setImagePicker(p => !p)}
                 disabled={sharingImage}
                 title="Compartilhar tabela como imagem"
                 className="flex items-center gap-1.5 text-sm bg-[#00bf63] hover:bg-[#00a854] disabled:opacity-50 text-white px-3 py-1.5 rounded-lg transition-colors font-semibold"
