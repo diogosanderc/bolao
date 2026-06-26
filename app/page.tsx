@@ -381,48 +381,48 @@ export default function LeaderboardPage() {
             ctx.fillText(String(rank), x + 14, midY)
           }
 
+          // Position change arrow — drawn LEFT of name so right side stays clear
+          const change: number | undefined = (entry as any).positionChange
+          ctx.font = 'bold 9px system-ui'
+          ctx.textAlign = 'left'
+          if (change && change !== 0) {
+            ctx.fillStyle = change > 0 ? '#60a5fa' : '#f87171'
+            ctx.fillText(change > 0 ? '▲' : '▼', x + 23, midY)
+          }
+
           // Name
           const nameColor = isBot ? '#fca5a5' : isWarn ? '#fde68a' : tier === 1 ? '#fde68a' : tier === 2 ? '#d1d5db' : tier === 3 ? '#d97706' : isTop7 ? '#4ade80' : '#e5e7eb'
           ctx.fillStyle = nameColor
           ctx.font = 'bold 11px system-ui'
           ctx.textAlign = 'left'
-          const maxNameW = colW - 100
+          const maxNameW = colW - 115
           let name = entry.participant.name
           while (ctx.measureText(name).width > maxNameW && name.length > 3) name = name.slice(0, -1)
           if (name !== entry.participant.name) name = name.trimEnd() + '…'
-          ctx.fillText(name, x + 26, midY)
+          ctx.fillText(name, x + 33, midY)
 
-          // Position change arrow
-          const change: number | undefined = (entry as any).positionChange
-          if (change && change !== 0) {
-            ctx.font = 'bold 10px system-ui'
-            ctx.textAlign = 'left'
-            ctx.fillStyle = change > 0 ? '#60a5fa' : '#f87171'
-            ctx.fillText(change > 0 ? `▲${change}` : `▼${Math.abs(change)}`, x + colW - 88, midY)
-          }
-
-          // Extra column based on selected mode
+          // Extra column — right-aligned, clear of total pts
           const p = entry as any
           ctx.font = '10px system-ui'
-          ctx.textAlign = 'left'
+          ctx.textAlign = 'right'
           if (selectedCol === 'uj') {
             const v = p.lastMatchPts ?? entry.lastMatchPoints ?? 0
             if (v > 0) {
               ctx.fillStyle = '#4ade80'
-              ctx.fillText(`+${v}`, x + colW - 60, midY)
+              ctx.fillText(`+${v}`, x + colW - 36, midY)
             }
           } else if (selectedCol === 'u2') {
             const a = p.secondLastMatchPts ?? 0
             const b = p.lastMatchPts ?? 0
             ctx.fillStyle = '#4ade80'
-            ctx.fillText(`(${a} + ${b})`, x + colW - 72, midY)
+            ctx.fillText(`(${a}+${b})`, x + colW - 36, midY)
           } else if (selectedCol === 'u2grupos') {
             const a = p.secondLastMatchPts ?? 0
             const b = p.lastMatchPts ?? 0
             const u2 = a + b
             const z = p.groupBonus ?? 0
             ctx.fillStyle = '#4ade80'
-            ctx.fillText(`( ${u2} + ${z} )`, x + colW - 80, midY)
+            ctx.fillText(`(${u2}+${z})`, x + colW - 36, midY)
           }
 
           // Total points (right column)
