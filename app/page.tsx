@@ -663,7 +663,7 @@ export default function LeaderboardPage() {
           >
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-bold text-gray-200 text-base">{matchModal.label}</h3>
-              <button onClick={() => setMatchModal(null)} className="text-gray-500 hover:text-gray-300 text-lg leading-none">✕</button>
+              <button onClick={() => setMatchModal(null)} className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white text-base transition-colors">✕</button>
             </div>
 
             {matchPredLoading ? (

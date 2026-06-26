@@ -143,7 +143,7 @@ export function Header() {
 
       {/* Mobile dropdown */}
       {!isAuthPage && open && (
-        <nav className="sm:hidden bg-[#009f50] border-t border-[#00bf63]/60 px-4 py-2 flex flex-col">
+        <nav className="sm:hidden bg-[#00bf63] border-t border-white/20 px-4 py-2 flex flex-col">
           {navLinks(true)}
         </nav>
       )}
