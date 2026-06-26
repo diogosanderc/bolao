@@ -121,6 +121,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     }
 
     const allGroupsDone = Object.keys(groupStandings).length === GROUPS.length
+    const completedGroupIds = new Set(Object.keys(groupStandings))
     const qualifiedR32 = new Set<string>()
     for (const s of Object.values(groupStandings)) {
       if (s[0]) qualifiedR32.add(s[0])
@@ -157,10 +158,8 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     const r32Detail: { teamId: string; name: string; flag: string; groupId: string; pts: number }[] = []
     let r32Points = 0
     for (const [groupId, predicted] of Object.entries(predictedStandings)) {
-      if (!groupStandings[groupId]) continue
-      const candidates = allGroupsDone
-        ? [predicted[0], predicted[1], predicted[2]].filter(Boolean)
-        : [predicted[0], predicted[1]].filter(Boolean)
+      if (!completedGroupIds.has(groupId)) continue
+      const candidates = [predicted[0], predicted[1], predicted[2]].filter(Boolean)
       for (const teamId of candidates) {
         if (qualifiedR32.has(teamId)) {
           r32Points += 3
@@ -172,12 +171,27 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     const phasePoints = groupOrderPoints + r32Points
     const totalPoints = matchPoints + phasePoints
 
+    // --- Group predictions for all 12 groups (for "Seleções" tab) ---
+    const toRef = (tid: string) => ({ id: tid, name: teamById[tid]?.name ?? tid, flag: teamById[tid]?.flag ?? '🏳' })
+    const groupPredictions = GROUPS.map(group => {
+      const predicted = predictedStandings[group.id] ?? []
+      const actual = groupStandings[group.id] ?? null
+      return {
+        groupId: group.id,
+        predicted: predicted.map(toRef),
+        actual: actual ? actual.map(toRef) : null,
+        complete: !!actual,
+        r32Qualified: predicted.map(tid => qualifiedR32.has(tid)),
+      }
+    })
+
     return NextResponse.json({
       participant: { id: participant.id, name: participant.name },
       predictions,
       summary: { totalPoints, matchPoints, correctResults, correctScores, matchesPlayed: played.length, groupOrderPoints, r32Points, phasePoints },
       groupDetail,
       r32Detail,
+      groupPredictions,
     })
   } catch (err) {
     console.error('[participante]', err)

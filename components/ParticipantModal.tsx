@@ -39,6 +39,14 @@ type R32Entry = {
   pts: number
 }
 
+type GroupPredRow = {
+  groupId: string
+  predicted: TeamRef[]
+  actual: TeamRef[] | null
+  complete: boolean
+  r32Qualified: boolean[]
+}
+
 type ParticipantData = {
   participant: { id: string; name: string }
   predictions: PredEntry[]
@@ -54,6 +62,7 @@ type ParticipantData = {
   }
   groupDetail: GroupDetail[]
   r32Detail: R32Entry[]
+  groupPredictions: GroupPredRow[]
 }
 
 type Props = { participantId: string; name: string; onClose: () => void }
@@ -61,7 +70,7 @@ type Props = { participantId: string; name: string; onClose: () => void }
 export function ParticipantModal({ participantId, name, onClose }: Props) {
   const [data, setData] = useState<ParticipantData | null>(null)
   const [loading, setLoading] = useState(true)
-  const [tab, setTab] = useState<'played' | 'upcoming'>('played')
+  const [tab, setTab] = useState<'played' | 'selecoes' | 'upcoming'>('played')
   const scrollRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -167,15 +176,21 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
         <div className="flex border-b border-gray-800 shrink-0">
           <button
             onClick={() => { setTab('played'); requestAnimationFrame(() => { if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight }) }}
-            className={`flex-1 py-2.5 text-sm font-medium transition-colors ${tab === 'played' ? 'text-yellow-600 dark:text-yellow-400 border-b-2 border-yellow-600 dark:border-yellow-400' : 'text-gray-500 hover:text-gray-300'}`}
+            className={`flex-1 py-2.5 text-xs font-medium transition-colors ${tab === 'played' ? 'text-yellow-600 dark:text-yellow-400 border-b-2 border-yellow-600 dark:border-yellow-400' : 'text-gray-500 hover:text-gray-300'}`}
           >
             Jogados ({played.length})
           </button>
           <button
-            onClick={() => { setTab('upcoming'); requestAnimationFrame(() => { if (scrollRef.current) scrollRef.current.scrollTop = 0 }) }}
-            className={`flex-1 py-2.5 text-sm font-medium transition-colors ${tab === 'upcoming' ? 'text-yellow-600 dark:text-yellow-400 border-b-2 border-yellow-600 dark:border-yellow-400' : 'text-gray-500 hover:text-gray-300'}`}
+            onClick={() => { setTab('selecoes'); requestAnimationFrame(() => { if (scrollRef.current) scrollRef.current.scrollTop = 0 }) }}
+            className={`flex-1 py-2.5 text-xs font-medium transition-colors ${tab === 'selecoes' ? 'text-yellow-600 dark:text-yellow-400 border-b-2 border-yellow-600 dark:border-yellow-400' : 'text-gray-500 hover:text-gray-300'}`}
           >
-            Próximos palpites ({upcoming.length})
+            Seleções
+          </button>
+          <button
+            onClick={() => { setTab('upcoming'); requestAnimationFrame(() => { if (scrollRef.current) scrollRef.current.scrollTop = 0 }) }}
+            className={`flex-1 py-2.5 text-xs font-medium transition-colors ${tab === 'upcoming' ? 'text-yellow-600 dark:text-yellow-400 border-b-2 border-yellow-600 dark:border-yellow-400' : 'text-gray-500 hover:text-gray-300'}`}
+          >
+            Próximos ({upcoming.length})
           </button>
         </div>
 
@@ -278,6 +293,46 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
                   </div>
                 </div>
               )}
+            </div>
+          )}
+
+          {!loading && tab === 'selecoes' && (
+            <div className="p-3 space-y-2">
+              {(!data?.groupPredictions?.length) && (
+                <p className="text-center py-10 text-gray-600">Sem palpites de classificação registrados.</p>
+              )}
+              {data?.groupPredictions?.map(g => (
+                <div key={g.groupId} className="rounded-lg border border-gray-800 bg-gray-900 overflow-hidden">
+                  <div className="flex items-center justify-between px-3 py-1.5 bg-gray-800/60">
+                    <span className="text-xs font-bold text-gray-300 uppercase tracking-wide">Grupo {g.groupId}</span>
+                    {!g.complete && <span className="text-[9px] font-semibold uppercase tracking-wide text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded">em jogo</span>}
+                  </div>
+                  <div className="divide-y divide-gray-800/50">
+                    {g.predicted.map((team, i) => {
+                      const qualified = g.r32Qualified[i]
+                      const posColors = ['text-yellow-400', 'text-gray-300', 'text-amber-600', 'text-gray-600']
+                      const actualPos = g.actual ? g.actual.findIndex(t => t.id === team.id) : -1
+                      const actualLabel = actualPos >= 0 ? `${actualPos + 1}º` : null
+                      const posMatch = actualPos === i
+                      return (
+                        <div key={team.id} className={`flex items-center gap-2 px-3 py-1.5 ${qualified ? 'bg-green-950/20' : ''}`}>
+                          <span className={`text-xs font-bold w-4 shrink-0 ${posColors[i]}`}>{i + 1}º</span>
+                          <span className="text-sm">{team.flag}</span>
+                          <span className={`text-xs font-semibold flex-1 ${qualified ? 'text-green-300' : g.complete ? 'text-gray-500' : 'text-gray-300'}`}>
+                            {team.name}
+                          </span>
+                          {g.complete && actualLabel && (
+                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${posMatch ? 'bg-green-800/60 text-green-300' : 'bg-gray-800 text-gray-500'}`}>
+                              {actualLabel} real
+                            </span>
+                          )}
+                          {qualified && <span className="text-[10px] font-bold text-green-400">+3</span>}
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              ))}
             </div>
           )}
 
