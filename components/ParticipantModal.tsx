@@ -297,42 +297,50 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
           )}
 
           {!loading && tab === 'selecoes' && (
-            <div className="p-3 space-y-2">
+            <div className="p-3 space-y-3">
               {(!data?.groupPredictions?.length) && (
                 <p className="text-center py-10 text-gray-600">Sem palpites de classificação registrados.</p>
               )}
-              {data?.groupPredictions?.map(g => (
-                <div key={g.groupId} className="rounded-lg border border-gray-800 bg-gray-900 overflow-hidden">
-                  <div className="flex items-center justify-between px-3 py-1.5 bg-gray-800/60">
-                    <span className="text-xs font-bold text-gray-300 uppercase tracking-wide">Grupo {g.groupId}</span>
-                    {!g.complete && <span className="text-[9px] font-semibold uppercase tracking-wide text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded">em jogo</span>}
-                  </div>
-                  <div className="divide-y divide-gray-800/50">
-                    {g.predicted.map((team, i) => {
-                      const qualified = g.r32Qualified[i]
-                      const posColors = ['text-yellow-400', 'text-gray-300', 'text-amber-600', 'text-gray-600']
-                      const actualPos = g.actual ? g.actual.findIndex(t => t.id === team.id) : -1
-                      const actualLabel = actualPos >= 0 ? `${actualPos + 1}º` : null
-                      const posMatch = actualPos === i
-                      return (
-                        <div key={team.id} className={`flex items-center gap-2 px-3 py-1.5 ${qualified ? 'bg-green-950/20' : ''}`}>
-                          <span className={`text-xs font-bold w-4 shrink-0 ${posColors[i]}`}>{i + 1}º</span>
-                          <span className="text-sm">{team.flag}</span>
-                          <span className={`text-xs font-semibold flex-1 ${qualified ? 'text-green-300' : g.complete ? 'text-gray-500' : 'text-gray-300'}`}>
-                            {team.name}
-                          </span>
-                          {g.complete && actualLabel && (
-                            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${posMatch ? 'bg-green-800/60 text-green-300' : 'bg-gray-800 text-gray-500'}`}>
-                              {actualLabel} real
-                            </span>
-                          )}
-                          {qualified && <span className="text-[10px] font-bold text-green-400">+3</span>}
-                        </div>
-                      )
-                    })}
-                  </div>
+              {/* Summary */}
+              {data && (
+                <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-gray-900 border border-gray-800">
+                  <span className="text-xs text-gray-400">Bônus classificação 16-avos</span>
+                  <span className="text-sm font-bold text-yellow-400">+{data.summary.r32Points} pts</span>
                 </div>
-              ))}
+              )}
+              {data?.groupPredictions?.map(g => {
+                const picks = g.predicted.slice(0, 3)
+                if (picks.length === 0) return null
+                return (
+                  <div key={g.groupId} className="rounded-lg border border-gray-800 bg-gray-900 overflow-hidden">
+                    <div className="flex items-center justify-between px-3 py-1.5 bg-gray-800/50">
+                      <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Grupo {g.groupId}</span>
+                      {!g.complete && <span className="text-[9px] font-semibold uppercase text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded">em jogo</span>}
+                    </div>
+                    <div className="flex flex-col divide-y divide-gray-800/40">
+                      {picks.map((team, i) => {
+                        const qualified = g.r32Qualified[i]
+                        const posLabel = ['1º', '2º', '3º'][i]
+                        const posColor = i === 0 ? 'text-yellow-500' : i === 1 ? 'text-gray-400' : 'text-amber-600'
+                        return (
+                          <div key={team.id} className={`flex items-center gap-2.5 px-3 py-2 ${qualified ? 'bg-green-950/20' : ''}`}>
+                            <span className={`text-[11px] font-bold w-5 shrink-0 ${posColor}`}>{posLabel}</span>
+                            <span>{team.flag}</span>
+                            <span className={`text-xs font-semibold flex-1 ${qualified ? 'text-green-300' : g.complete ? 'text-gray-500' : 'text-gray-300'}`}>
+                              {team.name}
+                            </span>
+                            {qualified
+                              ? <span className="text-xs font-bold text-green-400 bg-green-900/40 px-2 py-0.5 rounded">+3 pts</span>
+                              : g.complete
+                              ? <span className="text-xs text-gray-600">✗</span>
+                              : null}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )
+              })}
             </div>
           )}
 
