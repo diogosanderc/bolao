@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { readDB } from '@/lib/db'
-import { computeLeaderboard, scoreMatch } from '@/lib/scoring'
+import { computeLeaderboard, scoreMatch, computeGroupStandingsWithStats } from '@/lib/scoring'
 import { ALL_MATCHES, matchById, teamById } from '@/lib/copa2026'
 
 export async function GET() {
@@ -75,6 +75,33 @@ export async function GET() {
       last4PointsMap.set(participant.id, pts4)
     }
 
+    // Last completed group bonus: bonus earned from the most recently closed group only
+    const { standings: groupStandings } = computeGroupStandingsWithStats(allResults)
+    // Find the group whose last match was played most recently
+    let lastGroupId: string | null = null
+    for (let i = sortedResults.length - 1; i >= 0; i--) {
+      const match = matchById[sortedResults[i].matchId]
+      if (match?.phase === 'group' && match.groupId && groupStandings[match.groupId]) {
+        lastGroupId = match.groupId
+        break
+      }
+    }
+    const lastGroupBonusMap = new Map<string, number>()
+    if (lastGroupId) {
+      const actualOrder = groupStandings[lastGroupId] ?? []
+      const actualTop2 = new Set([actualOrder[0], actualOrder[1]].filter(Boolean))
+      for (const participant of validParticipants) {
+        const gp = db.groupPredictions.find(p => p.participantId === participant.id && p.groupId === lastGroupId)
+        let bonus = 0
+        if (gp) {
+          if (gp.order[0] && actualTop2.has(gp.order[0])) bonus += 3
+          if (gp.order[1] && actualTop2.has(gp.order[1])) bonus += 3
+          if (actualOrder.length > 0 && JSON.stringify(gp.order) === JSON.stringify(actualOrder)) bonus += 2
+        }
+        lastGroupBonusMap.set(participant.id, bonus)
+      }
+    }
+
     // Remaining matches (non-TBD only — group stage matches we can predict)
     const allPlayedIds = new Set(allResults.map(r => r.matchId))
     const remainingMatches = ALL_MATCHES.filter(
@@ -106,7 +133,7 @@ export async function GET() {
         last4Points: last4PointsMap.get(entry.participant.id) ?? 0,
         lastMatchPts: lastPtsMap.get(entry.participant.id) ?? 0,
         secondLastMatchPts: secondLastPtsMap.get(entry.participant.id) ?? 0,
-        groupBonus: (entry.breakdown.groupOrderPoints) + (entry.breakdown.advancementPoints['round_of_32'] ?? 0),
+        groupBonus: lastGroupBonusMap.get(entry.participant.id) ?? 0,
         maxPossiblePoints,
         pointsToFirst: Math.max(0, firstScore - entry.totalPoints),
         pointsToTop7: Math.max(0, top7Score - entry.totalPoints),

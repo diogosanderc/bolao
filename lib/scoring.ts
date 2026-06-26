@@ -313,7 +313,7 @@ function priorPhaseOf(phase: Phase): Phase | null {
 
 type ThirdPlaceStat = { teamId: string; groupId: string; pts: number; gd: number; gf: number }
 
-function computeGroupStandingsWithStats(results: MatchResult[]): {
+export function computeGroupStandingsWithStats(results: MatchResult[]): {
   standings: Record<string, string[]>
   thirdPlaceStats: ThirdPlaceStat[]
 } {
