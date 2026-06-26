@@ -402,16 +402,17 @@ function computePredictedGroupStandings(
 function predictedTeamsForRoundOf32(
   myPreds: MatchPrediction[],
   myGroupPreds: GroupPrediction[],
-  allGroupsComplete: boolean
+  _allGroupsComplete: boolean
 ): Set<string> {
   // If DB has explicit group predictions, use them; otherwise derive from match predictions.
-  // Predicted 3rd-place teams only earn r32 bonus once ALL groups finish (best-8 3rds determined).
+  // A team predicted in any top-3 slot earns +3 if it actually qualifies for R32 by any means
+  // (1st, 2nd, or best 3rd-place). The R32 qualification set handles the actual check.
   if (myGroupPreds.length > 0) {
     const teams = new Set<string>()
     for (const gp of myGroupPreds) {
       if (gp.order[0]) teams.add(gp.order[0])
       if (gp.order[1]) teams.add(gp.order[1])
-      if (allGroupsComplete && gp.order[2]) teams.add(gp.order[2])
+      if (gp.order[2]) teams.add(gp.order[2])
     }
     return teams
   }
@@ -421,7 +422,7 @@ function predictedTeamsForRoundOf32(
   for (const sorted of Object.values(standings)) {
     if (sorted[0]) teams.add(sorted[0])
     if (sorted[1]) teams.add(sorted[1])
-    if (allGroupsComplete && sorted[2]) teams.add(sorted[2])
+    if (sorted[2]) teams.add(sorted[2])
   }
   return teams
 }
