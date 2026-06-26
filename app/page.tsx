@@ -341,8 +341,10 @@ export default function LeaderboardPage() {
           const isWarn = isWarning(entry.totalPoints)
           const first = isFirstOfRank[i]
 
+          const isTop7 = !isBot && !isWarn && tier > 3 && rank >= 4 && rank <= 7
+
           // Row background
-          ctx.fillStyle = isBot ? '#3b0a0a' : isWarn ? '#2d1a06' : tier === 1 ? '#2d1f06' : i % 2 === 0 ? '#1f2937' : '#1a2231'
+          ctx.fillStyle = isBot ? '#3b0a0a' : isWarn ? '#2d1a06' : tier === 1 ? '#2d1f06' : isTop7 ? '#052e16' : i % 2 === 0 ? '#1f2937' : '#1a2231'
           ctx.beginPath()
           const r = 4
           ctx.moveTo(x + r, y + 1)
@@ -367,7 +369,7 @@ export default function LeaderboardPage() {
           }
 
           // Name
-          const nameColor = isBot ? '#fca5a5' : isWarn ? '#fde68a' : tier === 1 ? '#fde68a' : tier === 2 ? '#d1d5db' : tier === 3 ? '#d97706' : '#e5e7eb'
+          const nameColor = isBot ? '#fca5a5' : isWarn ? '#fde68a' : tier === 1 ? '#fde68a' : tier === 2 ? '#d1d5db' : tier === 3 ? '#d97706' : isTop7 ? '#4ade80' : '#e5e7eb'
           ctx.fillStyle = nameColor
           ctx.font = 'bold 11px system-ui'
           ctx.textAlign = 'left'
@@ -377,13 +379,12 @@ export default function LeaderboardPage() {
           if (name !== entry.participant.name) name = name.trimEnd() + '…'
           ctx.fillText(name, x + 26, midY)
 
-          // Last match points
-          const p = entry as any
+          // Last match points — left-aligned in its own slot before total
           if (entry.lastMatchPoints > 0) {
             ctx.fillStyle = '#4ade80'
             ctx.font = '10px system-ui'
-            ctx.textAlign = 'right'
-            ctx.fillText(`+${entry.lastMatchPoints}`, x + colW - 32, midY)
+            ctx.textAlign = 'left'
+            ctx.fillText(`+${entry.lastMatchPoints}`, x + colW - 64, midY)
           }
 
           // Total points
