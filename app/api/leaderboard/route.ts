@@ -106,7 +106,7 @@ export async function GET() {
         last4Points: last4PointsMap.get(entry.participant.id) ?? 0,
         lastMatchPts: lastPtsMap.get(entry.participant.id) ?? 0,
         secondLastMatchPts: secondLastPtsMap.get(entry.participant.id) ?? 0,
-        groupBonus: (entry.breakdown.groupOrderPoints) + (entry.breakdown.advancementPoints['round_of_16'] ?? 0),
+        groupBonus: (entry.breakdown.groupOrderPoints) + (entry.breakdown.advancementPoints['round_of_32'] ?? 0),
         maxPossiblePoints,
         pointsToFirst: Math.max(0, firstScore - entry.totalPoints),
         pointsToTop7: Math.max(0, top7Score - entry.totalPoints),
