@@ -290,88 +290,119 @@ export default function LeaderboardPage() {
   async function shareImage() {
     if (sharingImage) return
     setSharingImage(true)
-    const container = document.createElement('div')
-    container.style.cssText = 'position:fixed;left:-9999px;top:0;background:#111827;padding:14px 12px 10px;font-family:system-ui,sans-serif;width:680px;'
     try {
-      // Title
-      const title = document.createElement('div')
-      title.style.cssText = 'color:#facc15;font-size:16px;font-weight:700;text-align:center;margin-bottom:10px;'
-      title.textContent = '🏆 Classificação Bolão Copa 2026'
-      container.appendChild(title)
+      const DPR = 2
+      const W = 700
+      const ROW_H = 26
+      const PAD = 12
+      const half = Math.ceil(data.length / 2)
+      const colH = half * ROW_H
+      const headerH = lastMatch ? 64 : 44
+      const H = headerH + colH + 28
+      const canvas = document.createElement('canvas')
+      canvas.width = W * DPR
+      canvas.height = H * DPR
+      const ctx = canvas.getContext('2d')!
+      ctx.scale(DPR, DPR)
 
+      // Background
+      ctx.fillStyle = '#111827'
+      ctx.fillRect(0, 0, W, H)
+
+      // Title
+      ctx.font = 'bold 16px system-ui'
+      ctx.fillStyle = '#facc15'
+      ctx.textAlign = 'center'
+      ctx.fillText('🏆 Classificação Bolão Copa 2026', W / 2, 26)
+
+      let headerY = 40
       if (lastMatch) {
-        const sub = document.createElement('div')
-        sub.style.cssText = 'color:#9ca3af;font-size:11px;text-align:center;margin-bottom:10px;'
-        sub.textContent = `Último jogo: ${lastMatch.team1.name} ${lastMatch.score1}×${lastMatch.score2} ${lastMatch.team2.name}`
-        container.appendChild(sub)
+        ctx.font = '11px system-ui'
+        ctx.fillStyle = '#9ca3af'
+        ctx.fillText(`Último jogo: ${lastMatch.team1.name} ${lastMatch.score1}×${lastMatch.score2} ${lastMatch.team2.name}`, W / 2, headerY)
+        headerY += 18
       }
 
-      // Two columns
-      const cols = document.createElement('div')
-      cols.style.cssText = 'display:flex;gap:8px;align-items:flex-start;'
-      const half = Math.ceil(data.length / 2)
+      const colW = (W - PAD * 3) / 2
+      const medals: Record<number, string> = { 1: '🥇', 2: '🥈', 3: '🥉' }
 
       for (let c = 0; c < 2; c++) {
-        const colData = data.slice(c === 0 ? 0 : half, c === 0 ? half : data.length)
-        const col = document.createElement('div')
-        col.style.cssText = 'flex:1;min-width:0;'
+        const start = c === 0 ? 0 : half
+        const end = c === 0 ? half : data.length
+        const x = PAD + c * (colW + PAD)
 
-        for (const entry of colData) {
-          const idx = data.indexOf(entry)
-          const rank = ranks[idx]
+        for (let i = start; i < end; i++) {
+          const entry = data[i]
+          const rowIdx = i - start
+          const y = headerY + rowIdx * ROW_H
+          const rank = ranks[i]
           const tier = tierOf(entry.totalPoints)
           const isBot = isRelated(entry.totalPoints)
           const isWarn = isWarning(entry.totalPoints)
-          const first = isFirstOfRank[idx]
+          const first = isFirstOfRank[i]
 
-          const bg = isBot ? '#3b0a0a' : isWarn ? '#2d1a06' : tier === 1 ? '#2d1f06' : idx % 2 === 0 ? '#1f2937' : '#1a2231'
-          const nameColor = isBot ? '#fca5a5' : isWarn ? '#fde68a' : tier === 1 ? '#fde68a' : tier === 2 ? '#d1d5db' : tier === 3 ? '#d97706' : '#e5e7eb'
-          const ptsColor = isBot ? '#f87171' : '#facc15'
+          // Row background
+          ctx.fillStyle = isBot ? '#3b0a0a' : isWarn ? '#2d1a06' : tier === 1 ? '#2d1f06' : i % 2 === 0 ? '#1f2937' : '#1a2231'
+          ctx.beginPath()
+          const r = 4
+          ctx.moveTo(x + r, y + 1)
+          ctx.arcTo(x + colW, y + 1, x + colW, y + ROW_H - 1, r)
+          ctx.arcTo(x + colW, y + ROW_H - 1, x, y + ROW_H - 1, r)
+          ctx.arcTo(x, y + ROW_H - 1, x, y + 1, r)
+          ctx.arcTo(x, y + 1, x + colW, y + 1, r)
+          ctx.closePath()
+          ctx.fill()
 
-          const row = document.createElement('div')
-          row.style.cssText = `display:flex;align-items:center;padding:4px 6px;border-radius:4px;margin-bottom:2px;background:${bg};`
+          const midY = y + ROW_H / 2 + 4
 
-          const medal = tier === 1 && first ? '🥇' : tier === 2 && first ? '🥈' : tier === 3 && first ? '🥉' : ''
-          const rankEl = document.createElement('span')
-          rankEl.style.cssText = 'font-size:11px;width:22px;text-align:center;flex-shrink:0;margin-right:4px;'
-          rankEl.textContent = medal || (first ? String(rank) : '')
-          if (!medal) rankEl.style.color = isBot ? '#f87171' : '#6b7280'
-          row.appendChild(rankEl)
-
-          const nameEl = document.createElement('span')
-          nameEl.style.cssText = `flex:1;font-size:11px;font-weight:600;color:${nameColor};overflow:hidden;white-space:nowrap;text-overflow:ellipsis;`
-          nameEl.textContent = entry.participant.name
-          row.appendChild(nameEl)
-
-          if (entry.lastMatchPoints > 0) {
-            const lastEl = document.createElement('span')
-            lastEl.style.cssText = 'font-size:10px;color:#4ade80;margin-left:4px;flex-shrink:0;'
-            lastEl.textContent = `+${entry.lastMatchPoints}`
-            row.appendChild(lastEl)
+          // Rank / medal
+          const medal = medals[tier]
+          ctx.font = '12px system-ui'
+          ctx.textAlign = 'center'
+          if (medal && first) {
+            ctx.fillText(medal, x + 14, midY)
+          } else if (first) {
+            ctx.fillStyle = isBot ? '#f87171' : '#6b7280'
+            ctx.fillText(String(rank), x + 14, midY)
           }
 
-          const ptsEl = document.createElement('span')
-          ptsEl.style.cssText = `font-size:12px;font-weight:700;color:${ptsColor};margin-left:5px;flex-shrink:0;min-width:26px;text-align:right;`
-          ptsEl.textContent = String(entry.totalPoints)
-          row.appendChild(ptsEl)
+          // Name
+          const nameColor = isBot ? '#fca5a5' : isWarn ? '#fde68a' : tier === 1 ? '#fde68a' : tier === 2 ? '#d1d5db' : tier === 3 ? '#d97706' : '#e5e7eb'
+          ctx.fillStyle = nameColor
+          ctx.font = 'bold 11px system-ui'
+          ctx.textAlign = 'left'
+          const maxNameW = colW - 75
+          let name = entry.participant.name
+          while (ctx.measureText(name).width > maxNameW && name.length > 3) name = name.slice(0, -1)
+          if (name !== entry.participant.name) name = name.trimEnd() + '…'
+          ctx.fillText(name, x + 26, midY)
 
-          col.appendChild(row)
+          // Last match points
+          const p = entry as any
+          if (entry.lastMatchPoints > 0) {
+            ctx.fillStyle = '#4ade80'
+            ctx.font = '10px system-ui'
+            ctx.textAlign = 'right'
+            ctx.fillText(`+${entry.lastMatchPoints}`, x + colW - 32, midY)
+          }
+
+          // Total points
+          ctx.fillStyle = isBot ? '#f87171' : '#facc15'
+          ctx.font = 'bold 12px system-ui'
+          ctx.textAlign = 'right'
+          ctx.fillText(String(entry.totalPoints), x + colW - 4, midY)
         }
-        cols.appendChild(col)
       }
-      container.appendChild(cols)
 
-      const footer = document.createElement('div')
-      footer.style.cssText = 'color:#4b5563;font-size:10px;text-align:center;margin-top:8px;'
-      footer.textContent = `Bolão Copa 2026 · ${new Date().toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}`
-      container.appendChild(footer)
+      // Footer
+      ctx.fillStyle = '#4b5563'
+      ctx.font = '10px system-ui'
+      ctx.textAlign = 'center'
+      const stamp = new Date().toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+      ctx.fillText(`Bolão Copa 2026 · ${stamp}`, W / 2, H - 8)
 
-      document.body.appendChild(container)
-
-      const { toPng } = await import('html-to-image')
-      const dataUrl = await toPng(container, { pixelRatio: 2 })
-      const res = await fetch(dataUrl)
-      const blob = await res.blob()
+      const blob: Blob | null = await new Promise(res => canvas.toBlob(res, 'image/png'))
+      if (!blob) throw new Error('Falha ao gerar imagem')
       const file = new File([blob], 'classificacao-bolao.png', { type: 'image/png' })
       if (navigator.canShare?.({ files: [file] })) {
         await navigator.share({ files: [file], title: 'Classificação Bolão Copa 2026' })
@@ -386,7 +417,6 @@ export default function LeaderboardPage() {
     } catch (err: any) {
       if (err?.name !== 'AbortError') alert(`Erro ao compartilhar: ${err?.message ?? err}`)
     } finally {
-      document.body.removeChild(container)
       setSharingImage(false)
     }
   }
