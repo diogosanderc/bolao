@@ -412,7 +412,8 @@ function predictedTeamsForRoundOf32(
     for (const gp of myGroupPreds) {
       if (gp.order[0]) teams.add(gp.order[0])
       if (gp.order[1]) teams.add(gp.order[1])
-      if (gp.order[2]) teams.add(gp.order[2])
+      // 3rd-place picks only scored after all groups finish
+      if (_allGroupsComplete && gp.order[2]) teams.add(gp.order[2])
     }
     return teams
   }
@@ -422,7 +423,7 @@ function predictedTeamsForRoundOf32(
   for (const sorted of Object.values(standings)) {
     if (sorted[0]) teams.add(sorted[0])
     if (sorted[1]) teams.add(sorted[1])
-    if (sorted[2]) teams.add(sorted[2])
+    if (_allGroupsComplete && sorted[2]) teams.add(sorted[2])
   }
   return teams
 }
