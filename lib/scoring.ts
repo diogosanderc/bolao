@@ -7,6 +7,7 @@ import {
   LeaderboardEntry,
   Phase,
   R32TeamPick,
+  KnockoutPhasePick,
 } from './types'
 import { GROUPS, ALL_MATCHES, GROUP_MATCHES, matchById } from './copa2026'
 import { computeBracketFromResults } from './bracket'
@@ -88,7 +89,8 @@ export function computeLeaderboard(
   matchPredictions: MatchPrediction[],
   groupPredictions: GroupPrediction[],
   results: MatchResult[],
-  r32TeamPicks?: R32TeamPick[]
+  r32TeamPicks?: R32TeamPick[],
+  knockoutPhasePicks?: KnockoutPhasePick[]
 ): LeaderboardEntry[] {
   const resultMap = Object.fromEntries(results.map(r => [r.matchId, r]))
   const lastResult = results.length > 0 ? results[results.length - 1] : null
@@ -185,14 +187,25 @@ export function computeLeaderboard(
       const qualified = qualifiedByPhase[phase]
       if (qualified.size === 0) continue
 
-      // For round_of_32: use explicit r32TeamPicks if available, else derive from group predictions
-      // For other phases: use match prediction winners from prior phase
+      // Use explicit phase picks from aposta26.arq when available, else derive from match predictions
       const myR32Picks = r32TeamPicks?.find(p => p.participantId === participant.id)
-      const predictedForPhase = phase === 'round_of_32'
-        ? (myR32Picks
-            ? new Set(myR32Picks.teamIds)
-            : predictedTeamsForRoundOf32(myPreds, myGroupPreds, completedGroupIds))
-        : predictedTeamsForPhase(phase, myPreds, resolvedKnockoutTeams)
+      const myKOPicks = knockoutPhasePicks?.find(p => p.participantId === participant.id)
+      let predictedForPhase: Set<string>
+      if (phase === 'round_of_32') {
+        predictedForPhase = myR32Picks
+          ? new Set(myR32Picks.teamIds)
+          : predictedTeamsForRoundOf32(myPreds, myGroupPreds, completedGroupIds)
+      } else if (myKOPicks) {
+        const pickMap: Record<string, string[]> = {
+          round_of_16: myKOPicks.r16,
+          quarterfinal: myKOPicks.qf,
+          semifinal: myKOPicks.sf,
+          final: myKOPicks.finalists,
+        }
+        predictedForPhase = new Set(pickMap[phase] ?? [])
+      } else {
+        predictedForPhase = predictedTeamsForPhase(phase, myPreds, resolvedKnockoutTeams)
+      }
       let pts = 0
       for (const teamId of predictedForPhase) {
         if (qualified.has(teamId)) {
@@ -215,14 +228,18 @@ export function computeLeaderboard(
               : finalResult.score2 > finalResult.score1
               ? finalMatch?.team2Id
               : finalResult.advancingTeamId
-          const myFinalPred = myPreds.find(p => matchById[p.matchId]?.phase === 'final')
-          if (myFinalPred && champion) {
-            const predictedChampion =
-              myFinalPred.score1 > myFinalPred.score2
-                ? matchById[myFinalPred.matchId]?.team1Id
-                : myFinalPred.score2 > myFinalPred.score1
-                ? matchById[myFinalPred.matchId]?.team2Id
-                : myFinalPred.advancingTeamId
+          if (champion) {
+            // Use explicit champion pick if available, else derive from final match prediction
+            const predictedChampion = myKOPicks?.champion
+              ?? (() => {
+                const myFinalPred = myPreds.find(p => matchById[p.matchId]?.phase === 'final')
+                if (!myFinalPred) return undefined
+                return myFinalPred.score1 > myFinalPred.score2
+                  ? matchById[myFinalPred.matchId]?.team1Id
+                  : myFinalPred.score2 > myFinalPred.score1
+                  ? matchById[myFinalPred.matchId]?.team2Id
+                  : myFinalPred.advancingTeamId
+              })()
             if (predictedChampion === champion) pts += CHAMPION_POINTS
           }
         }

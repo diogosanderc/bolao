@@ -52,6 +52,7 @@ const merged = {
   results: volumeDb.results || [],
   matchDates: volumeDb.matchDates || {},
   r32TeamPicks: seedDb.r32TeamPicks || [],
+  knockoutPhasePicks: seedDb.knockoutPhasePicks || [],
   pushSubscriptions: volumeDb.pushSubscriptions || [],
   liveMatchStates: volumeDb.liveMatchStates || {},
 }

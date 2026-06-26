@@ -50015,5 +50015,2651 @@
         "SEN"
       ]
     }
+  ],
+  "knockoutPhasePicks": [
+    {
+      "participantId": "moreatico-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "CZE",
+        "NED",
+        "ENG",
+        "ESP",
+        "USA",
+        "BEL",
+        "BRA",
+        "ECU",
+        "MEX",
+        "CRO",
+        "ARG",
+        "TUR",
+        "SUI",
+        "COL"
+      ],
+      "qf": [
+        "GER",
+        "NED",
+        "ESP",
+        "USA",
+        "BRA",
+        "CRO",
+        "ARG",
+        "COL"
+      ],
+      "sf": [
+        "GER",
+        "ESP",
+        "BRA",
+        "ARG"
+      ],
+      "finalists": [
+        "GER",
+        "ARG"
+      ],
+      "champion": "GER"
+    },
+    {
+      "participantId": "aladim-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "CZE",
+        "NED",
+        "CRO",
+        "ESP",
+        "PAR",
+        "BEL",
+        "BRA",
+        "NOR",
+        "MEX",
+        "ENG",
+        "ARG",
+        "USA",
+        "SUI",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "NED",
+        "ESP",
+        "BEL",
+        "BRA",
+        "ENG",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "FRA",
+        "ESP",
+        "ENG",
+        "ARG"
+      ],
+      "finalists": [
+        "FRA",
+        "ARG"
+      ],
+      "champion": "FRA"
+    },
+    {
+      "participantId": "alexandre-pedroni-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "MEX",
+        "NED",
+        "COL",
+        "ESP",
+        "SEN",
+        "BEL",
+        "BRA",
+        "NOR",
+        "CZE",
+        "ENG",
+        "ARG",
+        "USA",
+        "SUI",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "MEX",
+        "ESP",
+        "BEL",
+        "BRA",
+        "ENG",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "FRA",
+        "ESP",
+        "BRA",
+        "POR"
+      ],
+      "finalists": [
+        "FRA",
+        "POR"
+      ],
+      "champion": "FRA"
+    },
+    {
+      "participantId": "andre-shark-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "MEX",
+        "NED",
+        "COL",
+        "ESP",
+        "TUR",
+        "BEL",
+        "BRA",
+        "CIV",
+        "CZE",
+        "ENG",
+        "ARG",
+        "PAR",
+        "SUI",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "NED",
+        "ESP",
+        "BEL",
+        "BRA",
+        "ENG",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "FRA",
+        "ESP",
+        "BRA",
+        "ARG"
+      ],
+      "finalists": [
+        "FRA",
+        "BRA"
+      ],
+      "champion": "BRA"
+    },
+    {
+      "participantId": "antonio-pai-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "SUI",
+        "NED",
+        "CRO",
+        "ESP",
+        "AUT",
+        "BEL",
+        "BRA",
+        "SEN",
+        "KSA",
+        "ENG",
+        "ARG",
+        "EGY",
+        "NZL",
+        "POR"
+      ],
+      "qf": [
+        "GER",
+        "SUI",
+        "ESP",
+        "AUT",
+        "BRA",
+        "ENG",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "GER",
+        "ESP",
+        "BRA",
+        "ARG"
+      ],
+      "finalists": [
+        "GER",
+        "BRA"
+      ],
+      "champion": "BRA"
+    },
+    {
+      "participantId": "avila-pedroni-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "MEX",
+        "NED",
+        "GHA",
+        "ESP",
+        "PAR",
+        "CIV",
+        "BRA",
+        "ECU",
+        "KOR",
+        "ENG",
+        "AUT",
+        "USA",
+        "SUI",
+        "POR"
+      ],
+      "qf": [
+        "GER",
+        "NED",
+        "ESP",
+        "CIV",
+        "BRA",
+        "ENG",
+        "AUT",
+        "POR"
+      ],
+      "sf": [
+        "GER",
+        "ESP",
+        "BRA",
+        "POR"
+      ],
+      "finalists": [
+        "ESP",
+        "BRA"
+      ],
+      "champion": "BRA"
+    },
+    {
+      "participantId": "bebeto-001",
+      "r16": [
+        "CIV",
+        "FRA",
+        "CZE",
+        "JPN",
+        "COL",
+        "ESP",
+        "TUR",
+        "BEL",
+        "NED",
+        "SEN",
+        "KOR",
+        "ENG",
+        "ARG",
+        "USA",
+        "SUI",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "JPN",
+        "ESP",
+        "BEL",
+        "SEN",
+        "KOR",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "FRA",
+        "ESP",
+        "SEN",
+        "ARG"
+      ],
+      "finalists": [
+        "ESP",
+        "SEN"
+      ],
+      "champion": "ESP"
+    },
+    {
+      "participantId": "biro-claude-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "KOR",
+        "NED",
+        "COL",
+        "ESP",
+        "USA",
+        "BEL",
+        "BRA",
+        "SEN",
+        "MEX",
+        "ENG",
+        "ARG",
+        "EGY",
+        "CAN",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "NED",
+        "ESP",
+        "USA",
+        "BRA",
+        "MEX",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "FRA",
+        "ESP",
+        "BRA",
+        "POR"
+      ],
+      "finalists": [
+        "ESP",
+        "POR"
+      ],
+      "champion": "POR"
+    },
+    {
+      "participantId": "biula-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "SUI",
+        "JPN",
+        "CRO",
+        "ESP",
+        "USA",
+        "BEL",
+        "BRA",
+        "NOR",
+        "MEX",
+        "ENG",
+        "ARG",
+        "TUR",
+        "CAN",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "JPN",
+        "ESP",
+        "BEL",
+        "BRA",
+        "ENG",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "FRA",
+        "ESP",
+        "BRA",
+        "POR"
+      ],
+      "finalists": [
+        "FRA",
+        "BRA"
+      ],
+      "champion": "BRA"
+    },
+    {
+      "participantId": "caca-candeia-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "CZE",
+        "MAR",
+        "COL",
+        "ESP",
+        "TUR",
+        "BEL",
+        "BRA",
+        "NOR",
+        "MEX",
+        "ENG",
+        "ARG",
+        "USA",
+        "SUI",
+        "POR"
+      ],
+      "qf": [
+        "GER",
+        "MAR",
+        "ESP",
+        "BEL",
+        "BRA",
+        "ENG",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "GER",
+        "ESP",
+        "BRA",
+        "POR"
+      ],
+      "finalists": [
+        "ESP",
+        "POR"
+      ],
+      "champion": "POR"
+    },
+    {
+      "participantId": "capelli-001",
+      "r16": [
+        "CIV",
+        "FRA",
+        "KOR",
+        "NED",
+        "COL",
+        "ESP",
+        "USA",
+        "BEL",
+        "BRA",
+        "GER",
+        "MEX",
+        "ENG",
+        "URU",
+        "EGY",
+        "SUI",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "NED",
+        "ESP",
+        "BEL",
+        "BRA",
+        "ENG",
+        "URU",
+        "POR"
+      ],
+      "sf": [
+        "FRA",
+        "ESP",
+        "ENG",
+        "POR"
+      ],
+      "finalists": [
+        "FRA",
+        "POR"
+      ],
+      "champion": "POR"
+    },
+    {
+      "participantId": "champinha-001",
+      "r16": [
+        "GER",
+        "NOR",
+        "CZE",
+        "MAR",
+        "POR",
+        "ESP",
+        "USA",
+        "BEL",
+        "BRA",
+        "FRA",
+        "MEX",
+        "ENG",
+        "ARG",
+        "PAR",
+        "SUI",
+        "COL"
+      ],
+      "qf": [
+        "GER",
+        "MAR",
+        "ESP",
+        "BEL",
+        "BRA",
+        "ENG",
+        "ARG",
+        "COL"
+      ],
+      "sf": [
+        "GER",
+        "ESP",
+        "BRA",
+        "ARG"
+      ],
+      "finalists": [
+        "ESP",
+        "BRA"
+      ],
+      "champion": "BRA"
+    },
+    {
+      "participantId": "damasio-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "CZE",
+        "NED",
+        "CRO",
+        "ESP",
+        "TUR",
+        "BEL",
+        "BRA",
+        "NOR",
+        "ECU",
+        "ENG",
+        "ARG",
+        "USA",
+        "SUI",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "NED",
+        "ESP",
+        "BEL",
+        "BRA",
+        "ENG",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "FRA",
+        "ESP",
+        "ENG",
+        "POR"
+      ],
+      "finalists": [
+        "ESP",
+        "POR"
+      ],
+      "champion": "ESP"
+    },
+    {
+      "participantId": "danniel-benevides-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "SUI",
+        "NED",
+        "COL",
+        "ESP",
+        "USA",
+        "BEL",
+        "BRA",
+        "NOR",
+        "MEX",
+        "ENG",
+        "ARG",
+        "EGY",
+        "CAN",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "NED",
+        "ESP",
+        "BEL",
+        "BRA",
+        "ENG",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "FRA",
+        "ESP",
+        "BRA",
+        "ARG"
+      ],
+      "finalists": [
+        "ESP",
+        "BRA"
+      ],
+      "champion": "BRA"
+    },
+    {
+      "participantId": "davi-cade-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "KOR",
+        "NED",
+        "CRO",
+        "ESP",
+        "PAR",
+        "BEL",
+        "BRA",
+        "NOR",
+        "MEX",
+        "ENG",
+        "ARG",
+        "USA",
+        "SUI",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "NED",
+        "ESP",
+        "BEL",
+        "BRA",
+        "ENG",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "FRA",
+        "ESP",
+        "BRA",
+        "ARG"
+      ],
+      "finalists": [
+        "FRA",
+        "BRA"
+      ],
+      "champion": "BRA"
+    },
+    {
+      "participantId": "doug-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "SUI",
+        "NED",
+        "CRO",
+        "ESP",
+        "USA",
+        "BEL",
+        "BRA",
+        "NOR",
+        "MEX",
+        "ENG",
+        "ARG",
+        "EGY",
+        "CAN",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "NED",
+        "ESP",
+        "BEL",
+        "BRA",
+        "ENG",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "FRA",
+        "ESP",
+        "BRA",
+        "ARG"
+      ],
+      "finalists": [
+        "ESP",
+        "ARG"
+      ],
+      "champion": "ESP"
+    },
+    {
+      "participantId": "dudu-rocha-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "CAN",
+        "NED",
+        "CRO",
+        "ESP",
+        "USA",
+        "BEL",
+        "BRA",
+        "NOR",
+        "MEX",
+        "ENG",
+        "ARG",
+        "TUR",
+        "SUI",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "NED",
+        "ESP",
+        "BEL",
+        "BRA",
+        "ENG",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "FRA",
+        "ESP",
+        "BRA",
+        "POR"
+      ],
+      "finalists": [
+        "FRA",
+        "POR"
+      ],
+      "champion": "FRA"
+    },
+    {
+      "participantId": "edinho-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "CAN",
+        "NED",
+        "COL",
+        "ESP",
+        "CIV",
+        "BEL",
+        "BRA",
+        "SEN",
+        "MEX",
+        "ENG",
+        "ARG",
+        "TUR",
+        "SUI",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "NED",
+        "ESP",
+        "CIV",
+        "BRA",
+        "ENG",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "FRA",
+        "ESP",
+        "ENG",
+        "POR"
+      ],
+      "finalists": [
+        "FRA",
+        "POR"
+      ],
+      "champion": "POR"
+    },
+    {
+      "participantId": "eduardo-campeol-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "CZE",
+        "NED",
+        "CRO",
+        "ESP",
+        "USA",
+        "BEL",
+        "BRA",
+        "NOR",
+        "MEX",
+        "ENG",
+        "ARG",
+        "PAR",
+        "SUI",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "NED",
+        "ESP",
+        "BEL",
+        "BRA",
+        "ENG",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "FRA",
+        "ESP",
+        "ENG",
+        "POR"
+      ],
+      "finalists": [
+        "ESP",
+        "ENG"
+      ],
+      "champion": "ENG"
+    },
+    {
+      "participantId": "enzo-magliano-queiroz-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "CZE",
+        "NED",
+        "COL",
+        "ESP",
+        "TUR",
+        "BEL",
+        "BRA",
+        "NOR",
+        "MEX",
+        "ENG",
+        "ARG",
+        "USA",
+        "SUI",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "NED",
+        "ESP",
+        "BEL",
+        "BRA",
+        "ENG",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "FRA",
+        "ESP",
+        "BRA",
+        "POR"
+      ],
+      "finalists": [
+        "FRA",
+        "BRA"
+      ],
+      "champion": "BRA"
+    },
+    {
+      "participantId": "everton-wutke-001",
+      "r16": [
+        "ECU",
+        "FRA",
+        "MEX",
+        "MAR",
+        "POR",
+        "ESP",
+        "TUR",
+        "BEL",
+        "BRA",
+        "GER",
+        "KOR",
+        "ENG",
+        "ARG",
+        "EGY",
+        "CIV",
+        "COL"
+      ],
+      "qf": [
+        "FRA",
+        "MAR",
+        "ESP",
+        "BEL",
+        "BRA",
+        "ENG",
+        "ARG",
+        "COL"
+      ],
+      "sf": [
+        "FRA",
+        "ESP",
+        "ENG",
+        "ARG"
+      ],
+      "finalists": [
+        "FRA",
+        "ARG"
+      ],
+      "champion": "FRA"
+    },
+    {
+      "participantId": "felipim-candelotti-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "KOR",
+        "NED",
+        "COL",
+        "ESP",
+        "USA",
+        "BEL",
+        "BRA",
+        "NOR",
+        "MEX",
+        "ENG",
+        "ARG",
+        "TUR",
+        "SUI",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "NED",
+        "ESP",
+        "BEL",
+        "BRA",
+        "ENG",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "FRA",
+        "ESP",
+        "ENG",
+        "POR"
+      ],
+      "finalists": [
+        "FRA",
+        "POR"
+      ],
+      "champion": "FRA"
+    },
+    {
+      "participantId": "gazela-marcelinho-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "MEX",
+        "NED",
+        "COL",
+        "ESP",
+        "USA",
+        "BEL",
+        "BRA",
+        "NOR",
+        "KOR",
+        "ENG",
+        "ARG",
+        "PAR",
+        "SUI",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "NED",
+        "ESP",
+        "BEL",
+        "BRA",
+        "ENG",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "FRA",
+        "ESP",
+        "BRA",
+        "POR"
+      ],
+      "finalists": [
+        "ESP",
+        "POR"
+      ],
+      "champion": "ESP"
+    },
+    {
+      "participantId": "giani-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "CAN",
+        "MAR",
+        "CRO",
+        "ESP",
+        "USA",
+        "BEL",
+        "BRA",
+        "ECU",
+        "MEX",
+        "ENG",
+        "ARG",
+        "TUR",
+        "SUI",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "MAR",
+        "ESP",
+        "BEL",
+        "BRA",
+        "ENG",
+        "ARG",
+        "SUI"
+      ],
+      "sf": [
+        "FRA",
+        "ESP",
+        "ENG",
+        "ARG"
+      ],
+      "finalists": [
+        "ESP",
+        "ENG"
+      ],
+      "champion": "ESP"
+    },
+    {
+      "participantId": "gilberto-papito-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "KOR",
+        "NED",
+        "GHA",
+        "ESP",
+        "PAR",
+        "CIV",
+        "BRA",
+        "ECU",
+        "MEX",
+        "ENG",
+        "AUT",
+        "USA",
+        "SUI",
+        "POR"
+      ],
+      "qf": [
+        "GER",
+        "NED",
+        "ESP",
+        "CIV",
+        "BRA",
+        "ENG",
+        "AUT",
+        "POR"
+      ],
+      "sf": [
+        "GER",
+        "ESP",
+        "BRA",
+        "POR"
+      ],
+      "finalists": [
+        "ESP",
+        "BRA"
+      ],
+      "champion": "BRA"
+    },
+    {
+      "participantId": "guilherme-dal-piaz-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "CAN",
+        "NED",
+        "COL",
+        "ESP",
+        "SEN",
+        "BEL",
+        "BRA",
+        "NOR",
+        "MEX",
+        "ENG",
+        "ARG",
+        "TUR",
+        "SUI",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "NED",
+        "ESP",
+        "BEL",
+        "BRA",
+        "ENG",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "NED",
+        "BEL",
+        "BRA",
+        "POR"
+      ],
+      "finalists": [
+        "NED",
+        "BRA"
+      ],
+      "champion": "BRA"
+    },
+    {
+      "participantId": "indio-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "KOR",
+        "NED",
+        "COL",
+        "ESP",
+        "USA",
+        "BEL",
+        "BRA",
+        "NOR",
+        "MEX",
+        "ENG",
+        "ARG",
+        "TUR",
+        "SUI",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "NED",
+        "ESP",
+        "USA",
+        "BRA",
+        "ENG",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "NED",
+        "ESP",
+        "BRA",
+        "ARG"
+      ],
+      "finalists": [
+        "ESP",
+        "BRA"
+      ],
+      "champion": "BRA"
+    },
+    {
+      "participantId": "iverson-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "RSA",
+        "BRA",
+        "CRO",
+        "ESP",
+        "USA",
+        "BEL",
+        "MAR",
+        "NOR",
+        "MEX",
+        "ENG",
+        "ARG",
+        "TUR",
+        "SUI",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "BRA",
+        "ESP",
+        "BEL",
+        "NOR",
+        "ENG",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "FRA",
+        "ESP",
+        "ENG",
+        "POR"
+      ],
+      "finalists": [
+        "FRA",
+        "POR"
+      ],
+      "champion": "FRA"
+    },
+    {
+      "participantId": "jamir-nogueira-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "CAN",
+        "NED",
+        "COL",
+        "ESP",
+        "USA",
+        "BEL",
+        "BRA",
+        "NOR",
+        "MEX",
+        "ENG",
+        "URU",
+        "EGY",
+        "SUI",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "NED",
+        "ESP",
+        "USA",
+        "BRA",
+        "ENG",
+        "URU",
+        "POR"
+      ],
+      "sf": [
+        "FRA",
+        "ESP",
+        "ENG",
+        "POR"
+      ],
+      "finalists": [
+        "FRA",
+        "POR"
+      ],
+      "champion": "FRA"
+    },
+    {
+      "participantId": "jefinho-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "CAN",
+        "NED",
+        "COL",
+        "URU",
+        "USA",
+        "BEL",
+        "BRA",
+        "SEN",
+        "MEX",
+        "ENG",
+        "ARG",
+        "TUR",
+        "SUI",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "NED",
+        "URU",
+        "USA",
+        "BRA",
+        "ENG",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "FRA",
+        "URU",
+        "BRA",
+        "ARG"
+      ],
+      "finalists": [
+        "FRA",
+        "BRA"
+      ],
+      "champion": "BRA"
+    },
+    {
+      "participantId": "joao-paulo-martinelli-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "CZE",
+        "NED",
+        "CRO",
+        "ESP",
+        "USA",
+        "BEL",
+        "BRA",
+        "NOR",
+        "MEX",
+        "ENG",
+        "ARG",
+        "TUR",
+        "SUI",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "NED",
+        "ESP",
+        "BEL",
+        "BRA",
+        "ENG",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "FRA",
+        "ESP",
+        "ENG",
+        "POR"
+      ],
+      "finalists": [
+        "ESP",
+        "ENG"
+      ],
+      "champion": "ENG"
+    },
+    {
+      "participantId": "jorjao-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "BIH",
+        "NED",
+        "CRO",
+        "ESP",
+        "TUR",
+        "BEL",
+        "BRA",
+        "NOR",
+        "ENG",
+        "ARG",
+        "EGY",
+        "SUI",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "NED",
+        "ESP",
+        "TUR",
+        "BRA",
+        "ENG",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "FRA",
+        "ESP",
+        "BRA",
+        "POR"
+      ],
+      "finalists": [
+        "FRA",
+        "BRA"
+      ],
+      "champion": "BRA"
+    },
+    {
+      "participantId": "kabelao-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "BIH",
+        "NED",
+        "CRO",
+        "ESP",
+        "TUR",
+        "EGY",
+        "BRA",
+        "SEN",
+        "ENG",
+        "ARG",
+        "BEL",
+        "SUI",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "NED",
+        "ESP",
+        "TUR",
+        "BRA",
+        "ENG",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "FRA",
+        "ESP",
+        "ENG",
+        "POR"
+      ],
+      "finalists": [
+        "FRA",
+        "ENG"
+      ],
+      "champion": "FRA"
+    },
+    {
+      "participantId": "konrad-campos-salomao-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "CAN",
+        "NED",
+        "COL",
+        "ESP",
+        "TUR",
+        "BEL",
+        "BRA",
+        "NOR",
+        "MEX",
+        "ENG",
+        "ARG",
+        "USA",
+        "SUI",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "NED",
+        "ESP",
+        "BEL",
+        "BRA",
+        "ENG",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "FRA",
+        "ESP",
+        "ENG",
+        "POR"
+      ],
+      "finalists": [
+        "FRA",
+        "POR"
+      ],
+      "champion": "FRA"
+    },
+    {
+      "participantId": "leandro-leite-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "CZE",
+        "NED",
+        "CRO",
+        "ESP",
+        "TUR",
+        "BEL",
+        "BRA",
+        "ECU",
+        "MEX",
+        "ENG",
+        "ARG",
+        "EGY",
+        "SUI",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "NED",
+        "ESP",
+        "BEL",
+        "BRA",
+        "ENG",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "FRA",
+        "ESP",
+        "ENG",
+        "POR"
+      ],
+      "finalists": [
+        "FRA",
+        "ENG"
+      ],
+      "champion": "FRA"
+    },
+    {
+      "participantId": "lirio-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "CZE",
+        "NED",
+        "CRO",
+        "ESP",
+        "USA",
+        "BEL",
+        "BRA",
+        "NOR",
+        "MEX",
+        "ENG",
+        "ARG",
+        "TUR",
+        "SUI",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "NED",
+        "ESP",
+        "BEL",
+        "BRA",
+        "ENG",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "FRA",
+        "ESP",
+        "BRA",
+        "ARG"
+      ],
+      "finalists": [
+        "FRA",
+        "BRA"
+      ],
+      "champion": "FRA"
+    },
+    {
+      "participantId": "lucao-aredes-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "SUI",
+        "NED",
+        "CRO",
+        "ESP",
+        "USA",
+        "BEL",
+        "BRA",
+        "NOR",
+        "MEX",
+        "ENG",
+        "ARG",
+        "TUR",
+        "CAN",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "NED",
+        "ESP",
+        "BEL",
+        "BRA",
+        "ENG",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "FRA",
+        "ESP",
+        "BRA",
+        "ARG"
+      ],
+      "finalists": [
+        "ESP",
+        "BRA"
+      ],
+      "champion": "ESP"
+    },
+    {
+      "participantId": "lucilio-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "SUI",
+        "NED",
+        "CRO",
+        "ESP",
+        "USA",
+        "BEL",
+        "BRA",
+        "NOR",
+        "MEX",
+        "ENG",
+        "ARG",
+        "PAR",
+        "CAN",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "NED",
+        "ESP",
+        "USA",
+        "BRA",
+        "ENG",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "FRA",
+        "ESP",
+        "ENG",
+        "ARG"
+      ],
+      "finalists": [
+        "ESP",
+        "ENG"
+      ],
+      "champion": "ENG"
+    },
+    {
+      "participantId": "lucio-venturim-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "CAN",
+        "NED",
+        "COL",
+        "ESP",
+        "USA",
+        "BEL",
+        "BRA",
+        "SEN",
+        "MEX",
+        "ENG",
+        "ARG",
+        "TUR",
+        "SUI",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "NED",
+        "ESP",
+        "BEL",
+        "BRA",
+        "ENG",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "FRA",
+        "ESP",
+        "BRA",
+        "POR"
+      ],
+      "finalists": [
+        "FRA",
+        "BRA"
+      ],
+      "champion": "BRA"
+    },
+    {
+      "participantId": "macalister-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "MEX",
+        "MAR",
+        "COL",
+        "ESP",
+        "TUR",
+        "BEL",
+        "BRA",
+        "SEN",
+        "KOR",
+        "ENG",
+        "ARG",
+        "IRN",
+        "SUI",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "MAR",
+        "ESP",
+        "BEL",
+        "BRA",
+        "ENG",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "FRA",
+        "ESP",
+        "ENG",
+        "POR"
+      ],
+      "finalists": [
+        "FRA",
+        "POR"
+      ],
+      "champion": "FRA"
+    },
+    {
+      "participantId": "malone-marco-aur-lio-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "MEX",
+        "JPN",
+        "COL",
+        "ESP",
+        "TUR",
+        "BEL",
+        "BRA",
+        "NOR",
+        "KOR",
+        "ENG",
+        "ARG",
+        "EGY",
+        "SUI",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "JPN",
+        "ESP",
+        "BEL",
+        "BRA",
+        "ENG",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "FRA",
+        "ESP",
+        "ENG",
+        "ARG"
+      ],
+      "finalists": [
+        "FRA",
+        "ARG"
+      ],
+      "champion": "ARG"
+    },
+    {
+      "participantId": "mansoni-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "CZE",
+        "NED",
+        "COL",
+        "ESP",
+        "TUR",
+        "BEL",
+        "BRA",
+        "ECU",
+        "MEX",
+        "ENG",
+        "ARG",
+        "USA",
+        "SUI",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "NED",
+        "ESP",
+        "BEL",
+        "BRA",
+        "MEX",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "FRA",
+        "ESP",
+        "BRA",
+        "ARG"
+      ],
+      "finalists": [
+        "FRA",
+        "BRA"
+      ],
+      "champion": "BRA"
+    },
+    {
+      "participantId": "markim-coco-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "SUI",
+        "NED",
+        "CRO",
+        "ESP",
+        "TUR",
+        "BEL",
+        "BRA",
+        "SEN",
+        "MEX",
+        "ENG",
+        "ARG",
+        "USA",
+        "CAN",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "NED",
+        "ESP",
+        "BEL",
+        "BRA",
+        "ENG",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "FRA",
+        "ESP",
+        "BRA",
+        "ARG"
+      ],
+      "finalists": [
+        "FRA",
+        "BRA"
+      ],
+      "champion": "BRA"
+    },
+    {
+      "participantId": "milena-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "KOR",
+        "JPN",
+        "COL",
+        "ESP",
+        "BIH",
+        "BEL",
+        "BRA",
+        "NOR",
+        "MEX",
+        "ENG",
+        "ARG",
+        "USA",
+        "SUI",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "JPN",
+        "ESP",
+        "BEL",
+        "BRA",
+        "ENG",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "FRA",
+        "ESP",
+        "BRA",
+        "POR"
+      ],
+      "finalists": [
+        "ESP",
+        "POR"
+      ],
+      "champion": "ESP"
+    },
+    {
+      "participantId": "tainha-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "CAN",
+        "NED",
+        "COL",
+        "ESP",
+        "TUR",
+        "BEL",
+        "BRA",
+        "CIV",
+        "MEX",
+        "ENG",
+        "ARG",
+        "USA",
+        "SUI",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "NED",
+        "ESP",
+        "BEL",
+        "BRA",
+        "ENG",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "FRA",
+        "ESP",
+        "ENG",
+        "POR"
+      ],
+      "finalists": [
+        "ESP",
+        "POR"
+      ],
+      "champion": "ESP"
+    },
+    {
+      "participantId": "morelli-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "KOR",
+        "NED",
+        "CRO",
+        "ESP",
+        "USA",
+        "BEL",
+        "BRA",
+        "SEN",
+        "MEX",
+        "ENG",
+        "ARG",
+        "TUR",
+        "SUI",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "NED",
+        "ESP",
+        "BEL",
+        "BRA",
+        "ENG",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "FRA",
+        "ESP",
+        "BRA",
+        "ARG"
+      ],
+      "finalists": [
+        "FRA",
+        "BRA"
+      ],
+      "champion": "BRA"
+    },
+    {
+      "participantId": "nandinho-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "CAN",
+        "MAR",
+        "CRO",
+        "ESP",
+        "USA",
+        "BEL",
+        "BRA",
+        "ECU",
+        "MEX",
+        "ENG",
+        "ARG",
+        "TUR",
+        "SUI",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "MAR",
+        "ESP",
+        "BEL",
+        "BRA",
+        "ENG",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "FRA",
+        "ESP",
+        "ENG",
+        "POR"
+      ],
+      "finalists": [
+        "ESP",
+        "ENG"
+      ],
+      "champion": "ESP"
+    },
+    {
+      "participantId": "octavio-pereira-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "KOR",
+        "NED",
+        "CRO",
+        "ESP",
+        "USA",
+        "BEL",
+        "BRA",
+        "SEN",
+        "MEX",
+        "ENG",
+        "ARG",
+        "PAR",
+        "SUI",
+        "POR"
+      ],
+      "qf": [
+        "GER",
+        "NED",
+        "ESP",
+        "BEL",
+        "BRA",
+        "ENG",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "GER",
+        "ESP",
+        "BRA",
+        "ARG"
+      ],
+      "finalists": [
+        "ESP",
+        "BRA"
+      ],
+      "champion": "ESP"
+    },
+    {
+      "participantId": "otori-bittencourt-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "KOR",
+        "MAR",
+        "POR",
+        "ESP",
+        "USA",
+        "EGY",
+        "BRA",
+        "ECU",
+        "MEX",
+        "CRO",
+        "URU",
+        "PAR",
+        "SUI",
+        "COL"
+      ],
+      "qf": [
+        "GER",
+        "KOR",
+        "ESP",
+        "USA",
+        "BRA",
+        "CRO",
+        "PAR",
+        "COL"
+      ],
+      "sf": [
+        "GER",
+        "ESP",
+        "CRO",
+        "COL"
+      ],
+      "finalists": [
+        "ESP",
+        "CRO"
+      ],
+      "champion": "ESP"
+    },
+    {
+      "participantId": "phillipe-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "CZE",
+        "NED",
+        "CRO",
+        "ESP",
+        "USA",
+        "BEL",
+        "BRA",
+        "SEN",
+        "MEX",
+        "ENG",
+        "ARG",
+        "EGY",
+        "SUI",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "NED",
+        "ESP",
+        "BEL",
+        "BRA",
+        "ENG",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "FRA",
+        "ESP",
+        "BRA",
+        "ARG"
+      ],
+      "finalists": [
+        "FRA",
+        "BRA"
+      ],
+      "champion": "BRA"
+    },
+    {
+      "participantId": "polo-marco-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "CAN",
+        "NED",
+        "COL",
+        "ESP",
+        "USA",
+        "BEL",
+        "BRA",
+        "NOR",
+        "MEX",
+        "ENG",
+        "ARG",
+        "EGY",
+        "SUI",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "NED",
+        "ESP",
+        "BEL",
+        "BRA",
+        "ENG",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "FRA",
+        "ESP",
+        "BRA",
+        "POR"
+      ],
+      "finalists": [
+        "ESP",
+        "BRA"
+      ],
+      "champion": "ESP"
+    },
+    {
+      "participantId": "ramon-poldi-guimar-es-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "CAN",
+        "NED",
+        "COL",
+        "ESP",
+        "TUR",
+        "BEL",
+        "BRA",
+        "CIV",
+        "MAR",
+        "ENG",
+        "ARG",
+        "EGY",
+        "ECU",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "NED",
+        "ESP",
+        "BEL",
+        "BRA",
+        "ENG",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "FRA",
+        "ESP",
+        "BRA",
+        "POR"
+      ],
+      "finalists": [
+        "ESP",
+        "BRA"
+      ],
+      "champion": "BRA"
+    },
+    {
+      "participantId": "ricardo-rocha-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "SUI",
+        "NED",
+        "COL",
+        "ESP",
+        "USA",
+        "BEL",
+        "BRA",
+        "NOR",
+        "MEX",
+        "ENG",
+        "ARG",
+        "PAR",
+        "CAN",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "NED",
+        "ESP",
+        "BEL",
+        "BRA",
+        "MEX",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "FRA",
+        "ESP",
+        "BRA",
+        "ARG"
+      ],
+      "finalists": [
+        "FRA",
+        "ARG"
+      ],
+      "champion": "FRA"
+    },
+    {
+      "participantId": "sandro-aredes-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "KOR",
+        "NED",
+        "COL",
+        "ESP",
+        "USA",
+        "BEL",
+        "BRA",
+        "NOR",
+        "MEX",
+        "ENG",
+        "ARG",
+        "TUR",
+        "SUI",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "NED",
+        "ESP",
+        "BEL",
+        "BRA",
+        "ENG",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "FRA",
+        "ESP",
+        "BRA",
+        "POR"
+      ],
+      "finalists": [
+        "FRA",
+        "BRA"
+      ],
+      "champion": "BRA"
+    },
+    {
+      "participantId": "silvio-roberto-lessa-amin-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "CZE",
+        "NED",
+        "CRO",
+        "ESP",
+        "TUR",
+        "BEL",
+        "BRA",
+        "ECU",
+        "MEX",
+        "ENG",
+        "ARG",
+        "IRN",
+        "SUI",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "NED",
+        "ESP",
+        "TUR",
+        "BRA",
+        "ENG",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "FRA",
+        "ESP",
+        "ENG",
+        "POR"
+      ],
+      "finalists": [
+        "FRA",
+        "POR"
+      ],
+      "champion": "FRA"
+    },
+    {
+      "participantId": "spag-mytho-tiago-001",
+      "r16": [
+        "USA",
+        "FRA",
+        "CAN",
+        "NED",
+        "COL",
+        "ESP",
+        "TUR",
+        "BEL",
+        "BRA",
+        "NOR",
+        "ECU",
+        "ENG",
+        "URU",
+        "PAR",
+        "BIH",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "NED",
+        "ESP",
+        "TUR",
+        "BRA",
+        "ENG",
+        "URU",
+        "POR"
+      ],
+      "sf": [
+        "FRA",
+        "ESP",
+        "BRA",
+        "POR"
+      ],
+      "finalists": [
+        "ESP",
+        "POR"
+      ],
+      "champion": "POR"
+    },
+    {
+      "participantId": "stelzer-marcel-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "CAN",
+        "JPN",
+        "CRO",
+        "ESP",
+        "USA",
+        "BEL",
+        "BRA",
+        "SEN",
+        "MEX",
+        "ENG",
+        "ARG",
+        "TUR",
+        "SUI",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "JPN",
+        "ESP",
+        "BEL",
+        "BRA",
+        "ENG",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "FRA",
+        "ESP",
+        "BRA",
+        "ARG"
+      ],
+      "finalists": [
+        "ESP",
+        "ARG"
+      ],
+      "champion": "ESP"
+    },
+    {
+      "participantId": "teo-castro-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "SUI",
+        "MAR",
+        "COL",
+        "ESP",
+        "TUR",
+        "BEL",
+        "BRA",
+        "NOR",
+        "CZE",
+        "ENG",
+        "ARG",
+        "USA",
+        "IRN",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "MAR",
+        "ESP",
+        "BEL",
+        "BRA",
+        "ENG",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "FRA",
+        "ESP",
+        "BRA",
+        "POR"
+      ],
+      "finalists": [
+        "ESP",
+        "BRA"
+      ],
+      "champion": "ESP"
+    },
+    {
+      "participantId": "thiago-negao-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "RSA",
+        "NED",
+        "COL",
+        "ESP",
+        "USA",
+        "BEL",
+        "BRA",
+        "SEN",
+        "MEX",
+        "ENG",
+        "URU",
+        "EGY",
+        "SUI",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "NED",
+        "COL",
+        "BEL",
+        "BRA",
+        "MEX",
+        "URU",
+        "SUI"
+      ],
+      "sf": [
+        "FRA",
+        "BEL",
+        "BRA",
+        "URU"
+      ],
+      "finalists": [
+        "FRA",
+        "BRA"
+      ],
+      "champion": "BRA"
+    },
+    {
+      "participantId": "tiagao-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "RSA",
+        "MAR",
+        "GHA",
+        "ESP",
+        "USA",
+        "BEL",
+        "BRA",
+        "ECU",
+        "JPN",
+        "ENG",
+        "ARG",
+        "AUS",
+        "SUI",
+        "POR"
+      ],
+      "qf": [
+        "GER",
+        "MAR",
+        "ESP",
+        "USA",
+        "BRA",
+        "ENG",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "MAR",
+        "USA",
+        "BRA",
+        "ARG"
+      ],
+      "finalists": [
+        "MAR",
+        "BRA"
+      ],
+      "champion": "BRA"
+    },
+    {
+      "participantId": "tinoco-fernando-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "CAN",
+        "NED",
+        "COL",
+        "URU",
+        "USA",
+        "BEL",
+        "MAR",
+        "ECU",
+        "MEX",
+        "ENG",
+        "ARG",
+        "PAR",
+        "SUI",
+        "POR"
+      ],
+      "qf": [
+        "GER",
+        "CAN",
+        "COL",
+        "USA",
+        "ECU",
+        "MEX",
+        "ARG",
+        "POR"
+      ],
+      "sf": [
+        "GER",
+        "COL",
+        "ECU",
+        "ARG"
+      ],
+      "finalists": [
+        "GER",
+        "ARG"
+      ],
+      "champion": "GER"
+    },
+    {
+      "participantId": "venzel-alex-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "KOR",
+        "NED",
+        "COL",
+        "ESP",
+        "USA",
+        "BEL",
+        "BRA",
+        "ECU",
+        "MEX",
+        "ENG",
+        "URU",
+        "EGY",
+        "CAN",
+        "POR"
+      ],
+      "qf": [
+        "FRA",
+        "NED",
+        "ESP",
+        "USA",
+        "BRA",
+        "ENG",
+        "URU",
+        "POR"
+      ],
+      "sf": [
+        "FRA",
+        "ESP",
+        "BRA",
+        "POR"
+      ],
+      "finalists": [
+        "FRA",
+        "BRA"
+      ],
+      "champion": "BRA"
+    },
+    {
+      "participantId": "vitim-001",
+      "r16": [
+        "GER",
+        "FRA",
+        "KOR",
+        "MAR",
+        "CRO",
+        "URU",
+        "TUR",
+        "BEL",
+        "BRA",
+        "ECU",
+        "MEX",
+        "ENG",
+        "ESP",
+        "USA",
+        "SUI",
+        "POR"
+      ],
+      "qf": [
+        "GER",
+        "MAR",
+        "URU",
+        "BEL",
+        "BRA",
+        "ENG",
+        "ESP",
+        "POR"
+      ],
+      "sf": [
+        "GER",
+        "URU",
+        "BRA",
+        "POR"
+      ],
+      "finalists": [
+        "URU",
+        "BRA"
+      ],
+      "champion": "BRA"
+    }
   ]
 }

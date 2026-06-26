@@ -98,6 +98,15 @@ export interface R32TeamPick {
   teamIds: string[] // 32 teams explicitly predicted to qualify for round of 32
 }
 
+export interface KnockoutPhasePick {
+  participantId: string
+  r16: string[]       // 16 teams predicted to reach round of 16
+  qf: string[]        // 8 teams predicted to reach quarterfinal
+  sf: string[]        // 4 teams predicted to reach semifinal
+  finalists: string[] // 2 teams predicted to reach final
+  champion: string    // 1 team predicted as champion
+}
+
 export interface Database {
   participants: Participant[]
   matchPredictions: MatchPrediction[]
@@ -107,6 +116,7 @@ export interface Database {
   pushSubscriptions?: PushSubscriptionRecord[]
   liveMatchStates?: Record<string, { status: 'pre' | 'in' | 'halftime' | 'completed'; score1: number; score2: number }>
   r32TeamPicks?: R32TeamPick[]
+  knockoutPhasePicks?: KnockoutPhasePick[]
 }
 
 export interface LeaderboardEntry {
