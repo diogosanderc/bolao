@@ -293,15 +293,10 @@ export default function LeaderboardPage() {
     if (!target) { alert('Tabela não encontrada. Tente novamente.'); return }
     setSharingImage(true)
     try {
-      const html2canvas = (await import('html2canvas')).default
-      const canvas = await html2canvas(target, {
-        backgroundColor: '#111827',
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        removeContainer: true,
-      })
-      const blob: Blob | null = await new Promise(res => canvas.toBlob(res, 'image/png'))
+      const { toPng } = await import('html-to-image')
+      const dataUrl = await toPng(target, { pixelRatio: 2, backgroundColor: '#111827' })
+      const res = await fetch(dataUrl)
+      const blob = await res.blob()
       if (!blob) throw new Error('Falha ao gerar imagem')
       const file = new File([blob], 'classificacao-bolao.png', { type: 'image/png' })
       if (navigator.canShare?.({ files: [file] })) {
