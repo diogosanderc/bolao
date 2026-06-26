@@ -422,11 +422,7 @@ export default function LeaderboardPage() {
             const u2 = a + b
             const z = p.groupBonus ?? 0
             ctx.fillStyle = '#4ade80'
-            ctx.fillText(String(u2), x + colW - 72, midY)
-            if (z > 0) {
-              ctx.fillStyle = '#facc15'
-              ctx.fillText(` +${z}`, x + colW - 55, midY)
-            }
+            ctx.fillText(`( ${u2} + ${z} )`, x + colW - 80, midY)
           }
 
           // Total points (right column)
