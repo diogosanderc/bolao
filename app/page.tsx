@@ -51,7 +51,7 @@ export default function LeaderboardPage() {
   const [matchPredLoading, setMatchPredLoading] = useState(false)
   const [sharingImage, setSharingImage] = useState(false)
   const [imagePicker, setImagePicker] = useState(false)
-  type ImageColumn = 'uj' | 'u2' | 'grupos' | 'r16' | 'total'
+  type ImageColumn = 'uj' | 'u2' | 'u2grupos'
   const [imageColumn, setImageColumn] = useState<ImageColumn>('uj')
   const leaderboardRef = useRef<HTMLDivElement>(null)
 
@@ -301,7 +301,7 @@ export default function LeaderboardPage() {
       const PAD = 12
       const half = Math.ceil(data.length / 2)
       const colH = half * ROW_H
-      const headerH = (lastMatch ? 56 : 40) + (selectedCol !== 'total' ? 18 : 0)
+      const headerH = (lastMatch ? 56 : 40) + 18
       const H = headerH + colH + 28
       const canvas = document.createElement('canvas')
       canvas.width = W * DPR
@@ -321,10 +321,8 @@ export default function LeaderboardPage() {
 
       const colLabel: Record<ImageColumn, string> = {
         uj: 'UJ = pts último jogo',
-        u2: 'U2 = pts últimos 2 jogos',
-        grupos: 'Grupos = acerto classificados',
-        r16: 'R16 = acerto classificados oitavas',
-        total: 'Classificação geral',
+        u2: 'U2 = (penúltimo + último)',
+        u2grupos: 'U2 + Grupos = (penúltimo + último) +bonus grupos/R16',
       }
       let headerY = 40
       if (lastMatch) {
@@ -333,13 +331,10 @@ export default function LeaderboardPage() {
         ctx.fillText(`Último jogo: ${lastMatch.team1.name} ${lastMatch.score1}×${lastMatch.score2} ${lastMatch.team2.name}`, W / 2, headerY)
         headerY += 16
       }
-      if (selectedCol !== 'total') {
-        ctx.font = '10px system-ui'
-        ctx.fillStyle = '#4ade80'
-        ctx.fillText(colLabel[selectedCol], W / 2, headerY)
-        headerY += 14
-      }
-      headerY += 4
+      ctx.font = '10px system-ui'
+      ctx.fillStyle = '#4ade80'
+      ctx.fillText(colLabel[selectedCol], W / 2, headerY)
+      headerY += 16
 
       const colW = (W - PAD * 3) / 2
       const medals: Record<number, string> = { 1: '🥇', 2: '🥈', 3: '🥉' }
@@ -406,20 +401,30 @@ export default function LeaderboardPage() {
             ctx.fillText(change > 0 ? `▲${change}` : `▼${Math.abs(change)}`, x + colW - 88, midY)
           }
 
-          // Extra column based on selected mode (not shown in 'total' mode — pts already on right)
+          // Extra column based on selected mode
           const p = entry as any
-          if (selectedCol !== 'total') {
-            const extraVal: number =
-              selectedCol === 'uj' ? entry.lastMatchPoints :
-              selectedCol === 'u2' ? (p.last2Points ?? 0) :
-              selectedCol === 'grupos' ? (p.groupOrderPoints ?? 0) :
-              (p.advancementR16Points ?? 0)
-            if (extraVal > 0) {
+          ctx.font = '10px system-ui'
+          ctx.textAlign = 'left'
+          if (selectedCol === 'uj') {
+            const v = p.lastMatchPts ?? entry.lastMatchPoints ?? 0
+            if (v > 0) {
               ctx.fillStyle = '#4ade80'
-              ctx.font = '10px system-ui'
-              ctx.textAlign = 'left'
-              const prefix = selectedCol === 'uj' || selectedCol === 'u2' ? '+' : ''
-              ctx.fillText(`${prefix}${extraVal}`, x + colW - 56, midY)
+              ctx.fillText(`+${v}`, x + colW - 60, midY)
+            }
+          } else if (selectedCol === 'u2') {
+            const a = p.secondLastMatchPts ?? 0
+            const b = p.lastMatchPts ?? 0
+            ctx.fillStyle = '#4ade80'
+            ctx.fillText(`(${a} + ${b})`, x + colW - 72, midY)
+          } else if (selectedCol === 'u2grupos') {
+            const a = p.secondLastMatchPts ?? 0
+            const b = p.lastMatchPts ?? 0
+            const z = p.groupBonus ?? 0
+            ctx.fillStyle = '#4ade80'
+            ctx.fillText(`(${a}+${b})`, x + colW - 84, midY)
+            if (z > 0) {
+              ctx.fillStyle = '#facc15'
+              ctx.fillText(` +${z}`, x + colW - 44, midY)
             }
           }
 
@@ -511,11 +516,9 @@ export default function LeaderboardPage() {
                   <div className="fixed inset-0 z-40" onClick={() => setImagePicker(false)} />
                   <div className="absolute right-0 top-full mt-1 z-50 bg-gray-800 border border-gray-700 rounded-xl shadow-xl p-2 flex flex-col gap-1 min-w-[200px]">
                   {([
-                    ['uj', '+UJ — último jogo'],
-                    ['u2', '+U2 — últimos 2 jogos'],
-                    ['grupos', 'Grupos — classificados'],
-                    ['r16', 'R16 — oitavas'],
-                    ['total', 'Total — classificação geral'],
+                    ['uj', 'UJ — pts do último jogo'],
+                    ['u2', 'U2 — (penúltimo + último)'],
+                    ['u2grupos', 'U2 + Grupos — (pen.+últ.) +bonus'],
                   ] as [ImageColumn, string][]).map(([val, label]) => (
                     <button
                       key={val}

@@ -50,12 +50,15 @@ export async function GET() {
 
     // Compute previous leaderboard (all results except the last) for position change arrows
     // Compute last-N-matches points per participant
-    const last2Results = sortedResults.slice(-2)
     const last4Results = sortedResults.slice(-4)
-    const last2PointsMap = new Map<string, number>()
     const last4PointsMap = new Map<string, number>()
+    // Individual breakdown for last 2 matches: [secondLast, last]
+    const secondLastResult = sortedResults.length >= 2 ? sortedResults[sortedResults.length - 2] : null
+    const lastResult = sortedResults.length >= 1 ? sortedResults[sortedResults.length - 1] : null
+    const secondLastPtsMap = new Map<string, number>()
+    const lastPtsMap = new Map<string, number>()
     for (const participant of validParticipants) {
-      let pts2 = 0, pts4 = 0
+      let pts4 = 0
       for (const result of last4Results) {
         const match = matchById[result.matchId]
         if (!match) continue
@@ -65,10 +68,10 @@ export async function GET() {
         if (pred) {
           const s = scoreMatch(pred, result, match).total
           pts4 += s
-          if (last2Results.some(r => r.matchId === result.matchId)) pts2 += s
+          if (secondLastResult && result.matchId === secondLastResult.matchId) secondLastPtsMap.set(participant.id, s)
+          if (lastResult && result.matchId === lastResult.matchId) lastPtsMap.set(participant.id, s)
         }
       }
-      last2PointsMap.set(participant.id, pts2)
       last4PointsMap.set(participant.id, pts4)
     }
 
@@ -85,10 +88,10 @@ export async function GET() {
 
     let leaderboardWithChanges: (typeof leaderboard[0] & {
       positionChange?: number
-      last2Points?: number
       last4Points?: number
-      groupOrderPoints?: number
-      advancementR16Points?: number
+      lastMatchPts?: number
+      secondLastMatchPts?: number
+      groupBonus?: number
       maxPossiblePoints?: number
       pointsToFirst?: number
       pointsToTop7?: number
@@ -100,10 +103,10 @@ export async function GET() {
       const maxPossiblePoints = entry.totalPoints + remainingMatches * maxPerMatch
       return {
         ...entry,
-        last2Points: last2PointsMap.get(entry.participant.id) ?? 0,
         last4Points: last4PointsMap.get(entry.participant.id) ?? 0,
-        groupOrderPoints: entry.breakdown.groupOrderPoints,
-        advancementR16Points: entry.breakdown.advancementPoints['round_of_16'] ?? 0,
+        lastMatchPts: lastPtsMap.get(entry.participant.id) ?? 0,
+        secondLastMatchPts: secondLastPtsMap.get(entry.participant.id) ?? 0,
+        groupBonus: (entry.breakdown.groupOrderPoints) + (entry.breakdown.advancementPoints['round_of_16'] ?? 0),
         maxPossiblePoints,
         pointsToFirst: Math.max(0, firstScore - entry.totalPoints),
         pointsToTop7: Math.max(0, top7Score - entry.totalPoints),
