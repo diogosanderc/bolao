@@ -51,6 +51,9 @@ const merged = {
   groupPredictions: seedDb.groupPredictions || [],
   results: volumeDb.results || [],
   matchDates: volumeDb.matchDates || {},
+  r32TeamPicks: seedDb.r32TeamPicks || [],
+  pushSubscriptions: volumeDb.pushSubscriptions || [],
+  liveMatchStates: volumeDb.liveMatchStates || {},
 }
 
 writeFileSync(volumePath, JSON.stringify(merged, null, 2))
