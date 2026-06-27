@@ -6,6 +6,7 @@ import { Flag } from '@/components/Flag'
 import { ParticipantModal } from '@/components/ParticipantModal'
 import { Scoreboard } from '@/components/Scoreboard'
 import { AnimatedNumber } from '@/components/AnimatedNumber'
+import { chipCode } from '@/lib/names'
 
 type LastMatch = {
   matchId: string
@@ -904,7 +905,7 @@ export default function LeaderboardPage() {
                       <div key={score} className="flex items-start justify-between gap-3 py-2.5">
                         <div className="flex flex-wrap gap-1 flex-1">
                           {names.sort().map(name => (
-                            <span key={name} title={name} className="text-xs bg-gray-800 text-gray-300 rounded px-1.5 py-0.5">{name === 'LUCILIO' ? 'LCLI' : name === 'MORELLI' ? 'MRLI' : name.substring(0, 4)}</span>
+                            <span key={name} title={name} className="text-xs bg-gray-800 text-gray-300 rounded px-1.5 py-0.5">{chipCode(name)}</span>
                           ))}
                         </div>
                         <span className="text-sm font-bold text-green-400 shrink-0">{score}</span>

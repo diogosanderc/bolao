@@ -5,6 +5,7 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell,
 } from 'recharts'
+import { chipCode } from '@/lib/names'
 
 type ParticipantInfo = { id: string; name: string }
 
@@ -48,14 +49,6 @@ const LINE_COLORS = [
   '#fb923c', '#38bdf8', '#f472b6', '#4ade80', '#c084fc',
   '#fbbf24', '#2dd4bf', '#818cf8', '#fb7185', '#86efac',
 ]
-
-// Compact name for the toggle chips: first name + last-name initial
-function abbrevName(name: string): string {
-  const parts = name.trim().split(/\s+/)
-  if (parts.length === 1) return parts[0]
-  const last = parts[parts.length - 1]
-  return `${parts[0]} ${last[0]}.`
-}
 
 export default function EstatisticasPage() {
   const [data, setData] = useState<EstatisticasData | null>(null)
@@ -186,7 +179,7 @@ export default function EstatisticasPage() {
                 style={active ? { borderColor: color, color: color, backgroundColor: `${color}20` } : {}}
                 title={p.name}
               >
-                {abbrevName(p.name)}
+                {chipCode(p.name)}
               </button>
             )
           })}
