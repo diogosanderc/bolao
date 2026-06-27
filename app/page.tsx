@@ -7,6 +7,9 @@ import { ParticipantModal } from '@/components/ParticipantModal'
 import { Scoreboard } from '@/components/Scoreboard'
 import { AnimatedNumber } from '@/components/AnimatedNumber'
 import { Podium } from '@/components/Podium'
+import { BroadcastBadges } from '@/components/BroadcastBadges'
+import { broadcastersForMatchId } from '@/lib/broadcasters'
+import { matchById } from '@/lib/copa2026'
 import { chipCode } from '@/lib/names'
 
 type LastMatch = {
@@ -816,6 +819,7 @@ export default function LeaderboardPage() {
             <span className="text-gray-600">vs</span>
             <span className="flex items-center gap-1.5"><Flag teamId={m.team2.id} size={18} />{m.team2.name}</span>
           </div>
+          <BroadcastBadges channels={broadcastersForMatchId(m.matchId, m.team1.id, m.team2.id, matchById[m.matchId]?.phase)} />
         </div>
       ))}
 
@@ -856,6 +860,7 @@ export default function LeaderboardPage() {
             <span className="text-gray-600">vs</span>
             <span className="flex items-center gap-1.5"><Flag teamId={m.team2.id} size={18} />{m.team2.name}</span>
           </div>
+          <BroadcastBadges channels={broadcastersForMatchId(m.matchId, m.team1.id, m.team2.id, matchById[m.matchId]?.phase)} />
         </button>
       ))}
 
