@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Flag } from '@/components/Flag'
 import { PHASE_LABELS, Phase } from '@/lib/types'
+import { AnimatedNumber } from '@/components/AnimatedNumber'
 
 type TeamRef = { id: string; name: string; flag: string }
 
@@ -59,6 +60,8 @@ type ParticipantData = {
     groupOrderPoints: number
     r32Points: number
     phasePoints: number
+    rank: number | null
+    totalParticipants: number
   }
   groupDetail: GroupDetail[]
   r32Detail: R32Entry[]
@@ -149,27 +152,74 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
         </div>
 
         {/* Header */}
-        <div className="flex items-start justify-between px-5 py-3 border-b border-gray-800 shrink-0">
-          <div className="flex-1 min-w-0 pr-3">
-            <h2 className="text-lg font-bold text-white">{name}</h2>
-            {data && (
-              <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-xs text-gray-500">
-                <span><span className="text-yellow-600 dark:text-yellow-400 font-bold">{data.summary.totalPoints}pts</span> totais</span>
-                <span><span className="text-green-700 dark:text-green-400 font-semibold">{data.summary.correctResults}</span> resultados certos</span>
-                <span><span className="text-yellow-700 dark:text-yellow-300 font-semibold">{data.summary.correctScores}</span> placares exatos</span>
-                {data.summary.phasePoints > 0 && (
-                  <span><span className="text-gray-300 font-semibold">+{data.summary.phasePoints}</span> bônus fase</span>
+        <div className="px-5 py-3 border-b border-gray-800 shrink-0">
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-2.5 flex-1 min-w-0 pr-3">
+              {data?.summary.rank != null && (
+                <span className={`shrink-0 flex flex-col items-center justify-center w-11 h-11 rounded-xl font-score leading-none ${
+                  data.summary.rank === 1 ? 'bg-yellow-400/20 text-yellow-400 border border-yellow-500/40' :
+                  data.summary.rank <= 3 ? 'bg-gray-400/15 text-gray-200 border border-gray-500/40' :
+                  data.summary.rank <= 7 ? 'bg-green-500/15 text-green-400 border border-green-600/40' :
+                  'bg-gray-800 text-gray-400 border border-gray-700'
+                }`}>
+                  <span className="text-[9px] text-gray-500 -mb-0.5">POS</span>
+                  <span className="text-lg font-bold">{data.summary.rank}</span>
+                </span>
+              )}
+              <h2 className="text-lg font-bold text-white truncate">{name}</h2>
+            </div>
+            <button
+              onClick={onClose}
+              className="shrink-0 w-9 h-9 flex items-center justify-center rounded-full bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white text-xl font-bold transition-colors"
+              aria-label="Fechar"
+            >
+              ×
+            </button>
+          </div>
+
+          {data && (() => {
+            const pct = data.summary.matchesPlayed > 0
+              ? Math.round((data.summary.correctResults / data.summary.matchesPlayed) * 100)
+              : 0
+            return (
+              <div className="mt-3 space-y-2.5">
+                {/* Summary cards */}
+                <div className="grid grid-cols-4 gap-2">
+                  <div className="rounded-lg bg-gray-900 border border-gray-800 px-2 py-1.5 text-center">
+                    <div className="text-yellow-600 dark:text-yellow-400 font-score font-bold text-xl leading-none"><AnimatedNumber value={data.summary.totalPoints} /></div>
+                    <div className="text-[9px] text-gray-500 uppercase tracking-wide mt-1">Pontos</div>
+                  </div>
+                  <div className="rounded-lg bg-gray-900 border border-gray-800 px-2 py-1.5 text-center">
+                    <div className="text-green-700 dark:text-green-400 font-score font-bold text-xl leading-none">{data.summary.correctResults}</div>
+                    <div className="text-[9px] text-gray-500 uppercase tracking-wide mt-1">Result.</div>
+                  </div>
+                  <div className="rounded-lg bg-gray-900 border border-gray-800 px-2 py-1.5 text-center">
+                    <div className="text-yellow-700 dark:text-yellow-300 font-score font-bold text-xl leading-none">{data.summary.correctScores}</div>
+                    <div className="text-[9px] text-gray-500 uppercase tracking-wide mt-1">Placares</div>
+                  </div>
+                  <div className="rounded-lg bg-gray-900 border border-gray-800 px-2 py-1.5 text-center">
+                    <div className="text-gray-300 font-score font-bold text-xl leading-none">+{data.summary.phasePoints}</div>
+                    <div className="text-[9px] text-gray-500 uppercase tracking-wide mt-1">Bônus</div>
+                  </div>
+                </div>
+                {/* Accuracy bar */}
+                {data.summary.matchesPlayed > 0 && (
+                  <div>
+                    <div className="flex items-center justify-between text-[10px] text-gray-500 mb-1">
+                      <span>Aproveitamento (resultados certos)</span>
+                      <span className="font-semibold text-gray-300">{pct}%</span>
+                    </div>
+                    <div className="h-2 rounded-full bg-gray-800 overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-all duration-500 ${pct >= 60 ? 'bg-green-500' : pct >= 40 ? 'bg-yellow-500' : 'bg-red-500'}`}
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                  </div>
                 )}
               </div>
-            )}
-          </div>
-          <button
-            onClick={onClose}
-            className="shrink-0 w-9 h-9 flex items-center justify-center rounded-full bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white text-xl font-bold transition-colors"
-            aria-label="Fechar"
-          >
-            ×
-          </button>
+            )
+          })()}
         </div>
 
         {/* Tabs */}
@@ -196,7 +246,19 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
 
         {/* Body */}
         <div ref={scrollRef} className="overflow-y-auto flex-1 px-1">
-          {loading && <div className="text-center py-12 text-gray-500">Carregando...</div>}
+          {loading && (
+            <div className="divide-y divide-gray-800/60">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="flex items-center justify-between gap-2 px-3 py-3">
+                  <div className="skeleton h-4 w-28" />
+                  <div className="flex items-center gap-2">
+                    <div className="skeleton h-5 w-12" />
+                    <div className="skeleton h-4 w-6" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
 
           {!loading && tab === 'played' && (
             <div className="divide-y divide-gray-800/60">
@@ -204,15 +266,15 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
               {played.map(p => (
                 <div key={p.matchId} className={`px-3 py-2.5 ${rowColor(p)}`}>
                   <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-1 text-xs min-w-0 shrink-0">
-                      <Flag teamId={p.team1.id} size={14} />
+                    <div className="flex items-center gap-1.5 text-sm min-w-0 shrink-0">
+                      <Flag teamId={p.team1.id} size={20} />
                       <span className="text-gray-300 font-semibold">{p.team1.id}</span>
                       <span className="text-gray-600 mx-0.5">×</span>
-                      <Flag teamId={p.team2.id} size={14} />
+                      <Flag teamId={p.team2.id} size={20} />
                       <span className="text-gray-300 font-semibold">{p.team2.id}</span>
                     </div>
                     <div className="flex items-center gap-2 shrink-0 text-xs">
-                      <span className="text-gray-500">{p.result!.score1}–{p.result!.score2}</span>
+                      <span className="text-gray-500 font-score">{p.result!.score1}–{p.result!.score2}</span>
                       <span className={`font-bold px-2 py-0.5 rounded ${
                         p.correctScore ? 'text-green-800 bg-green-200 dark:text-green-300 dark:bg-green-950' :
                         p.correctResult ? 'text-blue-800 bg-blue-200 dark:text-blue-300 dark:bg-blue-950/50' :
@@ -315,7 +377,7 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
                   <div key={g.groupId} className="rounded-lg border border-gray-800 bg-gray-900 overflow-hidden">
                     <div className="flex items-center justify-between px-3 py-1.5 bg-gray-800/50">
                       <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Grupo {g.groupId}</span>
-                      {!g.complete && <span className="text-[9px] font-semibold uppercase text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded">em jogo</span>}
+                      {!g.complete && <span className="text-[9px] font-semibold uppercase text-amber-700 bg-amber-200 dark:text-amber-400 dark:bg-amber-500/10 px-1.5 py-0.5 rounded">em jogo</span>}
                     </div>
                     <div className="flex flex-col divide-y divide-gray-800/40">
                       {picks.map((team, i) => {
@@ -323,14 +385,14 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
                         const posLabel = ['1º', '2º', '3º'][i]
                         const posColor = i === 0 ? 'text-yellow-500' : i === 1 ? 'text-gray-400' : 'text-amber-600'
                         return (
-                          <div key={team.id} className={`flex items-center gap-2.5 px-3 py-2 ${qualified ? 'bg-green-950/20' : ''}`}>
+                          <div key={team.id} className={`flex items-center gap-2.5 px-3 py-2 ${qualified ? 'bg-green-50 dark:bg-green-950/20' : ''}`}>
                             <span className={`text-[11px] font-bold w-5 shrink-0 ${posColor}`}>{posLabel}</span>
                             <span>{team.flag}</span>
-                            <span className={`text-xs font-semibold flex-1 ${qualified ? 'text-green-300' : g.complete ? 'text-gray-500' : 'text-gray-300'}`}>
+                            <span className={`text-xs font-semibold flex-1 ${qualified ? 'text-green-700 dark:text-green-300' : g.complete ? 'text-gray-500' : 'text-gray-300'}`}>
                               {team.name}
                             </span>
                             {qualified
-                              ? <span className="text-xs font-bold text-green-400 bg-green-900/40 px-2 py-0.5 rounded">+3 pts</span>
+                              ? <span className="text-xs font-bold text-green-800 bg-green-200 dark:text-green-400 dark:bg-green-900/40 px-2 py-0.5 rounded font-score">+3 pts</span>
                               : g.complete
                               ? <span className="text-xs text-gray-600">✗</span>
                               : null}
@@ -349,16 +411,16 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
               {upcoming.length === 0 && <p className="text-center py-10 text-gray-600">Sem palpites futuros registrados.</p>}
               {upcoming.map(p => (
                 <div key={p.matchId} className="px-3 py-2.5 flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-1 text-xs min-w-0 shrink-0">
-                    <Flag teamId={p.team1.id} size={14} />
+                  <div className="flex items-center gap-1.5 text-sm min-w-0 shrink-0">
+                    <Flag teamId={p.team1.id} size={20} />
                     <span className="text-gray-300 font-semibold">{p.team1.id}</span>
                     <span className="text-gray-600 mx-0.5">×</span>
-                    <Flag teamId={p.team2.id} size={14} />
+                    <Flag teamId={p.team2.id} size={20} />
                     <span className="text-gray-300 font-semibold">{p.team2.id}</span>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     {p.dateBRT && <span className="text-xs text-gray-600">{p.dateBRT}</span>}
-                    <span className="font-bold text-yellow-800 bg-yellow-200 dark:text-yellow-400 dark:bg-yellow-950/40 text-xs px-2 py-0.5 rounded">
+                    <span className="font-bold text-yellow-800 bg-yellow-200 dark:text-yellow-400 dark:bg-yellow-950/40 text-xs px-2 py-0.5 rounded font-score">
                       {p.prediction ? `${p.prediction.score1}–${p.prediction.score2}` : '—'}
                     </span>
                   </div>

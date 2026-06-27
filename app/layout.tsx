@@ -1,9 +1,11 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { Header } from '@/components/Header'
-import { Plus_Jakarta_Sans } from 'next/font/google'
+import { Plus_Jakarta_Sans, Oswald } from 'next/font/google'
 
 const font = Plus_Jakarta_Sans({ subsets: ['latin'], weight: ['400', '500', '600', '700', '800'] })
+// Condensed "scoreboard" face for big numbers (placares, pontos)
+const oswald = Oswald({ subsets: ['latin'], weight: ['500', '600', '700'], variable: '--font-oswald' })
 
 export const metadata: Metadata = {
   title: 'Bolão Copa do Mundo 2026',
@@ -27,7 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="apple-touch-icon" href="/icon-192.png" />
         <meta name="theme-color" content="#166534" />
       </head>
-      <body className={`min-h-screen antialiased ${font.className}`}>
+      <body className={`min-h-screen antialiased ${font.className} ${oswald.variable}`}>
         <script dangerouslySetInnerHTML={{ __html: `(function(){var t=localStorage.getItem('theme')||'dark';if(t==='dark')document.documentElement.classList.add('dark')})()` }} />
         <script dangerouslySetInnerHTML={{ __html: `if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js')}` }} />
         <Header />

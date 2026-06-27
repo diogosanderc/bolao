@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, BarChart, Bar,
+  ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell,
 } from 'recharts'
 
 type ParticipantInfo = { id: string; name: string }
@@ -53,6 +53,7 @@ export default function EstatisticasPage() {
   const [data, setData] = useState<EstatisticasData | null>(null)
   const [loading, setLoading] = useState(true)
   const [activeIds, setActiveIds] = useState<Set<string>>(new Set())
+  const [showAllClass, setShowAllClass] = useState(false)
 
   useEffect(() => {
     fetch('/api/estatisticas')
@@ -101,7 +102,22 @@ export default function EstatisticasPage() {
 
   function clearChart() { setActiveIds(new Set()) }
 
-  if (loading) return <div className="text-center py-20 text-gray-400">Carregando estatísticas...</div>
+  if (loading) return (
+    <div className="space-y-8">
+      <div className="skeleton h-7 w-56" />
+      <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 space-y-3">
+        <div className="skeleton h-4 w-48" />
+        <div className="flex flex-wrap gap-1.5">
+          {Array.from({ length: 12 }).map((_, i) => <div key={i} className="skeleton h-6 w-20 rounded-full" />)}
+        </div>
+        <div className="skeleton h-48 w-full" />
+      </div>
+      <div className="bg-gray-900 border border-gray-800 rounded-xl p-4 space-y-3">
+        <div className="skeleton h-4 w-48" />
+        <div className="skeleton h-64 w-full" />
+      </div>
+    </div>
+  )
   if (!data) return <div className="text-center py-20 text-gray-500">Erro ao carregar dados.</div>
 
   const { participants, participantStats, classificationStats, popularPredictions, surprises, matchesPlayed, snapshots } = data
@@ -274,9 +290,10 @@ export default function EstatisticasPage() {
       {classificationStats && classificationStats.some(c => c.total > 0) && (() => {
         // Order by the bolão's overall leaderboard ranking (participants comes sorted by it)
         const rankOrder = new Map(participants.map((p, i) => [p.id, i]))
-        const ranked = classificationStats
+        const rankedAll = classificationStats
           .filter(c => c.total > 0)
           .sort((a, b) => (rankOrder.get(a.id) ?? 999) - (rankOrder.get(b.id) ?? 999))
+        const ranked = showAllClass ? rankedAll : rankedAll.slice(0, 15)
         const chartHeight = Math.max(220, ranked.length * 22 + 40)
         const ClassTooltip = ({ active, payload }: any) => {
           if (!active || !payload || !payload.length) return null
@@ -293,8 +310,18 @@ export default function EstatisticasPage() {
         }
         return (
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-            <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">Pontuação de Classificação</h3>
-            <p className="text-xs text-gray-600 mb-3">Ordem dos grupos (+2/grupo) + seleções classificadas para as 16-avos (+3 cada)</p>
+            <div className="flex items-start justify-between gap-2 mb-1">
+              <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Pontuação de Classificação</h3>
+              {rankedAll.length > 15 && (
+                <button
+                  onClick={() => setShowAllClass(v => !v)}
+                  className="shrink-0 text-xs px-2.5 py-1 rounded-full border border-gray-700 text-gray-400 hover:text-gray-200 hover:border-gray-500 transition-colors"
+                >
+                  {showAllClass ? 'Ver top 15' : `Ver todos (${rankedAll.length})`}
+                </button>
+              )}
+            </div>
+            <p className="text-xs text-gray-600 mb-3">Ordem dos grupos (+2/grupo) + seleções classificadas para as 16-avos (+3 cada){!showAllClass && rankedAll.length > 15 ? ' · top 15 da classificação geral' : ''}</p>
             <div className="flex items-center gap-4 mb-3 text-xs">
               <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm inline-block" style={{ background: '#38bdf8' }} /> Ordem dos grupos</span>
               <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm inline-block" style={{ background: '#34d399' }} /> Classificados</span>
@@ -311,6 +338,62 @@ export default function EstatisticasPage() {
                 <Bar dataKey="knockoutPoints" stackId="a" fill="#a78bfa" radius={[0, 3, 3, 0]} />
               </BarChart>
             </ResponsiveContainer>
+          </div>
+        )
+      })()}
+
+      {/* Points distribution donut — match points vs classification bonus (aggregate) */}
+      {classificationStats && participantStats.length > 0 && (() => {
+        const classTotal = classificationStats.reduce((sum, c) => sum + c.total, 0)
+        const grandTotal = participantStats.reduce((sum, s) => sum + s.totalPoints, 0)
+        const matchTotal = Math.max(0, grandTotal - classTotal)
+        if (grandTotal === 0) return null
+        const pie = [
+          { name: 'Jogos (placares)', value: matchTotal, color: '#facc15' },
+          { name: 'Classificação', value: classTotal, color: '#34d399' },
+        ]
+        const pct = (v: number) => Math.round((v / grandTotal) * 100)
+        return (
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+            <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">Distribuição dos Pontos</h3>
+            <p className="text-xs text-gray-600 mb-3">De onde vêm os pontos somados de todos os participantes</p>
+            <div className="flex flex-col sm:flex-row items-center gap-4">
+              <ResponsiveContainer width="100%" height={200} className="max-w-[260px]">
+                <PieChart>
+                  <Pie data={pie} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={55} outerRadius={85} paddingAngle={2} stroke="none">
+                    {pie.map(s => <Cell key={s.name} fill={s.color} />)}
+                  </Pie>
+                  <Tooltip
+                    content={({ active, payload }: any) => {
+                      if (!active || !payload || !payload.length) return null
+                      const d = payload[0].payload
+                      return (
+                        <div className="bg-white dark:bg-gray-800 border border-gray-700 rounded-lg p-2.5 text-xs shadow-lg">
+                          <span style={{ color: d.color }} className="font-semibold">{d.name}</span>
+                          <span className="text-gray-200 font-bold ml-2">{d.value} pts ({pct(d.value)}%)</span>
+                        </div>
+                      )
+                    }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="space-y-2 w-full sm:w-auto">
+                {pie.map(s => (
+                  <div key={s.name} className="flex items-center gap-2 text-sm">
+                    <span className="w-3 h-3 rounded-sm inline-block shrink-0" style={{ background: s.color }} />
+                    <span className="text-gray-300 flex-1">{s.name}</span>
+                    <span className="font-score font-bold text-gray-200">{s.value}</span>
+                    <span className="text-gray-500 text-xs w-10 text-right">{pct(s.value)}%</span>
+                  </div>
+                ))}
+                <div className="flex items-center gap-2 text-sm border-t border-gray-800 pt-2">
+                  <span className="w-3 h-3 inline-block shrink-0" />
+                  <span className="text-gray-400 flex-1">Total</span>
+                  <span className="font-score font-bold text-yellow-400">{grandTotal}</span>
+                  <span className="w-10" />
+                </div>
+              </div>
+            </div>
           </div>
         )
       })()}

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { readDB } from '@/lib/db'
 import { matchById, teamById, ALL_MATCHES, GROUP_MATCHES, GROUPS } from '@/lib/copa2026'
-import { scoreMatch } from '@/lib/scoring'
+import { scoreMatch, computeLeaderboard } from '@/lib/scoring'
 
 // Build a map from teamId → groupId for lookup
 const teamGroupMap: Record<string, string> = {}
@@ -41,6 +41,15 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     const db = await readDB()
     const participant = db.participants.find(p => p.id === id)
     if (!participant) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+
+    // Overall ranking position (consistent with the main leaderboard)
+    const predCount = new Map<string, number>()
+    for (const p of db.matchPredictions) predCount.set(p.participantId, (predCount.get(p.participantId) ?? 0) + 1)
+    const rankedParticipants = db.participants.filter(p => (predCount.get(p.id) ?? 0) > 0)
+    const lb = computeLeaderboard(rankedParticipants, db.matchPredictions, db.groupPredictions, db.results, db.r32TeamPicks, db.knockoutPhasePicks)
+    const lbIdx = lb.findIndex(e => e.participant.id === id)
+    const rank = lbIdx >= 0 ? lbIdx + 1 : null
+    const totalParticipants = lb.length
 
     const matchDates = db.matchDates ?? {}
     const resultMap = Object.fromEntries(db.results.map(r => [r.matchId, r]))
@@ -212,7 +221,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     return NextResponse.json({
       participant: { id: participant.id, name: participant.name },
       predictions,
-      summary: { totalPoints, matchPoints, correctResults, correctScores, matchesPlayed: played.length, groupOrderPoints, r32Points, phasePoints },
+      summary: { totalPoints, matchPoints, correctResults, correctScores, matchesPlayed: played.length, groupOrderPoints, r32Points, phasePoints, rank, totalParticipants },
       groupDetail,
       r32Detail,
       groupPredictions,

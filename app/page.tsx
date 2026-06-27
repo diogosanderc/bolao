@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from 'react'
 import { LeaderboardEntry } from '@/lib/types'
 import { Flag } from '@/components/Flag'
 import { ParticipantModal } from '@/components/ParticipantModal'
+import { Scoreboard } from '@/components/Scoreboard'
+import { AnimatedNumber } from '@/components/AnimatedNumber'
 
 type LastMatch = {
   matchId: string
@@ -51,6 +53,7 @@ export default function LeaderboardPage() {
   const [matchPredLoading, setMatchPredLoading] = useState(false)
   const [sharingImage, setSharingImage] = useState(false)
   const [imagePicker, setImagePicker] = useState(false)
+  const [reloading, setReloading] = useState(false)
   type ImageColumn = 'uj' | 'u2' | 'u2grupos'
   const [imageColumn, setImageColumn] = useState<ImageColumn>('uj')
   const leaderboardRef = useRef<HTMLDivElement>(null)
@@ -551,8 +554,8 @@ export default function LeaderboardPage() {
             </div>
           )}
           <button
-            onClick={() => location.reload()}
-            className="text-xl text-gray-400 hover:text-gray-200 transition-colors"
+            onClick={() => { setReloading(true); location.reload() }}
+            className={`text-xl text-gray-400 hover:text-gray-200 transition-colors ${reloading ? 'animate-spin' : ''}`}
             aria-label="Atualizar"
           >
             ↻
@@ -570,14 +573,10 @@ export default function LeaderboardPage() {
                   : <span className="text-xs text-red-700 dark:text-red-400 uppercase tracking-wider font-bold">🔴 Ao vivo</span>}
                 {m.clock && <span className={`text-xs font-semibold ${m.suspended ? 'text-yellow-700 dark:text-yellow-300' : 'text-red-800 dark:text-red-300'}`}>{m.clock}</span>}
               </div>
-              <div className="flex items-center gap-2 text-sm text-gray-200 dark:text-white">
-                <span className="flex items-center gap-1.5"><Flag teamId={m.team1.id} size={18} />{m.team1.name}</span>
-                <span className="font-bold text-gray-200 dark:text-white text-base px-1">
-                  {m.liveScore1 !== undefined && m.liveScore2 !== undefined
-                    ? `${m.liveScore1} × ${m.liveScore2}`
-                    : <span className="text-red-500 dark:text-red-300">vs</span>}
-                </span>
-                <span className="flex items-center gap-1.5"><Flag teamId={m.team2.id} size={18} />{m.team2.name}</span>
+              <div className="flex items-center justify-center gap-3 text-sm text-gray-200 dark:text-white">
+                <span className="flex items-center gap-1.5 flex-1 justify-end min-w-0"><span className="truncate">{m.team1.name}</span><Flag teamId={m.team1.id} size={22} /></span>
+                <Scoreboard score1={m.liveScore1} score2={m.liveScore2} pending={m.liveScore1 === undefined} size="md" live={!m.suspended} />
+                <span className="flex items-center gap-1.5 flex-1 min-w-0"><Flag teamId={m.team2.id} size={22} /><span className="truncate">{m.team2.name}</span></span>
               </div>
               {m.goals && m.goals.length > 0 && (() => {
                 const t1Goals = m.goals.filter(g => g.teamId === m.team1.id)
@@ -626,10 +625,10 @@ export default function LeaderboardPage() {
       {lastMatch && (
         <div className="bg-gray-900 border border-gray-800 rounded-lg px-4 py-2.5">
           <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">Último jogo</div>
-          <div className="flex items-center gap-2 text-sm text-gray-300">
-            <span className="flex items-center gap-1.5"><Flag teamId={lastMatch.team1.id} size={18} />{lastMatch.team1.name}</span>
-            <span className="font-bold text-white">{lastMatch.score1} × {lastMatch.score2}</span>
-            <span className="flex items-center gap-1.5"><Flag teamId={lastMatch.team2.id} size={18} />{lastMatch.team2.name}</span>
+          <div className="flex items-center justify-center gap-3 text-sm text-gray-300">
+            <span className="flex items-center gap-1.5 flex-1 justify-end min-w-0"><span className="truncate">{lastMatch.team1.name}</span><Flag teamId={lastMatch.team1.id} size={20} /></span>
+            <Scoreboard score1={lastMatch.score1} score2={lastMatch.score2} size="sm" />
+            <span className="flex items-center gap-1.5 flex-1 min-w-0"><Flag teamId={lastMatch.team2.id} size={20} /><span className="truncate">{lastMatch.team2.name}</span></span>
           </div>
         </div>
       )}
@@ -653,7 +652,19 @@ export default function LeaderboardPage() {
       ))}
 
       {loading && (
-        <div className="text-center py-20 text-gray-400">Carregando...</div>
+        <div className="rounded-xl border border-gray-800 overflow-hidden">
+          <div className="skeleton h-10 w-full opacity-60" style={{ borderRadius: 0 }} />
+          <div className="divide-y divide-gray-800">
+            {Array.from({ length: 10 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-3 px-4 py-3">
+                <div className="skeleton w-5 h-5 rounded-full shrink-0" />
+                <div className="skeleton h-4 flex-1" style={{ maxWidth: `${50 + ((i * 7) % 35)}%` }} />
+                <div className="skeleton h-4 w-8 shrink-0" />
+                <div className="skeleton h-5 w-10 shrink-0" />
+              </div>
+            ))}
+          </div>
+        </div>
       )}
 
       {!loading && data.length === 0 && (
@@ -712,7 +723,7 @@ export default function LeaderboardPage() {
                         : <span className="text-red-700 dark:text-red-400 text-[10px] font-bold tabular-nums">▼{Math.abs(change)}</span>
                     }
                   </span>
-                  <span className="text-gray-200 dark:text-yellow-400 font-bold text-sm shrink-0 w-10 text-right tabular-nums">{entry.totalPoints}</span>
+                  <span className="text-gray-200 dark:text-yellow-400 font-bold text-base shrink-0 w-10 text-right font-score"><AnimatedNumber value={entry.totalPoints} /></span>
                 </div>
               )
             })}
@@ -823,8 +834,8 @@ export default function LeaderboardPage() {
                       return <span className={pts > 0 ? 'text-blue-600 dark:text-blue-400 font-semibold' : 'text-gray-400 dark:text-gray-500'}>{pts}</span>
                     })()}
                   </td>
-                  <td className={`px-4 py-3 text-right font-bold text-base ${isRelated(entry.totalPoints) ? 'text-red-600 dark:text-red-400' : isWarning(entry.totalPoints) ? 'text-gray-200 dark:text-yellow-500' : 'text-gray-200 dark:text-yellow-400'}`}>
-                    {entry.totalPoints}
+                  <td className={`px-4 py-3 text-right font-bold text-lg font-score ${isRelated(entry.totalPoints) ? 'text-red-600 dark:text-red-400' : isWarning(entry.totalPoints) ? 'text-gray-200 dark:text-yellow-500' : 'text-gray-200 dark:text-yellow-400'}`}>
+                    <AnimatedNumber value={entry.totalPoints} />
                   </td>
                 </tr>
               )}
