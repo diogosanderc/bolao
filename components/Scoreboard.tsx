@@ -10,9 +10,9 @@ type Props = {
 }
 
 const SIZES = {
-  sm: { box: 'min-w-[28px] px-2 py-1 text-lg', gap: 'gap-1', sep: 'text-sm' },
-  md: { box: 'min-w-[38px] px-3 py-1.5 text-2xl', gap: 'gap-1.5', sep: 'text-base' },
-  lg: { box: 'min-w-[46px] px-3.5 py-2 text-3xl', gap: 'gap-2', sep: 'text-lg' },
+  sm: { box: 'min-w-[26px] px-1.5 py-1 text-base', gap: 'gap-1', sep: 'text-sm' },
+  md: { box: 'min-w-[30px] px-2 py-1 text-lg', gap: 'gap-1.5', sep: 'text-sm' },
+  lg: { box: 'min-w-[38px] px-2.5 py-1.5 text-2xl', gap: 'gap-2', sep: 'text-base' },
 }
 
 /** Stadium-style scoreboard: two dark digit panels split by a colon. */
@@ -28,7 +28,7 @@ export function Scoreboard({ score1, score2, pending, size = 'md', live }: Props
     )
   }
 
-  const panel = `scoreboard-digit rounded-md text-white tabular-nums text-center ${s.box} ${
+  const panel = `scoreboard-digit inline-flex items-center justify-center rounded-md text-white tabular-nums ${s.box} ${
     live
       ? 'bg-gradient-to-b from-red-700 to-red-900 shadow-inner shadow-red-950/50'
       : 'bg-gradient-to-b from-gray-700 to-gray-900 shadow-inner shadow-black/40'
