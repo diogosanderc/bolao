@@ -52,6 +52,7 @@ export default function LeaderboardPage() {
   const [selectedParticipant, setSelectedParticipant] = useState<{ id: string; name: string } | null>(null)
   const [matchModal, setMatchModal] = useState<{ matchId: string; label: string } | null>(null)
   const [matchPredictions, setMatchPredictions] = useState<{ name: string; score1: number; score2: number }[]>([])
+  const [matchResult, setMatchResult] = useState<{ score1: number; score2: number } | null>(null)
   const [matchPredLoading, setMatchPredLoading] = useState(false)
   const [sharingImage, setSharingImage] = useState(false)
   const [imagePicker, setImagePicker] = useState(false)
@@ -60,13 +61,19 @@ export default function LeaderboardPage() {
   const [imageColumn, setImageColumn] = useState<ImageColumn>('uj')
   const leaderboardRef = useRef<HTMLDivElement>(null)
 
-  function openMatchPredictions(matchId: string, label: string) {
+  function openMatchPredictions(matchId: string, label: string, liveScore?: { score1: number; score2: number }) {
     setMatchModal({ matchId, label })
     setMatchPredictions([])
+    setMatchResult(liveScore ?? null)
     setMatchPredLoading(true)
     fetch(`/api/match/${matchId}/predictions`)
       .then(r => r.json())
-      .then(d => { setMatchPredictions(d.predictions ?? []); setMatchPredLoading(false) })
+      .then(d => {
+        setMatchPredictions(d.predictions ?? [])
+        // Final result wins; otherwise keep the live score passed in (if any)
+        if (d.result) setMatchResult({ score1: d.result.score1, score2: d.result.score2 })
+        setMatchPredLoading(false)
+      })
       .catch(() => setMatchPredLoading(false))
   }
 
@@ -568,7 +575,11 @@ export default function LeaderboardPage() {
       {liveMatches.length > 0 && (
         <div className="space-y-3">
           {liveMatches.map(m => (
-            <div key={m.matchId} className={`border rounded-lg px-4 py-2.5 ${m.suspended ? 'bg-yellow-50 dark:bg-yellow-950/60 border-yellow-400 dark:border-yellow-700' : 'bg-red-50 dark:bg-red-950/60 border-red-400 dark:border-red-700 animate-pulse'}`}>
+            <div
+              key={m.matchId}
+              onClick={() => openMatchPredictions(m.matchId, `${m.team1.name} vs ${m.team2.name}`, m.liveScore1 !== undefined && m.liveScore2 !== undefined ? { score1: m.liveScore1, score2: m.liveScore2 } : undefined)}
+              className={`border rounded-lg px-4 py-2.5 cursor-pointer transition-shadow hover:shadow-lg ${m.suspended ? 'bg-yellow-50 dark:bg-yellow-950/60 border-yellow-400 dark:border-yellow-700' : 'bg-red-50 dark:bg-red-950/60 border-red-400 dark:border-red-700 animate-pulse'}`}
+            >
               <div className="flex items-center justify-between mb-1">
                 {m.suspended
                   ? <span className="text-xs text-yellow-700 dark:text-yellow-400 uppercase tracking-wider font-bold">⛈️ Paralisado</span>
@@ -600,6 +611,7 @@ export default function LeaderboardPage() {
                   </div>
                 )
               })()}
+              <p className="text-right text-[10px] text-gray-500 dark:text-gray-400 mt-1.5">👁 toque para ver os palpites</p>
             </div>
           ))}
           {lastRefresh && (
@@ -625,14 +637,20 @@ export default function LeaderboardPage() {
       ))}
 
       {lastMatch && (
-        <div className="bg-gradient-to-br from-gray-900 to-gray-950 border border-gray-800 rounded-lg px-4 py-2.5">
-          <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">Último jogo</div>
+        <button
+          onClick={() => openMatchPredictions(lastMatch.matchId, `${lastMatch.team1.name} vs ${lastMatch.team2.name}`, { score1: lastMatch.score1, score2: lastMatch.score2 })}
+          className="w-full text-left bg-gradient-to-br from-gray-900 to-gray-950 border border-gray-800 hover:border-gray-600 rounded-lg px-4 py-2.5 transition-colors"
+        >
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-xs text-gray-500 uppercase tracking-wider">Último jogo</span>
+            <span className="text-[10px] text-gray-500 dark:text-gray-400">👁 palpites →</span>
+          </div>
           <div className="flex items-center gap-2.5 text-sm text-gray-300">
             <span className="flex items-center gap-1.5 min-w-0"><Flag teamId={lastMatch.team1.id} size={20} /><span className="truncate">{lastMatch.team1.name}</span></span>
             <Scoreboard score1={lastMatch.score1} score2={lastMatch.score2} size="sm" />
             <span className="flex items-center gap-1.5 min-w-0"><Flag teamId={lastMatch.team2.id} size={20} /><span className="truncate">{lastMatch.team2.name}</span></span>
           </div>
-        </div>
+        </button>
       )}
 
       {liveMatches.length === 0 && nextMatches.map(m => (
@@ -900,9 +918,17 @@ export default function LeaderboardPage() {
             className="relative w-full sm:max-w-2xl bg-gray-900 border border-gray-700 rounded-t-2xl sm:rounded-2xl p-4 pb-8 sm:pb-4 max-h-[85vh] overflow-y-auto"
             onClick={e => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-bold text-gray-200 text-base">{matchModal.label}</h3>
-              <button onClick={() => setMatchModal(null)} className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white text-base transition-colors">✕</button>
+            <div className="flex items-start justify-between mb-3 gap-3">
+              <div className="min-w-0">
+                <h3 className="font-bold text-gray-200 text-base">{matchModal.label}</h3>
+                {matchResult && (
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <span className="text-[10px] text-gray-500 uppercase tracking-wide">Resultado</span>
+                    <Scoreboard score1={matchResult.score1} score2={matchResult.score2} size="sm" />
+                  </div>
+                )}
+              </div>
+              <button onClick={() => setMatchModal(null)} className="shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white text-base transition-colors">✕</button>
             </div>
 
             {matchPredLoading ? (
@@ -920,16 +946,21 @@ export default function LeaderboardPage() {
                     }, {})
                   )
                     .sort((a, b) => b[1].length - a[1].length)
-                    .map(([score, names]) => (
-                      <div key={score} className="flex items-start justify-between gap-3 py-2.5">
+                    .map(([score, names]) => {
+                      const isExact = matchResult ? score === `${matchResult.score1}×${matchResult.score2}` : false
+                      return (
+                      <div key={score} className={`flex items-start justify-between gap-3 py-2.5 px-2 -mx-2 rounded ${isExact ? 'bg-green-100 dark:bg-green-950/40' : ''}`}>
                         <div className="flex flex-wrap gap-1 flex-1">
                           {names.sort().map(name => (
-                            <span key={name} title={name} className="text-xs bg-gray-800 text-gray-300 rounded px-1.5 py-0.5">{chipCode(name)}</span>
+                            <span key={name} title={name} className={`text-xs rounded px-1.5 py-0.5 ${isExact ? 'bg-green-200 text-green-900 dark:bg-green-900/60 dark:text-green-200 font-semibold' : 'bg-gray-800 text-gray-300'}`}>{chipCode(name)}</span>
                           ))}
                         </div>
-                        <span className="text-sm font-bold text-green-400 shrink-0">{score}</span>
+                        <span className={`text-sm font-bold shrink-0 flex items-center gap-1 ${isExact ? 'text-green-700 dark:text-green-300' : 'text-green-400'}`}>
+                          {isExact && <span title="Placar exato">🎯</span>}{score}
+                        </span>
                       </div>
-                    ))}
+                      )
+                    })}
                 </div>
                 <button
                   onClick={() => shareMatchPredictions(matchModal.label.split(' vs ')[0], matchModal.label.split(' vs ')[1], '')}
