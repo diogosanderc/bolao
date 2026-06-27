@@ -47,7 +47,10 @@ export default function LeaderboardPage() {
   const [lastMatch, setLastMatch] = useState<LastMatch>(null)
   const [nextMatch, setNextMatch] = useState<ScheduleMatch | null>(null)
   const [nextMatches, setNextMatches] = useState<ScheduleMatch[]>([])
+  const [upcoming, setUpcoming] = useState<ScheduleMatch[]>([])
   const [liveMatches, setLiveMatches] = useState<ScheduleMatch[]>([])
+  const [carouselIdx, setCarouselIdx] = useState(0)
+  const carouselRef = useRef<HTMLDivElement>(null)
   const [loading, setLoading] = useState(true)
   const [projectionMode, setProjectionMode] = useState(false)
   const [remainingMatches, setRemainingMatches] = useState(0)
@@ -131,6 +134,7 @@ export default function LeaderboardPage() {
       .then(d => {
         setNextMatch(d.nextMatch ?? null)
         setNextMatches(Array.isArray(d.nextMatches) ? d.nextMatches : [])
+        setUpcoming(Array.isArray(d.upcoming) ? d.upcoming : [])
         setLiveMatches(Array.isArray(d.live) ? d.live : [])
         setScheduleLoaded(true)
       })
@@ -840,29 +844,59 @@ export default function LeaderboardPage() {
         </button>
       )}
 
-      {liveMatches.length === 0 && nextMatches.map(m => (
-        <button
-          key={m.matchId}
-          onClick={() => openMatchPredictions(m.matchId, `${m.team1.name} vs ${m.team2.name}`)}
-          className="w-full bg-gradient-to-br from-gray-900 to-gray-950 border border-gray-800 hover:border-gray-600 rounded-lg px-4 py-2.5 text-left transition-colors"
-        >
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-xs text-gray-500 uppercase tracking-wider">Próximo jogo</span>
-            <span className="flex items-center gap-2">
-              {formatCountdown(m.date) && (
-                <span className="text-[10px] font-bold text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-950/50 px-1.5 py-0.5 rounded tabular-nums">⏱ {formatCountdown(m.date)}</span>
-              )}
-              <span className="text-xs text-green-700 dark:text-yellow-500 font-semibold">{m.dateBRT} →</span>
-            </span>
+      {liveMatches.length === 0 && upcoming.length > 0 && (() => {
+        const items = upcoming.slice(0, 12)
+        return (
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-xs text-gray-500 uppercase tracking-wider">{items.length > 1 ? 'Próximos jogos' : 'Próximo jogo'}</span>
+              {items.length > 1 && <span className="text-[10px] text-gray-600">deslize para o lado →</span>}
+            </div>
+            <div
+              ref={carouselRef}
+              onScroll={() => {
+                const el = carouselRef.current
+                if (!el) return
+                const card = el.firstElementChild as HTMLElement | null
+                const w = (card?.getBoundingClientRect().width ?? 1) + 12
+                setCarouselIdx(Math.round(el.scrollLeft / w))
+              }}
+              className="flex gap-3 overflow-x-auto snap-x snap-mandatory no-scrollbar -mx-4 px-4 pb-1"
+            >
+              {items.map(m => (
+                <button
+                  key={m.matchId}
+                  onClick={() => openMatchPredictions(m.matchId, `${m.team1.name} vs ${m.team2.name}`)}
+                  className="snap-center shrink-0 w-[86%] sm:w-[360px] bg-gradient-to-br from-gray-900 to-gray-950 border border-gray-800 hover:border-gray-600 rounded-lg px-4 py-2.5 text-left transition-colors"
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs text-gray-500 uppercase tracking-wider">Próximo jogo</span>
+                    <span className="flex items-center gap-2">
+                      {formatCountdown(m.date) && (
+                        <span className="text-[10px] font-bold text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-950/50 px-1.5 py-0.5 rounded tabular-nums">⏱ {formatCountdown(m.date)}</span>
+                      )}
+                      <span className="text-xs text-green-700 dark:text-yellow-500 font-semibold">{m.dateBRT}</span>
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-gray-300">
+                    <span className="flex items-center gap-1.5 min-w-0"><Flag teamId={m.team1.id} size={18} /><span className="truncate">{m.team1.name}</span></span>
+                    <span className="text-gray-600">vs</span>
+                    <span className="flex items-center gap-1.5 min-w-0"><Flag teamId={m.team2.id} size={18} /><span className="truncate">{m.team2.name}</span></span>
+                  </div>
+                  <BroadcastBadges channels={broadcastersForMatchId(m.matchId, m.team1.id, m.team2.id, matchById[m.matchId]?.phase)} />
+                </button>
+              ))}
+            </div>
+            {items.length > 1 && (
+              <div className="flex justify-center gap-1.5 mt-2">
+                {items.map((_, i) => (
+                  <span key={i} className={`h-1.5 rounded-full transition-all ${i === carouselIdx ? 'w-4 bg-gray-400' : 'w-1.5 bg-gray-700'}`} />
+                ))}
+              </div>
+            )}
           </div>
-          <div className="flex items-center gap-2 text-sm text-gray-300">
-            <span className="flex items-center gap-1.5"><Flag teamId={m.team1.id} size={18} />{m.team1.name}</span>
-            <span className="text-gray-600">vs</span>
-            <span className="flex items-center gap-1.5"><Flag teamId={m.team2.id} size={18} />{m.team2.name}</span>
-          </div>
-          <BroadcastBadges channels={broadcastersForMatchId(m.matchId, m.team1.id, m.team2.id, matchById[m.matchId]?.phase)} />
-        </button>
-      ))}
+        )
+      })()}
 
       {loading && (
         <div className="rounded-xl border border-gray-800 overflow-hidden">

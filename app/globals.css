@@ -40,6 +40,10 @@ html {
 .animate-flash-up   { animation: flash-green 2s ease-out both; }
 .animate-flash-down { animation: flash-red   2s ease-out both; }
 
+/* Hide scrollbar (carousel) while keeping scroll/swipe */
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
 /* Sporty "scoreboard" numerals — condensed face + tabular figures */
 .font-score {
   font-family: var(--font-oswald), system-ui, sans-serif;
