@@ -59,7 +59,6 @@ export default function LeaderboardPage() {
   const [imagePicker, setImagePicker] = useState(false)
   const [reloading, setReloading] = useState(false)
   const [scheduleLoaded, setScheduleLoaded] = useState(false)
-  const [showLegend, setShowLegend] = useState(false)
   const [pullDist, setPullDist] = useState(0)
   const [now, setNow] = useState(0)
   const [rowsIn, setRowsIn] = useState(false)
@@ -1018,29 +1017,23 @@ export default function LeaderboardPage() {
             )}
             </tbody>
           </table>
-          <div className="flex items-center justify-between gap-2 px-3 py-2 border-t border-gray-800">
+          <div className="px-3 py-2 border-t border-gray-800">
             <span className="text-xs text-gray-600">Toque num participante para ver os palpites</span>
-            <button onClick={() => setShowLegend(v => !v)} className="shrink-0 flex items-center gap-1 text-xs text-gray-500 hover:text-gray-300 transition-colors">
-              <span className="flex items-center justify-center w-5 h-5 rounded-full border border-gray-600 text-[10px] font-bold">i</span>
-              Legenda
-            </button>
           </div>
-          {showLegend && (
-            <div className="px-4 pb-3 pt-1 text-[11px] text-gray-400 space-y-1.5 border-t border-gray-800 animate-fade-in">
-              <div className="grid grid-cols-2 gap-x-4 gap-y-1">
-                <span><span className="font-bold text-gray-300">UJ</span> — pontos do último jogo</span>
-                <span><span className="font-bold text-gray-300">U4</span> — soma dos 4 últimos jogos</span>
-                <span><span className="font-bold text-gray-300">PTS</span> — total acumulado</span>
-                <span><span className="font-bold text-gray-300">-N</span> — pontos atrás do colocado acima</span>
-              </div>
-              <div className="flex flex-wrap gap-x-4 gap-y-1 pt-1 border-t border-gray-800/60">
-                <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-yellow-500 inline-block" /> Líder</span>
-                <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-green-600 inline-block" /> Zona Top 7 (4º–7º)</span>
-                <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-yellow-600 inline-block" /> Alerta</span>
-                <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-red-500 inline-block" /> Zona de risco</span>
-              </div>
+          <div className="px-4 pb-3 pt-1 text-[11px] text-gray-400 space-y-1.5 border-t border-gray-800">
+            <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+              <span><span className="font-bold text-gray-300">UJ</span> — pontos do último jogo</span>
+              <span><span className="font-bold text-gray-300">U4</span> — soma dos 4 últimos jogos</span>
+              <span><span className="font-bold text-gray-300">PTS</span> — total acumulado</span>
+              <span><span className="font-bold text-gray-300">-N</span> — pontos atrás do colocado acima</span>
             </div>
-          )}
+            <div className="flex flex-wrap gap-x-4 gap-y-1 pt-1 border-t border-gray-800/60">
+              <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-yellow-500 inline-block" /> Líder</span>
+              <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-green-600 inline-block" /> Zona Top 7 (4º–7º)</span>
+              <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-yellow-600 inline-block" /> Alerta</span>
+              <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-red-500 inline-block" /> Zona de risco</span>
+            </div>
+          </div>
           {lastRefresh && (
             <p className="text-center text-[10px] text-gray-600 pb-2">
               Atualizado às {lastRefresh.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
