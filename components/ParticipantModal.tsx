@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from 'react'
 import { Flag } from '@/components/Flag'
 import { PHASE_LABELS, Phase } from '@/lib/types'
 import { AnimatedNumber } from '@/components/AnimatedNumber'
-import { Avatar } from '@/components/Avatar'
 
 type TeamRef = { id: string; name: string; flag: string }
 
@@ -167,7 +166,6 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
                   <span className="text-lg font-bold">{data.summary.rank}</span>
                 </span>
               )}
-              <Avatar name={name} size={34} />
               <h2 className="text-lg font-bold text-white truncate">{name}</h2>
             </div>
             <button

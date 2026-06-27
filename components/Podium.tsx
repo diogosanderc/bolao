@@ -1,7 +1,6 @@
 'use client'
 
 import { LeaderboardEntry } from '@/lib/types'
-import { Avatar } from '@/components/Avatar'
 import { AnimatedNumber } from '@/components/AnimatedNumber'
 
 type Props = {
@@ -33,12 +32,12 @@ export function Podium({ top3, onSelect }: Props) {
             className="flex flex-col items-center group"
           >
             <div className="relative mb-1.5">
-              <Avatar
-                name={entry.participant.name}
-                size={isFirst ? 56 : 44}
-                className={`ring-2 ${slot.ring} ${slot.glow} transition-transform group-hover:scale-105`}
-              />
-              <span className="absolute -bottom-1 -right-1 text-base sm:text-lg drop-shadow">{slot.medal}</span>
+              <span
+                className={`flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-900 ring-2 ${slot.ring} ${slot.glow} transition-transform group-hover:scale-105`}
+                style={{ width: isFirst ? 56 : 44, height: isFirst ? 56 : 44, fontSize: isFirst ? 30 : 24 }}
+              >
+                {slot.medal}
+              </span>
             </div>
             <span className={`text-[11px] sm:text-xs font-semibold text-center leading-tight truncate w-full px-0.5 ${isFirst ? 'text-yellow-600 dark:text-yellow-300' : 'text-gray-700 dark:text-gray-200'}`}>
               {entry.participant.name}

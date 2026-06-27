@@ -6,7 +6,6 @@ import { Flag } from '@/components/Flag'
 import { ParticipantModal } from '@/components/ParticipantModal'
 import { Scoreboard } from '@/components/Scoreboard'
 import { AnimatedNumber } from '@/components/AnimatedNumber'
-import { Avatar } from '@/components/Avatar'
 import { Podium } from '@/components/Podium'
 import { chipCode } from '@/lib/names'
 
@@ -715,7 +714,6 @@ export default function LeaderboardPage() {
                   onClick={() => setSelectedParticipant({ id: entry.participant.id, name: entry.participant.name })}
                 >
                   <span className="text-gray-500 text-xs w-5 text-right shrink-0 font-semibold">{rank}</span>
-                  <Avatar name={entry.participant.name} size={22} />
                   <span className="text-gray-200 text-sm font-semibold flex-1 min-w-0 truncate">{entry.participant.name}</span>
                   {liveGain > 0
                     ? <span className="text-green-700 dark:text-green-400 text-xs font-bold w-9 text-right shrink-0 tabular-nums">+{liveGain}</span>
@@ -835,7 +833,6 @@ export default function LeaderboardPage() {
                     ''
                   }`}>
                     <div className="flex items-center gap-2 min-w-0">
-                      <Avatar name={entry.participant.name} size={26} />
                       <span className="truncate">{entry.participant.name}</span>
                       {(() => {
                         const ch: number | undefined = p.positionChange
