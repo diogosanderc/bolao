@@ -41,7 +41,7 @@ export async function GET() {
 
     for (let i = 0; i < sortedResults.length; i++) {
       const slice = sortedResults.slice(0, i + 1)
-      const lb = computeLeaderboard(participants, db.matchPredictions, db.groupPredictions, slice)
+      const lb = computeLeaderboard(participants, db.matchPredictions, db.groupPredictions, slice, db.r32TeamPicks, db.knockoutPhasePicks)
       const r = sortedResults[i]
       const pts: Record<string, number> = {}
       for (const entry of lb) pts[entry.participant.id] = entry.totalPoints
@@ -82,7 +82,7 @@ export async function GET() {
       }
     }
 
-    const finalLb = computeLeaderboard(participants, db.matchPredictions, db.groupPredictions, sortedResults)
+    const finalLb = computeLeaderboard(participants, db.matchPredictions, db.groupPredictions, sortedResults, db.r32TeamPicks, db.knockoutPhasePicks)
     for (const entry of finalLb) {
       if (stats[entry.participant.id]) {
         stats[entry.participant.id].totalPoints = entry.totalPoints
@@ -91,6 +91,23 @@ export async function GET() {
           : 0
       }
     }
+
+    // Classification bonus per participant: group order (+2/group) + qualified-team advancement points
+    const classificationStats = finalLb.map(entry => {
+      const groupOrderPoints = entry.breakdown.groupOrderPoints
+      const adv = entry.breakdown.advancementPoints
+      const r32Points = adv['round_of_32'] ?? 0
+      const knockoutPoints = (adv['round_of_16'] ?? 0) + (adv['quarterfinal'] ?? 0)
+        + (adv['semifinal'] ?? 0) + (adv['final'] ?? 0)
+      return {
+        id: entry.participant.id,
+        name: entry.participant.name,
+        groupOrderPoints,
+        r32Points,
+        knockoutPoints,
+        total: groupOrderPoints + r32Points + knockoutPoints,
+      }
+    }).sort((a, b) => b.total - a.total)
 
     // Most popular prediction per played match
     const popularPredictions: {
@@ -136,6 +153,7 @@ export async function GET() {
       participants: sortedParticipants.map(p => ({ id: p.id, name: p.name })),
       snapshots,
       participantStats: Object.values(stats),
+      classificationStats,
       popularPredictions,
       surprises: surprises.map(s => s.matchId),
       matchesPlayed,

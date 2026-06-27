@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer,
+  ResponsiveContainer, BarChart, Bar,
 } from 'recharts'
 
 type ParticipantInfo = { id: string; name: string }
@@ -21,6 +21,12 @@ type ParticipantStat = {
   correctGoals: number; pointsPerMatch: number; totalPoints: number
 }
 
+type ClassificationStat = {
+  id: string; name: string
+  groupOrderPoints: number; r32Points: number
+  knockoutPoints: number; total: number
+}
+
 type PopularPrediction = {
   matchId: string; label: string; dateBRT: string
   topPrediction: string; count: number; totalPredictions: number
@@ -31,6 +37,7 @@ type EstatisticasData = {
   participants: ParticipantInfo[]
   snapshots: Snapshot[]
   participantStats: ParticipantStat[]
+  classificationStats: ClassificationStat[]
   popularPredictions: PopularPrediction[]
   surprises: string[]
   matchesPlayed: number
@@ -97,7 +104,7 @@ export default function EstatisticasPage() {
   if (loading) return <div className="text-center py-20 text-gray-400">Carregando estatísticas...</div>
   if (!data) return <div className="text-center py-20 text-gray-500">Erro ao carregar dados.</div>
 
-  const { participants, participantStats, popularPredictions, surprises, matchesPlayed, snapshots } = data
+  const { participants, participantStats, classificationStats, popularPredictions, surprises, matchesPlayed, snapshots } = data
 
   if (matchesPlayed === 0) {
     return (
@@ -262,6 +269,47 @@ export default function EstatisticasPage() {
           )}
         </div>
       )}
+
+      {/* Classification bonus chart — group order + qualified-team points only */}
+      {classificationStats && classificationStats.some(c => c.total > 0) && (() => {
+        const ranked = classificationStats.filter(c => c.total > 0)
+        const chartHeight = Math.max(220, ranked.length * 22 + 40)
+        const ClassTooltip = ({ active, payload }: any) => {
+          if (!active || !payload || !payload.length) return null
+          const d = payload[0].payload as ClassificationStat
+          return (
+            <div className="bg-white dark:bg-gray-800 border border-gray-700 rounded-lg p-3 text-xs shadow-lg">
+              <p className="text-gray-200 font-semibold mb-2 truncate">{d.name}</p>
+              <div className="flex justify-between gap-4"><span className="text-sky-400">Ordem dos grupos</span><span className="font-bold text-gray-200">{d.groupOrderPoints}</span></div>
+              <div className="flex justify-between gap-4"><span className="text-emerald-400">Classificados 16-avos</span><span className="font-bold text-gray-200">{d.r32Points}</span></div>
+              {d.knockoutPoints > 0 && <div className="flex justify-between gap-4"><span className="text-violet-400">Mata-mata</span><span className="font-bold text-gray-200">{d.knockoutPoints}</span></div>}
+              <div className="flex justify-between gap-4 border-t border-gray-700 mt-1 pt-1"><span className="text-yellow-400">Total</span><span className="font-bold text-yellow-400">{d.total}</span></div>
+            </div>
+          )
+        }
+        return (
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
+            <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-1">Pontuação de Classificação</h3>
+            <p className="text-xs text-gray-600 mb-3">Ordem dos grupos (+2/grupo) + seleções classificadas para as 16-avos (+3 cada)</p>
+            <div className="flex items-center gap-4 mb-3 text-xs">
+              <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm inline-block" style={{ background: '#38bdf8' }} /> Ordem dos grupos</span>
+              <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm inline-block" style={{ background: '#34d399' }} /> Classificados</span>
+              <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm inline-block" style={{ background: '#a78bfa' }} /> Mata-mata</span>
+            </div>
+            <ResponsiveContainer width="100%" height={chartHeight}>
+              <BarChart data={ranked} layout="vertical" margin={{ top: 0, right: 24, bottom: 0, left: 0 }} barCategoryGap={3}>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-gray-700)" horizontal={false} />
+                <XAxis type="number" tick={{ fill: 'var(--color-gray-500)', fontSize: 11 }} />
+                <YAxis type="category" dataKey="name" width={110} tick={{ fill: 'var(--color-gray-400)', fontSize: 10 }} interval={0} />
+                <Tooltip content={<ClassTooltip />} cursor={{ fill: 'rgba(255,255,255,0.04)' }} />
+                <Bar dataKey="groupOrderPoints" stackId="a" fill="#38bdf8" />
+                <Bar dataKey="r32Points" stackId="a" fill="#34d399" />
+                <Bar dataKey="knockoutPoints" stackId="a" fill="#a78bfa" radius={[0, 3, 3, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )
+      })()}
 
       {/* Comparison panel — shown when exactly 2 participants selected */}
       {activeIds.size === 2 && (() => {
