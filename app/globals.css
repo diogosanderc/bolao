@@ -130,4 +130,14 @@ html.dark {
   --color-gray-200: oklch(92.8% 0.006 264.531);
   --color-gray-100: oklch(96.7% 0.003 264.542);
   --color-white: oklch(100% 0 0);
+
+  /* Unify every green accent to the brand "verde bandeira" (#00bf63).
+     Shades 300–800 (text, borders, solid fills) all map to the flag green;
+     900/950 stay dark so subtle tinted backgrounds keep their depth. */
+  --color-green-300: #00bf63;
+  --color-green-400: #00bf63;
+  --color-green-500: #00bf63;
+  --color-green-600: #00bf63;
+  --color-green-700: #00bf63;
+  --color-green-800: #00bf63;
 }

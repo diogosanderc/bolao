@@ -344,7 +344,7 @@ export default function LeaderboardPage() {
         headerY += 16
       }
       ctx.font = '10px system-ui'
-      ctx.fillStyle = '#4ade80'
+      ctx.fillStyle = '#00bf63'
       ctx.fillText(colLabel[selectedCol], W / 2, headerY)
       headerY += 16
 
@@ -403,7 +403,7 @@ export default function LeaderboardPage() {
           }
 
           // Name
-          const nameColor = isBot ? '#fca5a5' : isWarn ? '#fde68a' : tier === 1 ? '#fde68a' : tier === 2 ? '#d1d5db' : tier === 3 ? '#d97706' : isTop7 ? '#4ade80' : '#e5e7eb'
+          const nameColor = isBot ? '#fca5a5' : isWarn ? '#fde68a' : tier === 1 ? '#fde68a' : tier === 2 ? '#d1d5db' : tier === 3 ? '#d97706' : isTop7 ? '#00bf63' : '#e5e7eb'
           ctx.fillStyle = nameColor
           ctx.font = 'bold 11px system-ui'
           ctx.textAlign = 'left'
@@ -420,20 +420,20 @@ export default function LeaderboardPage() {
           if (selectedCol === 'uj') {
             const v = p.lastMatchPts ?? entry.lastMatchPoints ?? 0
             if (v > 0) {
-              ctx.fillStyle = '#4ade80'
+              ctx.fillStyle = '#00bf63'
               ctx.fillText(`+${v}`, x + colW - 36, midY)
             }
           } else if (selectedCol === 'u2') {
             const a = p.secondLastMatchPts ?? 0
             const b = p.lastMatchPts ?? 0
-            ctx.fillStyle = '#4ade80'
+            ctx.fillStyle = '#00bf63'
             ctx.fillText(`(${a}+${b})`, x + colW - 36, midY)
           } else if (selectedCol === 'u2grupos') {
             const a = p.secondLastMatchPts ?? 0
             const b = p.lastMatchPts ?? 0
             const u2 = a + b
             const z = p.groupBonus ?? 0
-            ctx.fillStyle = '#4ade80'
+            ctx.fillStyle = '#00bf63'
             ctx.fillText(`(${u2}+${z})`, x + colW - 36, midY)
           }
 

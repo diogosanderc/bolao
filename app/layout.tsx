@@ -27,7 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <link rel="icon" href="/icon.svg" type="image/svg+xml" />
         <link rel="apple-touch-icon" href="/icon-192.png" />
-        <meta name="theme-color" content="#166534" />
+        <meta name="theme-color" content="#00bf63" />
       </head>
       <body className={`min-h-screen antialiased ${font.className} ${oswald.variable}`}>
         <script dangerouslySetInnerHTML={{ __html: `(function(){var t=localStorage.getItem('theme')||'dark';if(t==='dark')document.documentElement.classList.add('dark')})()` }} />

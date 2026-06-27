@@ -340,7 +340,7 @@ export default function EstatisticasPage() {
             <div className="bg-white dark:bg-gray-800 border border-gray-700 rounded-lg p-3 text-xs shadow-lg">
               <p className="text-gray-200 font-semibold mb-2 truncate">{d.name}</p>
               <div className="flex justify-between gap-4"><span className="text-sky-400">Ordem dos grupos</span><span className="font-bold text-gray-200">{d.groupOrderPoints}</span></div>
-              <div className="flex justify-between gap-4"><span className="text-emerald-400">Classificados 16-avos</span><span className="font-bold text-gray-200">{d.r32Points}</span></div>
+              <div className="flex justify-between gap-4"><span className="text-green-500">Classificados 16-avos</span><span className="font-bold text-gray-200">{d.r32Points}</span></div>
               {d.knockoutPoints > 0 && <div className="flex justify-between gap-4"><span className="text-violet-400">Mata-mata</span><span className="font-bold text-gray-200">{d.knockoutPoints}</span></div>}
               <div className="flex justify-between gap-4 border-t border-gray-700 mt-1 pt-1"><span className="text-yellow-400">Total</span><span className="font-bold text-yellow-400">{d.total}</span></div>
             </div>
@@ -362,7 +362,7 @@ export default function EstatisticasPage() {
             <p className="text-xs text-gray-600 mb-3">Ordem dos grupos (+2/grupo) + seleções classificadas para as 16-avos (+3 cada){!showAllClass && rankedAll.length > 15 ? ' · top 15 da classificação geral' : ''}</p>
             <div className="flex items-center gap-4 mb-3 text-xs">
               <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm inline-block" style={{ background: '#38bdf8' }} /> Ordem dos grupos</span>
-              <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm inline-block" style={{ background: '#34d399' }} /> Classificados</span>
+              <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm inline-block" style={{ background: '#00bf63' }} /> Classificados</span>
               <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm inline-block" style={{ background: '#a78bfa' }} /> Mata-mata</span>
             </div>
             <ResponsiveContainer width="100%" height={chartHeight}>
@@ -372,7 +372,7 @@ export default function EstatisticasPage() {
                 <YAxis type="category" dataKey="name" width={110} tick={{ fill: 'var(--color-gray-400)', fontSize: 10 }} interval={0} />
                 <Tooltip content={<ClassTooltip />} cursor={{ fill: 'rgba(255,255,255,0.04)' }} />
                 <Bar dataKey="groupOrderPoints" stackId="a" fill="#38bdf8" />
-                <Bar dataKey="r32Points" stackId="a" fill="#34d399" />
+                <Bar dataKey="r32Points" stackId="a" fill="#00bf63" />
                 <Bar dataKey="knockoutPoints" stackId="a" fill="#a78bfa" radius={[0, 3, 3, 0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -388,7 +388,7 @@ export default function EstatisticasPage() {
         if (grandTotal === 0) return null
         const pie = [
           { name: 'Jogos (placares)', value: matchTotal, color: '#facc15' },
-          { name: 'Classificação', value: classTotal, color: '#34d399' },
+          { name: 'Classificação', value: classTotal, color: '#00bf63' },
         ]
         const pct = (v: number) => Math.round((v / grandTotal) * 100)
         return (
