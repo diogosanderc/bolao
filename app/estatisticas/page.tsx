@@ -49,6 +49,14 @@ const LINE_COLORS = [
   '#fbbf24', '#2dd4bf', '#818cf8', '#fb7185', '#86efac',
 ]
 
+// Compact name for the toggle chips: first name + last-name initial
+function abbrevName(name: string): string {
+  const parts = name.trim().split(/\s+/)
+  if (parts.length === 1) return parts[0]
+  const last = parts[parts.length - 1]
+  return `${parts[0]} ${last[0]}.`
+}
+
 export default function EstatisticasPage() {
   const [data, setData] = useState<EstatisticasData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -176,8 +184,9 @@ export default function EstatisticasPage() {
                     : 'border-gray-300 dark:border-gray-700 text-gray-500 dark:text-gray-500 hover:border-gray-400 dark:hover:border-gray-600 hover:text-gray-200'
                 }`}
                 style={active ? { borderColor: color, color: color, backgroundColor: `${color}20` } : {}}
+                title={p.name}
               >
-                {p.name}
+                {abbrevName(p.name)}
               </button>
             )
           })}
