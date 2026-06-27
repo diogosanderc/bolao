@@ -286,6 +286,42 @@ export default function EstatisticasPage() {
         </div>
       )}
 
+      {/* Comparison panel — shown when exactly 2 participants selected */}
+      {activeIds.size === 2 && (() => {
+        const ids = [...activeIds]
+        const s1 = participantStats.find(s => s.id === ids[0])
+        const s2 = participantStats.find(s => s.id === ids[1])
+        if (!s1 || !s2) return null
+        const p1idx = participants.findIndex(p => p.id === ids[0])
+        const p2idx = participants.findIndex(p => p.id === ids[1])
+        const c1 = LINE_COLORS[p1idx % LINE_COLORS.length]
+        const c2 = LINE_COLORS[p2idx % LINE_COLORS.length]
+        const leader = s1.totalPoints > s2.totalPoints ? 0 : s2.totalPoints > s1.totalPoints ? 1 : -1
+        return (
+          <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+            <div className="px-4 py-3 border-b border-gray-800">
+              <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">⚔️ Comparação Direta</h3>
+            </div>
+            <div className="grid grid-cols-2 divide-x divide-gray-800">
+              {[{ s: s1, c: c1, win: leader === 0 }, { s: s2, c: c2, win: leader === 1 }].map(({ s, c, win }) => (
+                <div key={s.id} className={`p-4 text-center ${win ? 'bg-green-50 dark:bg-green-950/20' : ''}`}>
+                  <p className="font-bold text-sm mb-3 truncate" style={{ color: c }}>{s.name}</p>
+                  <div className="space-y-2 text-sm">
+                    <div className={`text-2xl font-black ${win ? 'text-yellow-600 dark:text-yellow-400' : 'text-gray-300'}`}>{s.totalPoints}<span className="text-xs font-normal text-gray-500 ml-1">pts</span></div>
+                    <div className="flex justify-around text-xs text-gray-500 pt-1">
+                      <span><span className="text-green-600 dark:text-green-400 font-bold text-base">{s.correctResults}</span><br/>resultados</span>
+                      <span><span className="text-yellow-600 dark:text-yellow-400 font-bold text-base">{s.correctScores}</span><br/>placares</span>
+                      <span><span className="text-gray-300 font-bold text-base">{s.pointsPerMatch}</span><br/>pts/jogo</span>
+                    </div>
+                  </div>
+                  {win && <div className="mt-3 text-xs text-green-600 dark:text-green-400 font-semibold">👑 Na frente</div>}
+                </div>
+              ))}
+            </div>
+          </div>
+        )
+      })()}
+
       {/* Classification bonus chart — group order + qualified-team points only */}
       {classificationStats && classificationStats.some(c => c.total > 0) && (() => {
         // Order by the bolão's overall leaderboard ranking (participants comes sorted by it)
@@ -398,70 +434,22 @@ export default function EstatisticasPage() {
         )
       })()}
 
-      {/* Comparison panel — shown when exactly 2 participants selected */}
-      {activeIds.size === 2 && (() => {
-        const ids = [...activeIds]
-        const s1 = participantStats.find(s => s.id === ids[0])
-        const s2 = participantStats.find(s => s.id === ids[1])
-        if (!s1 || !s2) return null
-        const p1idx = participants.findIndex(p => p.id === ids[0])
-        const p2idx = participants.findIndex(p => p.id === ids[1])
-        const c1 = LINE_COLORS[p1idx % LINE_COLORS.length]
-        const c2 = LINE_COLORS[p2idx % LINE_COLORS.length]
-        const leader = s1.totalPoints > s2.totalPoints ? 0 : s2.totalPoints > s1.totalPoints ? 1 : -1
-        return (
-          <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
-            <div className="px-4 py-3 border-b border-gray-800">
-              <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">⚔️ Comparação Direta</h3>
-            </div>
-            <div className="grid grid-cols-2 divide-x divide-gray-800">
-              {[{ s: s1, c: c1, win: leader === 0 }, { s: s2, c: c2, win: leader === 1 }].map(({ s, c, win }) => (
-                <div key={s.id} className={`p-4 text-center ${win ? 'bg-green-50 dark:bg-green-950/20' : ''}`}>
-                  <p className="font-bold text-sm mb-3 truncate" style={{ color: c }}>{s.name}</p>
-                  <div className="space-y-2 text-sm">
-                    <div className={`text-2xl font-black ${win ? 'text-yellow-600 dark:text-yellow-400' : 'text-gray-300'}`}>{s.totalPoints}<span className="text-xs font-normal text-gray-500 ml-1">pts</span></div>
-                    <div className="flex justify-around text-xs text-gray-500 pt-1">
-                      <span><span className="text-green-600 dark:text-green-400 font-bold text-base">{s.correctResults}</span><br/>resultados</span>
-                      <span><span className="text-yellow-600 dark:text-yellow-400 font-bold text-base">{s.correctScores}</span><br/>placares</span>
-                      <span><span className="text-gray-300 font-bold text-base">{s.pointsPerMatch}</span><br/>pts/jogo</span>
-                    </div>
-                  </div>
-                  {win && <div className="mt-3 text-xs text-green-600 dark:text-green-400 font-semibold">👑 Na frente</div>}
-                </div>
-              ))}
-            </div>
-          </div>
-        )
-      })()}
-
       {/* Participant Stats */}
       <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
         <div className="px-4 py-3 border-b border-gray-800">
           <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Desempenho por Participante</h3>
           <p className="text-xs text-gray-600 mt-0.5">{matchesPlayed} jogo{matchesPlayed !== 1 ? 's' : ''} registrado{matchesPlayed !== 1 ? 's' : ''}</p>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+        <div>
+          <table className="w-full text-sm table-fixed">
             <thead>
-              <tr className="text-xs text-gray-500 tracking-wider border-b border-gray-800 bg-gray-950/50">
-                <th className="px-4 py-2 text-left">#</th>
-                <th className="px-4 py-2 text-left">Participante</th>
-                <th className="px-4 py-2 text-right">
-                  <div className="font-semibold">✅ Resultados</div>
-                  <div className="font-normal text-gray-600 normal-case">acertou quem vence/empate</div>
-                </th>
-                <th className="px-4 py-2 text-right">
-                  <div className="font-semibold">🎯 Placares</div>
-                  <div className="font-normal text-gray-600 normal-case">acertou o placar exato</div>
-                </th>
-                <th className="px-4 py-2 text-right">
-                  <div className="font-semibold">Média</div>
-                  <div className="font-normal text-gray-600 normal-case">pontos por jogo</div>
-                </th>
-                <th className="px-4 py-2 text-right">
-                  <div className="font-semibold">Total</div>
-                  <div className="font-normal text-gray-600 normal-case">pontos acumulados</div>
-                </th>
+              <tr className="text-[10px] sm:text-xs text-gray-500 tracking-wider border-b border-gray-800 bg-gray-950/50">
+                <th className="pl-2 pr-1 py-2 text-left w-7">#</th>
+                <th className="px-1 py-2 text-left">Participante</th>
+                <th className="px-1 py-2 text-right w-14" title="Resultados certos (% de aproveitamento)">✅<span className="hidden sm:inline"> Result.</span></th>
+                <th className="px-1 py-2 text-right w-10" title="Placares exatos">🎯<span className="hidden sm:inline"> Plac.</span></th>
+                <th className="px-1 py-2 text-right w-10" title="Pontos por jogo">Méd.</th>
+                <th className="pl-1 pr-2 py-2 text-right w-12 font-score">Total</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-800">
@@ -469,15 +457,15 @@ export default function EstatisticasPage() {
                 const pct = matchesPlayed > 0 ? Math.round((s.correctResults / matchesPlayed) * 100) : 0
                 return (
                   <tr key={s.id} className={idx === 0 ? 'bg-yellow-50 dark:bg-yellow-950/30' : ''}>
-                    <td className="px-4 py-3 text-gray-500 text-xs">{idx + 1}</td>
-                    <td className="px-4 py-3 font-semibold text-gray-200">{s.name}</td>
-                    <td className="px-4 py-3 text-right">
+                    <td className="pl-2 pr-1 py-3 text-gray-500 text-xs">{idx + 1}</td>
+                    <td className="px-1 py-3 font-semibold text-gray-200 truncate">{s.name}</td>
+                    <td className="px-1 py-3 text-right whitespace-nowrap">
                       <span className="text-green-600 dark:text-green-400">{s.correctResults}</span>
-                      <span className="text-gray-600 text-xs ml-1">({pct}%)</span>
+                      <span className="text-gray-600 text-[10px] ml-0.5">({pct}%)</span>
                     </td>
-                    <td className="px-4 py-3 text-right text-yellow-600 dark:text-yellow-400 font-semibold">{s.correctScores}</td>
-                    <td className="px-4 py-3 text-right text-gray-300">{s.pointsPerMatch}</td>
-                    <td className="px-4 py-3 text-right font-bold text-yellow-600 dark:text-yellow-500">{s.totalPoints}</td>
+                    <td className="px-1 py-3 text-right text-yellow-600 dark:text-yellow-400 font-semibold">{s.correctScores}</td>
+                    <td className="px-1 py-3 text-right text-gray-300">{s.pointsPerMatch}</td>
+                    <td className="pl-1 pr-2 py-3 text-right font-bold text-yellow-600 dark:text-yellow-500 font-score">{s.totalPoints}</td>
                   </tr>
                 )
               })}
