@@ -10,9 +10,9 @@ type Props = {
 }
 
 const SIZES = {
-  sm: { box: 'min-w-[26px] px-1.5 py-0.5 text-lg', gap: 'gap-1', sep: 'text-sm' },
-  md: { box: 'min-w-[32px] px-2 py-0.5 text-2xl', gap: 'gap-1.5', sep: 'text-base' },
-  lg: { box: 'min-w-[40px] px-2.5 py-1 text-3xl', gap: 'gap-2', sep: 'text-lg' },
+  sm: { box: 'min-w-[28px] px-2 py-1 text-lg', gap: 'gap-1', sep: 'text-sm' },
+  md: { box: 'min-w-[38px] px-3 py-1.5 text-2xl', gap: 'gap-1.5', sep: 'text-base' },
+  lg: { box: 'min-w-[46px] px-3.5 py-2 text-3xl', gap: 'gap-2', sep: 'text-lg' },
 }
 
 /** Stadium-style scoreboard: two dark digit panels split by a colon. */

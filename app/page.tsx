@@ -707,10 +707,10 @@ export default function LeaderboardPage() {
                   : <span className="flex items-center gap-1.5 text-xs text-red-700 dark:text-red-400 uppercase tracking-wider font-bold"><span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" /> Ao vivo</span>}
                 {m.clock && <span className={`text-xs font-semibold ${m.suspended ? 'text-yellow-700 dark:text-yellow-300' : 'text-red-800 dark:text-red-300'}`}>{m.clock}</span>}
               </div>
-              <div className="flex items-center justify-center gap-3 text-sm text-gray-200 dark:text-white">
-                <span className="flex items-center gap-1.5 flex-1 justify-end min-w-0"><span className="truncate">{m.team1.name}</span><Flag teamId={m.team1.id} size={22} /></span>
+              <div className="flex items-center gap-2.5 text-sm text-gray-200 dark:text-white">
+                <span className="flex items-center gap-1.5 min-w-0"><Flag teamId={m.team1.id} size={22} /><span className="truncate">{m.team1.name}</span></span>
                 <Scoreboard score1={m.liveScore1} score2={m.liveScore2} pending={m.liveScore1 === undefined} size="md" live={!m.suspended} />
-                <span className="flex items-center gap-1.5 flex-1 min-w-0"><Flag teamId={m.team2.id} size={22} /><span className="truncate">{m.team2.name}</span></span>
+                <span className="flex items-center gap-1.5 min-w-0"><Flag teamId={m.team2.id} size={22} /><span className="truncate">{m.team2.name}</span></span>
               </div>
               {m.goals && m.goals.length > 0 && (() => {
                 const t1Goals = m.goals.filter(g => g.teamId === m.team1.id)
