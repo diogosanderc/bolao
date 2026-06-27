@@ -272,9 +272,11 @@ export default function EstatisticasPage() {
 
       {/* Classification bonus chart — group order + qualified-team points only */}
       {classificationStats && classificationStats.some(c => c.total > 0) && (() => {
+        // Order by the bolão's overall leaderboard ranking (participants comes sorted by it)
+        const rankOrder = new Map(participants.map((p, i) => [p.id, i]))
         const ranked = classificationStats
           .filter(c => c.total > 0)
-          .sort((a, b) => b.total - a.total || a.name.localeCompare(b.name, 'pt'))
+          .sort((a, b) => (rankOrder.get(a.id) ?? 999) - (rankOrder.get(b.id) ?? 999))
         const chartHeight = Math.max(220, ranked.length * 22 + 40)
         const ClassTooltip = ({ active, payload }: any) => {
           if (!active || !payload || !payload.length) return null
