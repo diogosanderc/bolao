@@ -16,7 +16,7 @@ const SIZES = {
 }
 
 /** Stadium-style scoreboard: two dark digit panels split by a colon. */
-export function Scoreboard({ score1, score2, pending, size = 'md', live }: Props) {
+export function Scoreboard({ score1, score2, pending, size = 'md' }: Props) {
   const s = SIZES[size]
   const hasScore = score1 !== undefined && score2 !== undefined && !pending
 
@@ -28,16 +28,13 @@ export function Scoreboard({ score1, score2, pending, size = 'md', live }: Props
     )
   }
 
-  const panel = `scoreboard-digit inline-flex items-center justify-center rounded-md text-white tabular-nums ${s.box} ${
-    live
-      ? 'bg-gradient-to-b from-red-700 to-red-900 shadow-inner shadow-red-950/50'
-      : 'bg-gradient-to-b from-gray-700 to-gray-900 shadow-inner shadow-black/40'
-  }`
+  // Neutral dark panel for every state (live just keeps the red card/badge around it)
+  const panel = `scoreboard-digit inline-flex items-center justify-center rounded-md text-white tabular-nums bg-gradient-to-b from-gray-700 to-gray-900 shadow-inner shadow-black/40 ${s.box}`
 
   return (
     <span className={`inline-flex items-center ${s.gap} align-middle`}>
       <span className={panel}>{score1}</span>
-      <span className={`font-score font-bold ${s.sep} ${live ? 'text-red-500 dark:text-red-400' : 'text-gray-500'}`}>:</span>
+      <span className={`font-score font-bold text-gray-500 ${s.sep}`}>:</span>
       <span className={panel}>{score2}</span>
     </span>
   )
