@@ -8,17 +8,19 @@
 export type Broadcaster = {
   id: string
   name: string
-  /** text color */
+  /** text color (fallback chip) */
   fg: string
-  /** badge background */
+  /** badge background (fallback chip) */
   bg: string
   free: boolean
   url?: string
+  /** optional real logo file in /public/tv — falls back to the colored chip if absent */
+  logo?: string
 }
 
-export const CAZE: Broadcaster   = { id: 'caze',  name: 'CazéTV', fg: '#ffffff', bg: '#ff2d2d', free: true, url: 'https://www.youtube.com/@CazeTV' }
-export const GLOBO: Broadcaster  = { id: 'globo', name: 'Globo',  fg: '#ffffff', bg: '#0a3d91', free: true }
-export const SBT: Broadcaster    = { id: 'sbt',   name: 'SBT',    fg: '#111827', bg: '#ffd400', free: true }
+export const CAZE: Broadcaster   = { id: 'caze',  name: 'CazéTV', fg: '#ffffff', bg: '#ff2d2d', free: true, url: 'https://www.youtube.com/@CazeTV', logo: '/tv/caze.svg' }
+export const GLOBO: Broadcaster  = { id: 'globo', name: 'Globo',  fg: '#ffffff', bg: '#0a3d91', free: true, logo: '/tv/globo.svg' }
+export const SBT: Broadcaster    = { id: 'sbt',   name: 'SBT',    fg: '#111827', bg: '#ffd400', free: true, logo: '/tv/sbt.svg' }
 
 // Exact channel overrides per internal matchId (fill in as the grade is confirmed)
 const OVERRIDES: Record<string, Broadcaster[]> = {}
