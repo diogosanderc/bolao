@@ -109,6 +109,13 @@ html.dark {
   border-radius: 0.5rem;
 }
 
+/* Staggered row entrance on first leaderboard load */
+@keyframes row-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-row-in { animation: row-in 0.4s ease both; }
+
 /* Subtle pop when a number changes (count-up companion) */
 @keyframes number-pop {
   0%   { transform: translateY(0)   scale(1);    }

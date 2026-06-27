@@ -28,6 +28,7 @@ type ScheduleMatch = {
   matchId: string
   team1: { id: string; name: string; flag: string }
   team2: { id: string; name: string; flag: string }
+  date?: string
   dateBRT: string
   venue: string
   inProgress: boolean
@@ -57,6 +58,12 @@ export default function LeaderboardPage() {
   const [sharingImage, setSharingImage] = useState(false)
   const [imagePicker, setImagePicker] = useState(false)
   const [reloading, setReloading] = useState(false)
+  const [scheduleLoaded, setScheduleLoaded] = useState(false)
+  const [showLegend, setShowLegend] = useState(false)
+  const [pullDist, setPullDist] = useState(0)
+  const [now, setNow] = useState(0)
+  const [rowsIn, setRowsIn] = useState(false)
+  const rowsStartedRef = useRef(false)
   type ImageColumn = 'uj' | 'u2' | 'u2grupos'
   const [imageColumn, setImageColumn] = useState<ImageColumn>('uj')
   const leaderboardRef = useRef<HTMLDivElement>(null)
@@ -96,7 +103,7 @@ export default function LeaderboardPage() {
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null)
 
   function fetchLeaderboard() {
-    fetch('/api/leaderboard')
+    return fetch('/api/leaderboard')
       .then(r => r.json())
       .then(d => {
         setData(Array.isArray(d.leaderboard) ? d.leaderboard : [])
@@ -107,6 +114,38 @@ export default function LeaderboardPage() {
         setLoading(false)
       })
       .catch(() => setLoading(false))
+  }
+
+  function fetchSchedule() {
+    return fetch('/api/schedule')
+      .then(r => r.json())
+      .then(d => {
+        setNextMatch(d.nextMatch ?? null)
+        setNextMatches(Array.isArray(d.nextMatches) ? d.nextMatches : [])
+        setLiveMatches(Array.isArray(d.live) ? d.live : [])
+        setScheduleLoaded(true)
+      })
+      .catch(() => setScheduleLoaded(true))
+  }
+
+  // Light haptic feedback when supported (no-op on desktop/iOS Safari)
+  function haptic(ms = 10) {
+    try { navigator.vibrate?.(ms) } catch {}
+  }
+
+  async function doRefresh() {
+    if (reloading) return
+    setReloading(true)
+    haptic(8)
+    await fetch('/api/sync/live', { method: 'POST' }).catch(() => {})
+    await Promise.all([fetchLeaderboard(), fetchSchedule()])
+    setReloading(false)
+    showToast('✓ Atualizado')
+  }
+
+  function openParticipant(id: string, name: string) {
+    haptic(8)
+    setSelectedParticipant({ id, name })
   }
 
   useEffect(() => {
@@ -133,16 +172,6 @@ export default function LeaderboardPage() {
     pingPresence()
     const presenceInterval = setInterval(pingPresence, 30_000)
 
-    function fetchSchedule() {
-      fetch('/api/schedule')
-        .then(r => r.json())
-        .then(d => {
-          setNextMatch(d.nextMatch ?? null)
-          setNextMatches(Array.isArray(d.nextMatches) ? d.nextMatches : [])
-          setLiveMatches(Array.isArray(d.live) ? d.live : [])
-        })
-        .catch(() => {})
-    }
     fetchSchedule()
     const interval = setInterval(fetchSchedule, 10_000)
     return () => {
@@ -165,6 +194,18 @@ export default function LeaderboardPage() {
       clearInterval(syncInterval)
     }
   }, [liveMatches.length])
+
+  function formatCountdown(iso?: string): string | null {
+    if (!iso || !now) return null
+    const diff = new Date(iso).getTime() - now
+    if (diff <= 0 || diff > 7 * 24 * 3600_000) return null
+    const h = Math.floor(diff / 3600_000)
+    const m = Math.floor((diff % 3600_000) / 60_000)
+    const s = Math.floor((diff % 60_000) / 1000)
+    if (h > 0) return `${h}h${String(m).padStart(2, '0')}`
+    if (m > 0) return `${m}min ${String(s).padStart(2, '0')}s`
+    return `${s}s`
+  }
 
   const trophies: Record<number, string> = { 1: '🥇', 2: '🥈', 3: '🥉' }
 
@@ -221,10 +262,66 @@ export default function LeaderboardPage() {
     prevRanksRef.current = newRanks
     if (Object.keys(changes).length > 0) {
       setFlashMap(changes)
+      haptic(15) // buzz on any position change
       const t = setTimeout(() => setFlashMap({}), 2200)
       return () => clearTimeout(t)
     }
   }, [data])
+
+  // Stagger-animate leaderboard rows once, on first data load
+  useEffect(() => {
+    if (!rowsStartedRef.current && data.length > 0) {
+      rowsStartedRef.current = true
+      setRowsIn(true)
+      const t = setTimeout(() => setRowsIn(false), 1500)
+      return () => clearTimeout(t)
+    }
+  }, [data.length])
+
+  // Countdown ticker — only runs while there's an upcoming match with a date
+  const nextStart = nextMatches[0]?.date ?? nextMatch?.date
+  useEffect(() => {
+    if (!nextStart) return
+    setNow(Date.now())
+    const t = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(t)
+  }, [nextStart])
+
+  // Pull-to-refresh (mobile): pull down from the top to refresh
+  useEffect(() => {
+    let startY = 0
+    let pulling = false
+    const THRESHOLD = 70
+    const onStart = (e: TouchEvent) => {
+      if (window.scrollY <= 0 && !reloading) { startY = e.touches[0].clientY; pulling = true }
+    }
+    const onMove = (e: TouchEvent) => {
+      if (!pulling) return
+      const dy = e.touches[0].clientY - startY
+      if (dy > 0 && window.scrollY <= 0) {
+        setPullDist(Math.min(dy * 0.5, 90))
+      } else {
+        pulling = false
+        setPullDist(0)
+      }
+    }
+    const onEnd = () => {
+      if (!pulling) return
+      pulling = false
+      setPullDist(d => {
+        if (d >= THRESHOLD * 0.5) doRefresh()
+        return 0
+      })
+    }
+    window.addEventListener('touchstart', onStart, { passive: true })
+    window.addEventListener('touchmove', onMove, { passive: true })
+    window.addEventListener('touchend', onEnd, { passive: true })
+    return () => {
+      window.removeEventListener('touchstart', onStart)
+      window.removeEventListener('touchmove', onMove)
+      window.removeEventListener('touchend', onEnd)
+    }
+  }, [reloading])
 
   const [notifState, setNotifState] = useState<'default' | 'subscribed' | 'denied' | 'unsupported'>('default')
   const [notifToast, setNotifToast] = useState<string | null>(null)
@@ -494,20 +591,34 @@ export default function LeaderboardPage() {
 
   return (
     <div className="space-y-6">
+      {/* Pull-to-refresh indicator */}
+      {(pullDist > 0 || reloading) && (
+        <div
+          className="fixed left-0 right-0 top-0 z-40 flex justify-center pointer-events-none"
+          style={{ transform: `translateY(${reloading ? 12 : Math.min(pullDist, 80) - 8}px)`, transition: pullDist === 0 ? 'transform 0.2s' : 'none' }}
+        >
+          <span className="flex items-center justify-center w-9 h-9 rounded-full bg-gray-800/90 border border-gray-700 shadow-lg">
+            <svg className={`w-5 h-5 text-gray-200 ${reloading ? 'animate-spin' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: reloading ? undefined : `rotate(${pullDist * 3}deg)` }}>
+              <path d="M23 4v6h-6" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+            </svg>
+          </span>
+        </div>
+      )}
+
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-gray-200 dark:text-yellow-400">
           Classificação
         </h2>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           {notifState !== 'unsupported' && (
             <div className="relative">
               <button
                 onClick={toggleNotifications}
                 title={notifState === 'subscribed' ? 'Notificações ativas — clique para desativar' : notifState === 'denied' ? 'Notificações bloqueadas no browser' : 'Ativar notificações de gol e resultado'}
-                className={`text-xl px-2 py-1 rounded-lg transition-colors ${
-                  notifState === 'subscribed' ? 'text-yellow-400' :
+                className={`flex items-center justify-center w-10 h-10 text-xl rounded-full transition-colors ${
+                  notifState === 'subscribed' ? 'text-yellow-400 hover:bg-gray-800' :
                   notifState === 'denied' ? 'text-gray-600 cursor-not-allowed' :
-                  'text-gray-500 hover:text-gray-300'
+                  'text-gray-500 hover:text-gray-300 hover:bg-gray-800'
                 }`}
                 disabled={notifState === 'denied'}
               >
@@ -563,7 +674,8 @@ export default function LeaderboardPage() {
             </div>
           )}
           <button
-            onClick={() => { setReloading(true); location.reload() }}
+            onClick={doRefresh}
+            disabled={reloading}
             className="flex items-center justify-center w-10 h-10 rounded-full text-gray-400 hover:text-gray-100 hover:bg-gray-800 transition-colors shrink-0"
             aria-label="Atualizar"
           >
@@ -575,18 +687,25 @@ export default function LeaderboardPage() {
         </div>
       </div>
 
+      {!scheduleLoaded && liveMatches.length === 0 && !lastMatch && (
+        <div className="bg-gray-900 border border-gray-800 rounded-lg px-4 py-3 space-y-2">
+          <div className="skeleton h-3 w-24" />
+          <div className="skeleton h-5 w-full" />
+        </div>
+      )}
+
       {liveMatches.length > 0 && (
         <div className="space-y-3">
           {liveMatches.map(m => (
             <div
               key={m.matchId}
               onClick={() => openMatchPredictions(m.matchId, `${m.team1.name} vs ${m.team2.name}`, m.liveScore1 !== undefined && m.liveScore2 !== undefined ? { score1: m.liveScore1, score2: m.liveScore2 } : undefined)}
-              className={`border rounded-lg px-4 py-2.5 cursor-pointer transition-shadow hover:shadow-lg ${m.suspended ? 'bg-yellow-50 dark:bg-yellow-950/60 border-yellow-400 dark:border-yellow-700' : 'bg-red-50 dark:bg-red-950/60 border-red-400 dark:border-red-700 animate-pulse'}`}
+              className={`border rounded-lg px-4 py-2.5 cursor-pointer transition-shadow hover:shadow-lg ${m.suspended ? 'bg-yellow-50 dark:bg-yellow-950/60 border-yellow-400 dark:border-yellow-700' : 'bg-red-50 dark:bg-red-950/60 border-red-400 dark:border-red-700'}`}
             >
               <div className="flex items-center justify-between mb-1">
                 {m.suspended
                   ? <span className="text-xs text-yellow-700 dark:text-yellow-400 uppercase tracking-wider font-bold">⛈️ Paralisado</span>
-                  : <span className="text-xs text-red-700 dark:text-red-400 uppercase tracking-wider font-bold">🔴 Ao vivo</span>}
+                  : <span className="flex items-center gap-1.5 text-xs text-red-700 dark:text-red-400 uppercase tracking-wider font-bold"><span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" /> Ao vivo</span>}
                 {m.clock && <span className={`text-xs font-semibold ${m.suspended ? 'text-yellow-700 dark:text-yellow-300' : 'text-red-800 dark:text-red-300'}`}>{m.clock}</span>}
               </div>
               <div className="flex items-center justify-center gap-3 text-sm text-gray-200 dark:text-white">
@@ -664,7 +783,12 @@ export default function LeaderboardPage() {
         >
           <div className="flex items-center justify-between mb-1">
             <span className="text-xs text-gray-500 uppercase tracking-wider">Próximo jogo</span>
-            <span className="text-xs text-green-700 dark:text-yellow-500 font-semibold">{m.dateBRT} →</span>
+            <span className="flex items-center gap-2">
+              {formatCountdown(m.date) && (
+                <span className="text-[10px] font-bold text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-950/50 px-1.5 py-0.5 rounded tabular-nums">⏱ {formatCountdown(m.date)}</span>
+              )}
+              <span className="text-xs text-green-700 dark:text-yellow-500 font-semibold">{m.dateBRT} →</span>
+            </span>
           </div>
           <div className="flex items-center gap-2 text-sm text-gray-300">
             <span className="flex items-center gap-1.5"><Flag teamId={m.team1.id} size={18} />{m.team1.name}</span>
@@ -732,7 +856,7 @@ export default function LeaderboardPage() {
                 <div
                   key={entry.participant.id}
                   className="flex items-center gap-2 px-4 py-2 cursor-pointer hover:bg-red-100 dark:hover:bg-red-950/40 transition-colors"
-                  onClick={() => setSelectedParticipant({ id: entry.participant.id, name: entry.participant.name })}
+                  onClick={() => openParticipant(entry.participant.id, entry.participant.name)}
                 >
                   <span className="text-gray-500 text-xs w-5 text-right shrink-0 font-semibold">{rank}</span>
                   <span className="text-gray-200 text-sm font-semibold flex-1 min-w-0 truncate">{entry.participant.name}</span>
@@ -798,7 +922,7 @@ export default function LeaderboardPage() {
       {!loading && data.length >= 3 && !leaderboardHasLive && (
         <Podium
           top3={data.slice(0, 3)}
-          onSelect={(id, name) => setSelectedParticipant({ id, name })}
+          onSelect={openParticipant}
         />
       )}
 
@@ -823,8 +947,9 @@ export default function LeaderboardPage() {
                 return (
                 <tr
                   key={entry.participant.id}
-                  onClick={() => setSelectedParticipant({ id: entry.participant.id, name: entry.participant.name })}
-                  className={`cursor-pointer transition-colors ${
+                  onClick={() => openParticipant(entry.participant.id, entry.participant.name)}
+                  style={rowsIn ? { animationDelay: `${Math.min(idx, 25) * 28}ms` } : undefined}
+                  className={`cursor-pointer transition-colors ${rowsIn ? 'animate-row-in' : ''} ${
                     isRelated(entry.totalPoints) ? 'bg-red-50 hover:bg-red-100 dark:bg-red-950/50 dark:hover:bg-red-950/70' :
                     isWarning(entry.totalPoints) ? 'bg-yellow-50 hover:bg-yellow-100 dark:bg-yellow-950/20 dark:hover:bg-yellow-950/30' :
                     tier === 1 ? 'bg-yellow-100 hover:bg-yellow-200 dark:bg-yellow-950/40 dark:hover:bg-yellow-950/60' :
@@ -875,15 +1000,52 @@ export default function LeaderboardPage() {
                       return <span className={pts > 0 ? 'text-blue-600 dark:text-blue-400 font-semibold' : 'text-gray-400 dark:text-gray-500'}>{pts}</span>
                     })()}
                   </td>
-                  <td className={`pl-1 pr-2 py-3 text-right font-bold text-lg font-score ${isRelated(entry.totalPoints) ? 'text-red-600 dark:text-red-400' : isWarning(entry.totalPoints) ? 'text-gray-200 dark:text-yellow-500' : 'text-gray-200 dark:text-yellow-400'}`}>
-                    <AnimatedNumber value={entry.totalPoints} />
+                  <td className="pl-1 pr-2 py-3 text-right">
+                    <div className="flex flex-col items-end leading-none">
+                      <span className={`font-bold text-lg font-score ${isRelated(entry.totalPoints) ? 'text-red-600 dark:text-red-400' : isWarning(entry.totalPoints) ? 'text-gray-200 dark:text-yellow-500' : 'text-gray-200 dark:text-yellow-400'}`}>
+                        <AnimatedNumber value={entry.totalPoints} />
+                      </span>
+                      {(() => {
+                        if (idx === 0) return null
+                        const gap = data[idx - 1].totalPoints - entry.totalPoints
+                        if (gap <= 0) return <span className="text-[9px] text-gray-500 mt-0.5">=</span>
+                        return <span className="text-[9px] text-gray-500 dark:text-gray-500 mt-0.5 tabular-nums">-{gap}</span>
+                      })()}
+                    </div>
                   </td>
                 </tr>
               )}
             )}
             </tbody>
           </table>
-          <p className="text-xs text-gray-700 text-center py-2">Clique num participante para ver seus palpites</p>
+          <div className="flex items-center justify-between gap-2 px-3 py-2 border-t border-gray-800">
+            <span className="text-xs text-gray-600">Toque num participante para ver os palpites</span>
+            <button onClick={() => setShowLegend(v => !v)} className="shrink-0 flex items-center gap-1 text-xs text-gray-500 hover:text-gray-300 transition-colors">
+              <span className="flex items-center justify-center w-5 h-5 rounded-full border border-gray-600 text-[10px] font-bold">i</span>
+              Legenda
+            </button>
+          </div>
+          {showLegend && (
+            <div className="px-4 pb-3 pt-1 text-[11px] text-gray-400 space-y-1.5 border-t border-gray-800 animate-fade-in">
+              <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                <span><span className="font-bold text-gray-300">UJ</span> — pontos do último jogo</span>
+                <span><span className="font-bold text-gray-300">U4</span> — soma dos 4 últimos jogos</span>
+                <span><span className="font-bold text-gray-300">PTS</span> — total acumulado</span>
+                <span><span className="font-bold text-gray-300">-N</span> — pontos atrás do colocado acima</span>
+              </div>
+              <div className="flex flex-wrap gap-x-4 gap-y-1 pt-1 border-t border-gray-800/60">
+                <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-yellow-500 inline-block" /> Líder</span>
+                <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-green-600 inline-block" /> Zona Top 7 (4º–7º)</span>
+                <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-yellow-600 inline-block" /> Alerta</span>
+                <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-red-500 inline-block" /> Zona de risco</span>
+              </div>
+            </div>
+          )}
+          {lastRefresh && (
+            <p className="text-center text-[10px] text-gray-600 pb-2">
+              Atualizado às {lastRefresh.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+            </p>
+          )}
         </div>
       )}
 

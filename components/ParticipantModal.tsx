@@ -312,20 +312,20 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
                         <div className="grid grid-cols-2 gap-1 text-[10px]">
                           <div>
                             <p className="text-gray-600 mb-0.5">Seu palpite</p>
-                            <div className="flex gap-1 flex-wrap">
+                            <div className="flex gap-1.5 flex-wrap">
                               {g.predicted.map((t, i) => (
-                                <span key={t.id} className={i < 2 ? 'text-gray-300' : 'text-gray-500'}>
-                                  {i + 1}º {t.flag}
+                                <span key={t.id} className={`flex items-center gap-0.5 ${i < 2 ? 'text-gray-300' : 'text-gray-500'}`}>
+                                  {i + 1}º <Flag teamId={t.id} size={14} />
                                 </span>
                               ))}
                             </div>
                           </div>
                           <div>
                             <p className="text-gray-600 mb-0.5">Real</p>
-                            <div className="flex gap-1 flex-wrap">
+                            <div className="flex gap-1.5 flex-wrap">
                               {g.actual.map((t, i) => (
-                                <span key={t.id} className={i < 2 ? 'text-gray-300' : 'text-gray-500'}>
-                                  {i + 1}º {t.flag}
+                                <span key={t.id} className={`flex items-center gap-0.5 ${i < 2 ? 'text-gray-300' : 'text-gray-500'}`}>
+                                  {i + 1}º <Flag teamId={t.id} size={14} />
                                 </span>
                               ))}
                             </div>
@@ -346,8 +346,8 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {data!.r32Detail.map(t => (
-                      <div key={`${t.groupId}-${t.teamId}`} className="flex items-center gap-1 bg-gray-900 border border-gray-800 rounded-lg px-2.5 py-1.5 text-xs">
-                        <span>{t.flag}</span>
+                      <div key={`${t.groupId}-${t.teamId}`} className="flex items-center gap-1.5 bg-gray-900 border border-gray-800 rounded-lg px-2.5 py-1.5 text-xs">
+                        <Flag teamId={t.teamId} size={16} />
                         <span className="text-gray-300 font-medium">{t.name}</span>
                         <span className="text-gray-400 font-bold ml-1">+3</span>
                       </div>
