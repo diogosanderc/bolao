@@ -564,10 +564,13 @@ export default function LeaderboardPage() {
           )}
           <button
             onClick={() => { setReloading(true); location.reload() }}
-            className={`text-xl text-gray-400 hover:text-gray-200 transition-colors ${reloading ? 'animate-spin' : ''}`}
+            className="flex items-center justify-center w-10 h-10 rounded-full text-gray-400 hover:text-gray-100 hover:bg-gray-800 transition-colors shrink-0"
             aria-label="Atualizar"
           >
-            ↻
+            <svg className={`w-6 h-6 ${reloading ? 'animate-spin' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M23 4v6h-6" />
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+            </svg>
           </button>
         </div>
       </div>
