@@ -800,15 +800,15 @@ export default function LeaderboardPage() {
       )}
 
       {!loading && data.length > 0 && !leaderboardHasLive && (
-        <div ref={leaderboardRef} className="overflow-x-auto rounded-xl border border-gray-800">
-          <table className="w-full text-sm">
+        <div ref={leaderboardRef} className="rounded-xl border border-gray-800">
+          <table className="w-full text-sm table-fixed">
             <thead>
               <tr className="bg-gray-900 text-gray-400 text-xs uppercase tracking-wider">
-                <th className="px-4 py-3 text-left w-10">#</th>
-                <th className="px-4 py-3 text-left">Participante</th>
-                <th className="px-4 py-3 text-right cursor-help" title="Pontuação do último jogo">UJ</th>
-                <th className="px-4 py-3 text-right cursor-help" title="Soma dos 4 últimos jogos">U4</th>
-                <th className="px-4 py-3 text-right">PTS</th>
+                <th className="pl-2 pr-1 py-3 text-center w-8">#</th>
+                <th className="px-1 py-3 text-left">Participante</th>
+                <th className="px-1 py-3 text-right cursor-help w-9" title="Pontuação do último jogo">UJ</th>
+                <th className="px-1 py-3 text-right cursor-help w-9" title="Soma dos 4 últimos jogos">U4</th>
+                <th className="pl-1 pr-2 py-3 text-right w-12">PTS</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-800">
@@ -831,7 +831,7 @@ export default function LeaderboardPage() {
                     'hover:bg-gray-900/50'
                   } ${rank === 1 ? 'shadow-[inset_3px_0_0_0_#facc15]' : ''} ${flash === 'up' ? 'animate-flash-up' : flash === 'down' ? 'animate-flash-down' : ''}`}
                 >
-                  <td className="px-4 py-3 text-center font-bold text-lg">
+                  <td className="pl-2 pr-1 py-3 text-center font-bold">
                     {isRelated(entry.totalPoints)
                       ? (isFirstOfRank[idx] ? <span className="text-red-500 text-sm">{rank}</span> : null)
                       : isWarning(entry.totalPoints)
@@ -841,7 +841,7 @@ export default function LeaderboardPage() {
                           ? (isFirstOfRank[idx] ? <span className="text-green-600 dark:text-green-400 text-sm">{rank}</span> : null)
                           : (isFirstOfRank[idx] ? <span className="text-gray-500 text-sm">{rank}</span> : null))}
                   </td>
-                  <td className={`px-3 py-3 font-semibold ${
+                  <td className={`px-1 py-3 font-semibold ${
                     isRelated(entry.totalPoints) ? 'text-red-700 dark:text-red-300' :
                     isWarning(entry.totalPoints) ? 'text-yellow-600 dark:text-yellow-400' :
                     tier === 1 ? 'text-yellow-700 dark:text-yellow-300' :
@@ -850,7 +850,7 @@ export default function LeaderboardPage() {
                     (rank >= 4 && rank <= 7) ? 'text-green-600 dark:text-green-400' :
                     ''
                   }`}>
-                    <div className="flex items-center gap-2 min-w-0">
+                    <div className="flex items-center gap-1.5 min-w-0">
                       <span className="truncate">{entry.participant.name}</span>
                       {(() => {
                         const ch: number | undefined = p.positionChange
@@ -861,18 +861,18 @@ export default function LeaderboardPage() {
                       })()}
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="px-1 py-3 text-right">
                     {entry.lastMatchPoints > 0
                       ? <span className="text-green-600 dark:text-green-400 font-semibold">+{entry.lastMatchPoints}</span>
                       : <span className="text-gray-400 dark:text-gray-500">0</span>}
                   </td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="px-1 py-3 text-right">
                     {(() => {
                       const pts = p.last4Points ?? 0
                       return <span className={pts > 0 ? 'text-blue-600 dark:text-blue-400 font-semibold' : 'text-gray-400 dark:text-gray-500'}>{pts}</span>
                     })()}
                   </td>
-                  <td className={`px-4 py-3 text-right font-bold text-lg font-score ${isRelated(entry.totalPoints) ? 'text-red-600 dark:text-red-400' : isWarning(entry.totalPoints) ? 'text-gray-200 dark:text-yellow-500' : 'text-gray-200 dark:text-yellow-400'}`}>
+                  <td className={`pl-1 pr-2 py-3 text-right font-bold text-lg font-score ${isRelated(entry.totalPoints) ? 'text-red-600 dark:text-red-400' : isWarning(entry.totalPoints) ? 'text-gray-200 dark:text-yellow-500' : 'text-gray-200 dark:text-yellow-400'}`}>
                     <AnimatedNumber value={entry.totalPoints} />
                   </td>
                 </tr>
