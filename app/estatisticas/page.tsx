@@ -34,11 +34,14 @@ type PopularPrediction = {
   resultScore: string
 }
 
+type RecordItem = { icon: string; title: string; value: string; subtitle: string }
+
 type EstatisticasData = {
   participants: ParticipantInfo[]
   snapshots: Snapshot[]
   participantStats: ParticipantStat[]
   classificationStats: ClassificationStat[]
+  records: RecordItem[]
   popularPredictions: PopularPrediction[]
   surprises: string[]
   matchesPlayed: number
@@ -121,7 +124,7 @@ export default function EstatisticasPage() {
   )
   if (!data) return <div className="text-center py-20 text-gray-500">Erro ao carregar dados.</div>
 
-  const { participants, participantStats, classificationStats, popularPredictions, surprises, matchesPlayed, snapshots } = data
+  const { participants, participantStats, classificationStats, records, popularPredictions, surprises, matchesPlayed, snapshots } = data
 
   if (matchesPlayed === 0) {
     return (
@@ -157,6 +160,25 @@ export default function EstatisticasPage() {
   return (
     <div className="space-y-8">
       <h2 className="text-2xl font-bold text-gray-200 dark:text-yellow-400">Estatísticas do Bolão</h2>
+
+      {/* Records & curiosities */}
+      {records && records.length > 0 && (
+        <div>
+          <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-2">🏅 Recordes & Curiosidades</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            {records.map(r => (
+              <div key={r.title} className="flex items-start gap-3 bg-gray-900 border border-gray-800 rounded-xl px-3.5 py-3">
+                <span className="text-2xl leading-none mt-0.5">{r.icon}</span>
+                <div className="min-w-0">
+                  <p className="text-[10px] uppercase tracking-wide text-gray-500 font-semibold">{r.title}</p>
+                  <p className="text-sm font-bold text-gray-200 truncate">{r.value}</p>
+                  <p className="text-[11px] text-gray-500">{r.subtitle}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Evolution Chart */}
       <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">

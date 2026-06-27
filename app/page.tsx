@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { LeaderboardEntry } from '@/lib/types'
 import { Flag } from '@/components/Flag'
 import { ParticipantModal } from '@/components/ParticipantModal'
@@ -63,6 +63,13 @@ export default function LeaderboardPage() {
   const [now, setNow] = useState(0)
   const [rowsIn, setRowsIn] = useState(false)
   const rowsStartedRef = useRef(false)
+  const [query, setQuery] = useState('')
+  const [ujOpen, setUjOpen] = useState<string | null>(null)
+  const [myId, setMyId] = useState<string | null>(null)
+  const [podiumCelebrate, setPodiumCelebrate] = useState<Set<string>>(new Set())
+  const rowRefs = useRef<Map<string, HTMLTableRowElement>>(new Map())
+  const prevRects = useRef<Map<string, DOMRect>>(new Map())
+  const prevMyLiveRef = useRef(0)
   type ImageColumn = 'uj' | 'u2' | 'u2grupos'
   const [imageColumn, setImageColumn] = useState<ImageColumn>('uj')
   const leaderboardRef = useRef<HTMLDivElement>(null)
@@ -145,6 +152,15 @@ export default function LeaderboardPage() {
   function openParticipant(id: string, name: string) {
     haptic(8)
     setSelectedParticipant({ id, name })
+  }
+
+  function toggleMe(id: string) {
+    setMyId(prev => {
+      const next = prev === id ? null : id
+      if (next) localStorage.setItem('bolao_me', next)
+      else localStorage.removeItem('bolao_me')
+      return next
+    })
   }
 
   useEffect(() => {
@@ -242,29 +258,75 @@ export default function LeaderboardPage() {
   const prevRanksRef = useRef<Map<string, number>>(new Map())
   const [flashMap, setFlashMap] = useState<Record<string, 'up' | 'down'>>({})
 
-  // Detect rank changes to trigger flash animation
+  // Load identified "me" from localStorage
+  useEffect(() => {
+    setMyId(localStorage.getItem('bolao_me'))
+  }, [])
+
+  // Detect rank changes: buzz + celebrate podium entries (movement itself is FLIP-animated)
   useEffect(() => {
     if (data.length === 0) return
     const newRanks = new Map<string, number>()
     data.forEach(entry => {
       newRanks.set(entry.participant.id, data.filter(e => e.totalPoints > entry.totalPoints).length + 1)
     })
-    const changes: Record<string, 'up' | 'down'> = {}
+    let anyChange = false
+    const enteredPodium: string[] = []
     if (prevRanksRef.current.size > 0) {
       for (const [id, newRank] of newRanks) {
         const prev = prevRanksRef.current.get(id)
         if (prev !== undefined && prev !== newRank) {
-          changes[id] = prev > newRank ? 'up' : 'down'
+          anyChange = true
+          if (newRank <= 3 && prev > 3) enteredPodium.push(id)
         }
       }
     }
     prevRanksRef.current = newRanks
-    if (Object.keys(changes).length > 0) {
-      setFlashMap(changes)
-      haptic(15) // buzz on any position change
-      const t = setTimeout(() => setFlashMap({}), 2200)
+    if (anyChange) haptic(15)
+    if (enteredPodium.length > 0) {
+      setPodiumCelebrate(new Set(enteredPodium))
+      const t = setTimeout(() => setPodiumCelebrate(new Set()), 2600)
       return () => clearTimeout(t)
     }
+  }, [data])
+
+  // Buzz + highlight when a live goal changes MY points
+  useEffect(() => {
+    if (!myId) return
+    const me = data.find(e => e.participant.id === myId) as any
+    const lp = me?.livePoints ?? 0
+    if (leaderboardHasLive && lp > prevMyLiveRef.current && prevMyLiveRef.current >= 0) {
+      const gain = lp - prevMyLiveRef.current
+      haptic(40)
+      showToast(`⚽ Você ganhou +${gain} ao vivo!`)
+      setFlashMap(m => ({ ...m, [myId]: 'up' }))
+      const t = setTimeout(() => setFlashMap(m => { const n = { ...m }; delete n[myId]; return n }), 2200)
+      prevMyLiveRef.current = lp
+      return () => clearTimeout(t)
+    }
+    prevMyLiveRef.current = lp
+  }, [data, myId, leaderboardHasLive])
+
+  // FLIP: smoothly slide rows to their new positions when the order changes
+  useLayoutEffect(() => {
+    const newRects = new Map<string, DOMRect>()
+    rowRefs.current.forEach((el, id) => newRects.set(id, el.getBoundingClientRect()))
+    newRects.forEach((newRect, id) => {
+      const old = prevRects.current.get(id)
+      if (!old) return
+      const dy = old.top - newRect.top
+      if (Math.abs(dy) > 1) {
+        const el = rowRefs.current.get(id)
+        if (!el) return
+        el.style.transition = 'none'
+        el.style.transform = `translateY(${dy}px)`
+        requestAnimationFrame(() => {
+          el.style.transition = 'transform 0.45s cubic-bezier(0.22,0.61,0.36,1)'
+          el.style.transform = ''
+        })
+      }
+    })
+    prevRects.current = newRects
   }, [data])
 
   // Stagger-animate leaderboard rows once, on first data load
@@ -922,7 +984,23 @@ export default function LeaderboardPage() {
         <Podium
           top3={data.slice(0, 3)}
           onSelect={openParticipant}
+          celebrate={podiumCelebrate}
         />
+      )}
+
+      {!loading && data.length > 10 && !leaderboardHasLive && (
+        <div className="relative">
+          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+          <input
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            placeholder="Buscar participante…"
+            className="w-full bg-gray-900 border border-gray-800 focus:border-gray-600 rounded-xl pl-9 pr-9 py-2.5 text-sm text-gray-200 placeholder-gray-600 outline-none transition-colors"
+          />
+          {query && (
+            <button onClick={() => setQuery('')} className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-full text-gray-500 hover:text-gray-200 hover:bg-gray-800" aria-label="Limpar">✕</button>
+          )}
+        </div>
       )}
 
       {!loading && data.length > 0 && !leaderboardHasLive && (
@@ -943,9 +1021,12 @@ export default function LeaderboardPage() {
                 const tier = tierOf(entry.totalPoints)
                 const p = entry as any
                 const flash = flashMap[entry.participant.id]
+                const isMe = myId === entry.participant.id
+                if (query && !entry.participant.name.toLowerCase().includes(query.toLowerCase())) return null
                 return (
                 <tr
                   key={entry.participant.id}
+                  ref={el => { if (el) rowRefs.current.set(entry.participant.id, el); else rowRefs.current.delete(entry.participant.id) }}
                   onClick={() => openParticipant(entry.participant.id, entry.participant.name)}
                   style={rowsIn ? { animationDelay: `${Math.min(idx, 25) * 28}ms` } : undefined}
                   className={`cursor-pointer transition-colors ${rowsIn ? 'animate-row-in' : ''} ${
@@ -956,7 +1037,7 @@ export default function LeaderboardPage() {
                     tier === 3 ? 'bg-orange-50 hover:bg-orange-100 dark:bg-orange-950/30 dark:hover:bg-orange-950/50' :
                     (rank >= 4 && rank <= 7) ? 'bg-green-50 hover:bg-green-100 dark:bg-green-950/40 dark:hover:bg-green-950/60' :
                     'hover:bg-gray-900/50'
-                  } ${rank === 1 ? 'shadow-[inset_3px_0_0_0_#facc15]' : ''} ${flash === 'up' ? 'animate-flash-up' : flash === 'down' ? 'animate-flash-down' : ''}`}
+                  } ${rank === 1 ? 'shadow-[inset_3px_0_0_0_#facc15]' : ''} ${isMe ? 'shadow-[inset_3px_0_0_0_#00bf63] ring-1 ring-inset ring-[#00bf63]/40' : ''} ${flash === 'up' ? 'animate-flash-up' : flash === 'down' ? 'animate-flash-down' : ''}`}
                 >
                   <td className="pl-2 pr-1 py-3 text-center font-bold">
                     {isRelated(entry.totalPoints)
@@ -978,6 +1059,7 @@ export default function LeaderboardPage() {
                     ''
                   }`}>
                     <div className="flex items-center gap-1.5 min-w-0">
+                      {isMe && <span className="shrink-0 text-[#00bf63]" title="Você">★</span>}
                       <span className="truncate">{entry.participant.name}</span>
                       {(() => {
                         const ch: number | undefined = p.positionChange
@@ -988,10 +1070,32 @@ export default function LeaderboardPage() {
                       })()}
                     </div>
                   </td>
-                  <td className="px-1 py-3 text-right">
-                    {entry.lastMatchPoints > 0
-                      ? <span className="text-green-600 dark:text-green-400 font-semibold">+{entry.lastMatchPoints}</span>
-                      : <span className="text-gray-400 dark:text-gray-500">0</span>}
+                  <td className="px-1 py-3 text-right relative">
+                    <button
+                      onClick={e => { e.stopPropagation(); setUjOpen(o => o === entry.participant.id ? null : entry.participant.id) }}
+                      className="w-full text-right"
+                    >
+                      {entry.lastMatchPoints > 0
+                        ? <span className="text-green-600 dark:text-green-400 font-semibold underline decoration-dotted underline-offset-2">+{entry.lastMatchPoints}</span>
+                        : <span className="text-gray-400 dark:text-gray-500 underline decoration-dotted underline-offset-2">0</span>}
+                    </button>
+                    {ujOpen === entry.participant.id && (
+                      <>
+                        <div className="fixed inset-0 z-30" onClick={e => { e.stopPropagation(); setUjOpen(null) }} />
+                        <div onClick={e => e.stopPropagation()} className="absolute right-0 top-full mt-1 z-40 w-44 bg-gray-800 border border-gray-700 rounded-lg shadow-xl p-2.5 text-left animate-fade-in">
+                          <p className="text-[10px] uppercase tracking-wide text-gray-500 mb-1">Último jogo</p>
+                          {lastMatch ? (
+                            <>
+                              <p className="text-xs text-gray-300 font-semibold truncate">{lastMatch.team1.name} {lastMatch.score1}×{lastMatch.score2} {lastMatch.team2.name}</p>
+                              <div className="flex items-center justify-between mt-1.5 text-xs">
+                                <span className="text-gray-400">Palpite: <span className="text-gray-200 font-semibold font-score">{p.lastMatchPred ? `${p.lastMatchPred.score1}×${p.lastMatchPred.score2}` : '—'}</span></span>
+                                <span className={`font-bold ${entry.lastMatchPoints > 0 ? 'text-green-600 dark:text-green-400' : 'text-gray-500'}`}>+{entry.lastMatchPoints}</span>
+                              </div>
+                            </>
+                          ) : <p className="text-xs text-gray-500">Nenhum jogo ainda.</p>}
+                        </div>
+                      </>
+                    )}
                   </td>
                   <td className="px-1 py-3 text-right">
                     {(() => {
@@ -1017,6 +1121,9 @@ export default function LeaderboardPage() {
             )}
             </tbody>
           </table>
+          {query && !data.some(e => e.participant.name.toLowerCase().includes(query.toLowerCase())) && (
+            <p className="text-center text-sm text-gray-500 py-6">Nenhum participante encontrado para “{query}”.</p>
+          )}
           <div className="px-3 py-2 border-t border-gray-800">
             <span className="text-xs text-gray-600">Toque num participante para ver os palpites</span>
           </div>
@@ -1046,6 +1153,8 @@ export default function LeaderboardPage() {
         <ParticipantModal
           participantId={selectedParticipant.id}
           name={selectedParticipant.name}
+          isMe={myId === selectedParticipant.id}
+          onToggleMe={() => toggleMe(selectedParticipant.id)}
           onClose={() => setSelectedParticipant(null)}
         />
       )}

@@ -68,9 +68,9 @@ type ParticipantData = {
   groupPredictions: GroupPredRow[]
 }
 
-type Props = { participantId: string; name: string; onClose: () => void }
+type Props = { participantId: string; name: string; isMe?: boolean; onToggleMe?: () => void; onClose: () => void }
 
-export function ParticipantModal({ participantId, name, onClose }: Props) {
+export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClose }: Props) {
   const [data, setData] = useState<ParticipantData | null>(null)
   const [loading, setLoading] = useState(true)
   const [tab, setTab] = useState<'played' | 'selecoes' | 'upcoming'>('played')
@@ -168,13 +168,24 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
               )}
               <h2 className="text-lg font-bold text-white truncate">{name}</h2>
             </div>
-            <button
-              onClick={onClose}
-              className="shrink-0 w-9 h-9 flex items-center justify-center rounded-full bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white text-xl font-bold transition-colors"
-              aria-label="Fechar"
-            >
-              ×
-            </button>
+            <div className="flex items-center gap-2 shrink-0">
+              {onToggleMe && (
+                <button
+                  onClick={onToggleMe}
+                  className={`flex items-center gap-1 h-9 px-2.5 rounded-full text-xs font-semibold transition-colors ${isMe ? 'bg-[#00bf63] text-white' : 'bg-gray-800 text-gray-400 hover:text-gray-200'}`}
+                  title={isMe ? 'Você marcou como sendo você' : 'Marcar como você'}
+                >
+                  {isMe ? '★ Sou eu' : '☆ Sou eu'}
+                </button>
+              )}
+              <button
+                onClick={onClose}
+                className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white text-xl font-bold transition-colors"
+                aria-label="Fechar"
+              >
+                ×
+              </button>
+            </div>
           </div>
 
           {data && (() => {

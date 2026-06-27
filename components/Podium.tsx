@@ -6,6 +6,7 @@ import { AnimatedNumber } from '@/components/AnimatedNumber'
 type Props = {
   top3: LeaderboardEntry[]
   onSelect: (id: string, name: string) => void
+  celebrate?: Set<string>
 }
 
 // Visual order: 2nd, 1st, 3rd (champion centered + taller)
@@ -15,7 +16,7 @@ const SLOTS = [
   { rank: 3, medal: '🥉', h: 'h-16', ring: 'ring-amber-600/60', glow: '', from: 'from-amber-600/15' },
 ]
 
-export function Podium({ top3, onSelect }: Props) {
+export function Podium({ top3, onSelect, celebrate }: Props) {
   if (top3.length < 3) return null
   const byRank: Record<number, LeaderboardEntry> = { 1: top3[0], 2: top3[1], 3: top3[2] }
 
@@ -25,13 +26,15 @@ export function Podium({ top3, onSelect }: Props) {
         const entry = byRank[slot.rank]
         if (!entry) return <div key={slot.rank} />
         const isFirst = slot.rank === 1
+        const celebrating = celebrate?.has(entry.participant.id)
         return (
           <button
             key={slot.rank}
             onClick={() => onSelect(entry.participant.id, entry.participant.name)}
-            className="flex flex-col items-center group"
+            className={`flex flex-col items-center group ${celebrating ? 'animate-celebrate' : ''}`}
           >
             <div className="relative mb-1.5">
+              {celebrating && <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-lg animate-bounce">🎉</span>}
               <span
                 className={`flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-900 ring-2 ${slot.ring} ${slot.glow} transition-transform group-hover:scale-105`}
                 style={{ width: isFirst ? 56 : 44, height: isFirst ? 56 : 44, fontSize: isFirst ? 30 : 24 }}

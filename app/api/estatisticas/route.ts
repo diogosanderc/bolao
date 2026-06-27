@@ -143,6 +143,94 @@ export async function GET() {
       return !predsForMatch.some(mp => mp.score1 === rs1 && mp.score2 === rs2)
     })
 
+    // ─── Records & curiosities ────────────────────────────────────────────
+    const nameById = Object.fromEntries(participants.map(p => [p.id, p.name]))
+    const records: { icon: string; title: string; value: string; subtitle: string }[] = []
+
+    // Longest consecutive correct-result streak (chronological)
+    {
+      let best = { id: '', streak: 0 }
+      for (const p of participants) {
+        let cur = 0, max = 0
+        for (const result of sortedResults) {
+          const match = matchById[result.matchId]
+          const pred = db.matchPredictions.find(mp => mp.participantId === p.id && mp.matchId === result.matchId)
+          if (match && pred && scoreMatch(pred, result, match).correctResult) { cur++; if (cur > max) max = cur }
+          else cur = 0
+        }
+        if (max > best.streak) best = { id: p.id, streak: max }
+      }
+      if (best.streak >= 2) records.push({ icon: '🔥', title: 'Maior sequência', value: nameById[best.id], subtitle: `${best.streak} resultados certos seguidos` })
+    }
+
+    // Most exact scores
+    {
+      const top = Object.values(stats).sort((a, b) => b.correctScores - a.correctScores)[0]
+      if (top && top.correctScores > 0) records.push({ icon: '🎯', title: 'Rei do placar exato', value: top.name, subtitle: `${top.correctScores} placares cravados` })
+    }
+
+    // Riskiest — highest average total goals predicted per played match
+    {
+      let best = { id: '', avg: 0 }
+      for (const p of participants) {
+        let sum = 0, n = 0
+        for (const result of sortedResults) {
+          const pred = db.matchPredictions.find(mp => mp.participantId === p.id && mp.matchId === result.matchId)
+          if (pred) { sum += pred.score1 + pred.score2; n++ }
+        }
+        const avg = n > 0 ? sum / n : 0
+        if (avg > best.avg) best = { id: p.id, avg }
+      }
+      if (best.id) records.push({ icon: '🎲', title: 'Mais arrojado', value: nameById[best.id], subtitle: `média de ${best.avg.toFixed(1)} gols por palpite` })
+    }
+
+    // Per-match correctness, for "zebra", "unânime" and "freguês"
+    const matchAcc: { matchId: string; correctPct: number; exactCount: number; total: number; label: string }[] = []
+    for (const result of sortedResults) {
+      const match = matchById[result.matchId]
+      if (!match) continue
+      const preds = db.matchPredictions.filter(mp => mp.matchId === result.matchId)
+      if (preds.length === 0) continue
+      let correct = 0, exact = 0
+      for (const pred of preds) {
+        const s = scoreMatch(pred, result, match)
+        if (s.correctResult) correct++
+        if (s.correctScore) exact++
+      }
+      matchAcc.push({ matchId: result.matchId, correctPct: correct / preds.length, exactCount: exact, total: preds.length, label: matchLabel(result.matchId, result.score1, result.score2) })
+    }
+
+    // Zebra — lowest correct-result rate
+    {
+      const z = [...matchAcc].sort((a, b) => a.correctPct - b.correctPct)[0]
+      if (z) records.push({ icon: '😱', title: 'Jogo zebra', value: z.label, subtitle: `só ${Math.round(z.correctPct * 100)}% acertaram o resultado` })
+    }
+    // Unânime — most exact-score hits
+    {
+      const u = [...matchAcc].sort((a, b) => b.exactCount - a.exactCount)[0]
+      if (u && u.exactCount > 0) records.push({ icon: '🤝', title: 'Palpite unânime', value: u.label, subtitle: `${u.exactCount} de ${u.total} cravaram o placar` })
+    }
+    // Freguês — team whose matches were most mispredicted (min 2 matches)
+    {
+      const teamWrong: Record<string, { wrong: number; n: number }> = {}
+      for (const result of sortedResults) {
+        const match = matchById[result.matchId]
+        if (!match) continue
+        const acc = matchAcc.find(m => m.matchId === result.matchId)
+        if (!acc) continue
+        for (const tid of [match.team1Id, match.team2Id]) {
+          if (!teamWrong[tid]) teamWrong[tid] = { wrong: 0, n: 0 }
+          teamWrong[tid].wrong += (1 - acc.correctPct)
+          teamWrong[tid].n += 1
+        }
+      }
+      const ranked = Object.entries(teamWrong)
+        .filter(([, v]) => v.n >= 2)
+        .map(([tid, v]) => ({ tid, rate: v.wrong / v.n }))
+        .sort((a, b) => b.rate - a.rate)[0]
+      if (ranked) records.push({ icon: '🧱', title: 'Freguês da galera', value: teamById[ranked.tid]?.name ?? ranked.tid, subtitle: `${Math.round(ranked.rate * 100)}% erraram os jogos dele` })
+    }
+
     // Return participants sorted by current leaderboard ranking
     const lbOrder = new Map(finalLb.map((e, i) => [e.participant.id, i]))
     const sortedParticipants = [...participants].sort(
@@ -154,6 +242,7 @@ export async function GET() {
       snapshots,
       participantStats: Object.values(stats),
       classificationStats,
+      records,
       popularPredictions,
       surprises: surprises.map(s => s.matchId),
       matchesPlayed,

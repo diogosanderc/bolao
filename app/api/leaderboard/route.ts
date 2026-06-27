@@ -59,6 +59,7 @@ export async function GET() {
     const lastResult = sortedResults.length >= 1 ? sortedResults[sortedResults.length - 1] : null
     const secondLastPtsMap = new Map<string, number>()
     const lastPtsMap = new Map<string, number>()
+    const lastPredMap = new Map<string, { score1: number; score2: number }>()
     for (const participant of validParticipants) {
       let pts4 = 0
       for (const result of last4Results) {
@@ -71,7 +72,10 @@ export async function GET() {
           const s = scoreMatch(pred, result, match).total
           pts4 += s
           if (secondLastResult && result.matchId === secondLastResult.matchId) secondLastPtsMap.set(participant.id, s)
-          if (lastResult && result.matchId === lastResult.matchId) lastPtsMap.set(participant.id, s)
+          if (lastResult && result.matchId === lastResult.matchId) {
+            lastPtsMap.set(participant.id, s)
+            lastPredMap.set(participant.id, { score1: pred.score1, score2: pred.score2 })
+          }
         }
       }
       last4PointsMap.set(participant.id, pts4)
@@ -124,6 +128,7 @@ export async function GET() {
       last4Points?: number
       lastMatchPts?: number
       secondLastMatchPts?: number
+      lastMatchPred?: { score1: number; score2: number } | null
       groupBonus?: number
       maxPossiblePoints?: number
       pointsToFirst?: number
@@ -139,6 +144,7 @@ export async function GET() {
         last4Points: last4PointsMap.get(entry.participant.id) ?? 0,
         lastMatchPts: lastPtsMap.get(entry.participant.id) ?? 0,
         secondLastMatchPts: secondLastPtsMap.get(entry.participant.id) ?? 0,
+        lastMatchPred: lastPredMap.get(entry.participant.id) ?? null,
         groupBonus: lastGroupBonusMap.get(entry.participant.id) ?? 0,
         maxPossiblePoints,
         pointsToFirst: Math.max(0, firstScore - entry.totalPoints),
