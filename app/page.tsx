@@ -6,6 +6,8 @@ import { Flag } from '@/components/Flag'
 import { ParticipantModal } from '@/components/ParticipantModal'
 import { Scoreboard } from '@/components/Scoreboard'
 import { AnimatedNumber } from '@/components/AnimatedNumber'
+import { Avatar } from '@/components/Avatar'
+import { Podium } from '@/components/Podium'
 import { chipCode } from '@/lib/names'
 
 type LastMatch = {
@@ -624,7 +626,7 @@ export default function LeaderboardPage() {
       ))}
 
       {lastMatch && (
-        <div className="bg-gray-900 border border-gray-800 rounded-lg px-4 py-2.5">
+        <div className="bg-gradient-to-br from-gray-900 to-gray-950 border border-gray-800 rounded-lg px-4 py-2.5">
           <div className="text-xs text-gray-500 uppercase tracking-wider mb-1">Último jogo</div>
           <div className="flex items-center gap-2.5 text-sm text-gray-300">
             <span className="flex items-center gap-1.5 min-w-0"><Flag teamId={lastMatch.team1.id} size={20} /><span className="truncate">{lastMatch.team1.name}</span></span>
@@ -638,7 +640,7 @@ export default function LeaderboardPage() {
         <button
           key={m.matchId}
           onClick={() => openMatchPredictions(m.matchId, `${m.team1.name} vs ${m.team2.name}`)}
-          className="w-full bg-gray-900 border border-gray-800 hover:border-gray-600 rounded-lg px-4 py-2.5 text-left transition-colors"
+          className="w-full bg-gradient-to-br from-gray-900 to-gray-950 border border-gray-800 hover:border-gray-600 rounded-lg px-4 py-2.5 text-left transition-colors"
         >
           <div className="flex items-center justify-between mb-1">
             <span className="text-xs text-gray-500 uppercase tracking-wider">Próximo jogo</span>
@@ -669,11 +671,13 @@ export default function LeaderboardPage() {
       )}
 
       {!loading && data.length === 0 && (
-        <div className="text-center py-20 text-gray-500">
-          <p className="text-4xl mb-3">📋</p>
-          <p>Nenhum participante cadastrado ainda.</p>
-          <p className="text-sm mt-1">
-            <a href="/admin" className="text-yellow-400 hover:underline">Acesse o painel admin</a> para adicionar participantes.
+        <div className="flex flex-col items-center text-center py-16 px-6">
+          <div className="flex items-center justify-center w-20 h-20 rounded-full bg-gray-900 border border-gray-800 mb-4">
+            <span className="text-4xl">📋</span>
+          </div>
+          <p className="text-gray-300 font-semibold">Nenhum participante cadastrado ainda</p>
+          <p className="text-sm mt-1 text-gray-500">
+            <a href="/admin" className="text-yellow-500 hover:underline font-medium">Acesse o painel admin</a> para adicionar participantes.
           </p>
         </div>
       )}
@@ -711,6 +715,7 @@ export default function LeaderboardPage() {
                   onClick={() => setSelectedParticipant({ id: entry.participant.id, name: entry.participant.name })}
                 >
                   <span className="text-gray-500 text-xs w-5 text-right shrink-0 font-semibold">{rank}</span>
+                  <Avatar name={entry.participant.name} size={22} />
                   <span className="text-gray-200 text-sm font-semibold flex-1 min-w-0 truncate">{entry.participant.name}</span>
                   {liveGain > 0
                     ? <span className="text-green-700 dark:text-green-400 text-xs font-bold w-9 text-right shrink-0 tabular-nums">+{liveGain}</span>
@@ -771,6 +776,13 @@ export default function LeaderboardPage() {
         </div>
       )}
 
+      {!loading && data.length >= 3 && !leaderboardHasLive && (
+        <Podium
+          top3={data.slice(0, 3)}
+          onSelect={(id, name) => setSelectedParticipant({ id, name })}
+        />
+      )}
+
       {!loading && data.length > 0 && !leaderboardHasLive && (
         <div ref={leaderboardRef} className="overflow-x-auto rounded-xl border border-gray-800">
           <table className="w-full text-sm">
@@ -801,7 +813,7 @@ export default function LeaderboardPage() {
                     tier === 3 ? 'bg-orange-50 hover:bg-orange-100 dark:bg-orange-950/30 dark:hover:bg-orange-950/50' :
                     (rank >= 4 && rank <= 7) ? 'bg-green-50 hover:bg-green-100 dark:bg-green-950/40 dark:hover:bg-green-950/60' :
                     'hover:bg-gray-900/50'
-                  } ${flash === 'up' ? 'animate-flash-up' : flash === 'down' ? 'animate-flash-down' : ''}`}
+                  } ${rank === 1 ? 'shadow-[inset_3px_0_0_0_#facc15]' : ''} ${flash === 'up' ? 'animate-flash-up' : flash === 'down' ? 'animate-flash-down' : ''}`}
                 >
                   <td className="px-4 py-3 text-center font-bold text-lg">
                     {isRelated(entry.totalPoints)
@@ -813,7 +825,7 @@ export default function LeaderboardPage() {
                           ? (isFirstOfRank[idx] ? <span className="text-green-600 dark:text-green-400 text-sm">{rank}</span> : null)
                           : (isFirstOfRank[idx] ? <span className="text-gray-500 text-sm">{rank}</span> : null))}
                   </td>
-                  <td className={`px-4 py-3 font-semibold ${
+                  <td className={`px-3 py-3 font-semibold ${
                     isRelated(entry.totalPoints) ? 'text-red-700 dark:text-red-300' :
                     isWarning(entry.totalPoints) ? 'text-yellow-600 dark:text-yellow-400' :
                     tier === 1 ? 'text-yellow-700 dark:text-yellow-300' :
@@ -822,7 +834,17 @@ export default function LeaderboardPage() {
                     (rank >= 4 && rank <= 7) ? 'text-green-600 dark:text-green-400' :
                     ''
                   }`}>
-                    {entry.participant.name}
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Avatar name={entry.participant.name} size={26} />
+                      <span className="truncate">{entry.participant.name}</span>
+                      {(() => {
+                        const ch: number | undefined = p.positionChange
+                        if (ch === undefined || ch === 0) return null
+                        return ch > 0
+                          ? <span className="text-blue-600 dark:text-blue-400 text-[10px] font-bold shrink-0 tabular-nums">▲{ch}</span>
+                          : <span className="text-red-600 dark:text-red-400 text-[10px] font-bold shrink-0 tabular-nums">▼{Math.abs(ch)}</span>
+                      })()}
+                    </div>
                   </td>
                   <td className="px-4 py-3 text-right">
                     {entry.lastMatchPoints > 0

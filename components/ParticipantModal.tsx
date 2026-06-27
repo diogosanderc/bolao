@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Flag } from '@/components/Flag'
 import { PHASE_LABELS, Phase } from '@/lib/types'
 import { AnimatedNumber } from '@/components/AnimatedNumber'
+import { Avatar } from '@/components/Avatar'
 
 type TeamRef = { id: string; name: string; flag: string }
 
@@ -166,6 +167,7 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
                   <span className="text-lg font-bold">{data.summary.rank}</span>
                 </span>
               )}
+              <Avatar name={name} size={34} />
               <h2 className="text-lg font-bold text-white truncate">{name}</h2>
             </div>
             <button
@@ -261,7 +263,7 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
           )}
 
           {!loading && tab === 'played' && (
-            <div className="divide-y divide-gray-800/60">
+            <div key="played" className="divide-y divide-gray-800/60 animate-fade-in">
               {played.length === 0 && <p className="text-center py-10 text-gray-600">Nenhum jogo disputado ainda.</p>}
               {played.map(p => (
                 <div key={p.matchId} className={`px-3 py-2.5 ${rowColor(p)}`}>
@@ -359,7 +361,7 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
           )}
 
           {!loading && tab === 'selecoes' && (
-            <div className="p-3 space-y-3">
+            <div key="selecoes" className="p-3 space-y-3 animate-fade-in">
               {(!data?.groupPredictions?.length) && (
                 <p className="text-center py-10 text-gray-600">Sem palpites de classificação registrados.</p>
               )}
@@ -387,8 +389,8 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
                         return (
                           <div key={team.id} className={`flex items-center gap-2.5 px-3 py-2 ${qualified ? 'bg-green-50 dark:bg-green-950/20' : ''}`}>
                             <span className={`text-[11px] font-bold w-5 shrink-0 ${posColor}`}>{posLabel}</span>
-                            <span>{team.flag}</span>
-                            <span className={`text-xs font-semibold flex-1 ${qualified ? 'text-green-700 dark:text-green-300' : g.complete ? 'text-gray-500' : 'text-gray-300'}`}>
+                            <Flag teamId={team.id} size={22} />
+                            <span className={`text-sm font-semibold flex-1 ${qualified ? 'text-green-700 dark:text-green-300' : g.complete ? 'text-gray-500' : 'text-gray-300'}`}>
                               {team.name}
                             </span>
                             {qualified
@@ -407,7 +409,7 @@ export function ParticipantModal({ participantId, name, onClose }: Props) {
           )}
 
           {!loading && tab === 'upcoming' && (
-            <div className="divide-y divide-gray-800/60">
+            <div key="upcoming" className="divide-y divide-gray-800/60 animate-fade-in">
               {upcoming.length === 0 && <p className="text-center py-10 text-gray-600">Sem palpites futuros registrados.</p>}
               {upcoming.map(p => (
                 <div key={p.matchId} className="px-3 py-2.5 flex items-center justify-between gap-2">

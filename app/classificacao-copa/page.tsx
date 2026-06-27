@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Flag } from '@/components/Flag'
+import { Scoreboard } from '@/components/Scoreboard'
 import { teamById } from '@/lib/copa2026'
 
 type GroupRow = {
@@ -46,11 +47,9 @@ function MatchRow({ m, compact = false }: { m: MatchInfo; compact?: boolean }) {
       </div>
 
       {/* Score */}
-      <div className="shrink-0 text-center min-w-[3.4rem]">
+      <div className="shrink-0 text-center min-w-[3.4rem] flex justify-center">
         {played || live ? (
-          <span className={`font-bold px-1.5 py-0.5 rounded tabular-nums ${live ? 'bg-red-100 dark:bg-red-950 text-red-700 dark:text-red-300' : 'bg-gray-800 text-gray-100'}`}>
-            {m.score1}–{m.score2}
-          </span>
+          <Scoreboard score1={m.score1 ?? 0} score2={m.score2 ?? 0} size="sm" live={live} />
         ) : (
           <span className="text-gray-600 text-[11px]">×</span>
         )}
@@ -100,11 +99,13 @@ function GroupCard({ group }: { group: GroupData }) {
         <tbody className="divide-y divide-gray-800/60">
           {group.standings.map(row => {
             const team = teamById[row.teamId]
-            const border = row.pos <= 2 ? 'border-l-2 border-green-500'
+            const qualified = row.pos <= 2
+            const border = qualified ? 'border-l-2 border-green-500'
               : row.pos === 3 ? 'border-l-2 border-amber-500/60'
               : 'border-l-2 border-transparent'
+            const leaderBg = row.pos === 1 ? 'bg-green-50 dark:bg-green-950/30' : ''
             return (
-              <tr key={row.teamId} className={border}>
+              <tr key={row.teamId} className={`${border} ${leaderBg}`}>
                 <td className="px-2 py-1.5 text-gray-500 font-semibold">{row.pos}</td>
                 <td className="px-1 py-1.5">
                   <div className="flex items-center gap-1.5 min-w-0">
@@ -113,6 +114,7 @@ function GroupCard({ group }: { group: GroupData }) {
                       <span className="sm:hidden">{row.teamId}</span>
                       <span className="hidden sm:inline">{team?.name ?? row.teamId}</span>
                     </span>
+                    {qualified && <span className="shrink-0 text-green-600 dark:text-green-400 text-[10px] font-bold" title="Classificado">✓</span>}
                   </div>
                 </td>
                 <td className="px-1 py-1.5 text-center text-gray-400">{row.j}</td>
@@ -132,6 +134,17 @@ function GroupCard({ group }: { group: GroupData }) {
       </div>
     </div>
   )
+}
+
+// ─── Phase icons ─────────────────────────────────────────────────────────────
+
+const PHASE_ICON: Record<string, string> = {
+  round_of_32: '🎯',
+  round_of_16: '⚔️',
+  quarterfinal: '🥊',
+  semifinal: '🔥',
+  third_place: '🥉',
+  final: '🏆',
 }
 
 // ─── Knockout section ────────────────────────────────────────────────────────
@@ -162,14 +175,15 @@ function KnockoutSection({ phases }: { phases: KnockoutPhase[] }) {
                 : 'border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-200'
             }`}
           >
-            {p.label}
+            <span className="mr-1">{PHASE_ICON[p.phase] ?? ''}</span>{p.label}
           </button>
         ))}
       </div>
 
       {current && (
-        <div className="rounded-xl border border-gray-800 bg-gray-950 overflow-hidden">
-          <div className="bg-yellow-600 px-4 py-2">
+        <div className="rounded-xl border border-gray-800 bg-gray-950 overflow-hidden animate-fade-in">
+          <div className="bg-yellow-600 px-4 py-2 flex items-center gap-2">
+            <span className="text-base">{PHASE_ICON[current.phase] ?? ''}</span>
             <h3 className="font-bold text-white text-sm tracking-wide uppercase">{current.label}</h3>
           </div>
           <div className="divide-y divide-gray-800/50">
@@ -331,6 +345,26 @@ export default function ClassificacaoCopaPage() {
         )}
       </div>
 
+      {/* Group stage progress bar */}
+      {!loading && groups.length > 0 && (() => {
+        const total = groups.reduce((s, g) => s + g.matches.length, 0)
+        const played = groups.reduce((s, g) => s + g.matches.filter(m => m.status === 'played').length, 0)
+        if (total === 0) return null
+        const pct = Math.round((played / total) * 100)
+        const done = played === total
+        return (
+          <div className="rounded-lg bg-gray-900 border border-gray-800 px-4 py-2.5">
+            <div className="flex items-center justify-between text-xs mb-1.5">
+              <span className="text-gray-400 font-semibold uppercase tracking-wide">Fase de grupos</span>
+              <span className="text-gray-300 font-score font-bold">{played}/{total} jogos · {pct}%</span>
+            </div>
+            <div className="h-2 rounded-full bg-gray-800 overflow-hidden">
+              <div className={`h-full rounded-full transition-all duration-700 ${done ? 'bg-yellow-500' : 'bg-green-500'}`} style={{ width: `${pct}%` }} />
+            </div>
+          </div>
+        )
+      })()}
+
       {/* Main tabs */}
       <div className="flex border-b border-gray-800">
         {([['groups', 'Fase de Grupos'], ['thirds', 'Terceiros Lugares'], ['knockout', 'Mata-Mata']] as [Tab, string][]).map(([key, label]) => (
@@ -348,10 +382,21 @@ export default function ClassificacaoCopaPage() {
         ))}
       </div>
 
-      {loading && <div className="text-center py-12 text-gray-500">Carregando…</div>}
+      {loading && (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="rounded-xl border border-gray-800 overflow-hidden">
+              <div className="skeleton h-8 w-full" style={{ borderRadius: 0 }} />
+              <div className="p-3 space-y-2">
+                {Array.from({ length: 4 }).map((_, j) => <div key={j} className="skeleton h-5 w-full" />)}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {!loading && tab === 'groups' && (
-        <>
+        <div key="groups" className="space-y-4 animate-fade-in">
           <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-gray-500">
             <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-green-500 inline-block" /> Classificados (1º e 2º)</span>
             <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-amber-500/60 inline-block" /> Possível vaga como melhor 3º</span>
@@ -359,15 +404,15 @@ export default function ClassificacaoCopaPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {groups.map(g => <GroupCard key={g.id} group={g} />)}
           </div>
-        </>
+        </div>
       )}
 
       {!loading && tab === 'thirds' && (
-        <ThirdsSection groups={groups} />
+        <div key="thirds" className="animate-fade-in"><ThirdsSection groups={groups} /></div>
       )}
 
       {!loading && tab === 'knockout' && (
-        <KnockoutSection phases={knockout} />
+        <div key="knockout" className="animate-fade-in"><KnockoutSection phases={knockout} /></div>
       )}
     </div>
   )

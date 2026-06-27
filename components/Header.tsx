@@ -103,10 +103,12 @@ export function Header() {
   )
 
   return (
-    <header className="bg-[#00bf63] shadow-lg relative z-50">
+    <header className="bg-gradient-to-r from-[#009e52] via-[#00bf63] to-[#00a857] shadow-lg relative z-50">
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
-        <a href="/" className="flex items-center gap-2 no-underline">
-          <span className="text-3xl">🏆</span>
+        <a href="/" className="flex items-center gap-2.5 no-underline group">
+          <span className="flex items-center justify-center w-10 h-10 rounded-full bg-white/15 ring-2 ring-white/30 shadow-inner transition-transform group-hover:scale-105">
+            <span className="text-2xl leading-none">🏆</span>
+          </span>
           <h1 className="font-bold text-lg leading-tight text-white">Bolão Copa do Mundo 2026</h1>
         </a>
 
