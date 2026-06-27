@@ -91,15 +91,19 @@ export async function GET() {
     const lastGroupBonusMap = new Map<string, number>()
     if (lastGroupId) {
       const actualOrder = groupStandings[lastGroupId] ?? []
-      const actualTop2 = new Set([actualOrder[0], actualOrder[1]].filter(Boolean))
+      // Teams that qualified to R32 from this group (top 2 once the group is closed)
+      const qualifiedFromGroup = [actualOrder[0], actualOrder[1]].filter(Boolean)
       for (const participant of validParticipants) {
-        const gp = db.groupPredictions.find(p => p.participantId === participant.id && p.groupId === lastGroupId)
+        // +3 per qualified team that the participant explicitly picked for the R32 bracket
+        const r32 = db.r32TeamPicks?.find(p => p.participantId === participant.id)
+        const r32Set = r32 ? new Set(r32.teamIds) : null
         let bonus = 0
-        if (gp) {
-          if (gp.order[0] && actualTop2.has(gp.order[0])) bonus += 3
-          if (gp.order[1] && actualTop2.has(gp.order[1])) bonus += 3
-          if (actualOrder.length > 0 && JSON.stringify(gp.order) === JSON.stringify(actualOrder)) bonus += 2
+        for (const teamId of qualifiedFromGroup) {
+          if (r32Set ? r32Set.has(teamId) : false) bonus += 3
         }
+        // +2 for predicting the full group order exactly
+        const gp = db.groupPredictions.find(p => p.participantId === participant.id && p.groupId === lastGroupId)
+        if (gp && actualOrder.length > 0 && JSON.stringify(gp.order) === JSON.stringify(actualOrder)) bonus += 2
         lastGroupBonusMap.set(participant.id, bonus)
       }
     }

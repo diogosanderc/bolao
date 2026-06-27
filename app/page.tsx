@@ -420,7 +420,7 @@ export default function LeaderboardPage() {
             const a = p.secondLastMatchPts ?? 0
             const b = p.lastMatchPts ?? 0
             const u2 = a + b
-            const z = entry.phasePoints ?? 0
+            const z = p.groupBonus ?? 0
             ctx.fillStyle = '#4ade80'
             ctx.fillText(`(${u2}+${z})`, x + colW - 36, midY)
           }
