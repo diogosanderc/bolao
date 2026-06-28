@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { readDB } from '@/lib/db'
 import { matchById, teamById, ALL_MATCHES, GROUP_MATCHES, GROUPS } from '@/lib/copa2026'
 import { scoreMatch, computeLeaderboard } from '@/lib/scoring'
+import { computeBracketFromResults } from '@/lib/bracket'
 
 // Build a map from teamId → groupId for lookup
 const teamGroupMap: Record<string, string> = {}
@@ -60,6 +61,16 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
       db.groupPredictions.filter(p => p.participantId === id).map(p => [p.groupId, p.order])
     )
 
+    // Resolve knockout fixtures (stored as TBD) from the bracket so the modal
+    // shows the real teams (e.g. África do Sul × Canadá) instead of TBD.
+    const resolvedKnockout = computeBracketFromResults(db.results)
+    const teamOf = (m: { id: string; team1Id: string; team2Id: string }) => {
+      const r = resolvedKnockout[m.id]
+      const t1 = m.team1Id !== 'TBD' ? m.team1Id : (r?.team1Id ?? 'TBD')
+      const t2 = m.team2Id !== 'TBD' ? m.team2Id : (r?.team2Id ?? 'TBD')
+      return [t1, t2] as const
+    }
+
     const sortedMatches = [...ALL_MATCHES].sort((a, b) => {
       const dateA = matchDates[a.id]?.date ?? ''
       const dateB = matchDates[b.id]?.date ?? ''
@@ -85,13 +96,14 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
           correctGoals = sc.correctGoals
         }
 
+        const [t1, t2] = teamOf(m)
         return {
           matchId: m.id,
           matchNumber: m.matchNumber,
           phase: m.phase,
           groupId: m.groupId,
-          team1: { id: m.team1Id, name: teamById[m.team1Id]?.name ?? m.team1Id, flag: teamById[m.team1Id]?.flag ?? '🏳' },
-          team2: { id: m.team2Id, name: teamById[m.team2Id]?.name ?? m.team2Id, flag: teamById[m.team2Id]?.flag ?? '🏳' },
+          team1: { id: t1, name: teamById[t1]?.name ?? t1, flag: teamById[t1]?.flag ?? '🏳' },
+          team2: { id: t2, name: teamById[t2]?.name ?? t2, flag: teamById[t2]?.flag ?? '🏳' },
           date: matchDates[m.id]?.date ?? null,
           dateBRT: matchDates[m.id]?.dateBRT ?? null,
           prediction: pred ? { score1: pred.score1, score2: pred.score2 } : null,
