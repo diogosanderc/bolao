@@ -404,16 +404,23 @@ export default function LeaderboardPage() {
     return () => clearInterval(t)
   }, [nextStart])
 
+  // Track when any overlay (modal) is open, so pull-to-refresh stays disabled
+  const overlayOpenRef = useRef(false)
+  useEffect(() => {
+    overlayOpenRef.current = selectedParticipant !== null || matchModal !== null
+  }, [selectedParticipant, matchModal])
+
   // Pull-to-refresh (mobile): pull down from the top to refresh
   useEffect(() => {
     let startY = 0
     let pulling = false
     const THRESHOLD = 70
     const onStart = (e: TouchEvent) => {
+      if (overlayOpenRef.current) return // don't pull-to-refresh behind a modal
       if (window.scrollY <= 0 && !reloading) { startY = e.touches[0].clientY; pulling = true }
     }
     const onMove = (e: TouchEvent) => {
-      if (!pulling) return
+      if (!pulling || overlayOpenRef.current) return
       const dy = e.touches[0].clientY - startY
       if (dy > 0 && window.scrollY <= 0) {
         setPullDist(Math.min(dy * 0.5, 90))
