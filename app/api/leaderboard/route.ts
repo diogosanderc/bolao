@@ -113,6 +113,43 @@ export async function GET() {
       }
     }
 
+    // --- Last knockout game contribution: X (result pts) + Y (mata-mata rule) ---
+    const KO_ADV: Record<string, number> = { round_of_32: 3, round_of_16: 4, quarterfinal: 6, semifinal: 8, final: 10 }
+    const CHAMP_PTS = 12
+    const KO_CHAIN = ['round_of_32', 'round_of_16', 'quarterfinal', 'semifinal', 'final']
+    const nextKoPhase = (p: string) => { const i = KO_CHAIN.indexOf(p); return i >= 0 && i < KO_CHAIN.length - 1 ? KO_CHAIN[i + 1] : null }
+    const resolvedKO = computeBracketFromResults(db.results)
+    // Most recent knockout match (advancement chain) with a result
+    let lastKo: { res: typeof sortedResults[0]; phase: string } | null = null
+    for (let i = sortedResults.length - 1; i >= 0; i--) {
+      const m = matchById[sortedResults[i].matchId]
+      if (m && KO_CHAIN.includes(m.phase)) { lastKo = { res: sortedResults[i], phase: m.phase }; break }
+    }
+    const lastKoResultMap = new Map<string, number>()
+    const lastKoRuleMap = new Map<string, number>()
+    if (lastKo) {
+      const m = matchById[lastKo.res.matchId]!
+      const rk = resolvedKO[lastKo.res.matchId]
+      const t1 = m.team1Id !== 'TBD' ? m.team1Id : rk?.team1Id
+      const t2 = m.team2Id !== 'TBD' ? m.team2Id : rk?.team2Id
+      const r = lastKo.res
+      const winner = r.score1 > r.score2 ? t1 : r.score2 > r.score1 ? t2 : r.advancingTeamId
+      const np = nextKoPhase(lastKo.phase)
+      for (const participant of validParticipants) {
+        const pred = db.matchPredictions.find(p => p.participantId === participant.id && p.matchId === r.matchId)
+        const x = pred ? scoreMatch(pred, r, m).total : 0
+        let y = 0
+        const ko = db.knockoutPhasePicks?.find(p => p.participantId === participant.id)
+        if (ko && winner && winner !== 'TBD') {
+          const picks: Record<string, string[]> = { round_of_16: ko.r16, quarterfinal: ko.qf, semifinal: ko.sf, final: ko.finalists }
+          if (np && picks[np]?.includes(winner)) y += KO_ADV[np]
+          if (lastKo.phase === 'final' && ko.champion === winner) y += CHAMP_PTS
+        }
+        lastKoResultMap.set(participant.id, x)
+        lastKoRuleMap.set(participant.id, y)
+      }
+    }
+
     // Remaining matches (non-TBD only — group stage matches we can predict)
     const allPlayedIds = new Set(allResults.map(r => r.matchId))
     const remainingMatches = ALL_MATCHES.filter(
@@ -131,6 +168,8 @@ export async function GET() {
       secondLastMatchPts?: number
       lastMatchPred?: { score1: number; score2: number } | null
       groupBonus?: number
+      lastKoResultPts?: number
+      lastKoRulePts?: number
       maxPossiblePoints?: number
       pointsToFirst?: number
       pointsToTop7?: number
@@ -147,6 +186,8 @@ export async function GET() {
         secondLastMatchPts: secondLastPtsMap.get(entry.participant.id) ?? 0,
         lastMatchPred: lastPredMap.get(entry.participant.id) ?? null,
         groupBonus: lastGroupBonusMap.get(entry.participant.id) ?? 0,
+        lastKoResultPts: lastKoResultMap.get(entry.participant.id) ?? 0,
+        lastKoRulePts: lastKoRuleMap.get(entry.participant.id) ?? 0,
         maxPossiblePoints,
         pointsToFirst: Math.max(0, firstScore - entry.totalPoints),
         pointsToTop7: Math.max(0, top7Score - entry.totalPoints),

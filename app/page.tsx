@@ -549,7 +549,7 @@ export default function LeaderboardPage() {
         uj: 'UJ = pts último jogo',
         u2: 'U2 = (penúltimo + último)',
         u2grupos: 'U2 + Grupos = (penúltimo + último) +bonus grupos/R16',
-        jmata: 'Jogo + Mata-mata = (pts dos jogos + bônus classificação/mata-mata)',
+        jmata: 'Mata-mata (último jogo) = (resultado + regra do mata-mata)',
       }
       let headerY = 40
       if (lastMatch) {
@@ -651,11 +651,11 @@ export default function LeaderboardPage() {
             ctx.fillStyle = '#00bf63'
             ctx.fillText(`(${u2}+${z})`, x + colW - 36, midY)
           } else if (selectedCol === 'jmata') {
-            const jogo = entry.matchPoints ?? 0
-            const adv = entry.breakdown?.advancementPoints ?? {}
-            const mata = Object.values(adv).reduce((s: number, v: any) => s + (v ?? 0), 0)
+            // Last knockout game only: X = result pts, Y = mata-mata rule pts
+            const xPts = p.lastKoResultPts ?? 0
+            const yPts = p.lastKoRulePts ?? 0
             ctx.fillStyle = '#00bf63'
-            ctx.fillText(`(${jogo}+${mata})`, x + colW - 36, midY)
+            ctx.fillText(`(${xPts}+${yPts})`, x + colW - 36, midY)
           }
 
           // Total points (right column)
@@ -763,7 +763,7 @@ export default function LeaderboardPage() {
                     ['uj', 'UJ — pts do último jogo'],
                     ['u2', 'U2 — (penúltimo + último)'],
                     ['u2grupos', 'U2 + Grupos — (pen.+últ.) +bonus'],
-                    ['jmata', 'Jogo + Mata-mata — (jogos + classificação)'],
+                    ['jmata', 'Mata-mata — (resultado + regra) do último jogo'],
                   ] as [ImageColumn, string][]).map(([val, label]) => (
                     <button
                       key={val}
