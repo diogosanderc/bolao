@@ -211,7 +211,65 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     }
     const thirdPlacePoints = r32Detail.filter(d => d.via3rd).length * 3
 
-    const phasePoints = groupOrderPoints + r32Points
+    // --- Knockout advancement bonus (oitavas, quartas, semi, final, campeão) ---
+    const ADV_PTS: Record<string, number> = { round_of_16: 4, quarterfinal: 6, semifinal: 8, final: 10 }
+    const KO_ORDER = ['group', 'round_of_32', 'round_of_16', 'quarterfinal', 'semifinal', 'final']
+    const nextPhaseOf = (ph: string) => {
+      const i = KO_ORDER.indexOf(ph)
+      return i >= 0 && i < KO_ORDER.length - 1 ? KO_ORDER[i + 1] : null
+    }
+    const reachedByPhase: Record<string, Set<string>> = {
+      round_of_32: new Set(), round_of_16: new Set(), quarterfinal: new Set(), semifinal: new Set(), final: new Set(),
+    }
+    const teamsOf = (m: { id: string; team1Id: string; team2Id: string }) => {
+      const rk = resolvedKnockout[m.id]
+      return [
+        m.team1Id !== 'TBD' ? m.team1Id : rk?.team1Id,
+        m.team2Id !== 'TBD' ? m.team2Id : rk?.team2Id,
+      ] as const
+    }
+    for (const m of ALL_MATCHES) {
+      if (m.phase === 'group') continue
+      const res = resultMap[m.id]
+      if (!res) continue
+      const [t1, t2] = teamsOf(m)
+      if (reachedByPhase[m.phase]) {
+        if (t1 && t1 !== 'TBD') reachedByPhase[m.phase].add(t1)
+        if (t2 && t2 !== 'TBD') reachedByPhase[m.phase].add(t2)
+      }
+      const winner = res.score1 > res.score2 ? t1 : res.score2 > res.score1 ? t2 : res.advancingTeamId
+      const np = nextPhaseOf(m.phase)
+      if (winner && winner !== 'TBD' && np && reachedByPhase[np]) reachedByPhase[np].add(winner)
+    }
+
+    const myKO = db.knockoutPhasePicks?.find(p => p.participantId === id)
+    const koPickMap: Record<string, string[]> = {
+      round_of_16: myKO?.r16 ?? [],
+      quarterfinal: myKO?.qf ?? [],
+      semifinal: myKO?.sf ?? [],
+      final: myKO?.finalists ?? [],
+    }
+    const advancementDetail: Record<string, { points: number; pointsEach: number; teams: { teamId: string; name: string; flag: string }[] }> = {}
+    let advancementPoints = 0
+    for (const phase of ['round_of_16', 'quarterfinal', 'semifinal', 'final']) {
+      const reached = reachedByPhase[phase]
+      const teams = koPickMap[phase].filter(t => reached.has(t)).map(t => ({ teamId: t, name: teamById[t]?.name ?? t, flag: teamById[t]?.flag ?? '🏳' }))
+      const points = teams.length * ADV_PTS[phase]
+      advancementPoints += points
+      advancementDetail[phase] = { points, pointsEach: ADV_PTS[phase], teams }
+    }
+
+    // Champion bonus (+12)
+    let championPoints = 0
+    let championTeam: string | null = null
+    const finalRes = db.results.find(r => matchById[r.matchId]?.phase === 'final')
+    if (finalRes) {
+      const [ft1, ft2] = teamsOf({ id: finalRes.matchId, team1Id: matchById[finalRes.matchId]?.team1Id ?? 'TBD', team2Id: matchById[finalRes.matchId]?.team2Id ?? 'TBD' })
+      championTeam = finalRes.score1 > finalRes.score2 ? (ft1 ?? null) : finalRes.score2 > finalRes.score1 ? (ft2 ?? null) : (finalRes.advancingTeamId ?? null)
+      if (championTeam && myKO?.champion === championTeam) championPoints = 12
+    }
+
+    const phasePoints = groupOrderPoints + r32Points + advancementPoints + championPoints
     const totalPoints = matchPoints + phasePoints
 
     // --- Group predictions for all 12 groups (for "Seleções" tab) ---
@@ -235,9 +293,11 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     return NextResponse.json({
       participant: { id: participant.id, name: participant.name },
       predictions,
-      summary: { totalPoints, matchPoints, correctResults, correctScores, matchesPlayed: played.length, groupOrderPoints, r32Points, thirdPlacePoints, phasePoints, rank, totalParticipants },
+      summary: { totalPoints, matchPoints, correctResults, correctScores, matchesPlayed: played.length, groupOrderPoints, r32Points, thirdPlacePoints, advancementPoints, championPoints, phasePoints, rank, totalParticipants },
       groupDetail,
       r32Detail,
+      advancementDetail,
+      championTeam: championTeam ? { id: championTeam, name: teamById[championTeam]?.name ?? championTeam, flag: teamById[championTeam]?.flag ?? '🏳' } : null,
       groupPredictions,
     })
   } catch (err) {

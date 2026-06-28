@@ -61,12 +61,16 @@ type ParticipantData = {
     groupOrderPoints: number
     r32Points: number
     thirdPlacePoints: number
+    advancementPoints: number
+    championPoints: number
     phasePoints: number
     rank: number | null
     totalParticipants: number
   }
   groupDetail: GroupDetail[]
   r32Detail: R32Entry[]
+  advancementDetail: Record<string, { points: number; pointsEach: number; teams: TeamRef[] }>
+  championTeam: TeamRef | null
   groupPredictions: GroupPredRow[]
 }
 
@@ -372,6 +376,44 @@ export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClos
                         <span className={`font-bold ml-1 ${t.via3rd ? 'text-amber-800 dark:text-amber-300' : 'text-gray-400'}`}>+3</span>
                       </div>
                     ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Knockout advancement bonus (oitavas / quartas / semi / final) */}
+              {([
+                ['round_of_16', '⚔️ Oitavas de Final'],
+                ['quarterfinal', '🥊 Quartas de Final'],
+                ['semifinal', '🔥 Semifinal'],
+                ['final', '🏆 Final'],
+              ] as const).map(([key, label]) => {
+                const d = data?.advancementDetail?.[key]
+                if (!d || d.teams.length === 0) return null
+                return (
+                  <div key={key} className="px-3 pt-3 pb-1 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">{label}</span>
+                      <span className="text-xs font-bold text-gray-300">+{d.points} pts</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {d.teams.map(t => (
+                        <div key={t.id} className="flex items-center gap-1.5 bg-gray-900 border border-gray-800 rounded-lg px-2.5 py-1.5 text-xs">
+                          <Flag teamId={t.id} size={16} />
+                          <span className="text-gray-300 font-medium">{t.name}</span>
+                          <span className="text-gray-400 font-bold ml-1">+{d.pointsEach}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )
+              })}
+
+              {/* Champion bonus (+12) */}
+              {data && data.summary.championPoints > 0 && data.championTeam && (
+                <div className="px-3 pt-3 pb-4">
+                  <div className="flex items-center justify-between rounded-lg bg-yellow-100 dark:bg-yellow-950/30 border border-yellow-300 dark:border-yellow-900/50 px-3 py-2">
+                    <span className="flex items-center gap-1.5 text-xs font-semibold text-yellow-800 dark:text-yellow-300">👑 Campeão — <Flag teamId={data.championTeam.id} size={16} /> {data.championTeam.name}</span>
+                    <span className="text-xs font-bold text-yellow-800 dark:text-yellow-300">+{data.summary.championPoints} pts</span>
                   </div>
                 </div>
               )}
