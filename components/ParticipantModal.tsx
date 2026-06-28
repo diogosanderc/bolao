@@ -102,6 +102,8 @@ export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClos
   const sheetRef = useRef<HTMLDivElement>(null)
   const [dragY, setDragY] = useState(0)
   const [resetting, setResetting] = useState(false)
+  const [closing, setClosing] = useState(false)
+  const [slideDir, setSlideDir] = useState<'l' | 'r'>('r')
   const tabRef = useRef(tab)
   useEffect(() => { tabRef.current = tab }, [tab])
 
@@ -141,6 +143,8 @@ export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClos
 
   const TAB_ORDER = ['played', 'selecoes', 'upcoming'] as const
   function switchTab(t: typeof TAB_ORDER[number]) {
+    if (t === tabRef.current) return
+    setSlideDir(TAB_ORDER.indexOf(t) > TAB_ORDER.indexOf(tabRef.current) ? 'r' : 'l')
     setTab(t)
     requestAnimationFrame(() => {
       if (scrollRef.current) scrollRef.current.scrollTop = t === 'played' ? scrollRef.current.scrollHeight : 0
@@ -150,6 +154,13 @@ export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClos
     const i = TAB_ORDER.indexOf(tabRef.current)
     const ni = i + dir
     if (ni >= 0 && ni < TAB_ORDER.length) switchTab(TAB_ORDER[ni])
+  }
+  // Slide the sheet down and out, then unmount
+  function closeSheet() {
+    setClosing(true)
+    setResetting(true)
+    setDragY(typeof window !== 'undefined' ? window.innerHeight : 900)
+    setTimeout(onClose, 230)
   }
 
   // Touch gestures: swipe down (from top) to close, swipe left/right to change tabs
@@ -177,13 +188,14 @@ export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClos
     const onEnd = (e: TouchEvent) => {
       const t = e.changedTouches[0]
       const dx = t.clientX - sx, dy = t.clientY - sy
+      const vy = dy // simple velocity proxy via distance
       const m = mode; mode = 'none'
       if (m === 'v') {
-        if (dy > 90) { onClose(); return }
-        setResetting(true); setDragY(0); setTimeout(() => setResetting(false), 260)
+        if (dy > 90 || vy > 130) { closeSheet(); return }
+        setResetting(true); setDragY(0); setTimeout(() => setResetting(false), 280)
       } else if (m === 'h') {
-        if (dx <= -50) goTab(1)
-        else if (dx >= 50) goTab(-1)
+        if (dx <= -45) goTab(1)
+        else if (dx >= 45) goTab(-1)
       }
     }
     el.addEventListener('touchstart', onStart, { passive: true })
@@ -221,11 +233,17 @@ export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClos
   return (
     <div
       className="fixed inset-0 z-50 flex items-end justify-center"
-      onClick={onClose}
+      onClick={closeSheet}
       style={{ touchAction: 'none' }}
     >
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm animate-fade-in" />
+      {/* Backdrop — fades as the sheet is dragged down */}
+      <div
+        className={`absolute inset-0 bg-black/70 backdrop-blur-sm ${dragY > 0 || closing ? '' : 'animate-fade-in'}`}
+        style={{
+          opacity: dragY > 0 || closing ? Math.max(0, 1 - dragY / 520) : undefined,
+          transition: resetting ? 'opacity 0.28s ease' : undefined,
+        }}
+      />
 
       {/* Sheet */}
       <div
@@ -234,7 +252,8 @@ export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClos
         style={{
           maxHeight: '82vh', paddingBottom: 'env(safe-area-inset-bottom)', touchAction: 'pan-y',
           transform: (dragY > 0 || resetting) ? `translateY(${dragY}px)` : undefined,
-          transition: resetting ? 'transform 0.25s cubic-bezier(0.32,0.72,0,1)' : undefined,
+          transition: resetting ? 'transform 0.34s cubic-bezier(0.22, 1, 0.36, 1)' : undefined,
+          willChange: 'transform',
         }}
         onClick={e => e.stopPropagation()}
       >
@@ -271,7 +290,7 @@ export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClos
                 </button>
               )}
               <button
-                onClick={onClose}
+                onClick={closeSheet}
                 className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white text-xl font-bold transition-colors"
                 aria-label="Fechar"
               >
@@ -328,19 +347,19 @@ export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClos
         {/* Tabs */}
         <div className="flex border-b border-gray-800 shrink-0">
           <button
-            onClick={() => { setTab('played'); requestAnimationFrame(() => { if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight }) }}
+            onClick={() => switchTab('played')}
             className={`flex-1 py-2.5 text-xs font-medium transition-colors ${tab === 'played' ? 'text-yellow-600 dark:text-yellow-400 border-b-2 border-yellow-600 dark:border-yellow-400' : 'text-gray-500 hover:text-gray-300'}`}
           >
             Jogados ({played.length})
           </button>
           <button
-            onClick={() => { setTab('selecoes'); requestAnimationFrame(() => { if (scrollRef.current) scrollRef.current.scrollTop = 0 }) }}
+            onClick={() => switchTab('selecoes')}
             className={`flex-1 py-2.5 text-xs font-medium transition-colors ${tab === 'selecoes' ? 'text-yellow-600 dark:text-yellow-400 border-b-2 border-yellow-600 dark:border-yellow-400' : 'text-gray-500 hover:text-gray-300'}`}
           >
             Seleções
           </button>
           <button
-            onClick={() => { setTab('upcoming'); requestAnimationFrame(() => { if (scrollRef.current) scrollRef.current.scrollTop = 0 }) }}
+            onClick={() => switchTab('upcoming')}
             className={`flex-1 py-2.5 text-xs font-medium transition-colors ${tab === 'upcoming' ? 'text-yellow-600 dark:text-yellow-400 border-b-2 border-yellow-600 dark:border-yellow-400' : 'text-gray-500 hover:text-gray-300'}`}
           >
             Próximos ({upcoming.length})
@@ -364,7 +383,7 @@ export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClos
           )}
 
           {!loading && tab === 'played' && (
-            <div key="played" className="divide-y divide-gray-800/60 animate-fade-in">
+            <div key={`played-${slideDir}`} className={`divide-y divide-gray-800/60 ${slideDir === 'r' ? 'animate-tab-in-right' : 'animate-tab-in-left'}`}>
               {played.length === 0 && <p className="text-center py-10 text-gray-600">Nenhum jogo disputado ainda.</p>}
               {played.map(p => (
                 <div key={p.matchId} className={`px-3 py-2.5 ${rowColor(p)}`}>
@@ -507,7 +526,7 @@ export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClos
           )}
 
           {!loading && tab === 'selecoes' && (
-            <div key="selecoes" className="p-3 space-y-3 animate-fade-in">
+            <div key={`selecoes-${slideDir}`} className={`p-3 space-y-3 ${slideDir === 'r' ? 'animate-tab-in-right' : 'animate-tab-in-left'}`}>
               {(!data?.groupPredictions?.length) && (
                 <p className="text-center py-10 text-gray-600">Sem palpites de classificação registrados.</p>
               )}
@@ -555,7 +574,7 @@ export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClos
           )}
 
           {!loading && tab === 'upcoming' && (
-            <div key="upcoming" className="divide-y divide-gray-800/60 animate-fade-in">
+            <div key={`upcoming-${slideDir}`} className={`divide-y divide-gray-800/60 ${slideDir === 'r' ? 'animate-tab-in-right' : 'animate-tab-in-left'}`}>
               {upcoming.length === 0 && <p className="text-center py-10 text-gray-600">Sem palpites futuros registrados.</p>}
               {upcoming.map(p => (
                 <div key={p.matchId} className="px-3 py-2.5 flex items-center justify-between gap-2">

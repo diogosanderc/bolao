@@ -83,6 +83,18 @@ html {
 }
 .animate-row-in { animation: row-in 0.4s ease both; }
 
+/* Directional tab transitions (participant modal) */
+@keyframes tab-in-right {
+  from { opacity: 0; transform: translateX(26px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes tab-in-left {
+  from { opacity: 0; transform: translateX(-26px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.animate-tab-in-right { animation: tab-in-right 0.3s cubic-bezier(0.32, 0.72, 0, 1) both; }
+.animate-tab-in-left  { animation: tab-in-left  0.3s cubic-bezier(0.32, 0.72, 0, 1) both; }
+
 /* Podium entrance celebration */
 @keyframes celebrate {
   0%, 100% { transform: translateY(0) scale(1); filter: drop-shadow(0 0 0 rgba(250,204,21,0)); }
