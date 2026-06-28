@@ -76,6 +76,7 @@ export default function LeaderboardPage() {
   const rowRefs = useRef<Map<string, HTMLTableRowElement>>(new Map())
   const prevRects = useRef<Map<string, DOMRect>>(new Map())
   const prevMyLiveRef = useRef(0)
+  const prevMyRankRef = useRef<number | null>(null)
   type ImageColumn = 'uj' | 'u2' | 'u2grupos'
   const [imageColumn, setImageColumn] = useState<ImageColumn>('uj')
   const leaderboardRef = useRef<HTMLDivElement>(null)
@@ -168,6 +169,18 @@ export default function LeaderboardPage() {
       else localStorage.removeItem('bolao_me')
       return next
     })
+  }
+
+  // In-app toast + OS notification (when enabled) for the "me" participant
+  async function notifyMe(title: string, body: string) {
+    haptic(40)
+    showToast(`${title} — ${body}`)
+    try {
+      if ('Notification' in window && Notification.permission === 'granted' && 'serviceWorker' in navigator) {
+        const reg = await navigator.serviceWorker.ready
+        reg.showNotification(title, { body, icon: '/icon-192.png', badge: '/icon-192.png', tag: 'bolao-pos', renotify: true } as NotificationOptions)
+      }
+    } catch {}
   }
 
   useEffect(() => {
@@ -313,6 +326,33 @@ export default function LeaderboardPage() {
     }
     prevMyLiveRef.current = lp
   }, [data, myId, leaderboardHasLive])
+
+  // Notify the "me" participant about position changes after a live round
+  useEffect(() => {
+    if (!myId || data.length === 0) return
+    const idx = data.findIndex(e => e.participant.id === myId)
+    if (idx < 0) { prevMyRankRef.current = null; return }
+    const rank = data.filter(e => e.totalPoints > data[idx].totalPoints).length + 1
+    const prev = prevMyRankRef.current
+    prevMyRankRef.current = rank
+    if (prev === null || prev === rank) return // first read or no change
+
+    const up = rank < prev
+    if (up && rank === 1) {
+      notifyMe('👑 Liderança!', 'Você é o líder do Bolão!')
+    } else if (up && rank === 2) {
+      notifyMe('🥈 2ª posição', 'Você assumiu a 2ª posição!')
+    } else if (up && rank === 3) {
+      notifyMe('🥉 3ª posição', 'Você assumiu a 3ª posição!')
+    } else if (up && rank >= 4 && rank <= 7 && prev > 7) {
+      notifyMe('🎯 Zona de classificação', 'Você entrou na zona de classificação (Top 7)!')
+    } else {
+      const d = prev - rank // >0 subiu, <0 desceu
+      if (d > 0) notifyMe('🔼 Você subiu', `Subiu ${d} posiç${d > 1 ? 'ões' : 'ão'} — agora ${rank}º`)
+      else notifyMe('🔽 Você caiu', `Caiu ${Math.abs(d)} posiç${Math.abs(d) > 1 ? 'ões' : 'ão'} — agora ${rank}º`)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data, myId])
 
   // FLIP: smoothly slide rows to their new positions when the order changes
   useLayoutEffect(() => {
@@ -963,13 +1003,15 @@ export default function LeaderboardPage() {
               const p = entry as any
               const change: number | undefined = p.positionChange
               const liveGain: number = p.livePoints ?? 0
+              const isMe = myId === entry.participant.id
               return (
                 <div
                   key={entry.participant.id}
-                  className="flex items-center gap-2 px-4 py-2 cursor-pointer hover:bg-red-100 dark:hover:bg-red-950/40 transition-colors"
+                  className={`flex items-center gap-2 px-4 py-2 cursor-pointer hover:bg-red-100 dark:hover:bg-red-950/40 transition-colors ${isMe ? 'shadow-[inset_3px_0_0_0_#00bf63] bg-[#00bf63]/5' : ''}`}
                   onClick={() => openParticipant(entry.participant.id, entry.participant.name)}
                 >
                   <span className="text-gray-500 text-xs w-5 text-right shrink-0 font-semibold">{rank}</span>
+                  {isMe && <span className="shrink-0 text-[#00bf63]" title="Você">★</span>}
                   <span className="text-gray-200 text-sm font-semibold flex-1 min-w-0 truncate">{entry.participant.name}</span>
                   {liveGain > 0
                     ? <span className="text-green-700 dark:text-green-400 text-xs font-bold w-9 text-right shrink-0 tabular-nums">+{liveGain}</span>
