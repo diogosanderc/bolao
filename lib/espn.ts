@@ -40,6 +40,32 @@ export function resolveTeam(abbr: string, name: string): string | null {
     ?? null
 }
 
+type Canonical = { matchId: string; team1Id: string; team2Id: string }
+
+// Knockout fixtures are stored internally as TBD vs TBD, so they can't be matched
+// to an ESPN event by team pairing. Pass the resolved bracket (matchId → teams,
+// from computeBracketFromResults) to build an index that lets us map e.g.
+// "South Africa vs Canada" → R32_1 once those slots are decided.
+function buildKnockoutIndex(resolved?: Record<string, { team1Id: string; team2Id: string }>): Map<string, Canonical> {
+  const idx = new Map<string, Canonical>()
+  for (const [matchId, t] of Object.entries(resolved ?? {})) {
+    if (!t || !t.team1Id || !t.team2Id || t.team1Id === 'TBD' || t.team2Id === 'TBD') continue
+    idx.set([t.team1Id, t.team2Id].sort().join('|'), { matchId, team1Id: t.team1Id, team2Id: t.team2Id })
+  }
+  return idx
+}
+
+// Map a pair of resolved team ids to the canonical internal fixture: group-stage
+// matches by fixed pairing, knockout matches via the resolved-bracket index.
+function resolveCanonical(id1: string, id2: string, koIndex: Map<string, Canonical>): Canonical | null {
+  const group = ALL_MATCHES.find(m =>
+    (m.team1Id === id1 && m.team2Id === id2) ||
+    (m.team1Id === id2 && m.team2Id === id1)
+  )
+  if (group) return { matchId: group.id, team1Id: group.team1Id, team2Id: group.team2Id }
+  return koIndex.get([id1, id2].sort().join('|')) ?? null
+}
+
 export type GoalEvent = {
   minute: string
   playerName: string
@@ -110,7 +136,7 @@ function isSuspendedStatus(typeName: string, desc: string): boolean {
   )
 }
 
-function parseEvents(rawEvents: any[], liveMap: Map<string, LiveInfo>): ESPNEvent[] {
+function parseEvents(rawEvents: any[], liveMap: Map<string, LiveInfo>, koIndex: Map<string, Canonical>): ESPNEvent[] {
   const result: ESPNEvent[] = []
   for (const event of rawEvents) {
     const competition = event.competitions?.[0]
@@ -128,13 +154,10 @@ function parseEvents(rawEvents: any[], liveMap: Map<string, LiveInfo>): ESPNEven
     const id2 = resolveTeam(c2.team?.abbreviation ?? '', c2.team?.displayName ?? '')
     if (!id1 || !id2) continue
 
-    const match = ALL_MATCHES.find(m =>
-      (m.team1Id === id1 && m.team2Id === id2) ||
-      (m.team1Id === id2 && m.team2Id === id1)
-    )
+    const match = resolveCanonical(id1, id2, koIndex)
     if (!match) continue
 
-    const live = liveMap.get(match.id)
+    const live = liveMap.get(match.matchId)
     const flipped = match.team1Id === id2
 
     const rawScore1 = parseInt(c1.score ?? '', 10)
@@ -162,7 +185,7 @@ function parseEvents(rawEvents: any[], liveMap: Map<string, LiveInfo>): ESPNEven
     }
 
     result.push({
-      matchId: match.id,
+      matchId: match.matchId,
       team1Id: match.team1Id,
       team2Id: match.team2Id,
       date: event.date ?? '',
@@ -183,7 +206,7 @@ function parseEvents(rawEvents: any[], liveMap: Map<string, LiveInfo>): ESPNEven
 }
 
 // Fetch today's scoreboard for real-time live scores (60s cache)
-async function fetchLiveMap(): Promise<Map<string, LiveInfo>> {
+async function fetchLiveMap(koIndex: Map<string, Canonical>): Promise<Map<string, LiveInfo>> {
   try {
     const res = await fetch(ESPN_TODAY_URL, {
       headers: { 'User-Agent': 'Mozilla/5.0 (compatible; bolao/1.0)' },
@@ -215,10 +238,7 @@ async function fetchLiveMap(): Promise<Map<string, LiveInfo>> {
       const id1 = resolveTeam(c1.team?.abbreviation ?? '', c1.team?.displayName ?? '')
       const id2 = resolveTeam(c2.team?.abbreviation ?? '', c2.team?.displayName ?? '')
       if (!id1 || !id2) continue
-      const match = ALL_MATCHES.find(m =>
-        (m.team1Id === id1 && m.team2Id === id2) ||
-        (m.team1Id === id2 && m.team2Id === id1)
-      )
+      const match = resolveCanonical(id1, id2, koIndex)
       if (!match) continue
       const flippedLive = match.team1Id === id2
       const rawLiveS1 = parseInt(c1.score ?? '0', 10)
@@ -248,7 +268,7 @@ async function fetchLiveMap(): Promise<Map<string, LiveInfo>> {
         ? 'Intervalo'
         : (status?.displayClock ?? '')
 
-      liveMap.set(match.id, {
+      liveMap.set(match.matchId, {
         score1: rawLiveS1,
         score2: rawLiveS2,
         clock: clockRaw,
@@ -262,15 +282,18 @@ async function fetchLiveMap(): Promise<Map<string, LiveInfo>> {
   }
 }
 
-export async function fetchESPNEvents(): Promise<ESPNEvent[]> {
+export async function fetchESPNEvents(
+  knockoutResolved?: Record<string, { team1Id: string; team2Id: string }>,
+): Promise<ESPNEvent[]> {
+  const koIndex = buildKnockoutIndex(knockoutResolved)
   const [scheduleRes, liveMap] = await Promise.all([
     fetch(ESPN_SCHEDULE_URL, {
       headers: { 'User-Agent': 'Mozilla/5.0 (compatible; bolao/1.0)' },
       next: { revalidate: 1800 },
     }),
-    fetchLiveMap(),
+    fetchLiveMap(koIndex),
   ])
   if (!scheduleRes.ok) throw new Error(`ESPN ${scheduleRes.status}`)
   const data = await scheduleRes.json()
-  return parseEvents(data.events ?? [], liveMap)
+  return parseEvents(data.events ?? [], liveMap, koIndex)
 }
