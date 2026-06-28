@@ -150,6 +150,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     const allGroupsDone = Object.keys(groupStandings).length === GROUPS.length
     const completedGroupIds = new Set(Object.keys(groupStandings))
     const qualifiedR32 = new Set<string>()
+    const best3rdSet = new Set<string>() // teams that qualified specifically as a best-3rd
     for (const s of Object.values(groupStandings)) {
       if (s[0]) qualifiedR32.add(s[0])
       if (s[1]) qualifiedR32.add(s[1])
@@ -158,7 +159,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
       const best8 = [...thirdPlaceStats]
         .sort((a, b) => b.pts !== a.pts ? b.pts - a.pts : b.gd !== a.gd ? b.gd - a.gd : b.gf - a.gf)
         .slice(0, 8)
-      for (const t of best8) qualifiedR32.add(t.teamId)
+      for (const t of best8) { qualifiedR32.add(t.teamId); best3rdSet.add(t.teamId) }
     }
 
     // --- Predicted group standings ---
@@ -182,7 +183,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     }
 
     // --- R32 advancement bonus ---
-    const r32Detail: { teamId: string; name: string; flag: string; groupId: string; pts: number }[] = []
+    const r32Detail: { teamId: string; name: string; flag: string; groupId: string; pts: number; via3rd: boolean }[] = []
     let r32Points = 0
     const myR32Picks = db.r32TeamPicks?.find(p => p.participantId === id)
     if (myR32Picks) {
@@ -192,7 +193,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
           const groupId = teamGroupMap[teamId] ?? ''
           if (groupId && completedGroupIds.has(groupId)) {
             r32Points += 3
-            r32Detail.push({ teamId, name: teamById[teamId]?.name ?? teamId, flag: teamById[teamId]?.flag ?? '🏳', groupId, pts: 3 })
+            r32Detail.push({ teamId, name: teamById[teamId]?.name ?? teamId, flag: teamById[teamId]?.flag ?? '🏳', groupId, pts: 3, via3rd: best3rdSet.has(teamId) })
           }
         }
       }
@@ -203,11 +204,12 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
         for (const teamId of candidates) {
           if (qualifiedR32.has(teamId)) {
             r32Points += 3
-            r32Detail.push({ teamId, name: teamById[teamId]?.name ?? teamId, flag: teamById[teamId]?.flag ?? '🏳', groupId, pts: 3 })
+            r32Detail.push({ teamId, name: teamById[teamId]?.name ?? teamId, flag: teamById[teamId]?.flag ?? '🏳', groupId, pts: 3, via3rd: best3rdSet.has(teamId) })
           }
         }
       }
     }
+    const thirdPlacePoints = r32Detail.filter(d => d.via3rd).length * 3
 
     const phasePoints = groupOrderPoints + r32Points
     const totalPoints = matchPoints + phasePoints
@@ -233,7 +235,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     return NextResponse.json({
       participant: { id: participant.id, name: participant.name },
       predictions,
-      summary: { totalPoints, matchPoints, correctResults, correctScores, matchesPlayed: played.length, groupOrderPoints, r32Points, phasePoints, rank, totalParticipants },
+      summary: { totalPoints, matchPoints, correctResults, correctScores, matchesPlayed: played.length, groupOrderPoints, r32Points, thirdPlacePoints, phasePoints, rank, totalParticipants },
       groupDetail,
       r32Detail,
       groupPredictions,

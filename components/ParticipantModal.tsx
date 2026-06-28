@@ -38,6 +38,7 @@ type R32Entry = {
   flag: string
   groupId: string
   pts: number
+  via3rd?: boolean
 }
 
 type GroupPredRow = {
@@ -59,6 +60,7 @@ type ParticipantData = {
     matchesPlayed: number
     groupOrderPoints: number
     r32Points: number
+    thirdPlacePoints: number
     phasePoints: number
     rank: number | null
     totalParticipants: number
@@ -355,12 +357,19 @@ export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClos
                     <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">🏆 Classificados para 16-avos</span>
                     <span className="text-xs font-bold text-gray-300">+{data!.summary.r32Points} pts</span>
                   </div>
+                  {data!.summary.thirdPlacePoints > 0 && (
+                    <div className="flex items-center justify-between rounded-lg bg-amber-100 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-900/50 px-3 py-1.5">
+                      <span className="text-xs font-medium text-amber-800 dark:text-amber-300">🥉 Classificados como melhor 3º lugar</span>
+                      <span className="text-xs font-bold text-amber-800 dark:text-amber-300">+{data!.summary.thirdPlacePoints} pts</span>
+                    </div>
+                  )}
                   <div className="flex flex-wrap gap-2">
                     {data!.r32Detail.map(t => (
-                      <div key={`${t.groupId}-${t.teamId}`} className="flex items-center gap-1.5 bg-gray-900 border border-gray-800 rounded-lg px-2.5 py-1.5 text-xs">
+                      <div key={`${t.groupId}-${t.teamId}`} className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs border ${t.via3rd ? 'bg-amber-100 dark:bg-amber-950/30 border-amber-300 dark:border-amber-900/50' : 'bg-gray-900 border-gray-800'}`}>
                         <Flag teamId={t.teamId} size={16} />
-                        <span className="text-gray-300 font-medium">{t.name}</span>
-                        <span className="text-gray-400 font-bold ml-1">+3</span>
+                        <span className={`font-medium ${t.via3rd ? 'text-amber-800 dark:text-amber-200' : 'text-gray-300'}`}>{t.name}</span>
+                        {t.via3rd && <span className="text-[10px] text-amber-700 dark:text-amber-400 font-semibold">3º</span>}
+                        <span className={`font-bold ml-1 ${t.via3rd ? 'text-amber-800 dark:text-amber-300' : 'text-gray-400'}`}>+3</span>
                       </div>
                     ))}
                   </div>
