@@ -99,6 +99,11 @@ export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClos
   const [loading, setLoading] = useState(true)
   const [tab, setTab] = useState<'played' | 'selecoes' | 'upcoming'>('played')
   const scrollRef = useRef<HTMLDivElement>(null)
+  const sheetRef = useRef<HTMLDivElement>(null)
+  const [dragY, setDragY] = useState(0)
+  const [resetting, setResetting] = useState(false)
+  const tabRef = useRef(tab)
+  useEffect(() => { tabRef.current = tab }, [tab])
 
   useEffect(() => {
     fetch(`/api/participante/${participantId}`)
@@ -134,6 +139,64 @@ export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClos
     return () => window.removeEventListener('keydown', handler)
   }, [onClose])
 
+  const TAB_ORDER = ['played', 'selecoes', 'upcoming'] as const
+  function switchTab(t: typeof TAB_ORDER[number]) {
+    setTab(t)
+    requestAnimationFrame(() => {
+      if (scrollRef.current) scrollRef.current.scrollTop = t === 'played' ? scrollRef.current.scrollHeight : 0
+    })
+  }
+  function goTab(dir: 1 | -1) {
+    const i = TAB_ORDER.indexOf(tabRef.current)
+    const ni = i + dir
+    if (ni >= 0 && ni < TAB_ORDER.length) switchTab(TAB_ORDER[ni])
+  }
+
+  // Touch gestures: swipe down (from top) to close, swipe left/right to change tabs
+  useEffect(() => {
+    const el = sheetRef.current
+    if (!el) return
+    let sx = 0, sy = 0, mode: 'none' | 'v' | 'h' | 'scroll' = 'none', st = 0
+    const onStart = (e: TouchEvent) => {
+      const t = e.touches[0]; sx = t.clientX; sy = t.clientY; mode = 'none'
+      st = scrollRef.current?.scrollTop ?? 0
+    }
+    const onMove = (e: TouchEvent) => {
+      const t = e.touches[0]
+      const dx = t.clientX - sx, dy = t.clientY - sy
+      if (mode === 'none') {
+        if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return
+        if (Math.abs(dx) > Math.abs(dy)) mode = 'h'
+        else if (dy > 0 && st <= 0) mode = 'v'
+        else mode = 'scroll'
+        if (mode === 'v' || mode === 'h') setResetting(false)
+      }
+      if (mode === 'v') { e.preventDefault(); setDragY(Math.max(0, dy)) }
+      else if (mode === 'h') { e.preventDefault() }
+    }
+    const onEnd = (e: TouchEvent) => {
+      const t = e.changedTouches[0]
+      const dx = t.clientX - sx, dy = t.clientY - sy
+      const m = mode; mode = 'none'
+      if (m === 'v') {
+        if (dy > 90) { onClose(); return }
+        setResetting(true); setDragY(0); setTimeout(() => setResetting(false), 260)
+      } else if (m === 'h') {
+        if (dx <= -50) goTab(1)
+        else if (dx >= 50) goTab(-1)
+      }
+    }
+    el.addEventListener('touchstart', onStart, { passive: true })
+    el.addEventListener('touchmove', onMove, { passive: false })
+    el.addEventListener('touchend', onEnd, { passive: true })
+    return () => {
+      el.removeEventListener('touchstart', onStart)
+      el.removeEventListener('touchmove', onMove)
+      el.removeEventListener('touchend', onEnd)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   const played = data?.predictions.filter(p => p.result !== null) ?? []
   const upcoming = (data?.predictions.filter(p => p.result === null && p.prediction !== null) ?? [])
     .slice()
@@ -166,8 +229,13 @@ export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClos
 
       {/* Sheet */}
       <div
+        ref={sheetRef}
         className="relative bg-gray-950 border border-gray-800 border-b-0 rounded-t-2xl w-full max-w-2xl flex flex-col animate-slide-up"
-        style={{ maxHeight: '82vh', paddingBottom: 'env(safe-area-inset-bottom)', touchAction: 'pan-y' }}
+        style={{
+          maxHeight: '82vh', paddingBottom: 'env(safe-area-inset-bottom)', touchAction: 'pan-y',
+          transform: (dragY > 0 || resetting) ? `translateY(${dragY}px)` : undefined,
+          transition: resetting ? 'transform 0.25s cubic-bezier(0.32,0.72,0,1)' : undefined,
+        }}
         onClick={e => e.stopPropagation()}
       >
         {/* Drag handle */}
