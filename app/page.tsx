@@ -845,11 +845,22 @@ export default function LeaderboardPage() {
       )}
 
       {liveMatches.length === 0 && upcoming.length > 0 && (() => {
-        const items = upcoming.slice(0, 12)
+        // Show today's + tomorrow's matches (BRT); fall back to the next few if none
+        const brtDay = (d: Date) => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo', year: 'numeric', month: '2-digit', day: '2-digit' }).format(d)
+        const today = brtDay(new Date())
+        const tomorrow = brtDay(new Date(Date.now() + 86_400_000))
+        const todayAndTomorrow = upcoming.filter(m => {
+          if (!m.date) return false
+          const d = brtDay(new Date(m.date))
+          return d === today || d === tomorrow
+        })
+        const filtered = todayAndTomorrow.length > 0
+        const items = (filtered ? todayAndTomorrow : upcoming).slice(0, 12)
+        const heading = items.length <= 1 ? 'Próximo jogo' : filtered ? 'Jogos de hoje e amanhã' : 'Próximos jogos'
         return (
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <span className="text-xs text-gray-500 uppercase tracking-wider">{items.length > 1 ? 'Próximos jogos' : 'Próximo jogo'}</span>
+              <span className="text-xs text-gray-500 uppercase tracking-wider">{heading}</span>
               {items.length > 1 && <span className="text-[10px] text-gray-600">deslize para o lado →</span>}
             </div>
             <div
