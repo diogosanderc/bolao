@@ -1,10 +1,15 @@
 'use client'
 
-import { LeaderboardEntry } from '@/lib/types'
 import { AnimatedNumber } from '@/components/AnimatedNumber'
 
+export type PodiumTier = {
+  rank: number
+  points: number
+  members: { id: string; name: string }[]
+}
+
 type Props = {
-  top3: LeaderboardEntry[]
+  tiers: PodiumTier[] // up to 3 tiers, by distinct points (1st, 2nd, 3rd)
   onSelect: (id: string, name: string) => void
   celebrate?: Set<string>
 }
@@ -16,42 +21,55 @@ const SLOTS = [
   { rank: 3, medal: '🥉', h: 'h-16', ring: 'ring-amber-600/60', glow: '', from: 'from-amber-600/15' },
 ]
 
-export function Podium({ top3, onSelect, celebrate }: Props) {
-  if (top3.length < 3) return null
-  const byRank: Record<number, LeaderboardEntry> = { 1: top3[0], 2: top3[1], 3: top3[2] }
+export function Podium({ tiers, onSelect, celebrate }: Props) {
+  if (tiers.length === 0) return null
+  const byRank: Record<number, PodiumTier> = {}
+  for (const t of tiers) byRank[t.rank] = t
 
   return (
     <div className="grid grid-cols-3 gap-2 sm:gap-3 items-end">
       {SLOTS.map(slot => {
-        const entry = byRank[slot.rank]
-        if (!entry) return <div key={slot.rank} />
+        const tier = byRank[slot.rank]
+        if (!tier) return <div key={slot.rank} />
         const isFirst = slot.rank === 1
-        const celebrating = celebrate?.has(entry.participant.id)
+        const celebrating = tier.members.some(m => celebrate?.has(m.id))
+        const multi = tier.members.length > 1
         return (
-          <button
-            key={slot.rank}
-            onClick={() => onSelect(entry.participant.id, entry.participant.name)}
-            className={`flex flex-col items-center group ${celebrating ? 'animate-celebrate' : ''}`}
-          >
+          <div key={slot.rank} className={`flex flex-col items-center ${celebrating ? 'animate-celebrate' : ''}`}>
             <div className="relative mb-1.5">
               {celebrating && <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-lg animate-bounce">🎉</span>}
               <span
-                className={`flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-900 ring-2 ${slot.ring} ${slot.glow} transition-transform group-hover:scale-105`}
+                className={`flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-900 ring-2 ${slot.ring} ${slot.glow}`}
                 style={{ width: isFirst ? 56 : 44, height: isFirst ? 56 : 44, fontSize: isFirst ? 30 : 24 }}
               >
                 {slot.medal}
               </span>
+              {multi && (
+                <span className="absolute -bottom-1 -right-1 flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-gray-700 text-white text-[10px] font-bold border border-gray-900">
+                  {tier.members.length}
+                </span>
+              )}
             </div>
-            <span className={`text-[11px] sm:text-xs font-semibold text-center leading-tight truncate w-full px-0.5 ${isFirst ? 'text-yellow-600 dark:text-yellow-300' : 'text-gray-700 dark:text-gray-200'}`}>
-              {entry.participant.name}
-            </span>
+
+            <div className="flex flex-col items-center gap-0.5 w-full px-0.5">
+              {tier.members.map(m => (
+                <button
+                  key={m.id}
+                  onClick={() => onSelect(m.id, m.name)}
+                  className={`text-[11px] sm:text-xs font-semibold text-center leading-tight truncate w-full transition-transform active:scale-95 ${isFirst ? 'text-yellow-600 dark:text-yellow-300' : 'text-gray-700 dark:text-gray-200'} ${multi ? 'hover:underline' : 'hover:opacity-80'}`}
+                >
+                  {m.name}
+                </button>
+              ))}
+            </div>
+
             <div className={`mt-1.5 w-full rounded-t-lg bg-gradient-to-t ${slot.from} to-transparent border-t border-x border-gray-200 dark:border-gray-800 flex flex-col items-center justify-end pb-1.5 pt-2 ${slot.h}`}>
               <span className={`font-score font-bold leading-none ${isFirst ? 'text-2xl text-yellow-600 dark:text-yellow-400' : 'text-xl text-gray-700 dark:text-gray-200'}`}>
-                <AnimatedNumber value={entry.totalPoints} />
+                <AnimatedNumber value={tier.points} />
               </span>
               <span className="text-[9px] text-gray-500 uppercase tracking-wide mt-0.5">pts</span>
             </div>
-          </button>
+          </div>
         )
       })}
     </div>

@@ -1078,7 +1078,11 @@ export default function LeaderboardPage() {
 
       {!loading && data.length >= 3 && !leaderboardHasLive && (
         <Podium
-          top3={data.slice(0, 3)}
+          tiers={uniquePoints.slice(0, 3).map((pts, i) => ({
+            rank: i + 1,
+            points: pts,
+            members: data.filter(e => e.totalPoints === pts).map(e => ({ id: e.participant.id, name: e.participant.name })),
+          }))}
           onSelect={openParticipant}
           celebrate={podiumCelebrate}
         />
