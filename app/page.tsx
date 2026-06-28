@@ -13,13 +13,14 @@ import { matchById } from '@/lib/copa2026'
 import { chipCode } from '@/lib/names'
 import { positionMessage } from '@/lib/positionMessage'
 
-type LastMatch = {
+type RecentMatch = {
   matchId: string
   score1: number
   score2: number
   team1: { id: string; name: string; flag: string }
   team2: { id: string; name: string; flag: string }
-} | null
+}
+type LastMatch = RecentMatch | null
 
 type GoalEvent = {
   minute: string
@@ -46,6 +47,9 @@ type ScheduleMatch = {
 export default function LeaderboardPage() {
   const [data, setData] = useState<LeaderboardEntry[]>([])
   const [lastMatch, setLastMatch] = useState<LastMatch>(null)
+  const [recentMatches, setRecentMatches] = useState<RecentMatch[]>([])
+  const [recentIdx, setRecentIdx] = useState(0)
+  const recentRef = useRef<HTMLDivElement>(null)
   const [nextMatch, setNextMatch] = useState<ScheduleMatch | null>(null)
   const [nextMatches, setNextMatches] = useState<ScheduleMatch[]>([])
   const [upcoming, setUpcoming] = useState<ScheduleMatch[]>([])
@@ -122,6 +126,7 @@ export default function LeaderboardPage() {
       .then(d => {
         setData(Array.isArray(d.leaderboard) ? d.leaderboard : [])
         setLastMatch(d.lastMatch ?? null)
+        setRecentMatches(Array.isArray(d.recentMatches) ? d.recentMatches : (d.lastMatch ? [d.lastMatch] : []))
         setRemainingMatches(d.remainingMatches ?? 0)
         setLeaderboardHasLive(d.hasLive ?? false)
         setLastRefresh(new Date())
@@ -871,21 +876,49 @@ export default function LeaderboardPage() {
         </div>
       ))}
 
-      {lastMatch && (
-        <button
-          onClick={() => openMatchPredictions(lastMatch.matchId, `${lastMatch.team1.name} vs ${lastMatch.team2.name}`, { score1: lastMatch.score1, score2: lastMatch.score2 })}
-          className="w-full text-left bg-gradient-to-br from-gray-900 to-gray-950 border border-gray-800 hover:border-gray-600 rounded-lg px-4 py-2.5 transition-colors"
-        >
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-xs text-gray-500 uppercase tracking-wider">Último jogo</span>
-            <span className="text-[10px] text-gray-500 dark:text-gray-400">👁 palpites →</span>
+      {recentMatches.length > 0 && (
+        <div>
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-xs text-gray-500 uppercase tracking-wider">{recentMatches.length > 1 ? 'Últimos jogos' : 'Último jogo'}</span>
+            {recentMatches.length > 1 && <span className="text-[10px] text-gray-600">deslize para o lado →</span>}
           </div>
-          <div className="flex items-center gap-2.5 text-sm text-gray-300">
-            <span className="flex items-center gap-1.5 min-w-0"><Flag teamId={lastMatch.team1.id} size={20} /><span className="truncate">{lastMatch.team1.name}</span></span>
-            <Scoreboard score1={lastMatch.score1} score2={lastMatch.score2} size="sm" />
-            <span className="flex items-center gap-1.5 min-w-0"><Flag teamId={lastMatch.team2.id} size={20} /><span className="truncate">{lastMatch.team2.name}</span></span>
+          <div
+            ref={recentRef}
+            onScroll={() => {
+              const el = recentRef.current
+              if (!el) return
+              const card = el.firstElementChild as HTMLElement | null
+              const w = (card?.getBoundingClientRect().width ?? 1) + 12
+              setRecentIdx(Math.round(el.scrollLeft / w))
+            }}
+            className="flex gap-3 overflow-x-auto snap-x snap-mandatory no-scrollbar -mx-4 px-4 pb-1"
+          >
+            {recentMatches.map(rm => (
+              <button
+                key={rm.matchId}
+                onClick={() => openMatchPredictions(rm.matchId, `${rm.team1.name} vs ${rm.team2.name}`, { score1: rm.score1, score2: rm.score2 })}
+                className="snap-center shrink-0 w-[86%] sm:w-[360px] text-left bg-gradient-to-br from-gray-900 to-gray-950 border border-gray-800 hover:border-gray-600 rounded-lg px-4 py-2.5 transition-colors"
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs text-gray-500 uppercase tracking-wider">Último jogo</span>
+                  <span className="text-[10px] text-gray-500 dark:text-gray-400">👁 palpites →</span>
+                </div>
+                <div className="flex items-center gap-2.5 text-sm text-gray-300">
+                  <span className="flex items-center gap-1.5 min-w-0"><Flag teamId={rm.team1.id} size={20} /><span className="truncate">{rm.team1.name}</span></span>
+                  <Scoreboard score1={rm.score1} score2={rm.score2} size="sm" />
+                  <span className="flex items-center gap-1.5 min-w-0"><Flag teamId={rm.team2.id} size={20} /><span className="truncate">{rm.team2.name}</span></span>
+                </div>
+              </button>
+            ))}
           </div>
-        </button>
+          {recentMatches.length > 1 && (
+            <div className="flex justify-center gap-1.5 mt-2">
+              {recentMatches.map((_, i) => (
+                <span key={i} className={`h-1.5 rounded-full transition-all ${i === recentIdx ? 'w-4 bg-gray-400' : 'w-1.5 bg-gray-700'}`} />
+              ))}
+            </div>
+          )}
+        </div>
       )}
 
       {liveMatches.length === 0 && upcoming.length > 0 && (() => {

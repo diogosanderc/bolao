@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { readDB } from '@/lib/db'
 import { computeLeaderboard, scoreMatch, computeGroupStandingsWithStats } from '@/lib/scoring'
 import { ALL_MATCHES, matchById, teamById } from '@/lib/copa2026'
+import { computeBracketFromResults } from '@/lib/bracket'
 
 export async function GET() {
   try {
@@ -182,22 +183,32 @@ export async function GET() {
       })
     }
 
-    let lastMatch = null
-    if (sortedResults.length > 0) {
-      const last = sortedResults[sortedResults.length - 1]
-      const match = matchById[last.matchId]
-      if (match) {
-        lastMatch = {
-          matchId: last.matchId,
-          score1: last.score1,
-          score2: last.score2,
-          team1: { id: match.team1Id, name: teamById[match.team1Id]?.name ?? match.team1Id, flag: teamById[match.team1Id]?.flag ?? '🏳' },
-          team2: { id: match.team2Id, name: teamById[match.team2Id]?.name ?? match.team2Id, flag: teamById[match.team2Id]?.flag ?? '🏳' },
-        }
+    // Resolve knockout teams (TBD slots) from the bracket for display
+    const resolvedKnockout = computeBracketFromResults(db.results)
+    const teamRef = (m: { id: string; team1Id: string; team2Id: string }) => {
+      const rk = resolvedKnockout[m.id]
+      const t1 = m.team1Id !== 'TBD' ? m.team1Id : (rk?.team1Id ?? 'TBD')
+      const t2 = m.team2Id !== 'TBD' ? m.team2Id : (rk?.team2Id ?? 'TBD')
+      return {
+        team1: { id: t1, name: teamById[t1]?.name ?? t1, flag: teamById[t1]?.flag ?? '🏳' },
+        team2: { id: t2, name: teamById[t2]?.name ?? t2, flag: teamById[t2]?.flag ?? '🏳' },
       }
     }
 
-    return NextResponse.json({ leaderboard: leaderboardWithChanges, lastMatch, remainingMatches, hasLive })
+    // Last 4 played matches, most recent first
+    const recentMatches = sortedResults
+      .slice(-4)
+      .reverse()
+      .map(r => {
+        const match = matchById[r.matchId]
+        if (!match) return null
+        return { matchId: r.matchId, score1: r.score1, score2: r.score2, ...teamRef(match) }
+      })
+      .filter(Boolean)
+
+    const lastMatch = recentMatches[0] ?? null
+
+    return NextResponse.json({ leaderboard: leaderboardWithChanges, lastMatch, recentMatches, remainingMatches, hasLive })
   } catch (err) {
     console.error('[leaderboard]', err)
     return NextResponse.json({ leaderboard: [], lastMatch: null }, { status: 200 })
