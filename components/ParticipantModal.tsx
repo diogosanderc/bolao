@@ -74,6 +74,24 @@ type ParticipantData = {
   groupPredictions: GroupPredRow[]
 }
 
+// Team chip that shows "a definir" while the knockout slot isn't decided yet
+function TeamMini({ id }: { id: string }) {
+  if (id === 'TBD') {
+    return (
+      <span className="flex items-center gap-1.5 text-gray-500">
+        <span className="inline-flex items-center justify-center w-5 h-[14px] rounded-sm bg-gray-800 border border-gray-700 text-[9px]">?</span>
+        <span className="text-xs italic">a definir</span>
+      </span>
+    )
+  }
+  return (
+    <span className="flex items-center gap-1.5">
+      <Flag teamId={id} size={20} />
+      <span className="text-gray-300 font-semibold">{id}</span>
+    </span>
+  )
+}
+
 type Props = { participantId: string; name: string; isMe?: boolean; onToggleMe?: () => void; onClose: () => void }
 
 export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClose }: Props) {
@@ -474,11 +492,9 @@ export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClos
               {upcoming.map(p => (
                 <div key={p.matchId} className="px-3 py-2.5 flex items-center justify-between gap-2">
                   <div className="flex items-center gap-1.5 text-sm min-w-0 shrink-0">
-                    <Flag teamId={p.team1.id} size={20} />
-                    <span className="text-gray-300 font-semibold">{p.team1.id}</span>
+                    <TeamMini id={p.team1.id} />
                     <span className="text-gray-600 mx-0.5">×</span>
-                    <Flag teamId={p.team2.id} size={20} />
-                    <span className="text-gray-300 font-semibold">{p.team2.id}</span>
+                    <TeamMini id={p.team2.id} />
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     {p.dateBRT && <span className="text-xs text-gray-600">{p.dateBRT}</span>}
