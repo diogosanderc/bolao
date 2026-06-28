@@ -82,7 +82,7 @@ export default function LeaderboardPage() {
   const prevRects = useRef<Map<string, DOMRect>>(new Map())
   const prevMyLiveRef = useRef(0)
   const prevMyRankRef = useRef<number | null>(null)
-  type ImageColumn = 'uj' | 'u2' | 'u2grupos'
+  type ImageColumn = 'uj' | 'u2' | 'u2grupos' | 'jmata'
   const [imageColumn, setImageColumn] = useState<ImageColumn>('uj')
   const leaderboardRef = useRef<HTMLDivElement>(null)
 
@@ -549,6 +549,7 @@ export default function LeaderboardPage() {
         uj: 'UJ = pts último jogo',
         u2: 'U2 = (penúltimo + último)',
         u2grupos: 'U2 + Grupos = (penúltimo + último) +bonus grupos/R16',
+        jmata: 'Jogo + Mata-mata = (pts dos jogos + bônus classificação/mata-mata)',
       }
       let headerY = 40
       if (lastMatch) {
@@ -649,6 +650,12 @@ export default function LeaderboardPage() {
             const z = p.groupBonus ?? 0
             ctx.fillStyle = '#00bf63'
             ctx.fillText(`(${u2}+${z})`, x + colW - 36, midY)
+          } else if (selectedCol === 'jmata') {
+            const jogo = entry.matchPoints ?? 0
+            const adv = entry.breakdown?.advancementPoints ?? {}
+            const mata = Object.values(adv).reduce((s: number, v: any) => s + (v ?? 0), 0)
+            ctx.fillStyle = '#00bf63'
+            ctx.fillText(`(${jogo}+${mata})`, x + colW - 36, midY)
           }
 
           // Total points (right column)
@@ -756,6 +763,7 @@ export default function LeaderboardPage() {
                     ['uj', 'UJ — pts do último jogo'],
                     ['u2', 'U2 — (penúltimo + último)'],
                     ['u2grupos', 'U2 + Grupos — (pen.+últ.) +bonus'],
+                    ['jmata', 'Jogo + Mata-mata — (jogos + classificação)'],
                   ] as [ImageColumn, string][]).map(([val, label]) => (
                     <button
                       key={val}
