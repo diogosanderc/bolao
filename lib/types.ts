@@ -91,6 +91,7 @@ export interface PushSubscriptionRecord {
   endpoint: string
   keys: { p256dh: string; auth: string }
   createdAt: string
+  participantId?: string // the "sou eu" participant this device follows
 }
 
 export interface R32TeamPick {
@@ -117,6 +118,7 @@ export interface Database {
   liveMatchStates?: Record<string, { status: 'pre' | 'in' | 'halftime' | 'completed'; score1: number; score2: number }>
   r32TeamPicks?: R32TeamPick[]
   knockoutPhasePicks?: KnockoutPhasePick[]
+  lastRanks?: Record<string, number> // last notified rank per participant (for position push)
 }
 
 export interface LeaderboardEntry {

@@ -11,6 +11,7 @@ import { BroadcastBadges } from '@/components/BroadcastBadges'
 import { broadcastersForMatchId } from '@/lib/broadcasters'
 import { matchById } from '@/lib/copa2026'
 import { chipCode } from '@/lib/names'
+import { positionMessage } from '@/lib/positionMessage'
 
 type LastMatch = {
   matchId: string
@@ -167,6 +168,21 @@ export default function LeaderboardPage() {
       const next = prev === id ? null : id
       if (next) localStorage.setItem('bolao_me', next)
       else localStorage.removeItem('bolao_me')
+      // Associate this device's push subscription with the chosen participant
+      // (or clear it), so background "you moved" pushes target the right person.
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.ready
+          .then(reg => reg.pushManager.getSubscription())
+          .then(sub => {
+            if (!sub) return
+            fetch('/api/push/identify', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ endpoint: sub.endpoint, participantId: next }),
+            }).catch(() => {})
+          })
+          .catch(() => {})
+      }
       return next
     })
   }
@@ -337,20 +353,8 @@ export default function LeaderboardPage() {
     prevMyRankRef.current = rank
     if (prev === null || prev === rank) return // first read or no change
 
-    const up = rank < prev
-    if (up && rank === 1) {
-      notifyMe('👑 Liderança!', 'Você é o líder do Bolão!')
-    } else if (up && rank === 2) {
-      notifyMe('🥈 2ª posição', 'Você assumiu a 2ª posição!')
-    } else if (up && rank === 3) {
-      notifyMe('🥉 3ª posição', 'Você assumiu a 3ª posição!')
-    } else if (up && rank >= 4 && rank <= 7 && prev > 7) {
-      notifyMe('🎯 Zona de classificação', 'Você entrou na zona de classificação (Top 7)!')
-    } else {
-      const d = prev - rank // >0 subiu, <0 desceu
-      if (d > 0) notifyMe('🔼 Você subiu', `Subiu ${d} posiç${d > 1 ? 'ões' : 'ão'} — agora ${rank}º`)
-      else notifyMe('🔽 Você caiu', `Caiu ${Math.abs(d)} posiç${Math.abs(d) > 1 ? 'ões' : 'ão'} — agora ${rank}º`)
-    }
+    const msg = positionMessage(prev, rank, data.length)
+    if (msg) notifyMe(msg.title, msg.body)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data, myId])
 
@@ -497,7 +501,7 @@ export default function LeaderboardPage() {
       const r = await fetch('/api/push/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ endpoint: sub.endpoint, keys: { p256dh, auth } }),
+        body: JSON.stringify({ endpoint: sub.endpoint, keys: { p256dh, auth }, participantId: myId ?? undefined }),
       })
       if (!r.ok) { showToast('⚠️ Erro ao salvar assinatura no servidor'); return }
       setNotifState('subscribed')

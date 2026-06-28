@@ -2,6 +2,7 @@ import { updateDB, readDB } from './db'
 import { ALL_MATCHES, teamById } from './copa2026'
 import { resolveTeam } from './espn'
 import { sendPushToAll } from './push'
+import { notifyPositionChanges } from './positionNotify'
 import { computeBracketFromResults } from './bracket'
 
 type MatchState = {
@@ -328,6 +329,9 @@ export async function runLiveSync(): Promise<SyncResult> {
   if (pushQueue.length > 0) {
     console.log(`[liveSync] ${pushQueue.length} notification(s):`, pushQueue.map(p => p.title))
   }
+
+  // 5. Per-participant "you moved" position alerts (background push)
+  notifyPositionChanges().catch(() => {})
 
   return { ok: true, notifications: pushQueue.length }
 }

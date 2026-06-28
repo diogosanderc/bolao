@@ -55,6 +55,7 @@ const merged = {
   knockoutPhasePicks: seedDb.knockoutPhasePicks || [],
   pushSubscriptions: volumeDb.pushSubscriptions || [],
   liveMatchStates: volumeDb.liveMatchStates || {},
+  lastRanks: volumeDb.lastRanks || {},
 }
 
 writeFileSync(volumePath, JSON.stringify(merged, null, 2))
