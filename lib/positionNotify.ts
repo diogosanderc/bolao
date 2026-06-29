@@ -3,10 +3,6 @@ import { computeLeaderboard } from './scoring'
 import { sendPushToParticipant } from './push'
 import { positionMessage } from './positionMessage'
 
-// Minimum time between position notifications for the same participant (ms).
-// Prevents spam when live scores cause the ranking to oscillate.
-const COOLDOWN_MS = 5 * 60 * 1000
-
 // In-memory mutex — if a call is already in flight, skip rather than stack up.
 let inFlight: Promise<number> | null = null
 
@@ -20,7 +16,6 @@ async function _run(): Promise<number> {
   type Alert = { participantId: string; prev: number; next: number; total: number }
 
   let alerts: Alert[] = []
-  const now = Date.now()
 
   await updateDB(db => {
     const subs = db.pushSubscriptions ?? []
@@ -48,31 +43,22 @@ async function _run(): Promise<number> {
     const rankOf = new Map<string, number>()
     for (const e of lb) rankOf.set(e.participant.id, lb.filter(x => x.totalPoints > e.totalPoints).length + 1)
 
-    const prevRanks   = (db as any).lastRanks        ?? {} as Record<string, number>
-    const lastSentAt  = (db as any).lastRankNotifAt  ?? {} as Record<string, number>
+    const prevRanks   = (db as any).lastRanks ?? {} as Record<string, number>
     const hadBaseline = Object.keys(prevRanks).length > 0
 
     alerts = []
-    const newLastSentAt: Record<string, number> = { ...lastSentAt }
-
     for (const id of meIds) {
       const rank = rankOf.get(id)
       if (rank === undefined) continue
       const prev = prevRanks[id]
       if (!hadBaseline || prev === undefined || prev === rank) continue
-
-      // Cooldown: skip if we notified this participant recently
-      const lastSent = lastSentAt[id] ?? 0
-      if (now - lastSent < COOLDOWN_MS) continue
-
       alerts.push({ participantId: id, prev, next: rank, total: lb.length })
-      newLastSentAt[id] = now
     }
 
-    // Always persist updated ranks; only update cooldown timestamps for those we'll notify
+    // Persist updated ranks atomically — next call sees no change for the same event
     const newRanks: Record<string, number> = {}
     rankOf.forEach((r, id) => { newRanks[id] = r })
-    return { ...db, lastRanks: newRanks, lastRankNotifAt: newLastSentAt } as any
+    return { ...db, lastRanks: newRanks } as any
   })
 
   let sent = 0
