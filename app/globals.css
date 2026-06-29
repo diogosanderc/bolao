@@ -55,14 +55,14 @@ html {
 
 /* Sporty "scoreboard" numerals */
 .font-score {
-  font-family: 'SoccerJersey', var(--font-google-sans), "Google Sans", sans-serif;
+  font-family: var(--font-google-sans), "Google Sans", sans-serif;
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.02em;
 }
 
 /* Stadium scoreboard digit panel */
 .scoreboard-digit {
-  font-family: 'SoccerJersey', var(--font-google-sans), "Google Sans", sans-serif;
+  font-family: var(--font-google-sans), "Google Sans", sans-serif;
   font-variant-numeric: tabular-nums;
   line-height: 1;
 }
