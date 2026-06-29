@@ -2,6 +2,38 @@
 import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
 
+const FONT_SIZES = [13, 15, 17] as const
+
+function FontSizeToggle() {
+  const [idx, setIdx] = useState(0)
+
+  useEffect(() => {
+    const saved = parseInt(localStorage.getItem('fontSize') ?? '0', 10)
+    const i = FONT_SIZES.indexOf(saved as any)
+    const initial = i >= 0 ? i : 0
+    setIdx(initial)
+    document.documentElement.style.fontSize = `${FONT_SIZES[initial]}px`
+  }, [])
+
+  function cycle() {
+    const next = (idx + 1) % FONT_SIZES.length
+    setIdx(next)
+    const size = FONT_SIZES[next]
+    document.documentElement.style.fontSize = `${size}px`
+    localStorage.setItem('fontSize', String(size))
+  }
+
+  return (
+    <button
+      onClick={cycle}
+      title="Aumentar / reduzir fonte"
+      className="text-white/80 hover:text-white transition-colors font-bold text-xs leading-none px-1.5 py-1 rounded bg-white/10 hover:bg-white/20 shrink-0"
+    >
+      {idx === 0 ? 'A+' : idx === 1 ? 'A++' : 'A'}
+    </button>
+  )
+}
+
 export function Header() {
   const pathname = usePathname()
   const isAuthPage = ['/login', '/cadastro', '/esqueci-senha', '/resetar-senha'].includes(pathname)
@@ -81,10 +113,12 @@ export function Header() {
             {/* Desktop nav */}
             <nav className="ml-auto hidden sm:flex items-center gap-5 text-sm">
               {navLinks(false)}
+              <FontSizeToggle />
             </nav>
 
-            {/* Mobile: hamburger */}
-            <div className="ml-auto sm:hidden flex items-center gap-1">
+            {/* Mobile: font toggle + hamburger */}
+            <div className="ml-auto sm:hidden flex items-center gap-2">
+              <FontSizeToggle />
               <button
                 className="text-white p-1 rounded focus:outline-none"
                 onClick={() => setOpen(o => !o)}

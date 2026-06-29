@@ -6,7 +6,7 @@ import { notifyPositionChanges } from './positionNotify'
 import { computeBracketFromResults } from './bracket'
 
 type MatchState = {
-  status: 'pre' | 'in' | 'halftime' | 'suspended' | 'completed'
+  status: 'pre' | 'in' | 'halftime' | 'suspended' | 'extratime' | 'et_halftime' | 'penalties' | 'completed'
   score1: number
   score2: number
   sentStarted?: boolean
@@ -17,6 +17,11 @@ type MatchState = {
   sentGoals?: number
   sentVARKeys?: string[]
   sentRedCardKeys?: string[]
+  sentExtraTime?: boolean
+  sentETHalftime?: boolean
+  sentETSecondHalf?: boolean
+  sentPenalties?: boolean
+  sentPenaltyGoals?: number
 }
 
 type ESPNProcessed = {
@@ -70,6 +75,9 @@ export async function runLiveSync(): Promise<SyncResult> {
     const typeName: string = status?.type?.name ?? ''
     const completed = status?.type?.completed === true || typeName === 'STATUS_FINAL'
     const halftime = typeName === 'STATUS_HALFTIME'
+    const extratime = typeName === 'STATUS_EXTRA_TIME' || typeName === 'STATUS_OVERTIME'
+    const etHalftime = typeName === 'STATUS_HALFTIME_ET' || typeName === 'STATUS_HALFTIME_EXTRATIME'
+    const penalties = typeName === 'STATUS_SHOOTOUT' || typeName === 'STATUS_PENALTY' || typeName === 'STATUS_PENALTY_KICK' || typeName === 'STATUS_PENALTY_SHOOTOUT'
     const suspended =
       typeName === 'STATUS_RAIN_DELAY' ||
       typeName === 'STATUS_DELAYED' ||
@@ -81,9 +89,7 @@ export async function runLiveSync(): Promise<SyncResult> {
       status?.type?.state === 'in' ||
       typeName === 'STATUS_IN_PROGRESS' ||
       typeName === 'STATUS_SECOND_HALF' ||
-      typeName === 'STATUS_EXTRA_TIME' ||
-      typeName === 'STATUS_PENALTY' ||
-      halftime
+      extratime || etHalftime || penalties || halftime
     )
 
     const competitors: any[] = competition.competitors ?? []
@@ -110,8 +116,8 @@ export async function runLiveSync(): Promise<SyncResult> {
     const rawS2 = parseInt(c2.score ?? '0', 10)
     const score1 = flipped ? rawS2 : rawS1
     const score2 = flipped ? rawS1 : rawS2
-    const newStatus: MatchState['status'] = completed ? 'completed' : halftime ? 'halftime' : inProgress ? 'in' : suspended ? 'suspended' : 'pre'
-    const clock: string = halftime ? 'Intervalo' : suspended ? (status?.type?.shortDetail ?? status?.type?.description ?? 'Paralisado') : (status?.displayClock ?? '')
+    const newStatus: MatchState['status'] = completed ? 'completed' : penalties ? 'penalties' : etHalftime ? 'et_halftime' : extratime ? 'extratime' : halftime ? 'halftime' : inProgress ? 'in' : suspended ? 'suspended' : 'pre'
+    const clock: string = halftime || etHalftime ? 'Intervalo' : suspended ? (status?.type?.shortDetail ?? status?.type?.description ?? 'Paralisado') : (status?.displayClock ?? '')
 
     const varKeys: string[] = []
     const redCardKeys: string[] = []
@@ -157,7 +163,7 @@ export async function runLiveSync(): Promise<SyncResult> {
 
     pushQueue.length = 0
 
-    for (const { matchId, newStatus, score1, score2, t1, t2, clock, varKeys, redCardKeys } of espnProcessed) {
+    for (const { matchId, newStatus, score1, score2, t1, t2, clock, varKeys, redCardKeys, espnStatusName } of espnProcessed) {
       const prev = persistedStates[matchId]
 
       if (prev?.status === 'completed') continue
@@ -250,11 +256,17 @@ export async function runLiveSync(): Promise<SyncResult> {
       const sentSecondHalf = prev.sentSecondHalf ?? false
       const sentGoals = prev.sentGoals ?? (prev.score1 + prev.score2)
       const sentFinal = prev.sentFinal ?? false
+      const sentExtraTime = prev.sentExtraTime ?? false
+      const sentETHalftime = prev.sentETHalftime ?? false
+      const sentETSecondHalf = prev.sentETSecondHalf ?? false
+      const sentPenalties = prev.sentPenalties ?? false
+      const sentPenaltyGoals = prev.sentPenaltyGoals ?? 0
 
       const newState: MatchState = {
         status: newStatus, score1, score2, sentStarted, sentHalftime, sentSecondHalf, sentGoals, sentFinal,
         sentVARKeys: prev.sentVARKeys,
         sentRedCardKeys: prev.sentRedCardKeys,
+        sentExtraTime, sentETHalftime, sentETSecondHalf, sentPenalties, sentPenaltyGoals,
       }
 
       if (newStatus === 'in' && !sentStarted) {
@@ -272,19 +284,61 @@ export async function runLiveSync(): Promise<SyncResult> {
         newState.sentSecondHalf = true
       }
 
+      // ── Extra time ───────────────────────────────────────────────────────────
+      if (newStatus === 'extratime' && !sentExtraTime) {
+        pushQueue.push({ title: '⏱ Prorrogação!', body: scoreStr })
+        newState.sentExtraTime = true
+      }
+
+      if (newStatus === 'et_halftime' && !sentETHalftime) {
+        pushQueue.push({ title: '⏸ Intervalo da prorrogação', body: scoreStr })
+        newState.sentETHalftime = true
+      }
+
+      if (newStatus === 'extratime' && prev.status === 'et_halftime' && !sentETSecondHalf) {
+        pushQueue.push({ title: '▶️ Volta da prorrogação!', body: scoreStr })
+        newState.sentETSecondHalf = true
+      }
+
+      // ESPN sometimes goes straight from 'in' (90+) to 'extratime' — also handle
+      // halftime → extratime transition (ESPN may skip et_halftime state)
+      // and 'completed' with ET flag coming before penalties
+
+      // ── Penalties ────────────────────────────────────────────────────────────
+      if (newStatus === 'penalties' && !sentPenalties) {
+        pushQueue.push({ title: '🥅 Disputa de pênaltis!', body: scoreStr })
+        newState.sentPenalties = true
+        // Reset penalty goals counter to current match score (pre-shootout)
+        newState.sentPenaltyGoals = 0
+      }
+
+      // Track individual penalty goals (score changes during shootout)
+      if (newStatus === 'penalties') {
+        const currentPenGoals = score1 + score2
+        if (currentPenGoals > sentPenaltyGoals) {
+          pushQueue.push({ title: '⚽ Pênalti marcado!', body: scoreStr })
+          newState.sentPenaltyGoals = currentPenGoals
+        }
+      }
+
+      // Regular & ET goals (not during penalties)
       const currentGoals = score1 + score2
-      if (newStatus !== 'pre' && currentGoals > sentGoals) {
+      if (newStatus !== 'pre' && newStatus !== 'penalties' && currentGoals > sentGoals) {
         const alreadyFinal = dbResult && dbResult.score1 === score1 && dbResult.score2 === score2
         if (!alreadyFinal) {
           const clockLabel = clock && clock !== 'Intervalo' ? ` · ${clock}` : ''
-          pushQueue.push({ title: `⚽ Gol!${clockLabel}`, body: scoreStr })
+          const inET = newStatus === 'extratime' || newStatus === 'et_halftime'
+          pushQueue.push({ title: `⚽ Gol!${inET ? ' (Prorrogação)' : ''}${clockLabel}`, body: scoreStr })
         }
         newState.sentGoals = currentGoals
       }
 
       if (newStatus === 'completed') {
         if (!sentFinal) {
-          pushQueue.push({ title: '🏁 Resultado final', body: scoreStr })
+          const hadET = sentExtraTime
+          const hadPen = sentPenalties
+          const suffix = hadPen ? ' (pênaltis)' : hadET ? ' (prorrogação)' : ''
+          pushQueue.push({ title: `🏁 Resultado final${suffix}`, body: scoreStr })
           newState.sentFinal = true
         }
         if (!dbResult || dbResult.score1 !== score1 || dbResult.score2 !== score2) {
