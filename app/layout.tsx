@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 import './globals.css'
 import { Header } from '@/components/Header'
 import { BottomNav } from '@/components/BottomNav'
-import { TouchGlass } from '@/components/TouchGlass'
 import { Plus_Jakarta_Sans, Oswald } from 'next/font/google'
 
 const font = Plus_Jakarta_Sans({ subsets: ['latin'], weight: ['400', '500', '600', '700', '800'] })
@@ -34,12 +33,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`min-h-screen antialiased ${font.className} ${oswald.variable}`}>
         <script dangerouslySetInnerHTML={{ __html: `if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js')}` }} />
         <Header />
-        <main className="max-w-7xl mx-auto px-4 py-6 pb-24 sm:pb-6">{children}</main>
-        <footer className="text-center text-xs text-gray-700 py-6 mt-4 pb-20 sm:pb-6">
+        <main className="max-w-7xl mx-auto px-4 py-6 pb-28 sm:pb-6">{children}</main>
+        <footer className="text-center text-xs text-gray-700 py-6 mt-4 pb-24 sm:pb-6">
           Criado por Diogo Sander — 2026
         </footer>
         <BottomNav />
-        <TouchGlass />
       </body>
     </html>
   )

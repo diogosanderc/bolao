@@ -1185,40 +1185,6 @@ export default function LeaderboardPage() {
         />
       )}
 
-      {/* Resumo da rodada */}
-      {!loading && !leaderboardHasLive && lastMatch && data.length > 0 && roundDismissed !== lastMatch.matchId && (() => {
-        const top = [...data].filter(e => e.lastMatchPoints > 0).sort((a, b) => b.lastMatchPoints - a.lastMatchPoints)[0]
-        const climber = [...data].map(e => e as any).filter(e => (e.positionChange ?? 0) > 0).sort((a, b) => b.positionChange - a.positionChange)[0]
-        const faller = [...data].map(e => e as any).filter(e => (e.positionChange ?? 0) < 0).sort((a, b) => a.positionChange - b.positionChange)[0]
-        if (!top && !climber) return null
-        return (
-          <div className="rounded-xl border border-gray-800 bg-gradient-to-br from-gray-900 to-gray-950 px-4 py-3">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-gray-400">📋 Resumo da rodada</span>
-              <button onClick={() => dismissRound(lastMatch.matchId)} className="text-gray-600 hover:text-gray-300 text-sm" aria-label="Dispensar">✕</button>
-            </div>
-            <p className="text-[11px] text-gray-500 mb-2">{lastMatch.team1.name} {lastMatch.score1}×{lastMatch.score2} {lastMatch.team2.name}</p>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
-              {top && (
-                <div className="flex items-center gap-2 bg-gray-900/60 rounded-lg px-2.5 py-1.5">
-                  <span>⚡</span><div className="min-w-0"><p className="text-gray-500 text-[10px]">Mais pontuou</p><p className="text-gray-200 font-semibold truncate">{top.participant.name} <span className="text-green-400">+{top.lastMatchPoints}</span></p></div>
-                </div>
-              )}
-              {climber && (
-                <div className="flex items-center gap-2 bg-gray-900/60 rounded-lg px-2.5 py-1.5">
-                  <span>🔼</span><div className="min-w-0"><p className="text-gray-500 text-[10px]">Maior subida</p><p className="text-gray-200 font-semibold truncate">{climber.participant.name} <span className="text-blue-400">▲{climber.positionChange}</span></p></div>
-                </div>
-              )}
-              {faller && (
-                <div className="flex items-center gap-2 bg-gray-900/60 rounded-lg px-2.5 py-1.5">
-                  <span>🔽</span><div className="min-w-0"><p className="text-gray-500 text-[10px]">Maior queda</p><p className="text-gray-200 font-semibold truncate">{faller.participant.name} <span className="text-red-400">▼{Math.abs(faller.positionChange)}</span></p></div>
-                </div>
-              )}
-            </div>
-          </div>
-        )
-      })()}
-
       {!loading && data.length > 10 && !leaderboardHasLive && (
         <div className="space-y-2">
           <div className="relative">
@@ -1418,7 +1384,7 @@ export default function LeaderboardPage() {
         return (
           <button
             onClick={() => openParticipant(me.participant.id, me.participant.name)}
-            className="sm:hidden fixed inset-x-3 z-30 bottom-[68px] flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gray-900/95 backdrop-blur-md border border-[#00bf63]/40 shadow-lg shadow-black/40"
+            className="sm:hidden fixed inset-x-3 z-30 bottom-[80px] flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gray-900/95 backdrop-blur-md border border-[#00bf63]/40 shadow-lg shadow-black/40"
             style={{ marginBottom: 'env(safe-area-inset-bottom)' }}
           >
             <span className="text-[#00bf63] shrink-0">★</span>
@@ -1436,13 +1402,61 @@ export default function LeaderboardPage() {
         <button
           onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           aria-label="Voltar ao topo"
-          className="fixed right-4 bottom-[120px] sm:bottom-6 z-30 w-11 h-11 flex items-center justify-center rounded-full bg-gray-800/90 backdrop-blur border border-gray-700 text-gray-200 shadow-lg active:scale-95 transition-transform"
+          className="fixed right-4 bottom-[132px] sm:bottom-6 z-30 w-11 h-11 flex items-center justify-center rounded-full bg-gray-800/90 backdrop-blur border border-gray-700 text-gray-200 shadow-lg active:scale-95 transition-transform"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19V5M5 12l7-7 7 7" /></svg>
         </button>
       )}
 
       <Onboarding />
+
+      {/* Resumo da rodada — popup, uma vez por rodada */}
+      {!loading && !leaderboardHasLive && lastMatch && data.length > 0 && roundDismissed !== lastMatch.matchId && !selectedParticipant && !matchModal && (() => {
+        const top = [...data].filter(e => e.lastMatchPoints > 0).sort((a, b) => b.lastMatchPoints - a.lastMatchPoints)[0]
+        const climber = [...data].map(e => e as any).filter(e => (e.positionChange ?? 0) > 0).sort((a, b) => b.positionChange - a.positionChange)[0]
+        const faller = [...data].map(e => e as any).filter(e => (e.positionChange ?? 0) < 0).sort((a, b) => a.positionChange - b.positionChange)[0]
+        if (!top && !climber) return null
+        return (
+          <div className="fixed inset-0 z-[55] flex items-center justify-center p-5" onClick={() => dismissRound(lastMatch.matchId)}>
+            <div className="absolute inset-0 bg-black/70 backdrop-blur-sm animate-fade-in" />
+            <div className="relative w-full max-w-sm bg-gray-950 border border-gray-800 rounded-2xl p-5 animate-slide-up" onClick={e => e.stopPropagation()}>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-sm font-bold uppercase tracking-wider text-gray-300">📋 Resumo da rodada</span>
+                <button onClick={() => dismissRound(lastMatch.matchId)} className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white" aria-label="Fechar">✕</button>
+              </div>
+              <p className="text-xs text-gray-500 mb-4 flex items-center gap-1.5">
+                <Flag teamId={lastMatch.team1.id} size={16} /> {lastMatch.team1.name} <span className="font-score text-gray-300">{lastMatch.score1}×{lastMatch.score2}</span> <Flag teamId={lastMatch.team2.id} size={16} /> {lastMatch.team2.name}
+              </p>
+              <div className="space-y-2">
+                {top && (
+                  <div className="flex items-center gap-3 bg-gray-900 border border-gray-800 rounded-xl px-3 py-2.5">
+                    <span className="text-2xl">⚡</span>
+                    <div className="min-w-0 flex-1"><p className="text-[10px] uppercase tracking-wide text-gray-500">Mais pontuou</p><p className="text-sm text-gray-200 font-bold truncate">{top.participant.name}</p></div>
+                    <span className="text-green-400 font-score font-bold text-lg shrink-0">+{top.lastMatchPoints}</span>
+                  </div>
+                )}
+                {climber && (
+                  <div className="flex items-center gap-3 bg-gray-900 border border-gray-800 rounded-xl px-3 py-2.5">
+                    <span className="text-2xl">🔼</span>
+                    <div className="min-w-0 flex-1"><p className="text-[10px] uppercase tracking-wide text-gray-500">Maior subida</p><p className="text-sm text-gray-200 font-bold truncate">{climber.participant.name}</p></div>
+                    <span className="text-blue-400 font-score font-bold text-lg shrink-0">▲{climber.positionChange}</span>
+                  </div>
+                )}
+                {faller && (
+                  <div className="flex items-center gap-3 bg-gray-900 border border-gray-800 rounded-xl px-3 py-2.5">
+                    <span className="text-2xl">🔽</span>
+                    <div className="min-w-0 flex-1"><p className="text-[10px] uppercase tracking-wide text-gray-500">Maior queda</p><p className="text-sm text-gray-200 font-bold truncate">{faller.participant.name}</p></div>
+                    <span className="text-red-400 font-score font-bold text-lg shrink-0">▼{Math.abs(faller.positionChange)}</span>
+                  </div>
+                )}
+              </div>
+              <button onClick={() => dismissRound(lastMatch.matchId)} className="mt-4 w-full py-2.5 rounded-xl bg-[#00bf63] hover:bg-[#00a854] text-white font-semibold text-sm transition-colors">
+                Entendi
+              </button>
+            </div>
+          </div>
+        )
+      })()}
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-8">
         {[
