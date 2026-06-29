@@ -754,14 +754,18 @@ export default function LeaderboardPage() {
               <button
                 onClick={toggleNotifications}
                 title={notifState === 'subscribed' ? 'Notificações ativas — clique para desativar' : notifState === 'denied' ? 'Notificações bloqueadas no browser' : 'Ativar notificações de gol e resultado'}
-                className={`flex items-center justify-center w-10 h-10 text-xl rounded-full transition-colors ${
+                className={`flex items-center justify-center w-10 h-10 rounded-full transition-colors ${
                   notifState === 'subscribed' ? 'text-yellow-400 hover:bg-gray-800' :
                   notifState === 'denied' ? 'text-gray-600 cursor-not-allowed' :
                   'text-gray-500 hover:text-gray-300 hover:bg-gray-800'
                 }`}
                 disabled={notifState === 'denied'}
               >
-                {notifState === 'denied' ? '🔕' : '🔔'}
+                {notifState === 'denied' ? (
+                  <svg className="w-[22px] h-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8.7 3A6 6 0 0 1 18 8c0 3 .5 4.5 1.5 6M6 8c0-.7.1-1.4.3-2M5 8c0 5-2 6-2 6h13M9 18a3 3 0 0 0 6 0" /><line x1="3" y1="3" x2="21" y2="21" /></svg>
+                ) : (
+                  <svg className="w-[22px] h-[22px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8a6 6 0 1 0-12 0c0 5-2 6-2 6h16s-2-1-2-6" /><path d="M9 18a3 3 0 0 0 6 0" /></svg>
+                )}
               </button>
               {notifState === 'subscribed' && (
                 <span className="absolute top-0.5 right-0.5 w-2 h-2 bg-green-400 rounded-full border border-gray-950" />

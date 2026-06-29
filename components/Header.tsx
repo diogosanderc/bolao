@@ -68,7 +68,10 @@ export function Header() {
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
         <a href="/" className="flex items-center gap-2.5 no-underline group">
           <span className="flex items-center justify-center w-10 h-10 rounded-full bg-white/15 ring-2 ring-white/30 shadow-inner transition-transform group-hover:scale-105">
-            <span className="text-2xl leading-none">🏆</span>
+            <svg className="w-[22px] h-[22px] text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4Z" />
+              <path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3" />
+            </svg>
           </span>
           <h1 className="font-bold text-lg leading-tight text-white">Bolão Copa do Mundo 2026</h1>
         </a>
