@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Flag } from '@/components/Flag'
 import { Scoreboard } from '@/components/Scoreboard'
 import { teamById } from '@/lib/copa2026'
@@ -149,13 +149,29 @@ const PHASE_ICON: Record<string, string> = {
 
 // ─── Knockout section ────────────────────────────────────────────────────────
 
-function KnockoutSection({ phases }: { phases: KnockoutPhase[] }) {
-  const [activePhase, setActivePhase] = useState(() => phases[0]?.phase ?? '')
+// The round currently in progress = first knockout phase that still has an
+// unplayed match (with teams already decided); falls back to the last phase.
+function currentRoundPhase(phases: KnockoutPhase[]): string {
+  for (const p of phases) {
+    const hasResolved = p.matches.some(m => m.team1Id !== 'TBD' && m.team2Id !== 'TBD')
+    const allPlayed = p.matches.length > 0 && p.matches.every(m => m.status === 'played')
+    if (hasResolved && !allPlayed) return p.phase
+  }
+  // none in progress → last phase that has resolved matches, else first
+  const resolved = [...phases].reverse().find(p => p.matches.some(m => m.team1Id !== 'TBD' && m.team2Id !== 'TBD'))
+  return resolved?.phase ?? phases[0]?.phase ?? ''
+}
 
-  // keep selection valid as data loads
+function KnockoutSection({ phases }: { phases: KnockoutPhase[] }) {
+  const [activePhase, setActivePhase] = useState('')
+  const initedRef = useRef(false)
+
+  // default to the current round once data arrives; keep selection valid after
   useEffect(() => {
-    if (phases.length && !phases.find(p => p.phase === activePhase)) {
-      setActivePhase(phases[0].phase)
+    if (!phases.length) return
+    if (!initedRef.current || !phases.find(p => p.phase === activePhase)) {
+      setActivePhase(currentRoundPhase(phases))
+      initedRef.current = true
     }
   }, [phases, activePhase])
 
@@ -309,6 +325,7 @@ export default function ClassificacaoCopaPage() {
   const [hasLive,  setHasLive]  = useState(false)
   const [loading,  setLoading]  = useState(true)
   const [tab,      setTab]      = useState<Tab>('groups')
+  const tabInitedRef = useRef(false)
 
   useEffect(() => {
     let active = true
@@ -317,10 +334,17 @@ export default function ClassificacaoCopaPage() {
         .then(r => r.json())
         .then(d => {
           if (!active) return
+          const ko: KnockoutPhase[] = d.knockout ?? []
           setGroups(d.groups   ?? [])
-          setKnockout(d.knockout ?? [])
+          setKnockout(ko)
           setHasLive(!!d.hasLive)
           setLoading(false)
+          // Once the knockout has started (any resolved matchup), default to it
+          if (!tabInitedRef.current) {
+            tabInitedRef.current = true
+            const koStarted = ko.some(p => p.matches.some(m => m.team1Id !== 'TBD' && m.team2Id !== 'TBD'))
+            if (koStarted) setTab('knockout')
+          }
         })
         .catch(() => active && setLoading(false))
     }
