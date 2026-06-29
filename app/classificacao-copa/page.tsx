@@ -44,7 +44,7 @@ function MatchRow({ m, compact = false }: { m: MatchInfo; compact?: boolean }) {
         <span className={`truncate text-right font-semibold ${w1 ? 'text-gray-200' : played ? 'text-gray-400' : live ? 'text-gray-300' : 'text-gray-500'}`}>
           {compact ? m.team1Id : (teamById[m.team1Id]?.name ?? m.team1Id)}
         </span>
-        {!tbd ? <Flag teamId={m.team1Id} size={16} /> : <Icon name="flag" size={14} className="text-gray-600" />}
+        {m.team1Id !== 'TBD' ? <Flag teamId={m.team1Id} size={16} /> : <Icon name="flag" size={14} className="text-gray-600" />}
       </div>
 
       {/* Score */}
@@ -58,7 +58,7 @@ function MatchRow({ m, compact = false }: { m: MatchInfo; compact?: boolean }) {
 
       {/* Team 2 */}
       <div className="flex items-center gap-1.5 flex-1 min-w-0">
-        {!tbd ? <Flag teamId={m.team2Id} size={16} /> : <Icon name="flag" size={14} className="text-gray-600" />}
+        {m.team2Id !== 'TBD' ? <Flag teamId={m.team2Id} size={16} /> : <Icon name="flag" size={14} className="text-gray-600" />}
         <span className={`truncate font-semibold ${w2 ? 'text-gray-200' : played ? 'text-gray-400' : live ? 'text-gray-300' : 'text-gray-500'}`}>
           {compact ? m.team2Id : (teamById[m.team2Id]?.name ?? m.team2Id)}
         </span>
