@@ -42,10 +42,10 @@ function MatchRow({ m, compact = false }: { m: MatchInfo; compact?: boolean }) {
       {/* Live badge placeholder — always reserves the same width so the score stays centred */}
       <div className="w-14 shrink-0 flex items-center gap-1">
         {live && (
-          <>
-            <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-            <span className="text-[10px] font-semibold text-red-600 dark:text-red-400">{m.clock ?? 'AO VIVO'}</span>
-          </>
+          <span className="flex items-center gap-1 whitespace-nowrap">
+            <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse shrink-0" />
+            <span className="text-[10px] font-semibold text-red-600 dark:text-red-400">{m.clock && m.clock !== 'AO VIVO' ? m.clock : 'VIVO'}</span>
+          </span>
         )}
       </div>
 
