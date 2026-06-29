@@ -239,9 +239,11 @@ export default function LeaderboardPage() {
     }
   }, [])
 
-  // When there are live matches, refresh leaderboard every 15s and trigger ESPN sync every 30s
+  // While any match is live — per /api/schedule OR per the leaderboard's own
+  // provisional scoring — keep the leaderboard polling fast and force an ESPN sync.
+  const isLiveNow = liveMatches.length > 0 || leaderboardHasLive
   useEffect(() => {
-    if (liveMatches.length === 0) return
+    if (!isLiveNow) return
     const leaderboardInterval = setInterval(fetchLeaderboard, 10_000)
     const syncInterval = setInterval(() => {
       fetch('/api/sync/live', { method: 'POST' }).catch(() => {})
@@ -252,7 +254,7 @@ export default function LeaderboardPage() {
       clearInterval(leaderboardInterval)
       clearInterval(syncInterval)
     }
-  }, [liveMatches.length])
+  }, [isLiveNow])
 
   function formatCountdown(iso?: string): string | null {
     if (!iso || !now) return null
