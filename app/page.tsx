@@ -1159,7 +1159,7 @@ export default function LeaderboardPage() {
                 <th className="pl-2 pr-1 py-3 text-center w-8">#</th>
                 <th className="px-1 py-3 text-left">Participante</th>
                 <th className="px-1 py-3 text-right cursor-help w-9" title="Pontuação do último jogo">UJ</th>
-                <th className="px-1 py-3 text-right cursor-help w-9" title="Soma dos 4 últimos jogos">U4</th>
+                <th className="px-1 py-3 text-right cursor-help w-9" title="Classificação no mata-mata: pontos de avanço do último jogo (+4/+6/+8/+10/+12)">MM</th>
                 <th className="pl-1 pr-2 py-3 text-right w-12">PTS</th>
               </tr>
             </thead>
@@ -1247,8 +1247,10 @@ export default function LeaderboardPage() {
                   </td>
                   <td className="px-1 py-3 text-right">
                     {(() => {
-                      const pts = p.last4Points ?? 0
-                      return <span className={pts > 0 ? 'text-blue-600 dark:text-blue-400 font-semibold' : 'text-gray-400 dark:text-gray-500'}>{pts}</span>
+                      const mm = p.lastKoRulePts ?? 0
+                      return mm > 0
+                        ? <span className="text-blue-600 dark:text-blue-400 font-semibold">+{mm}</span>
+                        : <span className="text-gray-400 dark:text-gray-500">0</span>
                     })()}
                   </td>
                   <td className="pl-1 pr-2 py-3 text-right">
@@ -1278,7 +1280,7 @@ export default function LeaderboardPage() {
           <div className="px-4 pb-3 pt-1 text-[11px] text-gray-400 space-y-1.5 border-t border-gray-800">
             <div className="grid grid-cols-2 gap-x-4 gap-y-1">
               <span><span className="font-bold text-gray-300">UJ</span> — pontos do último jogo</span>
-              <span><span className="font-bold text-gray-300">U4</span> — soma dos 4 últimos jogos</span>
+              <span><span className="font-bold text-gray-300">MM</span> — avanço no mata-mata (+4/+6/+8/+10/+12)</span>
               <span><span className="font-bold text-gray-300">PTS</span> — total acumulado</span>
               <span><span className="font-bold text-gray-300">-N</span> — pontos atrás do colocado acima</span>
             </div>
