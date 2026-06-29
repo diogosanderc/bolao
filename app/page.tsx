@@ -75,7 +75,7 @@ export default function LeaderboardPage() {
   const [now, setNow] = useState(0)
   const [rowsIn, setRowsIn] = useState(false)
   const rowsStartedRef = useRef(false)
-  const [query, setQuery] = useState('')
+
   const [zoneFilter, setZoneFilter] = useState<'all' | 'top7' | 'red'>('all')
   const [showScrollTop, setShowScrollTop] = useState(false)
   const [roundDismissed, setRoundDismissed] = useState<string | null>(null)
@@ -1143,20 +1143,8 @@ export default function LeaderboardPage() {
       )}
 
 
-      {!loading && data.length > 10 && !leaderboardHasLive && (
+      {!loading && data.length > 0 && !leaderboardHasLive && (
         <div className="space-y-2">
-          <div className="relative">
-            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
-            <input
-              value={query}
-              onChange={e => setQuery(e.target.value)}
-              placeholder="Buscar participante…"
-              className="w-full bg-gray-900 border border-gray-800 focus:border-gray-600 rounded-xl pl-9 pr-9 py-2.5 text-sm text-gray-200 placeholder-gray-600 outline-none transition-colors"
-            />
-            {query && (
-              <button onClick={() => setQuery('')} className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-full text-gray-500 hover:text-gray-200 hover:bg-gray-800" aria-label="Limpar"><Icon name="x" size={14} /></button>
-            )}
-          </div>
           <div className="flex gap-1.5">
             {([['all', 'Todos', ''], ['top7', 'Top 7', 'bg-[#00bf63]'], ['red', 'Pagões', 'bg-red-500']] as const).map(([val, label, dot]) => (
               <button
@@ -1191,7 +1179,6 @@ export default function LeaderboardPage() {
                 const p = entry as any
                 const flash = flashMap[entry.participant.id]
                 const isMe = myId === entry.participant.id
-                if (query && !entry.participant.name.toLowerCase().includes(query.toLowerCase())) return null
                 if (zoneFilter === 'top7' && !(rank >= 1 && rank <= 7)) return null
                 if (zoneFilter === 'red' && !isRelated(entry.totalPoints)) return null
                 return (
@@ -1294,9 +1281,7 @@ export default function LeaderboardPage() {
             )}
             </tbody>
           </table>
-          {query && !data.some(e => e.participant.name.toLowerCase().includes(query.toLowerCase())) && (
-            <p className="text-center text-sm text-gray-500 py-6">Nenhum participante encontrado para “{query}”.</p>
-          )}
+
           <div className="px-3 py-2 border-t border-gray-800">
             <span className="text-xs text-gray-600">Toque num participante para ver os palpites</span>
           </div>
