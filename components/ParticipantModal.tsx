@@ -75,6 +75,38 @@ type ParticipantData = {
   groupPredictions: GroupPredRow[]
 }
 
+// Top predictions for a match, sorted by count desc, max 4 shown
+function PredDistribution({ matchId, dist, myScore }: {
+  matchId: string
+  dist: Record<string, Record<string, number>>
+  myScore: string | null
+}) {
+  const matchDist = dist[matchId]
+  if (!matchDist) return null
+  const sorted = Object.entries(matchDist).sort((a, b) => b[1] - a[1]).slice(0, 4)
+  const total = Object.values(matchDist).reduce((s, n) => s + n, 0)
+  return (
+    <div className="flex flex-wrap gap-1 mt-1.5">
+      {sorted.map(([score, count]) => {
+        const isMe = score === myScore
+        return (
+          <span
+            key={score}
+            className={`inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full border ${
+              isMe
+                ? 'bg-yellow-950/60 border-yellow-700 text-yellow-300'
+                : 'bg-gray-800 border-gray-700 text-gray-400'
+            }`}
+          >
+            <span className="font-score">{score}</span>
+            <span className={`${isMe ? 'text-yellow-500' : 'text-gray-500'} font-normal`}>{count}/{total}</span>
+          </span>
+        )
+      })}
+    </div>
+  )
+}
+
 // Team chip that shows "a definir" while the knockout slot isn't decided yet
 function TeamMini({ id }: { id: string }) {
   if (id === 'TBD') {
@@ -98,6 +130,8 @@ type Props = { participantId: string; name: string; isMe?: boolean; onToggleMe?:
 export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClose }: Props) {
   const [data, setData] = useState<ParticipantData | null>(null)
   const [loading, setLoading] = useState(true)
+  // matchId → score "1-0" → count
+  const [predDist, setPredDist] = useState<Record<string, Record<string, number>>>({})
   const [tab, setTab] = useState<'played' | 'selecoes' | 'upcoming'>('played')
   const [sharingCard, setSharingCard] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -110,10 +144,13 @@ export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClos
   useEffect(() => { tabRef.current = tab }, [tab])
 
   useEffect(() => {
-    fetch(`/api/participante/${participantId}`)
-      .then(r => r.json())
-      .then(d => {
+    Promise.all([
+      fetch(`/api/participante/${participantId}`).then(r => r.json()),
+      fetch('/api/match-predictions').then(r => r.json()),
+    ])
+      .then(([d, dist]) => {
         setData(d)
+        setPredDist(dist)
         setLoading(false)
         requestAnimationFrame(() => {
           if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight
@@ -497,6 +534,11 @@ export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClos
                   {p.correctScore && <p className="text-[10px] text-green-700 dark:text-green-400 mt-0.5 pl-0.5"><Icon name="target" size={11} className="inline -mt-0.5 mr-0.5" /> Placar exato!</p>}
                   {!p.correctScore && p.correctResult && <p className="text-[10px] text-blue-700 dark:text-blue-400 mt-0.5 pl-0.5"><Icon name="check" size={11} className="inline -mt-0.5 mr-0.5" /> Resultado certo</p>}
                   {!p.correctResult && p.result && <p className="text-[10px] text-red-600 dark:text-red-500 mt-0.5 pl-0.5"><Icon name="x" size={11} className="inline -mt-0.5 mr-0.5" /> Errou</p>}
+                  <PredDistribution
+                    matchId={p.matchId}
+                    dist={predDist}
+                    myScore={p.prediction ? `${p.prediction.score1}-${p.prediction.score2}` : null}
+                  />
                 </div>
               ))}
 
@@ -662,18 +704,25 @@ export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClos
             <div key={`upcoming-${slideDir}`} className={`divide-y divide-gray-800/60 ${slideDir === 'r' ? 'animate-tab-in-right' : 'animate-tab-in-left'}`}>
               {upcoming.length === 0 && <p className="text-center py-10 text-gray-600">Sem palpites futuros registrados.</p>}
               {upcoming.map(p => (
-                <div key={p.matchId} className="px-3 py-2.5 flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-1.5 text-sm min-w-0 shrink-0">
-                    <TeamMini id={p.team1.id} />
-                    <span className="text-gray-600 mx-0.5">×</span>
-                    <TeamMini id={p.team2.id} />
+                <div key={p.matchId} className="px-3 py-2.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-1.5 text-sm min-w-0 shrink-0">
+                      <TeamMini id={p.team1.id} />
+                      <span className="text-gray-600 mx-0.5">×</span>
+                      <TeamMini id={p.team2.id} />
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      {p.dateBRT && <span className="text-xs text-gray-600">{p.dateBRT}</span>}
+                      <span className="font-bold text-yellow-800 bg-yellow-200 dark:text-yellow-400 dark:bg-yellow-950/40 text-xs px-2 py-0.5 rounded font-score">
+                        {p.prediction ? `${p.prediction.score1}–${p.prediction.score2}` : '—'}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    {p.dateBRT && <span className="text-xs text-gray-600">{p.dateBRT}</span>}
-                    <span className="font-bold text-yellow-800 bg-yellow-200 dark:text-yellow-400 dark:bg-yellow-950/40 text-xs px-2 py-0.5 rounded font-score">
-                      {p.prediction ? `${p.prediction.score1}–${p.prediction.score2}` : '—'}
-                    </span>
-                  </div>
+                  <PredDistribution
+                    matchId={p.matchId}
+                    dist={predDist}
+                    myScore={p.prediction ? `${p.prediction.score1}-${p.prediction.score2}` : null}
+                  />
                 </div>
               ))}
             </div>
