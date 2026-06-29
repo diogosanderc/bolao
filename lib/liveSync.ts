@@ -11,6 +11,7 @@ type MatchState = {
   score2: number
   sentStarted?: boolean
   sentHalftime?: boolean
+  sentSecondHalf?: boolean
   sentSuspended?: boolean
   sentFinal?: boolean
   sentGoals?: number
@@ -246,11 +247,12 @@ export async function runLiveSync(): Promise<SyncResult> {
 
       const sentStarted = prev.sentStarted ?? (prev.status !== 'pre')
       const sentHalftime = prev.sentHalftime ?? false
+      const sentSecondHalf = prev.sentSecondHalf ?? false
       const sentGoals = prev.sentGoals ?? (prev.score1 + prev.score2)
       const sentFinal = prev.sentFinal ?? false
 
       const newState: MatchState = {
-        status: newStatus, score1, score2, sentStarted, sentHalftime, sentGoals, sentFinal,
+        status: newStatus, score1, score2, sentStarted, sentHalftime, sentSecondHalf, sentGoals, sentFinal,
         sentVARKeys: prev.sentVARKeys,
         sentRedCardKeys: prev.sentRedCardKeys,
       }
@@ -263,6 +265,11 @@ export async function runLiveSync(): Promise<SyncResult> {
       if (newStatus === 'halftime' && !sentHalftime) {
         pushQueue.push({ title: '⏸ Intervalo', body: scoreStr })
         newState.sentHalftime = true
+      }
+
+      if (newStatus === 'in' && prev.status === 'halftime' && !sentSecondHalf) {
+        pushQueue.push({ title: '▶️ Segundo tempo!', body: scoreStr })
+        newState.sentSecondHalf = true
       }
 
       const currentGoals = score1 + score2
