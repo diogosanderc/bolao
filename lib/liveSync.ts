@@ -22,6 +22,8 @@ type MatchState = {
   sentETSecondHalf?: boolean
   sentPenalties?: boolean
   sentPenaltyGoals?: number
+  regScore1?: number
+  regScore2?: number
 }
 
 type ESPNProcessed = {
@@ -261,12 +263,15 @@ export async function runLiveSync(): Promise<SyncResult> {
       const sentETSecondHalf = prev.sentETSecondHalf ?? false
       const sentPenalties = prev.sentPenalties ?? false
       const sentPenaltyGoals = prev.sentPenaltyGoals ?? 0
+      const regScore1 = prev.regScore1
+      const regScore2 = prev.regScore2
 
       const newState: MatchState = {
         status: newStatus, score1, score2, sentStarted, sentHalftime, sentSecondHalf, sentGoals, sentFinal,
         sentVARKeys: prev.sentVARKeys,
         sentRedCardKeys: prev.sentRedCardKeys,
         sentExtraTime, sentETHalftime, sentETSecondHalf, sentPenalties, sentPenaltyGoals,
+        regScore1, regScore2,
       }
 
       if (newStatus === 'in' && !sentStarted) {
@@ -310,6 +315,10 @@ export async function runLiveSync(): Promise<SyncResult> {
         newState.sentPenalties = true
         // Reset penalty goals counter to current match score (pre-shootout)
         newState.sentPenaltyGoals = 0
+        // Lock in the regulation/ET draw score — this is what counts for scoring,
+        // the shootout only decides who advances (set separately via advancingTeamId)
+        newState.regScore1 = score1
+        newState.regScore2 = score2
       }
 
       // Track individual penalty goals (score changes during shootout)
@@ -341,8 +350,13 @@ export async function runLiveSync(): Promise<SyncResult> {
           pushQueue.push({ title: `🏁 Resultado final${suffix}`, body: scoreStr })
           newState.sentFinal = true
         }
-        if (!dbResult || dbResult.score1 !== score1 || dbResult.score2 !== score2) {
-          dbResultUpdates.push({ matchId, score1, score2 })
+        // If the match went to penalties, save the regulation/ET draw score —
+        // not the shootout-inflated score — since points are scored on the draw
+        // and advancingTeamId (set manually) carries who passes the round.
+        const finalScore1 = sentPenalties && regScore1 !== undefined ? regScore1 : score1
+        const finalScore2 = sentPenalties && regScore2 !== undefined ? regScore2 : score2
+        if (!dbResult || dbResult.score1 !== finalScore1 || dbResult.score2 !== finalScore2) {
+          dbResultUpdates.push({ matchId, score1: finalScore1, score2: finalScore2 })
         }
       }
 
