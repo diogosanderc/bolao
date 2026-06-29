@@ -39,6 +39,16 @@ function MatchRow({ m, compact = false }: { m: MatchInfo; compact?: boolean }) {
 
   return (
     <div className={`flex items-center gap-2 px-3 py-1.5 text-xs ${tbd ? 'opacity-40' : ''}`}>
+      {/* Live badge placeholder — always reserves the same width so the score stays centred */}
+      <div className="w-14 shrink-0 flex items-center gap-1">
+        {live && (
+          <>
+            <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
+            <span className="text-[10px] font-semibold text-red-600 dark:text-red-400">{m.clock ?? 'AO VIVO'}</span>
+          </>
+        )}
+      </div>
+
       {/* Team 1 */}
       <div className="flex items-center gap-1.5 flex-1 justify-end min-w-0">
         <span className={`truncate text-right font-semibold ${w1 ? 'text-gray-200' : played ? 'text-gray-400' : live ? 'text-gray-300' : 'text-gray-500'}`}>
@@ -64,13 +74,8 @@ function MatchRow({ m, compact = false }: { m: MatchInfo; compact?: boolean }) {
         </span>
       </div>
 
-      {/* Live badge */}
-      {live && (
-        <span className="shrink-0 flex items-center gap-1">
-          <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-          <span className="text-[10px] font-semibold text-red-600 dark:text-red-400">{m.clock ?? 'AO VIVO'}</span>
-        </span>
-      )}
+      {/* Mirror placeholder on the right so team columns stay symmetric */}
+      <div className="w-14 shrink-0" />
     </div>
   )
 }
