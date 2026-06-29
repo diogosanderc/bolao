@@ -1454,29 +1454,44 @@ export default function LeaderboardPage() {
             ) : (
               <>
                 <div className="divide-y divide-gray-800 mb-4">
-                  {Object.entries(
-                    matchPredictions.reduce<Record<string, string[]>>((acc, p) => {
-                      const key = `${p.score1}×${p.score2}`
-                      acc[key] = [...(acc[key] ?? []), p.name]
-                      return acc
-                    }, {})
-                  )
-                    .sort((a, b) => b[1].length - a[1].length)
-                    .map(([score, names]) => {
-                      const isExact = matchResult ? score === `${matchResult.score1}×${matchResult.score2}` : false
-                      return (
-                      <div key={score} className={`flex items-start justify-between gap-3 py-2.5 px-2 -mx-2 rounded ${isExact ? 'bg-green-100 dark:bg-green-950/40' : ''}`}>
-                        <div className="flex flex-wrap gap-1 flex-1">
-                          {names.sort().map(name => (
-                            <span key={name} title={name} className={`text-xs rounded px-1.5 py-0.5 ${isExact ? 'bg-green-200 text-green-900 dark:bg-green-900/60 dark:text-green-200 font-semibold' : 'bg-gray-800 text-gray-300'}`}>{chipCode(name)}</span>
-                          ))}
-                        </div>
-                        <span className={`text-sm font-bold shrink-0 flex items-center gap-1 ${isExact ? 'text-green-700 dark:text-green-300' : 'text-green-400'}`}>
-                          {isExact && <Icon name="target" size={13} className="shrink-0" />}{score}
-                        </span>
-                      </div>
-                      )
-                    })}
+                  {(() => {
+                    const total = matchPredictions.length
+                    return Object.entries(
+                      matchPredictions.reduce<Record<string, string[]>>((acc, p) => {
+                        const key = `${p.score1}×${p.score2}`
+                        acc[key] = [...(acc[key] ?? []), p.name]
+                        return acc
+                      }, {})
+                    )
+                      .sort((a, b) => b[1].length - a[1].length)
+                      .map(([score, names]) => {
+                        const isExact = matchResult ? score === `${matchResult.score1}×${matchResult.score2}` : false
+                        const pct = Math.round((names.length / total) * 100)
+                        return (
+                          <div key={score} className={`py-2.5 px-2 -mx-2 rounded ${isExact ? 'bg-green-100 dark:bg-green-950/40' : ''}`}>
+                            <div className="flex items-center justify-between gap-3 mb-1.5">
+                              <div className="flex flex-wrap gap-1 flex-1">
+                                {names.sort().map(name => (
+                                  <span key={name} title={name} className={`text-xs rounded px-1.5 py-0.5 ${isExact ? 'bg-green-200 text-green-900 dark:bg-green-900/60 dark:text-green-200 font-semibold' : 'bg-gray-800 text-gray-300'}`}>{chipCode(name)}</span>
+                                ))}
+                              </div>
+                              <div className="shrink-0 text-right">
+                                <span className={`text-sm font-bold flex items-center gap-1 justify-end ${isExact ? 'text-green-700 dark:text-green-300' : 'text-green-400'}`}>
+                                  {isExact && <Icon name="target" size={13} className="shrink-0" />}{score}
+                                </span>
+                                <span className="text-[10px] text-gray-500">{names.length}/{total} · {pct}%</span>
+                              </div>
+                            </div>
+                            <div className="h-1 rounded-full bg-gray-800 overflow-hidden">
+                              <div
+                                className={`h-full rounded-full transition-all ${isExact ? 'bg-green-500' : 'bg-gray-600'}`}
+                                style={{ width: `${pct}%` }}
+                              />
+                            </div>
+                          </div>
+                        )
+                      })
+                  })()}
                 </div>
                 <button
                   onClick={() => shareMatchPredictions(matchModal.label.split(' vs ')[0], matchModal.label.split(' vs ')[1], '')}
