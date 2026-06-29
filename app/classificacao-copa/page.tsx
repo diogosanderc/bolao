@@ -20,6 +20,9 @@ type MatchInfo = {
   advancingTeamId?: string
   status: 'played' | 'live' | 'upcoming'
   clock: string | null
+  isPenalties?: boolean
+  penaltyScore1?: number
+  penaltyScore2?: number
 }
 
 type GroupData  = { id: string; name: string; standings: GroupRow[]; matches: MatchInfo[] }
@@ -58,11 +61,16 @@ function MatchRow({ m, compact = false }: { m: MatchInfo; compact?: boolean }) {
       </div>
 
       {/* Score */}
-      <div className="shrink-0 text-center min-w-[3.4rem] flex justify-center">
+      <div className="shrink-0 text-center min-w-[3.4rem] flex flex-col items-center gap-0.5">
         {played || live ? (
           <Scoreboard score1={m.score1 ?? 0} score2={m.score2 ?? 0} size="sm" live={live} />
         ) : (
           <span className="text-gray-600 text-[11px]">×</span>
+        )}
+        {m.isPenalties && m.penaltyScore1 !== undefined && m.penaltyScore2 !== undefined && (
+          <span className="text-[9px] font-semibold text-red-500 dark:text-red-400 tabular-nums leading-none">
+            Pên {m.penaltyScore1}–{m.penaltyScore2}
+          </span>
         )}
       </div>
 

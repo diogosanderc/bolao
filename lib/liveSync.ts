@@ -22,6 +22,8 @@ type MatchState = {
   sentETSecondHalf?: boolean
   sentPenalties?: boolean
   sentPenaltyGoals?: number
+  penaltyScore1?: number
+  penaltyScore2?: number
   regScore1?: number
   regScore2?: number
   regulationScore1?: number
@@ -42,6 +44,8 @@ type ESPNProcessed = {
   redCardKeys: string[]
   espnStatusName: string
   winnerTeamId?: string
+  penaltyScore1?: number
+  penaltyScore2?: number
 }
 
 let lastRunAt = 0
@@ -132,6 +136,10 @@ export async function runLiveSync(): Promise<SyncResult> {
 
     const varKeys: string[] = []
     const redCardKeys: string[] = []
+    let penaltyScore1: number | undefined
+    let penaltyScore2: number | undefined
+    const c1TeamId = String(c1.team?.id ?? '')
+    const c2TeamId = String(c2.team?.id ?? '')
     for (const detail of competition?.details ?? []) {
       const typeText: string = detail.type?.text ?? ''
       const typeLower = typeText.toLowerCase()
@@ -153,6 +161,17 @@ export async function runLiveSync(): Promise<SyncResult> {
         const detailTeamId = String(detail.team?.id ?? '')
         redCardKeys.push(`${detailTeamId}|${player}|${minute}`)
       }
+
+      if (penalties && typeText === 'Penalty - Scored') {
+        const detailTeamId = String(detail.team?.id ?? '')
+        if (!penaltyScore1) penaltyScore1 = 0
+        if (!penaltyScore2) penaltyScore2 = 0
+        if (detailTeamId === c1TeamId) penaltyScore1++
+        else if (detailTeamId === c2TeamId) penaltyScore2++
+      }
+    }
+    if (penalties && penaltyScore1 !== undefined) {
+      if (flipped) { const tmp = penaltyScore1; penaltyScore1 = penaltyScore2; penaltyScore2 = tmp }
     }
 
     espnProcessed.push({
@@ -161,7 +180,7 @@ export async function runLiveSync(): Promise<SyncResult> {
       team2Id: resolvedM?.team2Id ?? match.team2Id,
       t1: teamById[resolvedM?.team1Id ?? match.team1Id]?.name ?? (resolvedM?.team1Id ?? match.team1Id),
       t2: teamById[resolvedM?.team2Id ?? match.team2Id]?.name ?? (resolvedM?.team2Id ?? match.team2Id),
-      clock, varKeys, redCardKeys, espnStatusName: typeName, winnerTeamId,
+      clock, varKeys, redCardKeys, espnStatusName: typeName, winnerTeamId, penaltyScore1, penaltyScore2,
     })
   }
 
@@ -176,7 +195,7 @@ export async function runLiveSync(): Promise<SyncResult> {
 
     pushQueue.length = 0
 
-    for (const { matchId, newStatus, score1, score2, team1Id, team2Id, t1, t2, clock, varKeys, redCardKeys, espnStatusName, winnerTeamId } of espnProcessed) {
+    for (const { matchId, newStatus, score1, score2, team1Id, team2Id, t1, t2, clock, varKeys, redCardKeys, espnStatusName, winnerTeamId, penaltyScore1, penaltyScore2 } of espnProcessed) {
       const prev = persistedStates[matchId]
 
       if (prev?.status === 'completed') continue
@@ -291,6 +310,8 @@ export async function runLiveSync(): Promise<SyncResult> {
         sentVARKeys: prev.sentVARKeys,
         sentRedCardKeys: prev.sentRedCardKeys,
         sentExtraTime, sentETHalftime, sentETSecondHalf, sentPenalties, sentPenaltyGoals,
+        penaltyScore1: newStatus === 'penalties' ? (penaltyScore1 ?? prev.penaltyScore1) : undefined,
+        penaltyScore2: newStatus === 'penalties' ? (penaltyScore2 ?? prev.penaltyScore2) : undefined,
         regScore1, regScore2, regulationScore1, regulationScore2,
       }
 

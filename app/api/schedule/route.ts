@@ -86,6 +86,9 @@ export async function GET() {
         clock: e.clock,
         suspended: e.suspended,
         goals: e.goals,
+        isPenalties: e.isPenalties,
+        penaltyScore1: e.penaltyScore1,
+        penaltyScore2: e.penaltyScore2,
       })),
       upcoming: upcoming.slice(0, 20).map(e => ({
         ...e,

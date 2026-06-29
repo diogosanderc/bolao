@@ -18,6 +18,9 @@ type MatchInfo = {
   advancingTeamId?: string
   status: 'played' | 'live' | 'upcoming'
   clock: string | null
+  isPenalties?: boolean
+  penaltyScore1?: number
+  penaltyScore2?: number
 }
 
 function toBRTShort(iso: string): string | null {
@@ -64,6 +67,8 @@ function buildMatchInfo(
     clock = live.status === 'halftime' || live.status === 'et_halftime' ? 'Intervalo' : null
   }
 
+  const isPenalties = live?.status === 'penalties'
+
   return {
     matchId: m.id,
     matchNumber: m.matchNumber,
@@ -77,6 +82,9 @@ function buildMatchInfo(
     advancingTeamId,
     status,
     clock,
+    isPenalties,
+    penaltyScore1: isPenalties ? (live?.penaltyScore1 ?? 0) : undefined,
+    penaltyScore2: isPenalties ? (live?.penaltyScore2 ?? 0) : undefined,
   }
 }
 

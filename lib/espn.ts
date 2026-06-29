@@ -89,6 +89,9 @@ export type ESPNEvent = {
   liveScore2?: number
   clock?: string
   goals?: GoalEvent[]
+  isPenalties?: boolean
+  penaltyScore1?: number
+  penaltyScore2?: number
 }
 
 // ESPN sometimes encodes a brace (2+ goals by same player) as a single detail
@@ -122,7 +125,7 @@ function toBRT(isoDate: string): string {
   }
 }
 
-type LiveInfo = { score1: number; score2: number; clock: string; goals: GoalEvent[]; suspended: boolean }
+type LiveInfo = { score1: number; score2: number; clock: string; goals: GoalEvent[]; suspended: boolean; penaltyScore1?: number; penaltyScore2?: number; isPenalties?: boolean }
 
 function isSuspendedStatus(typeName: string, desc: string): boolean {
   const d = desc.toLowerCase()
@@ -200,6 +203,9 @@ function parseEvents(rawEvents: any[], liveMap: Map<string, LiveInfo>, koIndex: 
       liveScore2: live ? (flipped ? live.score1 : live.score2) : undefined,
       clock: live?.clock,
       goals: (live?.goals?.length ? live.goals : goals.length > 0 ? goals : undefined),
+      isPenalties: live?.isPenalties,
+      penaltyScore1: live ? (flipped ? live.penaltyScore2 : live.penaltyScore1) : undefined,
+      penaltyScore2: live ? (flipped ? live.penaltyScore1 : live.penaltyScore2) : undefined,
     })
   }
   return result
@@ -221,6 +227,8 @@ async function fetchLiveMap(koIndex: Map<string, Canonical>): Promise<Map<string
       const typeName: string = status?.type?.name ?? ''
       const typeDesc: string = status?.type?.description ?? status?.type?.shortDetail ?? ''
       const suspended = isSuspendedStatus(typeName, typeDesc)
+      const isPenalties = typeName === 'STATUS_SHOOTOUT' || typeName === 'STATUS_PENALTY' ||
+        typeName === 'STATUS_PENALTY_KICK' || typeName === 'STATUS_PENALTY_SHOOTOUT'
       const isLive = !status?.type?.completed && (
         suspended ||
         status?.type?.state === 'in' ||
@@ -228,7 +236,10 @@ async function fetchLiveMap(koIndex: Map<string, Canonical>): Promise<Map<string
         typeName === 'STATUS_HALFTIME' ||
         typeName === 'STATUS_SECOND_HALF' ||
         typeName === 'STATUS_EXTRA_TIME' ||
-        typeName === 'STATUS_PENALTY'
+        typeName === 'STATUS_OVERTIME' ||
+        typeName === 'STATUS_HALFTIME_ET' ||
+        typeName === 'STATUS_HALFTIME_EXTRATIME' ||
+        isPenalties
       )
       if (!isLive) continue
       const competitors: any[] = competition?.competitors ?? []
@@ -264,9 +275,26 @@ async function fetchLiveMap(koIndex: Map<string, Canonical>): Promise<Map<string
 
       const clockRaw = suspended
         ? (typeDesc || 'Paralisado')
-        : typeName === 'STATUS_HALFTIME'
+        : typeName === 'STATUS_HALFTIME' || typeName === 'STATUS_HALFTIME_ET' || typeName === 'STATUS_HALFTIME_EXTRATIME'
         ? 'Intervalo'
         : (status?.displayClock ?? '')
+
+      // Count penalty goals per team from details during shootout
+      let penScore1: number | undefined
+      let penScore2: number | undefined
+      if (isPenalties) {
+        const c1TeamId = String(c1.team?.id ?? '')
+        const c2TeamId = String(c2.team?.id ?? '')
+        let ps1 = 0, ps2 = 0
+        for (const detail of competition?.details ?? []) {
+          if (detail.type?.text !== 'Penalty - Scored') continue
+          const detailTeamId = String(detail.team?.id ?? '')
+          if (detailTeamId === c1TeamId) ps1++
+          else if (detailTeamId === c2TeamId) ps2++
+        }
+        penScore1 = flippedLive ? ps2 : ps1
+        penScore2 = flippedLive ? ps1 : ps2
+      }
 
       liveMap.set(match.matchId, {
         score1: rawLiveS1,
@@ -274,6 +302,9 @@ async function fetchLiveMap(koIndex: Map<string, Canonical>): Promise<Map<string
         clock: clockRaw,
         goals: liveGoals,
         suspended,
+        isPenalties,
+        penaltyScore1: penScore1,
+        penaltyScore2: penScore2,
       })
     }
     return liveMap

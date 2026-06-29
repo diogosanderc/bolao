@@ -43,6 +43,9 @@ type ScheduleMatch = {
   liveScore2?: number
   clock?: string
   goals?: GoalEvent[]
+  isPenalties?: boolean
+  penaltyScore1?: number
+  penaltyScore2?: number
 }
 
 export default function LeaderboardPage() {
@@ -854,7 +857,14 @@ export default function LeaderboardPage() {
               </div>
               <div className="flex items-center gap-2.5 text-sm text-gray-200 dark:text-white">
                 <span className="flex items-center gap-1.5 min-w-0"><Flag teamId={m.team1.id} size={22} /><span className="truncate">{m.team1.name}</span></span>
-                <Scoreboard score1={m.liveScore1} score2={m.liveScore2} pending={m.liveScore1 === undefined} size="md" live={!m.suspended} />
+                <div className="flex flex-col items-center shrink-0">
+                  <Scoreboard score1={m.liveScore1} score2={m.liveScore2} pending={m.liveScore1 === undefined} size="md" live={!m.suspended} />
+                  {m.isPenalties && m.penaltyScore1 !== undefined && m.penaltyScore2 !== undefined && (
+                    <span className="text-[10px] font-semibold text-red-700 dark:text-red-400 tabular-nums mt-0.5">
+                      Pên: {m.penaltyScore1} – {m.penaltyScore2}
+                    </span>
+                  )}
+                </div>
                 <span className="flex items-center gap-1.5 min-w-0"><Flag teamId={m.team2.id} size={22} /><span className="truncate">{m.team2.name}</span></span>
               </div>
               {m.goals && m.goals.length > 0 && (() => {
