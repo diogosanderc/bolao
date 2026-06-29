@@ -12,6 +12,7 @@ import { broadcastersForMatchId } from '@/lib/broadcasters'
 import { matchById } from '@/lib/copa2026'
 import { chipCode } from '@/lib/names'
 import { positionMessage } from '@/lib/positionMessage'
+import { Onboarding } from '@/components/Onboarding'
 
 type RecentMatch = {
   matchId: string
@@ -75,6 +76,8 @@ export default function LeaderboardPage() {
   const [rowsIn, setRowsIn] = useState(false)
   const rowsStartedRef = useRef(false)
   const [query, setQuery] = useState('')
+  const [zoneFilter, setZoneFilter] = useState<'all' | 'top7' | 'red'>('all')
+  const [showScrollTop, setShowScrollTop] = useState(false)
   const [ujOpen, setUjOpen] = useState<string | null>(null)
   const [myId, setMyId] = useState<string | null>(null)
   const [podiumCelebrate, setPodiumCelebrate] = useState<Set<string>>(new Set())
@@ -403,6 +406,13 @@ export default function LeaderboardPage() {
     const t = setInterval(() => setNow(Date.now()), 1000)
     return () => clearInterval(t)
   }, [nextStart])
+
+  // Floating "back to top" button visibility
+  useEffect(() => {
+    const onScroll = () => setShowScrollTop(window.scrollY > 700)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   // Track when any overlay (modal) is open, so pull-to-refresh stays disabled
   const overlayOpenRef = useRef(false)
@@ -1137,17 +1147,30 @@ export default function LeaderboardPage() {
       )}
 
       {!loading && data.length > 10 && !leaderboardHasLive && (
-        <div className="relative">
-          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
-          <input
-            value={query}
-            onChange={e => setQuery(e.target.value)}
-            placeholder="Buscar participante…"
-            className="w-full bg-gray-900 border border-gray-800 focus:border-gray-600 rounded-xl pl-9 pr-9 py-2.5 text-sm text-gray-200 placeholder-gray-600 outline-none transition-colors"
-          />
-          {query && (
-            <button onClick={() => setQuery('')} className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-full text-gray-500 hover:text-gray-200 hover:bg-gray-800" aria-label="Limpar">✕</button>
-          )}
+        <div className="space-y-2">
+          <div className="relative">
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+            <input
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              placeholder="Buscar participante…"
+              className="w-full bg-gray-900 border border-gray-800 focus:border-gray-600 rounded-xl pl-9 pr-9 py-2.5 text-sm text-gray-200 placeholder-gray-600 outline-none transition-colors"
+            />
+            {query && (
+              <button onClick={() => setQuery('')} className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-full text-gray-500 hover:text-gray-200 hover:bg-gray-800" aria-label="Limpar">✕</button>
+            )}
+          </div>
+          <div className="flex gap-1.5">
+            {([['all', 'Todos'], ['top7', '🟢 Top 7'], ['red', '🔴 Pagões']] as const).map(([val, label]) => (
+              <button
+                key={val}
+                onClick={() => setZoneFilter(val)}
+                className={`text-xs px-3 py-1 rounded-full border font-medium transition-colors ${zoneFilter === val ? 'border-[#00bf63] text-[#00bf63] bg-[#00bf63]/10' : 'border-gray-700 text-gray-500 hover:text-gray-300'}`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
       )}
 
@@ -1171,6 +1194,8 @@ export default function LeaderboardPage() {
                 const flash = flashMap[entry.participant.id]
                 const isMe = myId === entry.participant.id
                 if (query && !entry.participant.name.toLowerCase().includes(query.toLowerCase())) return null
+                if (zoneFilter === 'top7' && !(rank >= 1 && rank <= 7)) return null
+                if (zoneFilter === 'red' && !isRelated(entry.totalPoints)) return null
                 return (
                 <tr
                   key={entry.participant.id}
@@ -1308,6 +1333,43 @@ export default function LeaderboardPage() {
           onClose={() => setSelectedParticipant(null)}
         />
       )}
+
+      {/* "Sua posição" mini-bar (mobile, when identified) */}
+      {myId && !loading && !selectedParticipant && (() => {
+        const meIdx = data.findIndex(e => e.participant.id === myId)
+        if (meIdx < 0) return null
+        const me = data[meIdx] as any
+        const rank = ranks[meIdx]
+        const gapUp = meIdx > 0 ? data[meIdx - 1].totalPoints - me.totalPoints : 0
+        const mm = me.lastKoRulePts ?? 0
+        return (
+          <button
+            onClick={() => openParticipant(me.participant.id, me.participant.name)}
+            className="sm:hidden fixed inset-x-3 z-30 bottom-[68px] flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gray-900/95 backdrop-blur-md border border-[#00bf63]/40 shadow-lg shadow-black/40"
+            style={{ marginBottom: 'env(safe-area-inset-bottom)' }}
+          >
+            <span className="text-[#00bf63] shrink-0">★</span>
+            <span className="text-xs font-bold text-gray-200 shrink-0">{rank}º</span>
+            <span className="text-xs text-gray-400 truncate flex-1 text-left">{me.participant.name}</span>
+            {mm > 0 && <span className="text-[10px] font-bold text-blue-400 shrink-0">MM +{mm}</span>}
+            {rank > 1 && gapUp > 0 && <span className="text-[10px] text-gray-500 shrink-0">−{gapUp} p/ {rank - 1}º</span>}
+            <span className="font-score font-bold text-yellow-400 text-sm shrink-0">{me.totalPoints}</span>
+          </button>
+        )
+      })()}
+
+      {/* Scroll to top */}
+      {showScrollTop && (
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          aria-label="Voltar ao topo"
+          className="fixed right-4 bottom-[120px] sm:bottom-6 z-30 w-11 h-11 flex items-center justify-center rounded-full bg-gray-800/90 backdrop-blur border border-gray-700 text-gray-200 shadow-lg active:scale-95 transition-transform"
+        >
+          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19V5M5 12l7-7 7 7" /></svg>
+        </button>
+      )}
+
+      <Onboarding />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-8">
         {[
