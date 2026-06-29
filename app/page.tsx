@@ -944,36 +944,6 @@ export default function LeaderboardPage() {
         </div>
       )}
 
-      {/* Confronto do dia em destaque (mata-mata hoje) */}
-      {liveMatches.length === 0 && (() => {
-        const brtDay = (d: Date) => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(d)
-        const today = brtDay(new Date())
-        const ko = upcoming.find(m => {
-          const ph = matchById[m.matchId]?.phase
-          return ph && ph !== 'group' && m.date && brtDay(new Date(m.date)) === today
-        })
-        if (!ko) return null
-        const phaseLabel: Record<string, string> = { round_of_32: '16-avos', round_of_16: 'Oitavas', quarterfinal: 'Quartas', semifinal: 'Semifinal', third_place: '3º lugar', final: 'Final' }
-        const ph = matchById[ko.matchId]?.phase ?? ''
-        return (
-          <button
-            onClick={() => openMatchPredictions(ko.matchId, `${ko.team1.name} vs ${ko.team2.name}`)}
-            className="w-full text-left rounded-lg px-4 py-3 bg-gradient-to-r from-amber-500/15 to-[#00bf63]/10 border border-amber-500/30"
-          >
-            <div className="flex items-center gap-1.5 mb-1">
-              <span className="text-xs">🔥</span>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-500">Confronto de hoje · {phaseLabel[ph] ?? 'Mata-mata'}</span>
-            </div>
-            <div className="flex items-center gap-2.5 text-sm text-gray-200">
-              <span className="flex items-center gap-1.5 min-w-0"><Flag teamId={ko.team1.id} size={20} /><span className="truncate font-semibold">{ko.team1.name}</span></span>
-              <span className="text-gray-500 font-score">×</span>
-              <span className="flex items-center gap-1.5 min-w-0"><Flag teamId={ko.team2.id} size={20} /><span className="truncate font-semibold">{ko.team2.name}</span></span>
-              <span className="ml-auto text-[10px] text-gray-500 shrink-0">{ko.dateBRT} · ver palpites →</span>
-            </div>
-          </button>
-        )
-      })()}
-
       {liveMatches.length === 0 && upcoming.length > 0 && (() => {
         // Show today's + tomorrow's matches (BRT); fall back to the next few if none
         const brtDay = (d: Date) => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo', year: 'numeric', month: '2-digit', day: '2-digit' }).format(d)
