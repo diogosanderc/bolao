@@ -106,36 +106,25 @@ export function computeLeaderboard(
     final: new Set(),
   }
 
-  // Teams in round_of_32 are top 2 per group + 8 best 3rd place
-  // We derive from the group results which teams advanced
-  for (const match of ALL_MATCHES) {
-    const res = resultMap[match.id]
-    if (!res) continue
-    if (match.phase !== 'group') {
-      // The teams that played in this phase are qualified for this phase
-      if (match.team1Id !== 'TBD') qualifiedByPhase[match.phase].add(match.team1Id)
-      if (match.team2Id !== 'TBD') qualifiedByPhase[match.phase].add(match.team2Id)
-      // Winner advances to next phase (determined by admin result/advancing)
-      const winner =
-        res.score1 > res.score2
-          ? match.team1Id
-          : res.score2 > res.score1
-          ? match.team2Id
-          : res.advancingTeamId
-      if (winner) {
-        const nextPhase = nextPhaseOf(match.phase)
-        if (nextPhase) qualifiedByPhase[nextPhase].add(winner)
-      }
-    }
-  }
-
   // Group standings from group results (for group order bonus + round_of_32 qualified)
   const { standings: groupStandings, thirdPlaceStats } = computeGroupStandingsWithStats(results)
   const allGroupsComplete = Object.keys(groupStandings).length === GROUPS.length
   const completedGroupIds = new Set(Object.keys(groupStandings))
 
-  // Resolve actual teams for all knockout slots (needed for advancement scoring)
+  // Resolve actual teams for all knockout slots (needed for advancement scoring).
+  // Internal knockout fixtures are TBD, so we must resolve them from the bracket.
   const resolvedKnockoutTeams = computeBracketFromResults(results)
+
+  // A team "reaches" a knockout phase by appearing in that phase's resolved match
+  // (e.g. winning a round_of_32 game puts you in the round_of_16). round_of_32 is
+  // handled separately from group standings below.
+  for (const match of ALL_MATCHES) {
+    if (match.phase === 'group' || match.phase === 'round_of_32' || match.phase === 'third_place') continue
+    const rk = resolvedKnockoutTeams[match.id]
+    if (!rk) continue
+    if (rk.team1Id && rk.team1Id !== 'TBD') qualifiedByPhase[match.phase].add(rk.team1Id)
+    if (rk.team2Id && rk.team2Id !== 'TBD') qualifiedByPhase[match.phase].add(rk.team2Id)
+  }
 
   // Top 2 from each completed group always qualify for round_of_32
   for (const standing of Object.values(groupStandings)) {
@@ -222,11 +211,14 @@ export function computeLeaderboard(
         })
         if (finalResult) {
           const finalMatch = matchById[finalResult.matchId]
+          const fr = resolvedKnockoutTeams[finalResult.matchId]
+          const ft1 = finalMatch && finalMatch.team1Id !== 'TBD' ? finalMatch.team1Id : fr?.team1Id
+          const ft2 = finalMatch && finalMatch.team2Id !== 'TBD' ? finalMatch.team2Id : fr?.team2Id
           const champion =
             finalResult.score1 > finalResult.score2
-              ? finalMatch?.team1Id
+              ? ft1
               : finalResult.score2 > finalResult.score1
-              ? finalMatch?.team2Id
+              ? ft2
               : finalResult.advancingTeamId
           if (champion) {
             // Use explicit champion pick if available, else derive from final match prediction
