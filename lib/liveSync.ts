@@ -31,12 +31,15 @@ type ESPNProcessed = {
   newStatus: MatchState['status']
   score1: number
   score2: number
+  team1Id: string
+  team2Id: string
   t1: string
   t2: string
   clock: string
   varKeys: string[]
   redCardKeys: string[]
   espnStatusName: string
+  winnerTeamId?: string
 }
 
 let lastRunAt = 0
@@ -121,6 +124,10 @@ export async function runLiveSync(): Promise<SyncResult> {
     const newStatus: MatchState['status'] = completed ? 'completed' : penalties ? 'penalties' : etHalftime ? 'et_halftime' : extratime ? 'extratime' : halftime ? 'halftime' : inProgress ? 'in' : suspended ? 'suspended' : 'pre'
     const clock: string = halftime || etHalftime ? 'Intervalo' : suspended ? (status?.type?.shortDetail ?? status?.type?.description ?? 'Paralisado') : (status?.displayClock ?? '')
 
+    // ESPN sets competitor.winner = true for the team that advances (handles penalties)
+    const espnWinnerId = c1.winner === true ? id1 : c2.winner === true ? id2 : undefined
+    const winnerTeamId = espnWinnerId
+
     const varKeys: string[] = []
     const redCardKeys: string[] = []
     for (const detail of competition?.details ?? []) {
@@ -148,9 +155,11 @@ export async function runLiveSync(): Promise<SyncResult> {
 
     espnProcessed.push({
       matchId: match.id, newStatus, score1, score2,
+      team1Id: resolvedM?.team1Id ?? match.team1Id,
+      team2Id: resolvedM?.team2Id ?? match.team2Id,
       t1: teamById[resolvedM?.team1Id ?? match.team1Id]?.name ?? (resolvedM?.team1Id ?? match.team1Id),
       t2: teamById[resolvedM?.team2Id ?? match.team2Id]?.name ?? (resolvedM?.team2Id ?? match.team2Id),
-      clock, varKeys, redCardKeys, espnStatusName: typeName,
+      clock, varKeys, redCardKeys, espnStatusName: typeName, winnerTeamId,
     })
   }
 
@@ -161,11 +170,11 @@ export async function runLiveSync(): Promise<SyncResult> {
     const resultMap = Object.fromEntries(db.results.map(r => [r.matchId, r]))
     const persistedStates: Record<string, MatchState> = (db as any).liveMatchStates ?? {}
     const newPersistedStates: Record<string, MatchState> = { ...persistedStates }
-    const dbResultUpdates: { matchId: string; score1: number; score2: number }[] = []
+    const dbResultUpdates: { matchId: string; score1: number; score2: number; advancingTeamId?: string }[] = []
 
     pushQueue.length = 0
 
-    for (const { matchId, newStatus, score1, score2, t1, t2, clock, varKeys, redCardKeys, espnStatusName } of espnProcessed) {
+    for (const { matchId, newStatus, score1, score2, team1Id, team2Id, t1, t2, clock, varKeys, redCardKeys, espnStatusName, winnerTeamId } of espnProcessed) {
       const prev = persistedStates[matchId]
 
       if (prev?.status === 'completed') continue
@@ -181,6 +190,10 @@ export async function runLiveSync(): Promise<SyncResult> {
 
       if (newStatus === 'completed' && dbResult && dbResult.score1 === score1 && dbResult.score2 === score2) {
         newPersistedStates[matchId] = { ...prev, status: 'completed', score1, score2, sentStarted: true, sentFinal: true, sentGoals: score1 + score2 }
+        // Patch advancingTeamId if ESPN now knows who won (e.g. after a penalty)
+        if (score1 === score2 && winnerTeamId && !dbResult.advancingTeamId) {
+          dbResultUpdates.push({ matchId, score1, score2, advancingTeamId: winnerTeamId })
+        }
         continue
       }
 
@@ -188,8 +201,11 @@ export async function runLiveSync(): Promise<SyncResult> {
         if (newStatus === 'completed') {
           // Match already finished on first encounter — save result silently
           newPersistedStates[matchId] = { status: 'completed', score1, score2, sentStarted: true, sentFinal: true, sentGoals: score1 + score2 }
+          const coldAdvancing = score1 === score2 && winnerTeamId ? winnerTeamId : undefined
           if (!dbResult || dbResult.score1 !== score1 || dbResult.score2 !== score2) {
-            dbResultUpdates.push({ matchId, score1, score2 })
+            dbResultUpdates.push({ matchId, score1, score2, advancingTeamId: coldAdvancing ?? dbResult?.advancingTeamId })
+          } else if (coldAdvancing && !dbResult.advancingTeamId) {
+            dbResultUpdates.push({ matchId, score1, score2, advancingTeamId: coldAdvancing })
           }
         } else if (newStatus === 'in' || newStatus === 'halftime') {
           // Match already in progress on first encounter — notify immediately.
@@ -351,12 +367,15 @@ export async function runLiveSync(): Promise<SyncResult> {
           newState.sentFinal = true
         }
         // If the match went to penalties, save the regulation/ET draw score —
-        // not the shootout-inflated score — since points are scored on the draw
-        // and advancingTeamId (set manually) carries who passes the round.
+        // not the shootout-inflated score — since points are scored on the draw.
+        // advancingTeamId carries who passes the round, taken from ESPN's
+        // competitor.winner flag (which reflects the shootout outcome).
         const finalScore1 = sentPenalties && regScore1 !== undefined ? regScore1 : score1
         const finalScore2 = sentPenalties && regScore2 !== undefined ? regScore2 : score2
-        if (!dbResult || dbResult.score1 !== finalScore1 || dbResult.score2 !== finalScore2) {
-          dbResultUpdates.push({ matchId, score1: finalScore1, score2: finalScore2 })
+        const isDraw = finalScore1 === finalScore2
+        const advancingTeamId = isDraw && winnerTeamId ? winnerTeamId : undefined
+        if (!dbResult || dbResult.score1 !== finalScore1 || dbResult.score2 !== finalScore2 || (advancingTeamId && dbResult.advancingTeamId !== advancingTeamId)) {
+          dbResultUpdates.push({ matchId, score1: finalScore1, score2: finalScore2, advancingTeamId: advancingTeamId ?? dbResult?.advancingTeamId })
         }
       }
 
