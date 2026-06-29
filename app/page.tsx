@@ -78,6 +78,7 @@ export default function LeaderboardPage() {
   const [query, setQuery] = useState('')
   const [zoneFilter, setZoneFilter] = useState<'all' | 'top7' | 'red'>('all')
   const [showScrollTop, setShowScrollTop] = useState(false)
+  const [roundDismissed, setRoundDismissed] = useState<string | null>(null)
   const [ujOpen, setUjOpen] = useState<string | null>(null)
   const [myId, setMyId] = useState<string | null>(null)
   const [podiumCelebrate, setPodiumCelebrate] = useState<Set<string>>(new Set())
@@ -413,6 +414,14 @@ export default function LeaderboardPage() {
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
+
+  useEffect(() => {
+    try { setRoundDismissed(localStorage.getItem('bolao_round_dismissed')) } catch {}
+  }, [])
+  function dismissRound(matchId: string) {
+    try { localStorage.setItem('bolao_round_dismissed', matchId) } catch {}
+    setRoundDismissed(matchId)
+  }
 
   // Track when any overlay (modal) is open, so pull-to-refresh stays disabled
   const overlayOpenRef = useRef(false)
@@ -1175,6 +1184,40 @@ export default function LeaderboardPage() {
           celebrate={podiumCelebrate}
         />
       )}
+
+      {/* Resumo da rodada */}
+      {!loading && !leaderboardHasLive && lastMatch && data.length > 0 && roundDismissed !== lastMatch.matchId && (() => {
+        const top = [...data].filter(e => e.lastMatchPoints > 0).sort((a, b) => b.lastMatchPoints - a.lastMatchPoints)[0]
+        const climber = [...data].map(e => e as any).filter(e => (e.positionChange ?? 0) > 0).sort((a, b) => b.positionChange - a.positionChange)[0]
+        const faller = [...data].map(e => e as any).filter(e => (e.positionChange ?? 0) < 0).sort((a, b) => a.positionChange - b.positionChange)[0]
+        if (!top && !climber) return null
+        return (
+          <div className="rounded-xl border border-gray-800 bg-gradient-to-br from-gray-900 to-gray-950 px-4 py-3">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-gray-400">📋 Resumo da rodada</span>
+              <button onClick={() => dismissRound(lastMatch.matchId)} className="text-gray-600 hover:text-gray-300 text-sm" aria-label="Dispensar">✕</button>
+            </div>
+            <p className="text-[11px] text-gray-500 mb-2">{lastMatch.team1.name} {lastMatch.score1}×{lastMatch.score2} {lastMatch.team2.name}</p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+              {top && (
+                <div className="flex items-center gap-2 bg-gray-900/60 rounded-lg px-2.5 py-1.5">
+                  <span>⚡</span><div className="min-w-0"><p className="text-gray-500 text-[10px]">Mais pontuou</p><p className="text-gray-200 font-semibold truncate">{top.participant.name} <span className="text-green-400">+{top.lastMatchPoints}</span></p></div>
+                </div>
+              )}
+              {climber && (
+                <div className="flex items-center gap-2 bg-gray-900/60 rounded-lg px-2.5 py-1.5">
+                  <span>🔼</span><div className="min-w-0"><p className="text-gray-500 text-[10px]">Maior subida</p><p className="text-gray-200 font-semibold truncate">{climber.participant.name} <span className="text-blue-400">▲{climber.positionChange}</span></p></div>
+                </div>
+              )}
+              {faller && (
+                <div className="flex items-center gap-2 bg-gray-900/60 rounded-lg px-2.5 py-1.5">
+                  <span>🔽</span><div className="min-w-0"><p className="text-gray-500 text-[10px]">Maior queda</p><p className="text-gray-200 font-semibold truncate">{faller.participant.name} <span className="text-red-400">▼{Math.abs(faller.positionChange)}</span></p></div>
+                </div>
+              )}
+            </div>
+          </div>
+        )
+      })()}
 
       {!loading && data.length > 10 && !leaderboardHasLive && (
         <div className="space-y-2">
