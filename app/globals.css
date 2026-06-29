@@ -44,19 +44,27 @@ html {
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 
-/* Sporty "scoreboard" numerals — condensed face + tabular figures */
+/* Soccer Scoreboard font */
+@font-face {
+  font-family: 'SoccerScoreboard';
+  src: url('/fonts/soccer-scoreboard.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Sporty "scoreboard" numerals */
 .font-score {
-  font-family: var(--font-oswald), system-ui, sans-serif;
+  font-family: 'SoccerScoreboard', var(--font-oswald), system-ui, sans-serif;
   font-variant-numeric: tabular-nums;
-  letter-spacing: 0.01em;
+  letter-spacing: 0.02em;
 }
 
 /* Stadium scoreboard digit panel */
 .scoreboard-digit {
-  font-family: var(--font-oswald), system-ui, sans-serif;
+  font-family: 'SoccerScoreboard', var(--font-oswald), system-ui, sans-serif;
   font-variant-numeric: tabular-nums;
   line-height: 1;
-  font-weight: 700;
 }
 
 /* Skeleton shimmer */
