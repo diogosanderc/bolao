@@ -44,10 +44,10 @@ html {
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
 
-/* Soccer Scoreboard font */
+/* Soccer Jersey font */
 @font-face {
-  font-family: 'SoccerScoreboard';
-  src: url('/fonts/soccer-scoreboard.otf') format('opentype');
+  font-family: 'SoccerJersey';
+  src: url('/fonts/soccer-jersey.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -55,14 +55,14 @@ html {
 
 /* Sporty "scoreboard" numerals */
 .font-score {
-  font-family: 'SoccerScoreboard', var(--font-oswald), system-ui, sans-serif;
+  font-family: 'SoccerJersey', var(--font-oswald), system-ui, sans-serif;
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.02em;
 }
 
 /* Stadium scoreboard digit panel */
 .scoreboard-digit {
-  font-family: 'SoccerScoreboard', var(--font-oswald), system-ui, sans-serif;
+  font-family: 'SoccerJersey', var(--font-oswald), system-ui, sans-serif;
   font-variant-numeric: tabular-nums;
   line-height: 1;
 }
