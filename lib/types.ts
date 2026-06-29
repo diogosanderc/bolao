@@ -115,7 +115,7 @@ export interface Database {
   results: MatchResult[]
   matchDates: Record<string, { date: string; dateBRT: string; venue: string }>
   pushSubscriptions?: PushSubscriptionRecord[]
-  liveMatchStates?: Record<string, { status: 'pre' | 'in' | 'halftime' | 'completed'; score1: number; score2: number }>
+  liveMatchStates?: Record<string, { status: 'pre' | 'in' | 'halftime' | 'suspended' | 'extratime' | 'et_halftime' | 'penalties' | 'completed'; score1: number; score2: number }>
   r32TeamPicks?: R32TeamPick[]
   knockoutPhasePicks?: KnockoutPhasePick[]
   lastRanks?: Record<string, number> // last notified rank per participant (for position push)

@@ -42,7 +42,8 @@ function buildMatchInfo(
 ): MatchInfo {
   const official = officialMap.get(m.id)
   const live = liveStates[m.id]
-  const isLive = !official && live && (live.status === 'in' || live.status === 'halftime')
+  const inProgressStatuses = ['in', 'halftime', 'extratime', 'et_halftime', 'penalties']
+  const isLive = !official && live && inProgressStatuses.includes(live.status)
   if (isLive) hasLiveRef.value = true
 
   let status: MatchInfo['status'] = 'upcoming'
@@ -56,11 +57,11 @@ function buildMatchInfo(
     score1 = official.score1
     score2 = official.score2
     advancingTeamId = official.advancingTeamId
-  } else if (live && (live.status === 'in' || live.status === 'halftime' || live.status === 'completed')) {
+  } else if (live && (inProgressStatuses.includes(live.status) || live.status === 'completed')) {
     status = live.status === 'completed' ? 'played' : 'live'
     score1 = live.score1
     score2 = live.score2
-    clock = live.status === 'halftime' ? 'Intervalo' : null
+    clock = live.status === 'halftime' || live.status === 'et_halftime' ? 'Intervalo' : null
   }
 
   return {
@@ -88,10 +89,11 @@ export async function GET() {
     const hasLiveRef = { value: false }
 
     // Merge official results with live scores for group table computation
+    const inProgressStatuses = ['in', 'halftime', 'extratime', 'et_halftime', 'penalties']
     const merged: { matchId: string; score1: number; score2: number }[] = [...db.results]
     for (const [matchId, st] of Object.entries(liveStates)) {
       if (officialMap.has(matchId)) continue
-      if (st && (st.status === 'in' || st.status === 'halftime' || st.status === 'completed')) {
+      if (st && (inProgressStatuses.includes(st.status) || st.status === 'completed')) {
         merged.push({ matchId, score1: st.score1, score2: st.score2 })
       }
     }
