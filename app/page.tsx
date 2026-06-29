@@ -6,7 +6,6 @@ import { Flag } from '@/components/Flag'
 import { ParticipantModal } from '@/components/ParticipantModal'
 import { Scoreboard } from '@/components/Scoreboard'
 import { AnimatedNumber } from '@/components/AnimatedNumber'
-import { Podium } from '@/components/Podium'
 import { BroadcastBadges } from '@/components/BroadcastBadges'
 import { broadcastersForMatchId } from '@/lib/broadcasters'
 import { matchById } from '@/lib/copa2026'
@@ -81,7 +80,6 @@ export default function LeaderboardPage() {
   const [roundDismissed, setRoundDismissed] = useState<string | null>(null)
   const [ujOpen, setUjOpen] = useState<string | null>(null)
   const [myId, setMyId] = useState<string | null>(null)
-  const [podiumCelebrate, setPodiumCelebrate] = useState<Set<string>>(new Set())
   const rowRefs = useRef<Map<string, HTMLTableRowElement>>(new Map())
   const prevRects = useRef<Map<string, DOMRect>>(new Map())
   const prevMyLiveRef = useRef(0)
@@ -316,23 +314,14 @@ export default function LeaderboardPage() {
       newRanks.set(entry.participant.id, data.filter(e => e.totalPoints > entry.totalPoints).length + 1)
     })
     let anyChange = false
-    const enteredPodium: string[] = []
     if (prevRanksRef.current.size > 0) {
       for (const [id, newRank] of newRanks) {
         const prev = prevRanksRef.current.get(id)
-        if (prev !== undefined && prev !== newRank) {
-          anyChange = true
-          if (newRank <= 3 && prev > 3) enteredPodium.push(id)
-        }
+        if (prev !== undefined && prev !== newRank) anyChange = true
       }
     }
     prevRanksRef.current = newRanks
     if (anyChange) haptic(15)
-    if (enteredPodium.length > 0) {
-      setPodiumCelebrate(new Set(enteredPodium))
-      const t = setTimeout(() => setPodiumCelebrate(new Set()), 2600)
-      return () => clearTimeout(t)
-    }
   }, [data])
 
   // Buzz + highlight when a live goal changes MY points
@@ -1173,17 +1162,6 @@ export default function LeaderboardPage() {
         </div>
       )}
 
-      {!loading && data.length >= 3 && !leaderboardHasLive && (
-        <Podium
-          tiers={uniquePoints.slice(0, 3).map((pts, i) => ({
-            rank: i + 1,
-            points: pts,
-            members: data.filter(e => e.totalPoints === pts).map(e => ({ id: e.participant.id, name: e.participant.name })),
-          }))}
-          onSelect={openParticipant}
-          celebrate={podiumCelebrate}
-        />
-      )}
 
       {!loading && data.length > 10 && !leaderboardHasLive && (
         <div className="space-y-2">
