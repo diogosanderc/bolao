@@ -4,6 +4,7 @@ import { useEffect, useState, useMemo } from 'react'
 import Link from 'next/link'
 import { Flag } from '@/components/Flag'
 import { ALL_MATCHES, teamById, GROUPS } from '@/lib/copa2026'
+import { computeBracketFromResults } from '@/lib/bracket'
 import { PHASE_LABELS, MatchPrediction, Phase } from '@/lib/types'
 
 type ParticipantInfo = { id: string; name: string }
@@ -23,19 +24,32 @@ export default function TodosPalpitesPage() {
   const [search, setSearch] = useState('')
   const [expandedMatches, setExpandedMatches] = useState<Set<string>>(new Set())
   const [playedMatchIds, setPlayedMatchIds] = useState<Set<string>>(new Set())
+  const [results, setResults] = useState<any[]>([])
 
   useEffect(() => {
     Promise.all([
       fetch('/api/predictions/all').then(r => r.json()),
       fetch('/api/results').then(r => r.json()),
     ])
-      .then(([d, results]) => {
+      .then(([d, res]) => {
         setData(d)
-        setPlayedMatchIds(new Set(Array.isArray(results) ? results.map((r: any) => r.matchId) : []))
+        const arr = Array.isArray(res) ? res : []
+        setResults(arr)
+        setPlayedMatchIds(new Set(arr.map((r: any) => r.matchId)))
         setLoading(false)
       })
       .catch(() => setLoading(false))
   }, [])
+
+  // Resolve knockout fixtures (TBD) from the bracket so advancing teams show up
+  const resolvedKnockout = useMemo(() => computeBracketFromResults(results as any), [results])
+  function teamsOf(m: { id: string; team1Id: string; team2Id: string }): [string, string] {
+    const rk = resolvedKnockout[m.id]
+    return [
+      m.team1Id !== 'TBD' ? m.team1Id : (rk?.team1Id ?? 'TBD'),
+      m.team2Id !== 'TBD' ? m.team2Id : (rk?.team2Id ?? 'TBD'),
+    ]
+  }
 
   const participantById = useMemo(() => {
     if (!data) return {}
@@ -62,8 +76,9 @@ export default function TodosPalpitesPage() {
     return ALL_MATCHES.filter(m => {
       if (playedMatchIds.has(m.id)) return false
       if (!q) return true
-      const team1 = teamById[m.team1Id]
-      const team2 = teamById[m.team2Id]
+      const [t1, t2] = teamsOf(m)
+      const team1 = teamById[t1]
+      const team2 = teamById[t2]
       return (
         m.id.toUpperCase().includes(q) ||
         team1?.name.toUpperCase().includes(q) ||
@@ -71,7 +86,8 @@ export default function TodosPalpitesPage() {
         (m.groupId && `GRUPO ${m.groupId}`.includes(q))
       )
     })
-  }, [search, playedMatchIds])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search, playedMatchIds, resolvedKnockout])
 
   function toggleMatch(matchId: string) {
     setExpandedMatches(prev => {
@@ -93,8 +109,9 @@ export default function TodosPalpitesPage() {
   function shareMatchWhatsApp(matchId: string) {
     const match = ALL_MATCHES.find(m => m.id === matchId)
     if (!match) return
-    const team1 = teamById[match.team1Id]
-    const team2 = teamById[match.team2Id]
+    const [t1Id, t2Id] = teamsOf(match)
+    const team1 = teamById[t1Id]
+    const team2 = teamById[t2Id]
     const matchPreds = predsByMatch[matchId] ?? {}
     const scoreKeys = Object.keys(matchPreds).sort((a, b) => matchPreds[b].length - matchPreds[a].length)
     const total = scoreKeys.reduce((sum, k) => sum + matchPreds[k].length, 0)
@@ -179,8 +196,9 @@ export default function TodosPalpitesPage() {
                 <h4 className="text-xs font-semibold text-gray-600 uppercase tracking-wider pl-1">{groupLabel}</h4>
               )}
               {matches.map(match => {
-                const team1 = teamById[match.team1Id]
-                const team2 = teamById[match.team2Id]
+                const [t1Id, t2Id] = teamsOf(match)
+                const team1 = teamById[t1Id]
+                const team2 = teamById[t2Id]
                 const matchPreds = predsByMatch[match.id] ?? {}
                 const scoreKeys = Object.keys(matchPreds).sort((a, b) => {
                   return matchPreds[b].length - matchPreds[a].length
@@ -196,10 +214,10 @@ export default function TodosPalpitesPage() {
                     >
                       <div className="flex items-center gap-2 min-w-0">
                         <span className="text-xs text-gray-600 shrink-0">#{match.matchNumber}</span>
-                        <span className="font-semibold text-gray-200 text-sm">
-                          {team1 ? <><Flag teamId={match.team1Id} size={18} /> {team1.name}</> : match.team1Id}
-                          <span className="text-gray-500 mx-2">vs</span>
-                          {team2 ? <><Flag teamId={match.team2Id} size={18} /> {team2.name}</> : match.team2Id}
+                        <span className="font-semibold text-gray-200 text-sm inline-flex items-center gap-1.5 flex-wrap">
+                          {team1 ? <><Flag teamId={t1Id} size={18} /> {team1.name}</> : <span className="text-gray-500 italic">a definir</span>}
+                          <span className="text-gray-500 mx-1">vs</span>
+                          {team2 ? <><Flag teamId={t2Id} size={18} /> {team2.name}</> : <span className="text-gray-500 italic">a definir</span>}
                         </span>
                         {match.date && (
                           <span className="text-xs text-gray-600 hidden sm:inline shrink-0">{match.date}</span>

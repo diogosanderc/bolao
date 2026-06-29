@@ -1412,7 +1412,9 @@ export default function LeaderboardPage() {
 
       {/* Resumo da rodada — popup, uma vez por rodada */}
       {!loading && !leaderboardHasLive && lastMatch && data.length > 0 && roundDismissed !== lastMatch.matchId && !selectedParticipant && !matchModal && (() => {
-        const top = [...data].filter(e => e.lastMatchPoints > 0).sort((a, b) => b.lastMatchPoints - a.lastMatchPoints)[0]
+        // Round points = result of the last match + the mata-mata advancement it generated
+        const roundPts = (e: any) => (e.lastMatchPoints ?? 0) + (e.lastKoRulePts ?? 0)
+        const top = [...data].map(e => e as any).filter(e => roundPts(e) > 0).sort((a, b) => roundPts(b) - roundPts(a))[0]
         const climber = [...data].map(e => e as any).filter(e => (e.positionChange ?? 0) > 0).sort((a, b) => b.positionChange - a.positionChange)[0]
         const faller = [...data].map(e => e as any).filter(e => (e.positionChange ?? 0) < 0).sort((a, b) => a.positionChange - b.positionChange)[0]
         if (!top && !climber) return null
@@ -1431,8 +1433,12 @@ export default function LeaderboardPage() {
                 {top && (
                   <div className="flex items-center gap-3 bg-gray-900 border border-gray-800 rounded-xl px-3 py-2.5">
                     <span className="text-2xl">⚡</span>
-                    <div className="min-w-0 flex-1"><p className="text-[10px] uppercase tracking-wide text-gray-500">Mais pontuou</p><p className="text-sm text-gray-200 font-bold truncate">{top.participant.name}</p></div>
-                    <span className="text-green-400 font-score font-bold text-lg shrink-0">+{top.lastMatchPoints}</span>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[10px] uppercase tracking-wide text-gray-500">Mais pontuou</p>
+                      <p className="text-sm text-gray-200 font-bold truncate">{top.participant.name}</p>
+                      {top.lastKoRulePts > 0 && <p className="text-[10px] text-gray-500">{top.lastMatchPoints} resultado + {top.lastKoRulePts} mata-mata</p>}
+                    </div>
+                    <span className="text-green-400 font-score font-bold text-lg shrink-0">+{roundPts(top)}</span>
                   </div>
                 )}
                 {climber && (
