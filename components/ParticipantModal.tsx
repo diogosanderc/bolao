@@ -98,6 +98,7 @@ export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClos
   const [data, setData] = useState<ParticipantData | null>(null)
   const [loading, setLoading] = useState(true)
   const [tab, setTab] = useState<'played' | 'selecoes' | 'upcoming'>('played')
+  const [sharingCard, setSharingCard] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
   const sheetRef = useRef<HTMLDivElement>(null)
   const [dragY, setDragY] = useState(0)
@@ -161,6 +162,76 @@ export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClos
     setResetting(true)
     setDragY(typeof window !== 'undefined' ? window.innerHeight : 900)
     setTimeout(onClose, 230)
+  }
+
+  // Generate and share a clean image card with this participant's numbers
+  async function shareCard() {
+    if (!data || sharingCard) return
+    setSharingCard(true)
+    try {
+      const s = data.summary
+      const pct = s.matchesPlayed > 0 ? Math.round((s.correctResults / s.matchesPlayed) * 100) : 0
+      const DPR = 3, W = 460, H = 300
+      const canvas = document.createElement('canvas')
+      canvas.width = W * DPR; canvas.height = H * DPR
+      const ctx = canvas.getContext('2d')!
+      ctx.scale(DPR, DPR)
+      // Background
+      const bg = ctx.createLinearGradient(0, 0, W, H)
+      bg.addColorStop(0, '#0b1220'); bg.addColorStop(1, '#05070d')
+      ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H)
+      ctx.fillStyle = '#00bf63'; ctx.fillRect(0, 0, W, 5)
+      // Header
+      ctx.fillStyle = '#9ca3af'; ctx.font = '600 12px system-ui'; ctx.textAlign = 'left'
+      ctx.fillText('🏆 BOLÃO COPA 2026', 22, 30)
+      // Rank + name
+      ctx.fillStyle = '#facc15'; ctx.font = '800 40px system-ui'
+      const rankTxt = s.rank != null ? `${s.rank}º` : '—'
+      ctx.fillText(rankTxt, 22, 78)
+      ctx.fillStyle = '#ffffff'; ctx.font = '700 22px system-ui'
+      let nm = name
+      while (ctx.measureText(nm).width > W - 120 && nm.length > 3) nm = nm.slice(0, -1)
+      if (nm !== name) nm = nm.trimEnd() + '…'
+      ctx.fillText(nm, 92, 72)
+      if (s.totalParticipants) { ctx.fillStyle = '#6b7280'; ctx.font = '500 12px system-ui'; ctx.fillText(`de ${s.totalParticipants} participantes`, 92, 90) }
+      // Big points
+      ctx.textAlign = 'right'
+      ctx.fillStyle = '#facc15'; ctx.font = '800 54px system-ui'; ctx.fillText(String(s.totalPoints), W - 22, 84)
+      ctx.fillStyle = '#6b7280'; ctx.font = '600 12px system-ui'; ctx.fillText('PONTOS', W - 22, 102)
+      // Stats grid
+      const stats: [string, string, string][] = [
+        [String(s.correctResults), 'resultados', '#34d399'],
+        [String(s.correctScores), 'placares', '#fbbf24'],
+        [`${pct}%`, 'aproveit.', '#60a5fa'],
+        [`+${s.phasePoints}`, 'bônus', '#d1d5db'],
+      ]
+      const gx = 22, gy = 150, gw = (W - 44) / 4
+      stats.forEach(([val, lbl, color], i) => {
+        const cx = gx + gw * i + gw / 2
+        ctx.textAlign = 'center'
+        ctx.fillStyle = '#111a2b'; ctx.fillRect(gx + gw * i + 4, gy, gw - 8, 78)
+        ctx.fillStyle = color; ctx.font = '800 26px system-ui'; ctx.fillText(val, cx, gy + 38)
+        ctx.fillStyle = '#9ca3af'; ctx.font = '500 11px system-ui'; ctx.fillText(lbl, cx, gy + 60)
+      })
+      // Footer
+      ctx.textAlign = 'center'; ctx.fillStyle = '#4b5563'; ctx.font = '500 11px system-ui'
+      ctx.fillText('Classificação do Bolão da Copa do Mundo 2026', W / 2, H - 18)
+
+      const blob: Blob | null = await new Promise(res => canvas.toBlob(res, 'image/png'))
+      if (!blob) throw new Error('falha')
+      const file = new File([blob], 'meu-bolao.png', { type: 'image/png' })
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: `${name} — Bolão Copa 2026` })
+      } else {
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a'); a.href = url; a.download = 'meu-bolao.png'; a.click()
+        URL.revokeObjectURL(url)
+      }
+    } catch (err: any) {
+      if (err?.name !== 'AbortError') alert('Erro ao gerar imagem: ' + (err?.message ?? err))
+    } finally {
+      setSharingCard(false)
+    }
   }
 
   // Touch gestures: swipe down (from top) to close, swipe left/right to change tabs
@@ -280,6 +351,19 @@ export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClos
               <h2 className="text-lg font-bold text-white truncate">{name}</h2>
             </div>
             <div className="flex items-center gap-2 shrink-0">
+              {data && (
+                <button
+                  onClick={shareCard}
+                  disabled={sharingCard}
+                  className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white transition-colors disabled:opacity-50"
+                  title="Compartilhar card"
+                  aria-label="Compartilhar"
+                >
+                  {sharingCard
+                    ? <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
+                    : <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>}
+                </button>
+              )}
               {onToggleMe && (
                 <button
                   onClick={onToggleMe}
