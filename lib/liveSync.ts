@@ -24,6 +24,8 @@ type MatchState = {
   sentPenaltyGoals?: number
   regScore1?: number
   regScore2?: number
+  regulationScore1?: number
+  regulationScore2?: number
 }
 
 type ESPNProcessed = {
@@ -281,13 +283,15 @@ export async function runLiveSync(): Promise<SyncResult> {
       const sentPenaltyGoals = prev.sentPenaltyGoals ?? 0
       const regScore1 = prev.regScore1
       const regScore2 = prev.regScore2
+      const regulationScore1 = prev.regulationScore1
+      const regulationScore2 = prev.regulationScore2
 
       const newState: MatchState = {
         status: newStatus, score1, score2, sentStarted, sentHalftime, sentSecondHalf, sentGoals, sentFinal,
         sentVARKeys: prev.sentVARKeys,
         sentRedCardKeys: prev.sentRedCardKeys,
         sentExtraTime, sentETHalftime, sentETSecondHalf, sentPenalties, sentPenaltyGoals,
-        regScore1, regScore2,
+        regScore1, regScore2, regulationScore1, regulationScore2,
       }
 
       if (newStatus === 'in' && !sentStarted) {
@@ -309,6 +313,9 @@ export async function runLiveSync(): Promise<SyncResult> {
       if (newStatus === 'extratime' && !sentExtraTime) {
         pushQueue.push({ title: '⏱ Prorrogação!', body: scoreStr })
         newState.sentExtraTime = true
+        // Lock in the 90-min score — only regulation goals count for prediction points
+        newState.regulationScore1 = score1
+        newState.regulationScore2 = score2
       }
 
       if (newStatus === 'et_halftime' && !sentETHalftime) {
@@ -366,14 +373,18 @@ export async function runLiveSync(): Promise<SyncResult> {
           pushQueue.push({ title: `🏁 Resultado final${suffix}`, body: scoreStr })
           newState.sentFinal = true
         }
-        // If the match went to penalties, save the regulation/ET draw score —
-        // not the shootout-inflated score — since points are scored on the draw.
-        // advancingTeamId carries who passes the round, taken from ESPN's
-        // competitor.winner flag (which reflects the shootout outcome).
-        const finalScore1 = sentPenalties && regScore1 !== undefined ? regScore1 : score1
-        const finalScore2 = sentPenalties && regScore2 !== undefined ? regScore2 : score2
+        // Only 90-min goals count for prediction scoring.
+        // If ET was played, use the score locked at ET start (regulation score).
+        // If the match went straight to penalties (no ET), fall back to regScore.
+        // advancingTeamId is from ESPN's competitor.winner flag.
+        const finalScore1 = sentExtraTime && regulationScore1 !== undefined ? regulationScore1
+          : sentPenalties && regScore1 !== undefined ? regScore1
+          : score1
+        const finalScore2 = sentExtraTime && regulationScore2 !== undefined ? regulationScore2
+          : sentPenalties && regScore2 !== undefined ? regScore2
+          : score2
         const isDraw = finalScore1 === finalScore2
-        const advancingTeamId = isDraw && winnerTeamId ? winnerTeamId : undefined
+        const advancingTeamId = winnerTeamId
         if (!dbResult || dbResult.score1 !== finalScore1 || dbResult.score2 !== finalScore2 || (advancingTeamId && dbResult.advancingTeamId !== advancingTeamId)) {
           dbResultUpdates.push({ matchId, score1: finalScore1, score2: finalScore2, advancingTeamId: advancingTeamId ?? dbResult?.advancingTeamId })
         }
