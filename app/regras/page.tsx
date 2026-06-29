@@ -1,3 +1,5 @@
+import { Icon, IconName } from '@/components/Icon'
+
 export default function RegrasPage() {
   return (
     <div className="space-y-6 max-w-2xl mx-auto">
@@ -9,7 +11,7 @@ export default function RegrasPage() {
       {/* Match scoring */}
       <section className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
         <div className="bg-green-800 px-4 py-2.5">
-          <h3 className="font-bold text-white text-sm uppercase tracking-wide">⚽ Pontuação por Jogo</h3>
+          <h3 className="font-bold text-white text-sm uppercase tracking-wide flex items-center gap-2"><Icon name="ball" size={15} /> Pontuação por Jogo</h3>
         </div>
         <table className="w-full text-sm">
           <thead>
@@ -19,17 +21,17 @@ export default function RegrasPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-800">
-            {[
-              ['✅', 'Resultado certo (vitória/empate/derrota)', '4 pts'],
-              ['⚽', 'Gols exatos do time mandante', '+1 pt'],
-              ['⚽', 'Gols exatos do time visitante', '+1 pt'],
-              ['🎯', 'Placar exato completo', '+2 pts'],
-              ['🔥', 'Gols de um time ≥ 4 e você acertou quantos', '+2 pts/time'],
-              ['📊', 'Classificação completa do grupo (1º, 2º, 3º e 4º lugar todos certos)', '+2 pts/grupo'],
-            ].map(([icon, desc, pts]) => (
+            {([
+              ['check', 'Resultado certo (vitória/empate/derrota)', '4 pts'],
+              ['ball', 'Gols exatos do time mandante', '+1 pt'],
+              ['ball', 'Gols exatos do time visitante', '+1 pt'],
+              ['target', 'Placar exato completo', '+2 pts'],
+              ['flame', 'Gols de um time ≥ 4 e você acertou quantos', '+2 pts/time'],
+              ['bars', 'Classificação completa do grupo (1º, 2º, 3º e 4º lugar todos certos)', '+2 pts/grupo'],
+            ] as [IconName, string, string][]).map(([icon, desc, pts]) => (
               <tr key={desc}>
                 <td className="px-4 py-3 text-gray-300">
-                  <span className="mr-2">{icon}</span>{desc}
+                  <span className="inline-flex items-center gap-2"><Icon name={icon} size={15} className="shrink-0 text-gray-400" />{desc}</span>
                 </td>
                 <td className="px-4 py-3 text-right font-bold text-green-600 dark:text-green-400 whitespace-nowrap">{pts}</td>
               </tr>
@@ -44,7 +46,7 @@ export default function RegrasPage() {
       {/* Example */}
       <section className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
         <div className="px-4 py-2.5 border-b border-gray-800">
-          <h3 className="font-semibold text-gray-300 text-sm">📋 Exemplo</h3>
+          <h3 className="font-semibold text-gray-300 text-sm flex items-center gap-2"><Icon name="clipboard" size={15} /> Exemplo</h3>
         </div>
         <div className="px-4 py-4 space-y-2 text-sm text-gray-400">
           <p>Resultado real: <strong className="text-white">Brasil 3 × 1 Argentina</strong></p>
@@ -68,7 +70,7 @@ export default function RegrasPage() {
       {/* Phase advancement */}
       <section className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
         <div className="bg-yellow-700 px-4 py-2.5">
-          <h3 className="font-bold text-white text-sm uppercase tracking-wide">🏆 Classificação no Mata-Mata</h3>
+          <h3 className="font-bold text-white text-sm uppercase tracking-wide flex items-center gap-2"><Icon name="trophy" size={15} /> Classificação no Mata-Mata</h3>
         </div>
         <p className="px-4 py-3 text-xs text-gray-500 border-b border-gray-800">
           Pontos ganhos por cada time que você previu avançar em cada fase (baseado nos seus palpites de jogos anteriores).
@@ -87,7 +89,7 @@ export default function RegrasPage() {
               ['Quartas de Final', '6 pts'],
               ['Semifinal', '8 pts'],
               ['Final', '10 pts'],
-              ['Campeão 🏆', '+12 pts'],
+              ['Campeão', '+12 pts'],
             ].map(([phase, pts]) => (
               <tr key={phase}>
                 <td className="px-4 py-3 text-gray-300">{phase}</td>
@@ -100,7 +102,7 @@ export default function RegrasPage() {
 
       {/* Penalties */}
       <section className="bg-gray-900 border border-gray-800 rounded-xl px-4 py-4 space-y-2">
-        <h3 className="font-semibold text-gray-200">🟡 Pênaltis e Prorrogação</h3>
+        <h3 className="font-semibold text-gray-200 flex items-center gap-2"><Icon name="ball" size={16} className="text-yellow-500" /> Pênaltis e Prorrogação</h3>
         <p className="text-sm text-gray-400">
           Em jogos do mata-mata que terminam empatados, você também pode indicar qual time avança
           (por pênaltis ou prorrogação). Esse acerto serve como <strong className="text-gray-200">critério de desempate</strong> na
@@ -110,16 +112,16 @@ export default function RegrasPage() {
 
       {/* Zone */}
       <section className="bg-gray-900 border border-gray-800 rounded-xl px-4 py-4 space-y-2">
-        <h3 className="font-semibold text-gray-200">💸 Zona de Rebaixamento</h3>
+        <h3 className="font-semibold text-gray-200 flex items-center gap-2"><Icon name="money" size={16} className="text-red-500" /> Zona de Rebaixamento</h3>
         <p className="text-sm text-gray-400">
-          Os <strong className="text-red-600 dark:text-red-400">7 últimos colocados</strong> ao final do torneio ficam na zona de rebaixamento (💸).
-          Os <strong className="text-yellow-600 dark:text-yellow-400">2 acima</strong> estão em alerta (⚠️).
+          Os <strong className="text-red-600 dark:text-red-400">7 últimos colocados</strong> ao final do torneio ficam na zona de rebaixamento.
+          Os <strong className="text-yellow-600 dark:text-yellow-400">2 acima</strong> estão em alerta.
         </p>
       </section>
 
       {/* Tips */}
       <section className="bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-900/50 rounded-xl px-4 py-4 space-y-1.5">
-        <h3 className="font-semibold text-green-700 dark:text-green-300 text-sm">💡 Dicas</h3>
+        <h3 className="font-semibold text-green-700 dark:text-green-300 text-sm flex items-center gap-2"><Icon name="bulb" size={15} /> Dicas</h3>
         <ul className="text-sm text-green-700 dark:text-green-400/80 space-y-1 list-disc list-inside">
           <li>Apostar no placar exato vale muito mais — priorize jogos onde você tem convicção</li>
           <li>Os pontos de classificação no mata-mata podem virar o jogo no final do torneio</li>

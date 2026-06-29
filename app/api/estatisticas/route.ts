@@ -160,13 +160,13 @@ export async function GET() {
         }
         if (max > best.streak) best = { id: p.id, streak: max }
       }
-      if (best.streak >= 2) records.push({ icon: '🔥', title: 'Maior sequência', value: nameById[best.id], subtitle: `${best.streak} resultados certos seguidos` })
+      if (best.streak >= 2) records.push({ icon: 'flame', title: 'Maior sequência', value: nameById[best.id], subtitle: `${best.streak} resultados certos seguidos` })
     }
 
     // Most exact scores
     {
       const top = Object.values(stats).sort((a, b) => b.correctScores - a.correctScores)[0]
-      if (top && top.correctScores > 0) records.push({ icon: '🎯', title: 'Rei do placar exato', value: top.name, subtitle: `${top.correctScores} placares cravados` })
+      if (top && top.correctScores > 0) records.push({ icon: 'target', title: 'Rei do placar exato', value: top.name, subtitle: `${top.correctScores} placares cravados` })
     }
 
     // Riskiest — highest average total goals predicted per played match
@@ -181,7 +181,7 @@ export async function GET() {
         const avg = n > 0 ? sum / n : 0
         if (avg > best.avg) best = { id: p.id, avg }
       }
-      if (best.id) records.push({ icon: '🎲', title: 'Mais arrojado', value: nameById[best.id], subtitle: `média de ${best.avg.toFixed(1)} gols por palpite` })
+      if (best.id) records.push({ icon: 'rocket', title: 'Mais arrojado', value: nameById[best.id], subtitle: `média de ${best.avg.toFixed(1)} gols por palpite` })
     }
 
     // Per-match correctness, for "zebra", "unânime" and "freguês"
@@ -203,12 +203,12 @@ export async function GET() {
     // Zebra — lowest correct-result rate
     {
       const z = [...matchAcc].sort((a, b) => a.correctPct - b.correctPct)[0]
-      if (z) records.push({ icon: '😱', title: 'Jogo zebra', value: z.label, subtitle: `só ${Math.round(z.correctPct * 100)}% acertaram o resultado` })
+      if (z) records.push({ icon: 'alert', title: 'Jogo zebra', value: z.label, subtitle: `só ${Math.round(z.correctPct * 100)}% acertaram o resultado` })
     }
     // Unânime — most exact-score hits
     {
       const u = [...matchAcc].sort((a, b) => b.exactCount - a.exactCount)[0]
-      if (u && u.exactCount > 0) records.push({ icon: '🤝', title: 'Palpite unânime', value: u.label, subtitle: `${u.exactCount} de ${u.total} cravaram o placar` })
+      if (u && u.exactCount > 0) records.push({ icon: 'users', title: 'Palpite unânime', value: u.label, subtitle: `${u.exactCount} de ${u.total} cravaram o placar` })
     }
     // Freguês — team whose matches were most mispredicted (min 2 matches)
     {
@@ -228,7 +228,7 @@ export async function GET() {
         .filter(([, v]) => v.n >= 2)
         .map(([tid, v]) => ({ tid, rate: v.wrong / v.n }))
         .sort((a, b) => b.rate - a.rate)[0]
-      if (ranked) records.push({ icon: '🧱', title: 'Freguês da galera', value: teamById[ranked.tid]?.name ?? ranked.tid, subtitle: `${Math.round(ranked.rate * 100)}% erraram os jogos dele` })
+      if (ranked) records.push({ icon: 'ban', title: 'Freguês da galera', value: teamById[ranked.tid]?.name ?? ranked.tid, subtitle: `${Math.round(ranked.rate * 100)}% erraram os jogos dele` })
     }
 
     // Return participants sorted by current leaderboard ranking

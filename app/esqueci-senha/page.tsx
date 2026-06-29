@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import { Icon } from '@/components/Icon'
 
 export default function EsqueciSenhaPage() {
   const [email, setEmail] = useState('')
@@ -29,14 +30,14 @@ export default function EsqueciSenhaPage() {
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <div className="text-5xl mb-3">🔑</div>
+          <div className="flex justify-center mb-3"><Icon name="key" size={48} className="text-[#00bf63]" strokeWidth={1.4} /></div>
           <h1 className="text-2xl font-bold text-white">Esqueci a senha</h1>
           <p className="text-gray-400 text-sm mt-1">Vamos enviar um link de redefinição por e-mail</p>
         </div>
 
         {sent ? (
           <div className="bg-green-950/40 border border-green-800 rounded-2xl p-6 text-center space-y-3">
-            <div className="text-3xl">✉️</div>
+            <div className="flex justify-center"><Icon name="mail" size={32} className="text-green-400" strokeWidth={1.4} /></div>
             <p className="text-green-300 font-semibold">E-mail enviado!</p>
             <p className="text-gray-400 text-sm">
               Se o endereço <strong>{email}</strong> estiver cadastrado, você receberá um link em breve.

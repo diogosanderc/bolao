@@ -5,6 +5,7 @@ import { useParams, useSearchParams } from 'next/navigation'
 import { GROUPS, GROUP_MATCHES, KNOCKOUT_MATCHES, teamById, groupById } from '@/lib/copa2026'
 import { Match, MatchPrediction, GroupPrediction, Participant, PHASE_LABELS, KNOCKOUT_PHASES } from '@/lib/types'
 import { Flag } from '@/components/Flag'
+import { Icon } from '@/components/Icon'
 import { computeGroupStandings, computeFullBracket } from '@/lib/bracket'
 
 interface PredictionsData {
@@ -124,11 +125,11 @@ function MatchCard({
       <div className="px-4 pb-3 flex items-center justify-between">
         {officialResult ? (
           <span className="text-xs text-green-600 dark:text-green-500 flex items-center gap-1">
-            <span>✓</span> Resultado oficial: {result?.score1}×{result?.score2}
+            <Icon name="check" size={13} /> Resultado oficial: {result?.score1}×{result?.score2}
           </span>
         ) : prediction !== undefined ? (
           <span className="text-xs text-green-600 dark:text-green-400 flex items-center gap-1">
-            <span>✓</span> Palpite enviado
+            <Icon name="check" size={13} /> Palpite enviado
           </span>
         ) : (
           <span className="text-xs text-gray-600">Sem palpite</span>
@@ -157,7 +158,7 @@ function GroupTab({ groupId, isActive, filledCount, onClick }: {
         'bg-gray-900 border-gray-800 text-gray-400 hover:border-gray-600 hover:text-gray-200'
       }`}>
       {groupId}
-      {done && <span className="ml-1 text-xs">✓</span>}
+      {done && <Icon name="check" size={12} className="ml-1 inline" />}
     </button>
   )
 }
@@ -255,7 +256,7 @@ export default function PalpitePage() {
       {/* Admin banner */}
       {adminMode && (
         <div className="bg-yellow-50 dark:bg-yellow-950/60 border border-yellow-400 dark:border-yellow-600 rounded-xl px-4 py-2.5 text-sm text-yellow-700 dark:text-yellow-300 flex items-center gap-2">
-          <span>🔑</span>
+          <Icon name="key" size={15} />
           <span>Modo Admin — editando palpites de <strong>{data.participant.name}</strong></span>
         </div>
       )}
@@ -278,12 +279,12 @@ export default function PalpitePage() {
       {/* Phase tabs */}
       <div className="flex gap-1 bg-gray-900 p-1 rounded-xl w-fit">
         <button onClick={() => setActiveTab('groups')}
-          className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all ${activeTab === 'groups' ? 'bg-green-700 text-[white] shadow' : 'text-gray-400 hover:text-gray-300'}`}>
-          ⚽ Fase de Grupos
+          className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all inline-flex items-center gap-1.5 ${activeTab === 'groups' ? 'bg-green-700 text-[white] shadow' : 'text-gray-400 hover:text-gray-300'}`}>
+          <Icon name="ball" size={15} /> Fase de Grupos
         </button>
         <button onClick={() => setActiveTab('knockout')}
-          className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all ${activeTab === 'knockout' ? 'bg-green-700 text-[white] shadow' : 'text-gray-400 hover:text-gray-300'}`}>
-          🏆 Mata-Mata
+          className={`px-5 py-2 rounded-lg text-sm font-semibold transition-all inline-flex items-center gap-1.5 ${activeTab === 'knockout' ? 'bg-green-700 text-[white] shadow' : 'text-gray-400 hover:text-gray-300'}`}>
+          <Icon name="trophy" size={15} /> Mata-Mata
         </button>
       </div>
 

@@ -1,6 +1,7 @@
 'use client'
 import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { Icon } from '@/components/Icon'
 
 function ResetForm() {
   const router = useRouter()
@@ -44,13 +45,13 @@ function ResetForm() {
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <div className="text-5xl mb-3">🔒</div>
+          <div className="flex justify-center mb-3"><Icon name="lock" size={48} className="text-[#00bf63]" strokeWidth={1.4} /></div>
           <h1 className="text-2xl font-bold text-white">Nova senha</h1>
         </div>
 
         {done ? (
           <div className="bg-green-950/40 border border-green-800 rounded-2xl p-6 text-center">
-            <div className="text-3xl mb-2">✅</div>
+            <div className="flex justify-center mb-2"><Icon name="check" size={32} className="text-green-400" strokeWidth={1.6} /></div>
             <p className="text-green-300 font-semibold">Senha redefinida!</p>
             <p className="text-gray-400 text-sm mt-1">Redirecionando para o login...</p>
           </div>

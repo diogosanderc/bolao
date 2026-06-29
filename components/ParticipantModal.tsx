@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Flag } from '@/components/Flag'
 import { PHASE_LABELS, Phase } from '@/lib/types'
 import { AnimatedNumber } from '@/components/AnimatedNumber'
+import { Icon } from '@/components/Icon'
 
 type TeamRef = { id: string; name: string; flag: string }
 
@@ -183,7 +184,7 @@ export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClos
       ctx.fillStyle = '#00bf63'; ctx.fillRect(0, 0, W, 5)
       // Header
       ctx.fillStyle = '#9ca3af'; ctx.font = '600 12px system-ui'; ctx.textAlign = 'left'
-      ctx.fillText('🏆 BOLÃO COPA 2026', 22, 30)
+      ctx.fillText('BOLÃO COPA 2026', 22, 30)
       // Rank + name
       ctx.fillStyle = '#facc15'; ctx.font = '800 40px system-ui'
       const rankTxt = s.rank != null ? `${s.rank}º` : '—'
@@ -370,7 +371,7 @@ export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClos
                   className={`flex items-center gap-1 h-9 px-2.5 rounded-full text-xs font-semibold transition-colors ${isMe ? 'bg-[#00bf63] text-white' : 'bg-gray-800 text-gray-400 hover:text-gray-200'}`}
                   title={isMe ? 'Você marcou como sendo você' : 'Marcar como você'}
                 >
-                  {isMe ? '★ Sou eu' : '☆ Sou eu'}
+                  <><Icon name={isMe ? 'star' : 'star-outline'} size={13} /> Sou eu</>
                 </button>
               )}
               <button
@@ -493,9 +494,9 @@ export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClos
                       </span>
                     </div>
                   </div>
-                  {p.correctScore && <p className="text-[10px] text-green-700 dark:text-green-400 mt-0.5 pl-0.5">🎯 Placar exato!</p>}
-                  {!p.correctScore && p.correctResult && <p className="text-[10px] text-blue-700 dark:text-blue-400 mt-0.5 pl-0.5">✅ Resultado certo</p>}
-                  {!p.correctResult && p.result && <p className="text-[10px] text-red-600 dark:text-red-500 mt-0.5 pl-0.5">✗ Errou</p>}
+                  {p.correctScore && <p className="text-[10px] text-green-700 dark:text-green-400 mt-0.5 pl-0.5"><Icon name="target" size={11} className="inline -mt-0.5 mr-0.5" /> Placar exato!</p>}
+                  {!p.correctScore && p.correctResult && <p className="text-[10px] text-blue-700 dark:text-blue-400 mt-0.5 pl-0.5"><Icon name="check" size={11} className="inline -mt-0.5 mr-0.5" /> Resultado certo</p>}
+                  {!p.correctResult && p.result && <p className="text-[10px] text-red-600 dark:text-red-500 mt-0.5 pl-0.5"><Icon name="x" size={11} className="inline -mt-0.5 mr-0.5" /> Errou</p>}
                 </div>
               ))}
 
@@ -503,7 +504,7 @@ export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClos
               {hasGroupDetail && (
                 <div className="px-3 pt-4 pb-3 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">📊 Ordem dos Grupos</span>
+                    <span className="flex items-center gap-1.5 text-xs font-semibold text-gray-400 uppercase tracking-wide"><Icon name="bars" size={13} /> Ordem dos Grupos</span>
                     <span className="text-xs font-bold text-gray-300">+{data!.summary.groupOrderPoints} pts</span>
                   </div>
                   <div className="space-y-1.5">
@@ -512,7 +513,7 @@ export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClos
                         <div className="flex items-center justify-between mb-1">
                           <span className="font-bold text-gray-400">Grupo {g.groupId}</span>
                           <span className={`font-bold ${g.correct ? 'text-green-400' : 'text-red-500'}`}>
-                            {g.correct ? '✓ +2' : '✗ 0'}
+                            {g.correct ? <span className="flex items-center gap-0.5"><Icon name="check" size={12} /> +2</span> : <span className="flex items-center gap-0.5"><Icon name="x" size={12} /> 0</span>}
                           </span>
                         </div>
                         <div className="grid grid-cols-2 gap-1 text-[10px]">
@@ -547,12 +548,12 @@ export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClos
               {hasR32Detail && (
                 <div className="px-3 pt-3 pb-4 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">🏆 Classificados para 16-avos</span>
+                    <span className="flex items-center gap-1.5 text-xs font-semibold text-gray-400 uppercase tracking-wide"><Icon name="trophy" size={13} /> Classificados para 16-avos</span>
                     <span className="text-xs font-bold text-gray-300">+{data!.summary.r32Points} pts</span>
                   </div>
                   {data!.summary.thirdPlacePoints > 0 && (
                     <div className="flex items-center justify-between rounded-lg bg-amber-100 dark:bg-amber-950/30 border border-amber-300 dark:border-amber-900/50 px-3 py-1.5">
-                      <span className="text-xs font-medium text-amber-800 dark:text-amber-300">🥉 Classificados como melhor 3º lugar</span>
+                      <span className="flex items-center gap-1.5 text-xs font-medium text-amber-800 dark:text-amber-300"><Icon name="medal" size={13} /> Classificados como melhor 3º lugar</span>
                       <span className="text-xs font-bold text-amber-800 dark:text-amber-300">+{data!.summary.thirdPlacePoints} pts</span>
                     </div>
                   )}
@@ -571,17 +572,17 @@ export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClos
 
               {/* Knockout advancement bonus (oitavas / quartas / semi / final) */}
               {([
-                ['round_of_16', '⚔️ Oitavas de Final'],
-                ['quarterfinal', '🥊 Quartas de Final'],
-                ['semifinal', '🔥 Semifinal'],
-                ['final', '🏆 Final'],
-              ] as const).map(([key, label]) => {
+                ['round_of_16', 'Oitavas de Final', 'swords'],
+                ['quarterfinal', 'Quartas de Final', 'flame'],
+                ['semifinal', 'Semifinal', 'zap'],
+                ['final', 'Final', 'trophy'],
+              ] as const).map(([key, label, icon]) => {
                 const d = data?.advancementDetail?.[key]
                 if (!d || d.teams.length === 0) return null
                 return (
                   <div key={key} className="px-3 pt-3 pb-1 space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold text-gray-400 uppercase tracking-wide">{label}</span>
+                      <span className="flex items-center gap-1.5 text-xs font-semibold text-gray-400 uppercase tracking-wide"><Icon name={icon} size={13} /> {label}</span>
                       <span className="text-xs font-bold text-gray-300">+{d.points} pts</span>
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -601,7 +602,7 @@ export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClos
               {data && data.summary.championPoints > 0 && data.championTeam && (
                 <div className="px-3 pt-3 pb-4">
                   <div className="flex items-center justify-between rounded-lg bg-yellow-100 dark:bg-yellow-950/30 border border-yellow-300 dark:border-yellow-900/50 px-3 py-2">
-                    <span className="flex items-center gap-1.5 text-xs font-semibold text-yellow-800 dark:text-yellow-300">👑 Campeão — <Flag teamId={data.championTeam.id} size={16} /> {data.championTeam.name}</span>
+                    <span className="flex items-center gap-1.5 text-xs font-semibold text-yellow-800 dark:text-yellow-300"><Icon name="crown" size={14} /> Campeão — <Flag teamId={data.championTeam.id} size={16} /> {data.championTeam.name}</span>
                     <span className="text-xs font-bold text-yellow-800 dark:text-yellow-300">+{data.summary.championPoints} pts</span>
                   </div>
                 </div>
@@ -645,7 +646,7 @@ export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClos
                             {qualified
                               ? <span className="text-xs font-bold text-green-800 bg-green-200 dark:text-green-400 dark:bg-green-900/40 px-2 py-0.5 rounded font-score">+3 pts</span>
                               : g.complete
-                              ? <span className="text-xs text-gray-600">✗</span>
+                              ? <span className="text-gray-600"><Icon name="x" size={12} /></span>
                               : null}
                           </div>
                         )

@@ -1,14 +1,15 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { Icon, IconName } from '@/components/Icon'
 
 const KEY = 'bolao_onboarded_v1'
 
-const TIPS: { icon: string; title: string; body: string }[] = [
-  { icon: '👆', title: 'Toque num nome', body: 'Veja os palpites, a posição e a pontuação detalhada de cada participante.' },
-  { icon: '↔️', title: 'Deslize entre as abas', body: 'No card do participante, arraste pros lados pra trocar entre Jogados, Seleções e Próximos.' },
-  { icon: '⬇️', title: 'Puxe pra atualizar', body: 'Na classificação, puxe a tela pra baixo a partir do topo pra atualizar os pontos.' },
-  { icon: '⭐', title: 'Marque "Sou eu"', body: 'No seu card, toque em ☆ Sou eu pra destacar sua linha e receber avisos quando subir/cair.' },
+const TIPS: { icon: IconName; title: string; body: string }[] = [
+  { icon: 'pointer', title: 'Toque num nome', body: 'Veja os palpites, a posição e a pontuação detalhada de cada participante.' },
+  { icon: 'swap-h', title: 'Deslize entre as abas', body: 'No card do participante, arraste pros lados pra trocar entre Jogados, Seleções e Próximos.' },
+  { icon: 'arrow-down', title: 'Puxe pra atualizar', body: 'Na classificação, puxe a tela pra baixo a partir do topo pra atualizar os pontos.' },
+  { icon: 'star', title: 'Marque "Sou eu"', body: 'No seu card, toque na estrela "Sou eu" pra destacar sua linha e receber avisos quando subir/cair.' },
 ]
 
 export function Onboarding() {
@@ -36,7 +37,7 @@ export function Onboarding() {
         onClick={e => e.stopPropagation()}
       >
         <div className="text-center">
-          <div className="text-4xl mb-2">{tip.icon}</div>
+          <div className="flex justify-center mb-3"><Icon name={tip.icon} size={40} className="text-[#00bf63]" strokeWidth={1.4} /></div>
           <h3 className="text-lg font-bold text-white">{tip.title}</h3>
           <p className="text-sm text-gray-400 mt-1.5">{tip.body}</p>
         </div>

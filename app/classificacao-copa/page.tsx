@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Flag } from '@/components/Flag'
 import { Scoreboard } from '@/components/Scoreboard'
+import { Icon, IconName } from '@/components/Icon'
 import { teamById } from '@/lib/copa2026'
 
 type GroupRow = {
@@ -43,7 +44,7 @@ function MatchRow({ m, compact = false }: { m: MatchInfo; compact?: boolean }) {
         <span className={`truncate text-right font-semibold ${w1 ? 'text-gray-200' : played ? 'text-gray-400' : live ? 'text-gray-300' : 'text-gray-500'}`}>
           {compact ? m.team1Id : (teamById[m.team1Id]?.name ?? m.team1Id)}
         </span>
-        {!tbd ? <Flag teamId={m.team1Id} size={16} /> : <span className="text-gray-600">🏳</span>}
+        {!tbd ? <Flag teamId={m.team1Id} size={16} /> : <Icon name="flag" size={14} className="text-gray-600" />}
       </div>
 
       {/* Score */}
@@ -57,7 +58,7 @@ function MatchRow({ m, compact = false }: { m: MatchInfo; compact?: boolean }) {
 
       {/* Team 2 */}
       <div className="flex items-center gap-1.5 flex-1 min-w-0">
-        {!tbd ? <Flag teamId={m.team2Id} size={16} /> : <span className="text-gray-600">🏳</span>}
+        {!tbd ? <Flag teamId={m.team2Id} size={16} /> : <Icon name="flag" size={14} className="text-gray-600" />}
         <span className={`truncate font-semibold ${w2 ? 'text-gray-200' : played ? 'text-gray-400' : live ? 'text-gray-300' : 'text-gray-500'}`}>
           {compact ? m.team2Id : (teamById[m.team2Id]?.name ?? m.team2Id)}
         </span>
@@ -114,7 +115,7 @@ function GroupCard({ group }: { group: GroupData }) {
                       <span className="sm:hidden">{row.teamId}</span>
                       <span className="hidden sm:inline">{team?.name ?? row.teamId}</span>
                     </span>
-                    {qualified && <span className="shrink-0 text-green-600 dark:text-green-400 text-[10px] font-bold" title="Classificado">✓</span>}
+                    {qualified && <Icon name="check" size={12} className="shrink-0 text-green-600 dark:text-green-400" />}
                   </div>
                 </td>
                 <td className="px-1 py-1.5 text-center text-gray-400">{row.j}</td>
@@ -138,13 +139,13 @@ function GroupCard({ group }: { group: GroupData }) {
 
 // ─── Phase icons ─────────────────────────────────────────────────────────────
 
-const PHASE_ICON: Record<string, string> = {
-  round_of_32: '🎯',
-  round_of_16: '⚔️',
-  quarterfinal: '🥊',
-  semifinal: '🔥',
-  third_place: '🥉',
-  final: '🏆',
+const PHASE_ICON: Record<string, IconName> = {
+  round_of_32: 'target',
+  round_of_16: 'swords',
+  quarterfinal: 'flame',
+  semifinal: 'zap',
+  third_place: 'medal',
+  final: 'trophy',
 }
 
 // ─── Knockout section ────────────────────────────────────────────────────────
@@ -191,7 +192,7 @@ function KnockoutSection({ phases }: { phases: KnockoutPhase[] }) {
                 : 'border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-200'
             }`}
           >
-            <span className="mr-1">{PHASE_ICON[p.phase] ?? ''}</span>{p.label}
+            {PHASE_ICON[p.phase] && <Icon name={PHASE_ICON[p.phase]} size={13} className="mr-1 inline" />}{p.label}
           </button>
         ))}
       </div>
@@ -199,7 +200,7 @@ function KnockoutSection({ phases }: { phases: KnockoutPhase[] }) {
       {current && (
         <div className="rounded-xl border border-gray-800 bg-gray-950 overflow-hidden animate-fade-in">
           <div className="bg-yellow-600 px-4 py-2 flex items-center gap-2">
-            <span className="text-base">{PHASE_ICON[current.phase] ?? ''}</span>
+            {PHASE_ICON[current.phase] && <Icon name={PHASE_ICON[current.phase]} size={16} />}
             <h3 className="font-bold text-white text-sm tracking-wide uppercase">{current.label}</h3>
           </div>
           <div className="divide-y divide-gray-800/50">
@@ -309,7 +310,7 @@ function ThirdsSection({ groups }: { groups: GroupData[] }) {
       </div>
       <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-gray-500">
         <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-amber-500 inline-block" /> Top 8 — classificados às 16 avos</span>
-        <span className="flex items-center gap-1.5"><span className="opacity-50">⬜</span> Grupo ainda em andamento</span>
+        <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm border border-gray-600 inline-block" /> Grupo ainda em andamento</span>
       </div>
     </div>
   )

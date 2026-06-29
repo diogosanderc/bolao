@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, ReactNode } from 'react'
 import { LeaderboardEntry } from '@/lib/types'
 import { Flag } from '@/components/Flag'
 import { ParticipantModal } from '@/components/ParticipantModal'
@@ -12,6 +12,7 @@ import { matchById } from '@/lib/copa2026'
 import { chipCode } from '@/lib/names'
 import { positionMessage } from '@/lib/positionMessage'
 import { Onboarding } from '@/components/Onboarding'
+import { Icon, IconName } from '@/components/Icon'
 
 type RecentMatch = {
   matchId: string
@@ -265,7 +266,11 @@ export default function LeaderboardPage() {
     return `${s}s`
   }
 
-  const trophies: Record<number, string> = { 1: '🥇', 2: '🥈', 3: '🥉' }
+  const trophies: Record<number, ReactNode> = {
+    1: <Icon name="medal" size={16} className="inline text-yellow-500" />,
+    2: <Icon name="medal" size={16} className="inline text-gray-400" />,
+    3: <Icon name="medal" size={16} className="inline text-amber-600" />,
+  }
 
   const uniquePoints = [...new Set(data.map(e => e.totalPoints))].sort((a, b) => b - a)
   const tierOf = (pts: number) => uniquePoints.indexOf(pts) + 1
@@ -717,7 +722,8 @@ export default function LeaderboardPage() {
     data.forEach((entry, idx) => {
       const rank = ranks[idx]
       const tier = tierOf(entry.totalPoints)
-      const medal = isRelated(entry.totalPoints) ? (isFirstOfRank[idx] ? `${rank}.` : '   ') : isWarning(entry.totalPoints) ? '⚠️' : (trophies[tier] ?? (rank >= 4 && rank <= 7 && isFirstOfRank[idx] ? '⭐' : (isFirstOfRank[idx] ? `${rank}.` : '   ')))
+      const trophyEmoji: Record<number, string> = { 1: '🥇', 2: '🥈', 3: '🥉' }
+      const medal = isRelated(entry.totalPoints) ? (isFirstOfRank[idx] ? `${rank}.` : '   ') : isWarning(entry.totalPoints) ? '⚠️' : (trophyEmoji[tier] ?? (rank >= 4 && rank <= 7 && isFirstOfRank[idx] ? '⭐' : (isFirstOfRank[idx] ? `${rank}.` : '   ')))
       const pts = `${entry.totalPoints}pts`
       const last = entry.lastMatchPoints > 0 ? ` (+${entry.lastMatchPoints})` : ''
       lines.push(`${medal} *${entry.participant.name}* — ${pts}${last}`)
@@ -848,7 +854,7 @@ export default function LeaderboardPage() {
             >
               <div className="flex items-center justify-between mb-1">
                 {m.suspended
-                  ? <span className="text-xs text-yellow-700 dark:text-yellow-400 uppercase tracking-wider font-bold">⛈️ Paralisado</span>
+                  ? <span className="flex items-center gap-1.5 text-xs text-yellow-700 dark:text-yellow-400 uppercase tracking-wider font-bold"><Icon name="cloud-rain" size={14} /> Paralisado</span>
                   : <span className="flex items-center gap-1.5 text-xs text-red-700 dark:text-red-400 uppercase tracking-wider font-bold"><span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" /> Ao vivo</span>}
                 {m.clock && <span className={`text-xs font-semibold ${m.suspended ? 'text-yellow-700 dark:text-yellow-300' : 'text-red-800 dark:text-red-300'}`}>{m.clock}</span>}
               </div>
@@ -867,8 +873,8 @@ export default function LeaderboardPage() {
                         <div key={team.id} className="flex items-center gap-1.5 flex-wrap">
                           <Flag teamId={team.id} size={14} />
                           {goals.map((g, i) => (
-                            <span key={i} className="text-xs text-red-800 dark:text-red-200">
-                              ⚽{g.minute && <span className="text-red-700 dark:text-red-400"> {g.minute}</span>} {g.playerName}
+                            <span key={i} className="text-xs text-red-800 dark:text-red-200 inline-flex items-center gap-0.5">
+                              <Icon name="ball" size={12} className="shrink-0" />{g.minute && <span className="text-red-700 dark:text-red-400"> {g.minute}</span>} {g.playerName}
                             </span>
                           ))}
                         </div>
@@ -877,7 +883,7 @@ export default function LeaderboardPage() {
                   </div>
                 )
               })()}
-              <p className="text-right text-[10px] text-gray-500 dark:text-gray-400 mt-1.5">👁 toque para ver os palpites</p>
+              <p className="flex items-center justify-end gap-1 text-[10px] text-gray-500 dark:text-gray-400 mt-1.5"><Icon name="eye" size={12} /> toque para ver os palpites</p>
             </div>
           ))}
           {lastRefresh && (
@@ -928,7 +934,7 @@ export default function LeaderboardPage() {
               >
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-xs text-gray-500 uppercase tracking-wider">Último jogo</span>
-                  <span className="text-[10px] text-gray-500 dark:text-gray-400">👁 palpites →</span>
+                  <span className="flex items-center gap-1 text-[10px] text-gray-500 dark:text-gray-400"><Icon name="eye" size={12} /> palpites</span>
                 </div>
                 <div className="flex items-center gap-2.5 text-sm text-gray-300">
                   <span className="flex items-center gap-1.5 min-w-0"><Flag teamId={rm.team1.id} size={20} /><span className="truncate">{rm.team1.name}</span></span>
@@ -988,7 +994,7 @@ export default function LeaderboardPage() {
                     <span className="text-xs text-gray-500 uppercase tracking-wider">Próximo jogo</span>
                     <span className="flex items-center gap-2">
                       {formatCountdown(m.date) && (
-                        <span className="text-[10px] font-bold text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-950/50 px-1.5 py-0.5 rounded tabular-nums">⏱ {formatCountdown(m.date)}</span>
+                        <span className="text-[10px] font-bold text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-950/50 px-1.5 py-0.5 rounded tabular-nums inline-flex items-center gap-1"><Icon name="clock" size={11} /> {formatCountdown(m.date)}</span>
                       )}
                       <span className="text-xs text-green-700 dark:text-yellow-500 font-semibold">{m.dateBRT}</span>
                     </span>
@@ -1032,7 +1038,7 @@ export default function LeaderboardPage() {
       {!loading && data.length === 0 && (
         <div className="flex flex-col items-center text-center py-16 px-6">
           <div className="flex items-center justify-center w-20 h-20 rounded-full bg-gray-900 border border-gray-800 mb-4">
-            <span className="text-4xl">📋</span>
+            <Icon name="clipboard" size={36} className="text-gray-500" strokeWidth={1.4} />
           </div>
           <p className="text-gray-300 font-semibold">Nenhum participante cadastrado ainda</p>
           <p className="text-sm mt-1 text-gray-500">
@@ -1050,7 +1056,7 @@ export default function LeaderboardPage() {
               : 'border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-200'
           }`}
         >
-          📊 {projectionMode ? 'Ocultar Projeção' : 'Ver Projeção'}
+          <Icon name="bars" size={16} /> {projectionMode ? 'Ocultar Projeção' : 'Ver Projeção'}
         </button>
       )}
 
@@ -1075,7 +1081,7 @@ export default function LeaderboardPage() {
                   onClick={() => openParticipant(entry.participant.id, entry.participant.name)}
                 >
                   <span className="text-gray-500 text-xs w-5 text-right shrink-0 font-semibold">{rank}</span>
-                  {isMe && <span className="shrink-0 text-[#00bf63]" title="Você">★</span>}
+                  {isMe && <Icon name="star" size={13} className="shrink-0 text-[#00bf63]" />}
                   <span className="text-gray-200 text-sm font-semibold flex-1 min-w-0 truncate">{entry.participant.name}</span>
                   {liveGain > 0
                     ? <span className="text-green-700 dark:text-green-400 text-xs font-bold w-9 text-right shrink-0 tabular-nums">+{liveGain}</span>
@@ -1085,8 +1091,8 @@ export default function LeaderboardPage() {
                     {change === undefined || change === 0
                       ? <span className="w-2 h-2 rounded-sm bg-gray-400 dark:bg-gray-600 inline-block" />
                       : change > 0
-                        ? <span className="text-blue-700 dark:text-blue-300 text-[10px] font-bold tabular-nums">▲{change}</span>
-                        : <span className="text-red-700 dark:text-red-400 text-[10px] font-bold tabular-nums">▼{Math.abs(change)}</span>
+                        ? <span className="text-blue-700 dark:text-blue-300 text-[10px] font-bold tabular-nums inline-flex items-center"><Icon name="arrow-up" size={10} />{change}</span>
+                        : <span className="text-red-700 dark:text-red-400 text-[10px] font-bold tabular-nums inline-flex items-center"><Icon name="arrow-down" size={10} />{Math.abs(change)}</span>
                     }
                   </span>
                   <span className="text-gray-200 dark:text-yellow-400 font-bold text-base shrink-0 w-10 text-right font-score"><AnimatedNumber value={entry.totalPoints} /></span>
@@ -1100,7 +1106,7 @@ export default function LeaderboardPage() {
       {projectionMode && data.length > 0 && (
         <div className="rounded-xl border border-purple-200 dark:border-purple-800 overflow-hidden">
           <div className="bg-purple-50 dark:bg-purple-950/60 px-4 py-2.5 border-b border-purple-200 dark:border-purple-800">
-            <p className="text-xs text-purple-700 dark:text-purple-300 font-semibold uppercase tracking-wider">📊 Projeção — {remainingMatches} jogos restantes</p>
+            <p className="text-xs text-purple-700 dark:text-purple-300 font-semibold uppercase tracking-wider flex items-center gap-1.5"><Icon name="bars" size={13} /> Projeção — {remainingMatches} jogos restantes</p>
             <p className="text-xs text-purple-500 mt-0.5">Máximo estimado: pts atuais + {remainingMatches} × 8 pts/jogo</p>
           </div>
           <div className="divide-y divide-purple-100 dark:divide-purple-900/40">
@@ -1123,7 +1129,7 @@ export default function LeaderboardPage() {
                     </span>
                     <span className="w-16 text-right">
                       {p.isInTop7
-                        ? <span className="text-green-600 dark:text-green-400 text-xs font-bold">Top 7 ✓</span>
+                        ? <span className="text-green-600 dark:text-green-400 text-xs font-bold inline-flex items-center gap-1">Top 7 <Icon name="check" size={12} /></span>
                         : p.canReachTop7
                         ? <span className="text-yellow-600 dark:text-yellow-400 text-xs">+{p.pointsToTop7} p/ T7</span>
                         : <span className="text-red-600 dark:text-red-500 text-xs">fora</span>}
@@ -1148,16 +1154,17 @@ export default function LeaderboardPage() {
               className="w-full bg-gray-900 border border-gray-800 focus:border-gray-600 rounded-xl pl-9 pr-9 py-2.5 text-sm text-gray-200 placeholder-gray-600 outline-none transition-colors"
             />
             {query && (
-              <button onClick={() => setQuery('')} className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-full text-gray-500 hover:text-gray-200 hover:bg-gray-800" aria-label="Limpar">✕</button>
+              <button onClick={() => setQuery('')} className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 flex items-center justify-center rounded-full text-gray-500 hover:text-gray-200 hover:bg-gray-800" aria-label="Limpar"><Icon name="x" size={14} /></button>
             )}
           </div>
           <div className="flex gap-1.5">
-            {([['all', 'Todos'], ['top7', '🟢 Top 7'], ['red', '🔴 Pagões']] as const).map(([val, label]) => (
+            {([['all', 'Todos', ''], ['top7', 'Top 7', 'bg-[#00bf63]'], ['red', 'Pagões', 'bg-red-500']] as const).map(([val, label, dot]) => (
               <button
                 key={val}
                 onClick={() => setZoneFilter(val)}
-                className={`text-xs px-3 py-1 rounded-full border font-medium transition-colors ${zoneFilter === val ? 'border-[#00bf63] text-[#00bf63] bg-[#00bf63]/10' : 'border-gray-700 text-gray-500 hover:text-gray-300'}`}
+                className={`flex items-center gap-1.5 text-xs px-3 py-1 rounded-full border font-medium transition-colors ${zoneFilter === val ? 'border-[#00bf63] text-[#00bf63] bg-[#00bf63]/10' : 'border-gray-700 text-gray-500 hover:text-gray-300'}`}
               >
+                {dot && <span className={`w-2 h-2 rounded-full ${dot}`} />}
                 {label}
               </button>
             ))}
@@ -1223,14 +1230,14 @@ export default function LeaderboardPage() {
                     ''
                   }`}>
                     <div className="flex items-center gap-1.5 min-w-0">
-                      {isMe && <span className="shrink-0 text-[#00bf63]" title="Você">★</span>}
+                      {isMe && <Icon name="star" size={13} className="shrink-0 text-[#00bf63]" />}
                       <span className="truncate">{entry.participant.name}</span>
                       {(() => {
                         const ch: number | undefined = p.positionChange
                         if (ch === undefined || ch === 0) return null
                         return ch > 0
-                          ? <span className="text-blue-600 dark:text-blue-400 text-[10px] font-bold shrink-0 tabular-nums">▲{ch}</span>
-                          : <span className="text-red-600 dark:text-red-400 text-[10px] font-bold shrink-0 tabular-nums">▼{Math.abs(ch)}</span>
+                          ? <span className="text-blue-600 dark:text-blue-400 text-[10px] font-bold shrink-0 tabular-nums inline-flex items-center"><Icon name="arrow-up" size={10} />{ch}</span>
+                          : <span className="text-red-600 dark:text-red-400 text-[10px] font-bold shrink-0 tabular-nums inline-flex items-center"><Icon name="arrow-down" size={10} />{Math.abs(ch)}</span>
                       })()}
                     </div>
                   </td>
@@ -1339,7 +1346,7 @@ export default function LeaderboardPage() {
             className="sm:hidden fixed inset-x-3 z-30 bottom-[80px] flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gray-900/95 backdrop-blur-md border border-[#00bf63]/40 shadow-lg shadow-black/40"
             style={{ marginBottom: 'env(safe-area-inset-bottom)' }}
           >
-            <span className="text-[#00bf63] shrink-0">★</span>
+            <Icon name="star" size={14} className="text-[#00bf63] shrink-0" />
             <span className="text-xs font-bold text-gray-200 shrink-0">{rank}º</span>
             <span className="text-xs text-gray-400 truncate flex-1 text-left">{me.participant.name}</span>
             {mm > 0 && <span className="text-[10px] font-bold text-blue-400 shrink-0">MM +{mm}</span>}
@@ -1375,8 +1382,8 @@ export default function LeaderboardPage() {
             <div className="absolute inset-0 bg-black/70 backdrop-blur-sm animate-fade-in" />
             <div className="relative w-full max-w-sm bg-gray-950 border border-gray-800 rounded-2xl p-5 animate-slide-up" onClick={e => e.stopPropagation()}>
               <div className="flex items-center justify-between mb-1">
-                <span className="text-sm font-bold uppercase tracking-wider text-gray-300">📋 Resumo da rodada</span>
-                <button onClick={() => dismissRound(lastMatch.matchId)} className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white" aria-label="Fechar">✕</button>
+                <span className="flex items-center gap-1.5 text-sm font-bold uppercase tracking-wider text-gray-300"><Icon name="clipboard" size={16} /> Resumo da rodada</span>
+                <button onClick={() => dismissRound(lastMatch.matchId)} className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white" aria-label="Fechar"><Icon name="x" size={16} /></button>
               </div>
               <p className="text-xs text-gray-500 mb-4 flex items-center gap-1.5">
                 <Flag teamId={lastMatch.team1.id} size={16} /> {lastMatch.team1.name} <span className="font-score text-gray-300">{lastMatch.score1}×{lastMatch.score2}</span> <Flag teamId={lastMatch.team2.id} size={16} /> {lastMatch.team2.name}
@@ -1384,7 +1391,7 @@ export default function LeaderboardPage() {
               <div className="space-y-2">
                 {top && (
                   <div className="flex items-center gap-3 bg-gray-900 border border-gray-800 rounded-xl px-3 py-2.5">
-                    <span className="text-2xl">⚡</span>
+                    <Icon name="zap" size={22} className="text-yellow-400 shrink-0" />
                     <div className="min-w-0 flex-1">
                       <p className="text-[10px] uppercase tracking-wide text-gray-500">Mais pontuou</p>
                       <p className="text-sm text-gray-200 font-bold truncate">{top.participant.name}</p>
@@ -1395,16 +1402,16 @@ export default function LeaderboardPage() {
                 )}
                 {climber && (
                   <div className="flex items-center gap-3 bg-gray-900 border border-gray-800 rounded-xl px-3 py-2.5">
-                    <span className="text-2xl">🔼</span>
+                    <Icon name="arrow-up" size={22} className="text-blue-400 shrink-0" />
                     <div className="min-w-0 flex-1"><p className="text-[10px] uppercase tracking-wide text-gray-500">Maior subida</p><p className="text-sm text-gray-200 font-bold truncate">{climber.participant.name}</p></div>
-                    <span className="text-blue-400 font-score font-bold text-lg shrink-0">▲{climber.positionChange}</span>
+                    <span className="text-blue-400 font-score font-bold text-lg shrink-0 inline-flex items-center"><Icon name="arrow-up" size={16} />{climber.positionChange}</span>
                   </div>
                 )}
                 {faller && (
                   <div className="flex items-center gap-3 bg-gray-900 border border-gray-800 rounded-xl px-3 py-2.5">
-                    <span className="text-2xl">🔽</span>
+                    <Icon name="arrow-down" size={22} className="text-red-400 shrink-0" />
                     <div className="min-w-0 flex-1"><p className="text-[10px] uppercase tracking-wide text-gray-500">Maior queda</p><p className="text-sm text-gray-200 font-bold truncate">{faller.participant.name}</p></div>
-                    <span className="text-red-400 font-score font-bold text-lg shrink-0">▼{Math.abs(faller.positionChange)}</span>
+                    <span className="text-red-400 font-score font-bold text-lg shrink-0 inline-flex items-center"><Icon name="arrow-down" size={16} />{Math.abs(faller.positionChange)}</span>
                   </div>
                 )}
               </div>
@@ -1417,14 +1424,14 @@ export default function LeaderboardPage() {
       })()}
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-8">
-        {[
-          { label: 'Resultado certo', pts: '4 pts', icon: '✅' },
-          { label: 'Placar exato', pts: '+2 pts', icon: '🎯' },
-          { label: 'Gols de um time', pts: '1 pt/time', icon: '⚽' },
-          { label: 'Acertar gols do vencedor (≥ 4 gols)', pts: '+2 pts', icon: '🔥' },
-        ].map(item => (
+        {([
+          { label: 'Resultado certo', pts: '4 pts', icon: 'check' },
+          { label: 'Placar exato', pts: '+2 pts', icon: 'target' },
+          { label: 'Gols de um time', pts: '1 pt/time', icon: 'ball' },
+          { label: 'Acertar gols do vencedor (≥ 4 gols)', pts: '+2 pts', icon: 'flame' },
+        ] as { label: string; pts: string; icon: IconName }[]).map(item => (
           <div key={item.label} className="bg-gray-900 rounded-lg p-3 text-center border border-gray-800">
-            <div className="text-2xl mb-1">{item.icon}</div>
+            <div className="flex justify-center mb-1.5"><Icon name={item.icon} size={22} className="text-[#00bf63]" /></div>
             <div className="text-xs text-gray-400">{item.label}</div>
             <div className="text-green-600 dark:text-green-400 font-bold text-sm">{item.pts}</div>
           </div>
@@ -1452,7 +1459,7 @@ export default function LeaderboardPage() {
                   </div>
                 )}
               </div>
-              <button onClick={() => setMatchModal(null)} className="shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white text-base transition-colors">✕</button>
+              <button onClick={() => setMatchModal(null)} className="shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white text-base transition-colors"><Icon name="x" size={16} /></button>
             </div>
 
             {matchPredLoading ? (
@@ -1480,7 +1487,7 @@ export default function LeaderboardPage() {
                           ))}
                         </div>
                         <span className={`text-sm font-bold shrink-0 flex items-center gap-1 ${isExact ? 'text-green-700 dark:text-green-300' : 'text-green-400'}`}>
-                          {isExact && <span title="Placar exato">🎯</span>}{score}
+                          {isExact && <Icon name="target" size={13} className="shrink-0" />}{score}
                         </span>
                       </div>
                       )

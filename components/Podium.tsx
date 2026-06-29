@@ -1,6 +1,7 @@
 'use client'
 
 import { AnimatedNumber } from '@/components/AnimatedNumber'
+import { Icon } from '@/components/Icon'
 
 export type PodiumTier = {
   rank: number
@@ -16,9 +17,9 @@ type Props = {
 
 // Visual order: 2nd, 1st, 3rd (champion centered + taller)
 const SLOTS = [
-  { rank: 2, medal: '🥈', h: 'h-20', ring: 'ring-gray-400/60', glow: '', from: 'from-gray-300/15' },
-  { rank: 1, medal: '🥇', h: 'h-28', ring: 'ring-yellow-400/70', glow: 'shadow-[0_0_24px_-4px_rgba(250,204,21,0.5)]', from: 'from-yellow-400/20' },
-  { rank: 3, medal: '🥉', h: 'h-16', ring: 'ring-amber-600/60', glow: '', from: 'from-amber-600/15' },
+  { rank: 2, medalColor: 'text-gray-400', h: 'h-20', ring: 'ring-gray-400/60', glow: '', from: 'from-gray-300/15' },
+  { rank: 1, medalColor: 'text-yellow-400', h: 'h-28', ring: 'ring-yellow-400/70', glow: 'shadow-[0_0_24px_-4px_rgba(250,204,21,0.5)]', from: 'from-yellow-400/20' },
+  { rank: 3, medalColor: 'text-amber-600', h: 'h-16', ring: 'ring-amber-600/60', glow: '', from: 'from-amber-600/15' },
 ]
 
 export function Podium({ tiers, onSelect, celebrate }: Props) {
@@ -37,12 +38,12 @@ export function Podium({ tiers, onSelect, celebrate }: Props) {
         return (
           <div key={slot.rank} className={`flex flex-col items-center ${celebrating ? 'animate-celebrate' : ''}`}>
             <div className="relative mb-1.5">
-              {celebrating && <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-lg animate-bounce">🎉</span>}
+              {celebrating && <span className="absolute -top-3 left-1/2 -translate-x-1/2 animate-bounce"><Icon name="sparkles" size={18} className="text-yellow-400" /></span>}
               <span
                 className={`flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-900 ring-2 ${slot.ring} ${slot.glow}`}
-                style={{ width: isFirst ? 56 : 44, height: isFirst ? 56 : 44, fontSize: isFirst ? 30 : 24 }}
+                style={{ width: isFirst ? 56 : 44, height: isFirst ? 56 : 44 }}
               >
-                {slot.medal}
+                <Icon name="medal" size={isFirst ? 30 : 24} className={slot.medalColor} strokeWidth={1.4} />
               </span>
               {multi && (
                 <span className="absolute -bottom-1 -right-1 flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-gray-700 text-white text-[10px] font-bold border border-gray-900">

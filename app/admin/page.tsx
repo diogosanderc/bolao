@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { GROUPS, GROUP_MATCHES, KNOCKOUT_MATCHES, teamById, groupById } from '@/lib/copa2026'
 import { Participant, Match, PHASE_LABELS, KNOCKOUT_PHASES } from '@/lib/types'
 import { Flag } from '@/components/Flag'
+import { Icon } from '@/components/Icon'
 import { computeFullBracket } from '@/lib/bracket'
 
 const ADMIN_KEY_STORAGE = 'bolao_admin_key'
@@ -435,7 +436,7 @@ export default function AdminPage() {
         <div className="fixed inset-0 bg-black/70 z-40 flex items-center justify-center p-4">
           <div className="bg-gray-900 border border-gray-700 rounded-xl w-full max-w-lg max-h-[80vh] flex flex-col shadow-2xl">
             <div className="flex items-center justify-between px-5 py-4 border-b border-gray-800">
-              <h3 className="font-bold text-white">📥 Importar Resultados em Lote</h3>
+              <h3 className="font-bold text-white flex items-center gap-2"><Icon name="download" size={16} /> Importar Resultados em Lote</h3>
               <button onClick={() => setBulkImportOpen(false)} className="text-gray-500 hover:text-white text-lg leading-none">×</button>
             </div>
             <div className="p-4 space-y-3 overflow-y-auto flex-1">
@@ -488,33 +489,33 @@ export default function AdminPage() {
             disabled={syncing}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 disabled:text-gray-600 text-gray-100 rounded-lg font-semibold transition-colors text-xs"
           >
-            {syncing ? '⟳ ...' : '📅 Sincronizar Agenda'}
+            {syncing ? <span className="inline-flex items-center gap-1"><Icon name="refresh" size={13} className="animate-spin" /> ...</span> : <span className="inline-flex items-center gap-1.5"><Icon name="calendar" size={13} /> Sincronizar Agenda</span>}
           </button>
-          {lastDateSync && <span className="text-xs text-gray-500">🕐 {lastDateSync}</span>}
+          {lastDateSync && <span className="text-xs text-gray-500 inline-flex items-center gap-1"><Icon name="clock" size={12} /> {lastDateSync}</span>}
           <button
             onClick={downloadBackup}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg font-semibold transition-colors text-xs border border-gray-700"
           >
-            ⬇ Backup DB
+            <Icon name="download" size={13} /> Backup DB
           </button>
           <button
             onClick={testPush}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-lg font-semibold transition-colors text-xs border border-gray-700"
           >
-            🔔 Testar Push
+            <Icon name="bell" size={13} /> Testar Push
           </button>
           <button
             onClick={fetchSyncDiffs}
             disabled={syncing}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-800 hover:bg-blue-700 disabled:bg-gray-800 disabled:text-gray-600 text-blue-100 rounded-lg font-semibold transition-colors text-xs"
           >
-            {syncing ? '⟳ Buscando...' : '⟳ Sincronizar Resultados'}
+            <span className="inline-flex items-center gap-1.5"><Icon name="refresh" size={13} className={syncing ? 'animate-spin' : ''} /> {syncing ? 'Buscando...' : 'Sincronizar Resultados'}</span>
           </button>
           <button
             onClick={() => { setBulkImportOpen(true); setBulkMsg('') }}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-green-800 hover:bg-green-700 text-green-100 rounded-lg font-semibold transition-colors text-xs"
           >
-            📥 Importar em Lote
+            <Icon name="download" size={13} /> Importar em Lote
           </button>
           <button onClick={() => { localStorage.removeItem(ADMIN_KEY_STORAGE); location.reload() }} className="hover:text-gray-200">Sair</button>
         </div>
@@ -527,7 +528,7 @@ export default function AdminPage() {
         return (
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-3">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">📈 Visitas ao Site</h3>
+              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5"><Icon name="bars" size={13} /> Visitas ao Site</h3>
               <div className="flex gap-3 text-xs text-gray-500">
                 <span>Hoje: <span className="text-yellow-400 font-bold">{visitStats.today}</span></span>
                 <span>Total: <span className="text-gray-300 font-semibold">{visitStats.total}</span></span>
@@ -588,7 +589,10 @@ export default function AdminPage() {
             onClick={() => setActiveTab(tab)}
             className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === tab ? 'border-yellow-500 text-yellow-600 dark:text-yellow-400' : 'border-transparent text-gray-400 hover:text-gray-200'}`}
           >
-            {tab === 'participants' ? '👥 Participantes' : tab === 'results' ? '⚽ Grupos' : '🏆 Mata-Mata'}
+            <span className="inline-flex items-center gap-1.5">
+              <Icon name={tab === 'participants' ? 'users' : tab === 'results' ? 'ball' : 'trophy'} size={14} />
+              {tab === 'participants' ? 'Participantes' : tab === 'results' ? 'Grupos' : 'Mata-Mata'}
+            </span>
           </button>
         ))}
       </div>
@@ -673,7 +677,7 @@ export default function AdminPage() {
                     'bg-gray-800 border-gray-700 text-gray-300 hover:border-gray-500'
                   }`}
                 >
-                  {g.id} {done === 6 ? '✓' : `${done}/6`}
+                  {g.id} {done === 6 ? <Icon name="check" size={13} className="inline" /> : `${done}/6`}
                 </button>
               )
             })}
@@ -703,7 +707,7 @@ export default function AdminPage() {
         <div className="space-y-8 max-w-2xl">
           {groupsDone < 12 && (
             <div className="bg-yellow-950/30 border border-yellow-800 rounded-lg p-3 text-sm text-yellow-200">
-              ⚠️ {groupsDone}/12 grupos com resultados completos. Os times do mata-mata são calculados automaticamente conforme os grupos são preenchidos.
+              <Icon name="alert" size={14} className="inline -mt-0.5 mr-1" /> {groupsDone}/12 grupos com resultados completos. Os times do mata-mata são calculados automaticamente conforme os grupos são preenchidos.
             </div>
           )}
 
@@ -826,7 +830,7 @@ function ResultInput({
             title="Remover resultado"
             className="shrink-0 text-xs text-red-400 hover:text-red-300 disabled:opacity-40 px-1.5 py-1.5 transition-colors"
           >
-            ✕
+            <Icon name="x" size={14} />
           </button>
         )}
       </div>
@@ -847,8 +851,8 @@ function ResultInput({
       )}
 
       {saved && (
-        <p className="text-xs text-green-500">
-          ✓ {current!.score1} × {current!.score2}
+        <p className="text-xs text-green-500 flex items-center gap-1">
+          <Icon name="check" size={12} /> {current!.score1} × {current!.score2}
           {current?.advancingTeamId && ` — avança: ${teamById[current.advancingTeamId]?.name}`}
         </p>
       )}

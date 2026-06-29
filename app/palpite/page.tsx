@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { Icon } from '@/components/Icon'
 
 export default function PalpiteEntryPage() {
   const [name, setName] = useState('')
@@ -39,7 +40,7 @@ export default function PalpiteEntryPage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-[65vh] gap-8">
       <div className="text-center">
-        <div className="text-5xl mb-3">⚽</div>
+        <div className="flex justify-center mb-3"><Icon name="ball" size={48} className="text-[#00bf63]" strokeWidth={1.4} /></div>
         <h1 className="text-3xl font-bold text-gray-200">Enviar Palpites</h1>
         <p className="text-gray-400 mt-2 text-sm">Digite o seu nome no bolão para acessar os seus palpites</p>
       </div>
@@ -71,7 +72,7 @@ export default function PalpiteEntryPage() {
           disabled={loading || !name.trim()}
           className="w-full bg-green-700 hover:bg-green-600 disabled:bg-gray-800 disabled:text-gray-600 text-white font-bold py-3.5 rounded-xl transition-colors text-lg tracking-wide"
         >
-          {loading ? 'Aguarde...' : 'Acessar Palpites →'}
+          {loading ? 'Aguarde...' : <span className="inline-flex items-center gap-1.5">Acessar Palpites <Icon name="arrow-right" size={16} /></span>}
         </button>
       </form>
 

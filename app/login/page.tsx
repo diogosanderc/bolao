@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
+import { Icon } from '@/components/Icon'
 
 function LoginForm() {
   const router = useRouter()
@@ -37,7 +38,7 @@ function LoginForm() {
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <div className="text-5xl mb-3">🏆</div>
+          <div className="flex justify-center mb-3"><Icon name="trophy" size={48} className="text-[#00bf63]" strokeWidth={1.4} /></div>
           <h1 className="text-2xl font-bold text-white">Bolão Copa 2026</h1>
           <p className="text-gray-400 text-sm mt-1">Entrar na minha conta</p>
         </div>

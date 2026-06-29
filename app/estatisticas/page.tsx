@@ -6,6 +6,7 @@ import {
   ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell,
 } from 'recharts'
 import { chipCode } from '@/lib/names'
+import { Icon, IconName } from '@/components/Icon'
 
 type ParticipantInfo = { id: string; name: string }
 
@@ -129,7 +130,7 @@ export default function EstatisticasPage() {
   if (matchesPlayed === 0) {
     return (
       <div className="text-center py-20 text-gray-500">
-        <p className="text-4xl mb-3">📊</p>
+        <div className="flex justify-center mb-3"><Icon name="bars" size={40} className="text-gray-600" strokeWidth={1.4} /></div>
         <p>Nenhum resultado registrado ainda.</p>
         <p className="text-sm mt-1 text-gray-600">As estatísticas aparecerão conforme os jogos forem registrados.</p>
       </div>
@@ -164,11 +165,11 @@ export default function EstatisticasPage() {
       {/* Records & curiosities */}
       {records && records.length > 0 && (
         <div>
-          <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-2">🏅 Recordes & Curiosidades</h3>
+          <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-2"><Icon name="medal" size={15} /> Recordes & Curiosidades</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             {records.map(r => (
               <div key={r.title} className="flex items-start gap-3 bg-gray-900 border border-gray-800 rounded-xl px-3.5 py-3">
-                <span className="text-2xl leading-none mt-0.5">{r.icon}</span>
+                <span className="mt-0.5 text-[#00bf63]"><Icon name={r.icon as IconName} size={24} strokeWidth={1.4} /></span>
                 <div className="min-w-0">
                   <p className="text-[10px] uppercase tracking-wide text-gray-500 font-semibold">{r.title}</p>
                   <p className="text-sm font-bold text-gray-200 truncate">{r.value}</p>
@@ -210,7 +211,7 @@ export default function EstatisticasPage() {
           <p className="text-xs text-gray-500">Clique no participante para incluir no gráfico</p>
           {activeIds.size > 0 && (
             <button onClick={clearChart} className="text-xs px-2.5 py-1 rounded-full border border-gray-400 dark:border-gray-700 text-gray-500 hover:text-red-400 hover:border-red-500 transition-colors">
-              ✕ Limpar gráfico
+              <span className="inline-flex items-center gap-1"><Icon name="x" size={12} /> Limpar gráfico</span>
             </button>
           )}
         </div>
@@ -324,7 +325,7 @@ export default function EstatisticasPage() {
         return (
           <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
             <div className="px-4 py-3 border-b border-gray-800">
-              <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">⚔️ Comparação Direta</h3>
+              <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2"><Icon name="swords" size={15} /> Comparação Direta</h3>
             </div>
             <div className="grid grid-cols-2 divide-x divide-gray-800">
               {[{ s: s1, c: c1, win: leader === 0 }, { s: s2, c: c2, win: leader === 1 }].map(({ s, c, win }) => (
@@ -338,7 +339,7 @@ export default function EstatisticasPage() {
                       <span><span className="text-gray-300 font-bold text-base">{s.pointsPerMatch}</span><br/>pts/jogo</span>
                     </div>
                   </div>
-                  {win && <div className="mt-3 text-xs text-green-600 dark:text-green-400 font-semibold">👑 Na frente</div>}
+                  {win && <div className="mt-3 text-xs text-green-600 dark:text-green-400 font-semibold flex items-center justify-center gap-1"><Icon name="crown" size={13} /> Na frente</div>}
                 </div>
               ))}
             </div>
@@ -470,8 +471,8 @@ export default function EstatisticasPage() {
               <tr className="text-[10px] sm:text-xs text-gray-500 tracking-wider border-b border-gray-800 bg-gray-950/50">
                 <th className="pl-2 pr-1 py-2 text-left w-7">#</th>
                 <th className="px-1 py-2 text-left">Participante</th>
-                <th className="px-1 py-2 text-right w-14" title="Resultados certos (% de aproveitamento)">✅<span className="hidden sm:inline"> Result.</span></th>
-                <th className="px-1 py-2 text-right w-10" title="Placares exatos">🎯<span className="hidden sm:inline"> Plac.</span></th>
+                <th className="px-1 py-2 text-right w-14" title="Resultados certos (% de aproveitamento)"><span className="inline-flex items-center justify-end gap-1"><Icon name="check" size={12} /><span className="hidden sm:inline">Result.</span></span></th>
+                <th className="px-1 py-2 text-right w-10" title="Placares exatos"><span className="inline-flex items-center justify-end gap-1"><Icon name="target" size={12} /><span className="hidden sm:inline">Plac.</span></span></th>
                 <th className="px-1 py-2 text-right w-10" title="Pontos por jogo">Méd.</th>
                 <th className="pl-1 pr-2 py-2 text-right w-12 font-score">Total</th>
               </tr>
@@ -516,13 +517,13 @@ export default function EstatisticasPage() {
                   </div>
                   <div className="text-right shrink-0">
                     <div className="flex items-center gap-2">
-                      {isSurprise && <span className="text-xs text-orange-600 dark:text-orange-400">😱 Surpresa!</span>}
+                      {isSurprise && <span className="text-xs text-orange-600 dark:text-orange-400 inline-flex items-center gap-1"><Icon name="alert" size={12} /> Surpresa!</span>}
                       <span className={`text-sm font-bold px-2 py-0.5 rounded ${topHit ? 'text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-950' : 'text-gray-300 bg-gray-800'}`}>
                         {pp.topPrediction}
                       </span>
                       <span className="text-xs text-gray-500">
                         {pp.count}/{pp.totalPredictions}
-                        {topHit && <span className="ml-1 text-green-600 dark:text-green-500">✓</span>}
+                        {topHit && <Icon name="check" size={11} className="ml-1 inline text-green-600 dark:text-green-500" />}
                       </span>
                     </div>
                   </div>
@@ -536,7 +537,7 @@ export default function EstatisticasPage() {
       {/* Surprise summary */}
       {surprises.length > 0 && (
         <div className="bg-orange-50 dark:bg-orange-950/30 border border-orange-200 dark:border-orange-900/50 rounded-xl px-4 py-3 text-sm text-orange-700 dark:text-orange-300">
-          😱 <span className="font-semibold">{surprises.length} jogo{surprises.length !== 1 ? 's' : ''} sem nenhum palpite exato</span>
+          <Icon name="alert" size={14} className="inline -mt-0.5 mr-1" /> <span className="font-semibold">{surprises.length} jogo{surprises.length !== 1 ? 's' : ''} sem nenhum palpite exato</span>
           {' '}— ninguém acertou o placar correto nesses jogos.
         </div>
       )}

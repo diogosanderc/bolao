@@ -1,6 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { Icon } from '@/components/Icon'
 
 export default function CadastroPage() {
   const router = useRouter()
@@ -37,7 +38,7 @@ export default function CadastroPage() {
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <div className="text-5xl mb-3">⚽</div>
+          <div className="flex justify-center mb-3"><Icon name="ball" size={48} className="text-[#00bf63]" strokeWidth={1.4} /></div>
           <h1 className="text-2xl font-bold text-white">Criar conta</h1>
           <p className="text-gray-400 text-sm mt-1">Bolão Copa do Mundo 2026</p>
         </div>
