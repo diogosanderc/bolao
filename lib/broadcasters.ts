@@ -1,9 +1,10 @@
 // Brazilian World Cup 2026 broadcasters.
 // Source/credit: 26worldcup/26worldcup.github.io broadcasters.json (MIT), asOf 2026-06-10.
 //
-// The open dataset is per-market (country), not per-match. CazéTV streams all 104
-// games free; Globo and SBT carry Brazil's games + the knockout stage on free TV.
-// `OVERRIDES` lets us pin exact channels for a specific match when known.
+// The open dataset is per-market (country), not per-match — it can't say which
+// channel carries a specific game. CazéTV streams all 104 games free, so it's the
+// only reliable default. Globo + SBT are only shown where it's certain (Brazil's
+// games and the final). For anything else, use `OVERRIDES` to pin exact channels.
 
 export type Broadcaster = {
   id: string
@@ -31,8 +32,10 @@ const OVERRIDES: Record<string, Broadcaster[]> = {}
  */
 export function broadcastersForMatch(team1Id: string, team2Id: string, phase?: string): Broadcaster[] {
   const isBrazil = team1Id === 'BRA' || team2Id === 'BRA'
-  const isKnockout = !!phase && phase !== 'group'
-  if (isBrazil || isKnockout) return [GLOBO, SBT, CAZE]
+  const isFinal = phase === 'final'
+  // Only Brazil's games and the final reliably air on open TV (Globo + SBT).
+  // Everything else defaults to CazéTV (streams all 104 free); pin exceptions in OVERRIDES.
+  if (isBrazil || isFinal) return [GLOBO, SBT, CAZE]
   return [CAZE]
 }
 
