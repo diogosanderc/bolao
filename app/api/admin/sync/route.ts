@@ -159,6 +159,7 @@ export async function POST(req: NextRequest) {
 
   await updateDB(db => {
     const resultMap = Object.fromEntries(db.results.map(r => [r.matchId, r]))
+    const liveStates = { ...((db as any).liveMatchStates ?? {}) }
     for (const u of updates) {
       resultMap[u.matchId] = {
         ...resultMap[u.matchId],
@@ -167,12 +168,23 @@ export async function POST(req: NextRequest) {
         ...(u.regulationScore1 !== undefined ? { regulationScore1: u.regulationScore1 } : {}),
         ...(u.regulationScore2 !== undefined ? { regulationScore2: u.regulationScore2 } : {}),
       }
+      // Lock so liveSync never overwrites a synced result
+      liveStates[u.matchId] = {
+        ...liveStates[u.matchId],
+        status: 'completed',
+        score1: u.score1,
+        score2: u.score2,
+        sentStarted: true,
+        sentFinal: true,
+        sentGoals: u.score1 + u.score2,
+      }
     }
     const existingDates = db.matchDates ?? {}
     return {
       ...db,
       results: Object.values(resultMap),
       matchDates: { ...existingDates, ...dateMap },
+      liveMatchStates: liveStates,
     }
   })
 
