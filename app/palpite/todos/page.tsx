@@ -152,9 +152,45 @@ export default function TodosPalpitesPage() {
       const W = 520
       const PAD = 16
       const SCORE_COL_W = 58
-      const ROW_H = 52
       const TITLE_H = 68
-      const H = TITLE_H + (scoreKeys.length > 0 ? scoreKeys.length * ROW_H : 40) + 32
+      // Fixed height above names per row: score+count line + bar + spacing
+      const ROW_FIXED = 38
+      const NAME_LINE_H = 14
+      const NAME_FONT = '10px system-ui'
+
+      const barMaxW = W - PAD * 2 - SCORE_COL_W - 4
+
+      // Helper: wrap abbreviated names into lines that fit barMaxW
+      function wrapNameLines(nameList: string[], measureCtx: CanvasRenderingContext2D): string[] {
+        measureCtx.font = NAME_FONT
+        const words = nameList.slice().sort().map(n => {
+          if (n === 'LUCILIO') return 'LCLI'
+          if (n === 'MORELLI') return 'MRLI'
+          return n.substring(0, 4)
+        })
+        const lines: string[] = []
+        let cur = ''
+        for (const w of words) {
+          const test = cur ? `${cur} ${w}` : w
+          if (cur && measureCtx.measureText(test).width > barMaxW) {
+            lines.push(cur)
+            cur = w
+          } else {
+            cur = test
+          }
+        }
+        if (cur) lines.push(cur)
+        return lines
+      }
+
+      // Pre-compute name lines for each score group (needs a throwaway canvas to measure)
+      const measureCanvas = document.createElement('canvas')
+      const measureCtx = measureCanvas.getContext('2d')!
+      const rowNameLines: string[][] = scoreKeys.map(k => wrapNameLines(matchPreds[k], measureCtx))
+      const rowHeights = rowNameLines.map(lines => ROW_FIXED + lines.length * NAME_LINE_H + 8)
+
+      const totalRowH = rowHeights.reduce((s, h) => s + h, 0)
+      const H = TITLE_H + (scoreKeys.length > 0 ? totalRowH : 40) + 32
 
       const canvas = document.createElement('canvas')
       canvas.width = W * DPR
@@ -189,12 +225,13 @@ export default function TodosPalpitesPage() {
         ctx.fillText('Nenhum palpite registrado', W / 2, TITLE_H + 24)
       } else {
         const maxCount = matchPreds[scoreKeys[0]].length
+        let y = TITLE_H
         for (let i = 0; i < scoreKeys.length; i++) {
           const key = scoreKeys[i]
           const [s1, s2] = key.split('-')
           const names = matchPreds[key]
           const pct = total > 0 ? Math.round((names.length / total) * 100) : 0
-          const y = TITLE_H + i * ROW_H
+          const rowH = rowHeights[i]
           const isMostPopular = i === 0
 
           // Row background
@@ -202,9 +239,9 @@ export default function TodosPalpitesPage() {
           const rr = 4
           ctx.beginPath()
           ctx.moveTo(PAD + rr, y + 2)
-          ctx.arcTo(W - PAD, y + 2, W - PAD, y + ROW_H - 2, rr)
-          ctx.arcTo(W - PAD, y + ROW_H - 2, PAD, y + ROW_H - 2, rr)
-          ctx.arcTo(PAD, y + ROW_H - 2, PAD, y + 2, rr)
+          ctx.arcTo(W - PAD, y + 2, W - PAD, y + rowH - 2, rr)
+          ctx.arcTo(W - PAD, y + rowH - 2, PAD, y + rowH - 2, rr)
+          ctx.arcTo(PAD, y + rowH - 2, PAD, y + 2, rr)
           ctx.arcTo(PAD, y + 2, W - PAD, y + 2, rr)
           ctx.closePath()
           ctx.fill()
@@ -219,32 +256,26 @@ export default function TodosPalpitesPage() {
           ctx.font = 'bold 11px system-ui'
           ctx.fillStyle = isMostPopular ? '#34d399' : '#9ca3af'
           ctx.textAlign = 'left'
-          ctx.fillText(`${names.length} (${pct}%)`, PAD + SCORE_COL_W + 4, y + 20)
+          const barX = PAD + SCORE_COL_W + 4
+          ctx.fillText(`${names.length} (${pct}%)`, barX, y + 20)
 
           // Progress bar
-          const barX = PAD + SCORE_COL_W + 4
-          const barMaxW = W - PAD * 2 - SCORE_COL_W - 4
           const barFillW = maxCount > 0 ? (names.length / maxCount) * barMaxW : 0
           ctx.fillStyle = '#374151'
-          ctx.fillRect(barX, y + 28, barMaxW, 4)
+          ctx.fillRect(barX, y + 26, barMaxW, 4)
           ctx.fillStyle = isMostPopular ? '#22c55e' : '#3b82f6'
-          ctx.fillRect(barX, y + 28, barFillW, 4)
+          ctx.fillRect(barX, y + 26, barFillW, 4)
 
-          // Names (abbreviated, truncated to fit)
-          const abbrev = names.sort().map(name => {
-            if (name === 'LUCILIO') return 'LCLI'
-            if (name === 'MORELLI') return 'MRLI'
-            return name.substring(0, 4)
-          }).join(' ')
-          ctx.font = '10px system-ui'
+          // Name lines (wrapped)
+          ctx.font = NAME_FONT
           ctx.fillStyle = '#6b7280'
           ctx.textAlign = 'left'
-          let abbrevStr = abbrev
-          while (ctx.measureText(abbrevStr).width > barMaxW && abbrevStr.length > 3) {
-            abbrevStr = abbrevStr.slice(0, -1)
+          const nameLines = rowNameLines[i]
+          for (let li = 0; li < nameLines.length; li++) {
+            ctx.fillText(nameLines[li], barX, y + 38 + li * NAME_LINE_H)
           }
-          if (abbrevStr !== abbrev) abbrevStr = abbrevStr.trimEnd() + '…'
-          ctx.fillText(abbrevStr, barX, y + 44)
+
+          y += rowH
         }
       }
 
