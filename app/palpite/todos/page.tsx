@@ -154,8 +154,8 @@ export default function TodosPalpitesPage() {
       const SCORE_COL_W = 58
       const TITLE_H = 68
       // Fixed height above names per row: score+count line + bar + spacing
-      const ROW_FIXED = 38
-      const NAME_LINE_H = 14
+      const ROW_FIXED = 46
+      const NAME_LINE_H = 15
       const NAME_FONT = '10px system-ui'
 
       const barMaxW = W - PAD * 2 - SCORE_COL_W - 4
@@ -272,7 +272,7 @@ export default function TodosPalpitesPage() {
           ctx.textAlign = 'left'
           const nameLines = rowNameLines[i]
           for (let li = 0; li < nameLines.length; li++) {
-            ctx.fillText(nameLines[li], barX, y + 38 + li * NAME_LINE_H)
+            ctx.fillText(nameLines[li], barX, y + 46 + li * NAME_LINE_H)
           }
 
           y += rowH
