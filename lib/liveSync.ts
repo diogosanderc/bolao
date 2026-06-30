@@ -144,10 +144,6 @@ export async function runLiveSync(): Promise<SyncResult> {
     const newStatus: MatchState['status'] = completed ? 'completed' : penalties ? 'penalties' : etHalftime ? 'et_halftime' : extratime ? 'extratime' : halftime ? 'halftime' : inProgress ? 'in' : suspended ? 'suspended' : 'pre'
     const clock: string = halftime || etHalftime ? 'Intervalo' : suspended ? (status?.type?.shortDetail ?? status?.type?.description ?? 'Paralisado') : (status?.displayClock ?? '')
 
-    // ESPN sets competitor.winner = true for the team that advances (handles penalties)
-    const espnWinnerId = c1.winner === true ? id1 : c2.winner === true ? id2 : undefined
-    const winnerTeamId = espnWinnerId
-
     const varKeys: string[] = []
     const redCardKeys: string[] = []
     let penaltyScore1: number | undefined
@@ -176,17 +172,31 @@ export async function runLiveSync(): Promise<SyncResult> {
         redCardKeys.push(`${detailTeamId}|${player}|${minute}`)
       }
 
-      if (penalties && typeText === 'Penalty - Scored') {
+      // Count penalty goals from details even when status is already 'completed'
+      // so cold-start and post-completion polls can still determine the shootout winner.
+      if (typeText === 'Penalty - Scored') {
         const detailTeamId = String(detail.team?.id ?? '')
-        if (!penaltyScore1) penaltyScore1 = 0
-        if (!penaltyScore2) penaltyScore2 = 0
+        if (penaltyScore1 === undefined) penaltyScore1 = 0
+        if (penaltyScore2 === undefined) penaltyScore2 = 0
         if (detailTeamId === c1TeamId) penaltyScore1++
         else if (detailTeamId === c2TeamId) penaltyScore2++
       }
     }
-    if (penalties && penaltyScore1 !== undefined) {
+    if (penaltyScore1 !== undefined) {
       if (flipped) { const tmp = penaltyScore1; penaltyScore1 = penaltyScore2; penaltyScore2 = tmp }
     }
+
+    // Determine advancing team: ESPN's explicit winner flag first, then derived from
+    // penalty goal count (for completed matches where the flag may not be set).
+    const espnWinnerId = c1.winner === true ? id1 : c2.winner === true ? id2 : undefined
+    const effT1 = resolvedM?.team1Id ?? match.team1Id
+    const effT2 = resolvedM?.team2Id ?? match.team2Id
+    const penWinnerId = !espnWinnerId
+      && penaltyScore1 !== undefined && penaltyScore2 !== undefined
+      && penaltyScore1 !== penaltyScore2
+      ? (penaltyScore1 > penaltyScore2 ? effT1 : effT2)
+      : undefined
+    const winnerTeamId = espnWinnerId ?? penWinnerId
 
     espnProcessed.push({
       matchId: match.id, newStatus, score1, score2,
