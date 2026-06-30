@@ -4,20 +4,20 @@ import { MatchPrediction, MatchResult } from './types'
 
 // R32 match ID → slot key (letter of the group whose 1st-place faces a best-3rd)
 const SLOT_GROUP: Record<string, string> = {
-  R32_2: 'E', R32_5: 'B', R32_7: 'A', R32_8:  'L',
-  R32_9: 'G', R32_10: 'D', R32_14: 'I', R32_15: 'K',
+  R32_2: 'E', R32_5: 'I', R32_7: 'A', R32_8:  'L',
+  R32_9: 'D', R32_10: 'G', R32_13: 'B', R32_15: 'K',
 }
 
 // Bracket feed order (must be R16 → QF → SF → F for sequential winner resolution)
 const BRACKET_TREE: [string, string, string][] = [
-  ['R16_1', 'R32_2',  'R32_14'],
+  ['R16_1', 'R32_2',  'R32_5'],
   ['R16_2', 'R32_1',  'R32_3'],
   ['R16_3', 'R32_4',  'R32_6'],
   ['R16_4', 'R32_7',  'R32_8'],
   ['R16_5', 'R32_11', 'R32_12'],
-  ['R16_6', 'R32_10', 'R32_9'],
-  ['R16_7', 'R32_13', 'R32_16'],
-  ['R16_8', 'R32_5',  'R32_15'],
+  ['R16_6', 'R32_9',  'R32_10'],
+  ['R16_7', 'R32_14', 'R32_16'],
+  ['R16_8', 'R32_13', 'R32_15'],
   ['QF_1',  'R16_1',  'R16_2'],
   ['QF_2',  'R16_3',  'R16_4'],
   ['QF_3',  'R16_5',  'R16_6'],
