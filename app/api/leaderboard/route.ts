@@ -197,20 +197,39 @@ export async function GET() {
         isInTop7: rank <= 7,
       }
     })
-    // Position change + livePoints (points gained exclusively from current live matches)
-    // Provisional results that are finished (status=completed OR stale 'in' started >3h ago)
-    // must be included in the base so livePoints only reflects truly in-progress matches.
-    const finishedProvisional = provisionalResults.filter(pr => {
+    // Identify truly live matches: in-progress and not stale (started <3h ago)
+    const trulyLiveProvisional = provisionalResults.filter(pr => {
       const state = liveStates[pr.matchId]
-      if (!state) return true
-      if (state.status === 'completed') return true
+      if (!state) return false
+      const inProgress = ['in', 'halftime', 'extratime', 'et_halftime', 'penalties']
+      if (!inProgress.includes(state.status)) return false
       const matchDate = matchDates[pr.matchId]?.date
       const stale = matchDate && (now - new Date(matchDate).getTime()) > 3 * 3_600_000
-      return !!stale
+      return !stale
     })
-    const baseForComparison = hasLive
-      ? [...sortedResults, ...finishedProvisional]
-      : sortedResults.slice(0, -1)
+
+    // livePoints: computed directly via scoreMatch for live matches only.
+    // Avoids phase-advancement and group-bonus inflation caused by leaderboard diff.
+    // Max per live match = 8 pts (exact score) + up to 4 (goleada bonus) = 12.
+    const livePtsMap = new Map<string, number>()
+    if (hasLive) {
+      for (const participant of validParticipants) {
+        let pts = 0
+        for (const pr of trulyLiveProvisional) {
+          const match = matchById[pr.matchId]
+          if (!match) continue
+          const pred = db.matchPredictions.find(
+            p => p.participantId === participant.id && p.matchId === pr.matchId
+          )
+          if (!pred) continue
+          pts += scoreMatch(pred, pr, match).total
+        }
+        livePtsMap.set(participant.id, pts)
+      }
+    }
+
+    // Position change: rank vs confirmed results only (without any provisional)
+    const baseForComparison = sortedResults.slice(0, -1)
     if (hasLive || sortedResults.length > 1) {
       const prevLeaderboard = computeLeaderboard(
         validParticipants,
@@ -220,19 +239,16 @@ export async function GET() {
         db.r32TeamPicks,
         db.knockoutPhasePicks
       )
-      const prevPointsMap = new Map<string, number>()
       const prevRankMap = new Map<string, number>()
       for (const entry of prevLeaderboard) {
         const prevRank = prevLeaderboard.filter(e => e.totalPoints > entry.totalPoints).length + 1
         prevRankMap.set(entry.participant.id, prevRank)
-        prevPointsMap.set(entry.participant.id, entry.totalPoints)
       }
       leaderboardWithChanges = leaderboardWithChanges.map(entry => {
         const currentRank = leaderboard.filter(e => e.totalPoints > entry.totalPoints).length + 1
         const prevRank = prevRankMap.get(entry.participant.id)
         const positionChange = prevRank !== undefined ? prevRank - currentRank : undefined
-        const prevPts = prevPointsMap.get(entry.participant.id) ?? entry.totalPoints
-        const livePoints = hasLive ? Math.max(0, entry.totalPoints - prevPts) : 0
+        const livePoints = livePtsMap.get(entry.participant.id) ?? 0
         return { ...entry, positionChange, livePoints }
       })
     }
