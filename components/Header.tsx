@@ -65,13 +65,6 @@ export function Header() {
         Simulador
       </a>
       <a
-        href="/palpite"
-        onClick={() => setOpen(false)}
-        className={`hover:text-yellow-300 transition-colors text-white font-semibold tracking-wide uppercase ${mobile ? 'py-2 text-base' : 'text-sm'} ${pathname.startsWith('/palpite') ? 'text-yellow-300' : ''}`}
-      >
-        Palpites
-      </a>
-      <a
         href="/estatisticas"
         onClick={() => setOpen(false)}
         className={`hover:text-yellow-300 transition-colors text-white font-semibold tracking-wide uppercase ${mobile ? 'py-2 text-base' : 'text-sm'} ${pathname.startsWith('/estatisticas') ? 'text-yellow-300' : ''}`}

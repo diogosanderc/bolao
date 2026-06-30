@@ -64,15 +64,6 @@ function StatsIcon({ className }: IconProps) {
     </svg>
   )
 }
-function TargetIcon({ className }: IconProps) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="9" />
-      <circle cx="12" cy="12" r="5" />
-      <circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none" />
-    </svg>
-  )
-}
 function SimulatorIcon({ className }: IconProps) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -100,7 +91,6 @@ function SettingsIcon({ className }: IconProps) {
 const MAIN_ITEMS = [
   { href: '/', lines: ['Classificação'], Icon: TrophyIcon },
   { href: '/classificacao-copa', lines: ['Tabela'], Icon: TableIcon },
-  { href: '/palpite', lines: ['Palpites'], Icon: TargetIcon },
   { href: '/estatisticas', lines: ['Stats'], Icon: StatsIcon },
 ] as const
 

@@ -7,7 +7,7 @@ import { Icon } from '@/components/Icon'
 function LoginForm() {
   const router = useRouter()
   const params = useSearchParams()
-  const redirect = params.get('redirect') || '/palpite'
+  const redirect = params.get('redirect') || '/'
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
