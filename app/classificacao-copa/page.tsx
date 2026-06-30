@@ -150,6 +150,156 @@ function GroupCard({ group }: { group: GroupData }) {
   )
 }
 
+// ─── Compact bracket match card ──────────────────────────────────────────────
+
+function BracketCard({ m, highlight }: { m: MatchInfo; highlight?: boolean }) {
+  const played = m.status === 'played'
+  const live   = m.status === 'live'
+  const adv = m.advancingTeamId
+
+  function TeamRow({ teamId, side }: { teamId: string; side: 1 | 2 }) {
+    const score = side === 1 ? m.score1 : m.score2
+    const otherScore = side === 1 ? m.score2 : m.score1
+    const isAdv = adv ? adv === teamId : played ? (side === 1 ? (m.score1! > m.score2!) : (m.score2! > m.score1!)) : false
+    const isTbd = teamId === 'TBD'
+    return (
+      <div className={`flex items-center gap-1.5 px-2 py-1 ${side === 1 ? 'border-b border-gray-800/60' : ''} ${isAdv && played ? 'bg-gray-800/60' : ''}`}>
+        {isTbd
+          ? <span className="w-4 h-4 rounded-sm bg-gray-800 shrink-0" />
+          : <Flag teamId={teamId} size={16} />}
+        <span className={`text-[11px] font-semibold flex-1 min-w-0 truncate ${isTbd ? 'text-gray-600' : isAdv && played ? 'text-gray-100' : played ? 'text-gray-500' : 'text-gray-300'}`}>
+          {isTbd ? '—' : (teamById[teamId]?.name ?? teamId)}
+        </span>
+        {(played || live) && score !== null && (
+          <span className={`text-[11px] font-bold tabular-nums shrink-0 ${isAdv && played ? 'text-yellow-400' : live ? 'text-red-400' : score! > otherScore! ? 'text-gray-200' : 'text-gray-500'}`}>
+            {score}
+          </span>
+        )}
+      </div>
+    )
+  }
+
+  return (
+    <div className={`rounded-lg border overflow-hidden w-[148px] shrink-0 ${highlight ? 'border-yellow-500/60 shadow-[0_0_8px_rgba(234,179,8,0.2)]' : live ? 'border-red-700/60' : played ? 'border-gray-700' : 'border-gray-800'} bg-gray-950`}>
+      {live && (
+        <div className="flex items-center gap-1 px-2 py-0.5 bg-red-950/60">
+          <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse shrink-0" />
+          <span className="text-[9px] font-bold text-red-400 uppercase tracking-wide">{m.clock ?? 'AO VIVO'}</span>
+        </div>
+      )}
+      <TeamRow teamId={m.team1Id} side={1} />
+      <TeamRow teamId={m.team2Id} side={2} />
+      {m.isPenalties && m.penaltyScore1 !== undefined && (
+        <div className="text-center text-[9px] font-semibold text-red-400 py-0.5 bg-red-950/30">
+          Pên {m.penaltyScore1}–{m.penaltyScore2}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─── Visual QF→SF→Final bracket tree ─────────────────────────────────────────
+// BRACKET_TREE mapping: SF_1←(QF_1,QF_3), SF_2←(QF_2,QF_4), F_1←(SF_1,SF_2)
+
+function BracketTree({ phases }: { phases: KnockoutPhase[] }) {
+  const qfPhase  = phases.find(p => p.phase === 'quarterfinal')
+  const sfPhase  = phases.find(p => p.phase === 'semifinal')
+  const fPhase   = phases.find(p => p.phase === 'final')
+  const tpPhase  = phases.find(p => p.phase === 'third_place')
+  if (!qfPhase || !sfPhase || !fPhase) return null
+  const [qf1, qf2, qf3, qf4] = qfPhase.matches  // sorted by matchNumber
+  const [sf1, sf2] = sfPhase.matches
+  const final = fPhase.matches[0]
+  const tp = tpPhase?.matches[0]
+  if (!qf1 || !qf2 || !qf3 || !qf4 || !sf1 || !sf2 || !final) return null
+
+  // SF_1 ← QF_1+QF_3; SF_2 ← QF_2+QF_4
+  // Layout: two halves stacked, each half = [QF_A, QF_B] → SF
+  const CARD_H = 62
+  const GAP    = 10
+  const HALF_GAP = 20
+  const CONN_W = 28
+
+  // y-centers within one "half-bracket" block (0-based within the half)
+  const yA   = CARD_H / 2
+  const yB   = CARD_H + GAP + CARD_H / 2
+  const ySF  = (yA + yB) / 2
+  const halfH = CARD_H * 2 + GAP
+
+  const totalH = halfH * 2 + HALF_GAP
+  const ySF1 = ySF
+  const ySF2 = halfH + HALF_GAP + ySF
+
+  const yF = totalH / 2
+
+  const stroke = '#374151'  // gray-700
+
+  function Connector({ y1, y2, mid, label }: { y1: number; y2: number; mid: number; label?: string }) {
+    return (
+      <g>
+        <line x1={0}   y1={y1}  x2={CONN_W / 2} y2={y1}  stroke={stroke} strokeWidth={1.5} />
+        <line x1={0}   y1={y2}  x2={CONN_W / 2} y2={y2}  stroke={stroke} strokeWidth={1.5} />
+        <line x1={CONN_W / 2} y1={y1} x2={CONN_W / 2} y2={y2} stroke={stroke} strokeWidth={1.5} />
+        <line x1={CONN_W / 2} y1={mid} x2={CONN_W}    y2={mid} stroke={stroke} strokeWidth={1.5} />
+        {label && <text x={CONN_W / 2} y={mid - 4} textAnchor="middle" fontSize={8} fill="#6b7280">{label}</text>}
+      </g>
+    )
+  }
+
+  return (
+    <div className="overflow-x-auto pb-2">
+      <div className="relative flex items-start gap-0" style={{ minWidth: 580 }}>
+        {/* QF column */}
+        <div className="flex flex-col" style={{ gap: `${HALF_GAP}px` }}>
+          <div className="flex flex-col" style={{ gap: `${GAP}px` }}>
+            <BracketCard m={qf1} />
+            <BracketCard m={qf3} />
+          </div>
+          <div className="flex flex-col" style={{ gap: `${GAP}px` }}>
+            <BracketCard m={qf2} />
+            <BracketCard m={qf4} />
+          </div>
+        </div>
+
+        {/* QF→SF connectors */}
+        <svg width={CONN_W} height={totalH} className="shrink-0">
+          <Connector y1={yA}              y2={yB}              mid={ySF1} />
+          <Connector y1={halfH + HALF_GAP + yA} y2={halfH + HALF_GAP + yB} mid={ySF2} />
+        </svg>
+
+        {/* SF column */}
+        <div className="flex flex-col" style={{ gap: `${HALF_GAP + halfH - CARD_H}px`, paddingTop: `${ySF1 - CARD_H / 2}px` }}>
+          <BracketCard m={sf1} highlight={sf1.status !== 'upcoming'} />
+          <BracketCard m={sf2} highlight={sf2.status !== 'upcoming'} />
+        </div>
+
+        {/* SF→Final connectors */}
+        <svg width={CONN_W} height={totalH} className="shrink-0">
+          <Connector y1={ySF1} y2={ySF2} mid={yF} />
+        </svg>
+
+        {/* Final */}
+        <div className="flex flex-col gap-2" style={{ paddingTop: `${yF - CARD_H / 2}px` }}>
+          <div className="flex items-center gap-1 mb-0.5">
+            <Icon name="trophy" size={13} className="text-yellow-500" />
+            <span className="text-[10px] font-bold text-yellow-500 uppercase tracking-wider">Final</span>
+          </div>
+          <BracketCard m={final} highlight={true} />
+          {tp && (
+            <div className="mt-2">
+              <div className="flex items-center gap-1 mb-0.5">
+                <Icon name="medal" size={13} className="text-amber-500" />
+                <span className="text-[10px] font-bold text-amber-500 uppercase tracking-wider">3º Lugar</span>
+              </div>
+              <BracketCard m={tp} />
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ─── Phase icons ─────────────────────────────────────────────────────────────
 
 const PHASE_ICON: Record<string, IconName> = {
@@ -178,6 +328,7 @@ function currentRoundPhase(phases: KnockoutPhase[]): string {
 
 function KnockoutSection({ phases }: { phases: KnockoutPhase[] }) {
   const [activePhase, setActivePhase] = useState('')
+  const [bracketView, setBracketView] = useState(false)
   const initedRef = useRef(false)
 
   // default to the current round once data arrives; keep selection valid after
@@ -191,16 +342,19 @@ function KnockoutSection({ phases }: { phases: KnockoutPhase[] }) {
 
   const current = phases.find(p => p.phase === activePhase)
 
+  // Only show bracket toggle once QF teams are resolved
+  const qfResolved = phases.find(p => p.phase === 'quarterfinal')?.matches.some(m => m.team1Id !== 'TBD') ?? false
+
   return (
     <div className="space-y-3">
-      {/* Phase tabs */}
-      <div className="flex flex-wrap gap-1.5">
+      {/* Phase tabs + bracket toggle */}
+      <div className="flex flex-wrap items-center gap-1.5">
         {phases.map(p => (
           <button
             key={p.phase}
-            onClick={() => setActivePhase(p.phase)}
+            onClick={() => { setActivePhase(p.phase); setBracketView(false) }}
             className={`text-xs px-3 py-1 rounded-full border transition-colors ${
-              activePhase === p.phase
+              activePhase === p.phase && !bracketView
                 ? 'bg-green-700 dark:bg-yellow-500 text-[white] dark:text-black border-green-700 dark:border-yellow-500 font-bold'
                 : 'border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-200'
             }`}
@@ -208,9 +362,32 @@ function KnockoutSection({ phases }: { phases: KnockoutPhase[] }) {
             {PHASE_ICON[p.phase] && <Icon name={PHASE_ICON[p.phase]} size={13} className="mr-1 inline" />}{p.label}
           </button>
         ))}
+        {qfResolved && (
+          <button
+            onClick={() => setBracketView(v => !v)}
+            className={`ml-auto text-xs px-3 py-1 rounded-full border transition-colors flex items-center gap-1 ${
+              bracketView
+                ? 'bg-purple-700 text-white border-purple-700 font-bold'
+                : 'border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-200'
+            }`}
+          >
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className="w-3.5 h-3.5">
+              <rect x="1" y="4" width="5" height="4" rx="1"/><rect x="1" y="12" width="5" height="4" rx="1"/>
+              <rect x="8" y="7.5" width="5" height="5" rx="1"/><rect x="15" y="7.5" width="4" height="5" rx="1"/>
+              <line x1="6" y1="6" x2="8" y2="8.5"/><line x1="6" y1="14" x2="8" y2="11.5"/>
+              <line x1="13" y1="10" x2="15" y2="10"/>
+            </svg>
+            Chaveamento
+          </button>
+        )}
       </div>
 
-      {current && (
+      {bracketView && qfResolved ? (
+        <div className="rounded-xl border border-gray-800 bg-gray-950 p-3 animate-fade-in">
+          <p className="text-[10px] text-gray-600 mb-2">QF → SF → Final · deslize para o lado →</p>
+          <BracketTree phases={phases} />
+        </div>
+      ) : current && (
         <div className="rounded-xl border border-gray-800 bg-gray-950 overflow-hidden animate-fade-in">
           <div className="bg-yellow-600 px-4 py-2 flex items-center gap-2">
             {PHASE_ICON[current.phase] && <Icon name={PHASE_ICON[current.phase]} size={16} />}
@@ -219,7 +396,6 @@ function KnockoutSection({ phases }: { phases: KnockoutPhase[] }) {
           <div className="divide-y divide-gray-800/50">
             {current.matches.map((m, i) => (
               <div key={m.matchId}>
-                {/* Pair label for R32: show match number in bracket */}
                 {current.phase === 'round_of_32' && i % 2 === 0 && (
                   <div className="px-3 pt-2 pb-0.5 text-[10px] text-gray-600 font-semibold uppercase tracking-wider">
                     Jogo {Math.floor(i / 2) + 1}

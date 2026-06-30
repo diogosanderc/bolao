@@ -67,11 +67,12 @@ export function BottomNav() {
               key={href}
               href={href}
               prefetch
-              className={`relative flex-1 flex flex-col items-center justify-center gap-1 py-2.5 transition-colors ${active ? 'text-[#00bf63]' : 'text-gray-400 active:text-gray-200'}`}
+              className={`relative flex-1 flex flex-col items-center justify-center gap-1 py-2 transition-colors ${active ? 'text-[#00bf63]' : 'text-gray-400 active:text-gray-200'}`}
             >
-              <Icon className={`w-[26px] h-[26px] transition-transform ${active ? 'scale-110' : ''}`} />
-              <span className="text-xs font-semibold tracking-tight">{label}</span>
-              {active && <span className="absolute top-0 h-0.5 w-10 rounded-full bg-[#00bf63]" />}
+              {active && <span className="absolute inset-x-3 inset-y-1 rounded-xl bg-[#00bf63]/15" />}
+              <Icon className={`relative w-[24px] h-[24px] transition-transform ${active ? 'scale-110' : ''}`} />
+              <span className={`relative text-[10px] font-bold tracking-tight ${active ? '' : 'font-semibold'}`}>{label}</span>
+              {active && <span className="absolute top-0 left-1/2 -translate-x-1/2 h-0.5 w-8 rounded-full bg-[#00bf63]" />}
             </Link>
           )
         })}

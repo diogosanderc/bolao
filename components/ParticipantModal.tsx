@@ -702,7 +702,13 @@ export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClos
 
           {!loading && tab === 'upcoming' && (
             <div key={`upcoming-${slideDir}`} className={`divide-y divide-gray-800/60 ${slideDir === 'r' ? 'animate-tab-in-right' : 'animate-tab-in-left'}`}>
-              {upcoming.length === 0 && <p className="text-center py-10 text-gray-600">Sem palpites futuros registrados.</p>}
+              {upcoming.length === 0 && (
+                <div className="flex flex-col items-center gap-2 py-12 text-gray-600">
+                  <svg className="w-10 h-10 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+                  <p className="text-sm">Nenhum palpite futuro registrado.</p>
+                  <p className="text-xs text-gray-700">Os palpites ainda não preenchidos aparecem aqui.</p>
+                </div>
+              )}
               {upcoming.map(p => (
                 <div key={p.matchId} className="px-3 py-2.5">
                   <div className="flex items-center justify-between gap-2">

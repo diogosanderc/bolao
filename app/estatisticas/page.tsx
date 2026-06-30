@@ -59,13 +59,15 @@ export default function EstatisticasPage() {
   const [loading, setLoading] = useState(true)
   const [activeIds, setActiveIds] = useState<Set<string>>(new Set())
   const [showAllClass, setShowAllClass] = useState(false)
+  const [statsSearch, setStatsSearch] = useState('')
 
   useEffect(() => {
     fetch('/api/estatisticas')
       .then(r => r.json())
       .then(d => {
         setData(d)
-        setActiveIds(new Set())
+        // Pre-select top 5 participants so the chart isn't empty on first load
+        setActiveIds(new Set((d.participants as { id: string }[]).slice(0, 5).map(p => p.id)))
         setLoading(false)
       })
       .catch(() => setLoading(false))
@@ -137,7 +139,9 @@ export default function EstatisticasPage() {
     )
   }
 
-  const sortedStats = [...participantStats].sort((a, b) => b.totalPoints - a.totalPoints)
+  const sortedStats = [...participantStats]
+    .sort((a, b) => b.totalPoints - a.totalPoints)
+    .filter(s => !statsSearch || s.name.toLowerCase().includes(statsSearch.toLowerCase()))
   const surpriseSet = new Set(surprises)
 
   const CustomTooltip = ({ active, payload, label }: any) => {
@@ -461,9 +465,23 @@ export default function EstatisticasPage() {
 
       {/* Participant Stats */}
       <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
-        <div className="px-4 py-3 border-b border-gray-800">
-          <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Desempenho por Participante</h3>
-          <p className="text-xs text-gray-600 mt-0.5">{matchesPlayed} jogo{matchesPlayed !== 1 ? 's' : ''} registrado{matchesPlayed !== 1 ? 's' : ''}</p>
+        <div className="px-4 py-3 border-b border-gray-800 flex items-center gap-3 flex-wrap">
+          <div className="flex-1 min-w-0">
+            <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Desempenho por Participante</h3>
+            <p className="text-xs text-gray-600 mt-0.5">{matchesPlayed} jogo{matchesPlayed !== 1 ? 's' : ''} registrado{matchesPlayed !== 1 ? 's' : ''}</p>
+          </div>
+          <div className="relative shrink-0">
+            <input
+              type="text"
+              value={statsSearch}
+              onChange={e => setStatsSearch(e.target.value)}
+              placeholder="Buscar..."
+              className="bg-gray-800 border border-gray-700 text-gray-200 text-xs rounded-lg px-3 py-1.5 pl-7 w-36 focus:outline-none focus:border-gray-500 placeholder-gray-600"
+            />
+            <svg className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </div>
         </div>
         <div>
           <table className="w-full text-sm table-fixed">
@@ -478,10 +496,13 @@ export default function EstatisticasPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-800">
+              {sortedStats.length === 0 && (
+                <tr><td colSpan={6} className="text-center py-8 text-gray-600 text-sm">Nenhum participante encontrado.</td></tr>
+              )}
               {sortedStats.map((s, idx) => {
                 const pct = matchesPlayed > 0 ? Math.round((s.correctResults / matchesPlayed) * 100) : 0
                 return (
-                  <tr key={s.id} className={idx === 0 ? 'bg-yellow-50 dark:bg-yellow-950/30' : ''}>
+                  <tr key={s.id} className={idx === 0 && !statsSearch ? 'bg-yellow-50 dark:bg-yellow-950/30' : ''}>
                     <td className="pl-2 pr-1 py-3 text-gray-500 text-xs">{idx + 1}</td>
                     <td className="px-1 py-3 font-semibold text-gray-200 truncate">{s.name}</td>
                     <td className="px-1 py-3 text-right whitespace-nowrap">
