@@ -18,20 +18,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
   }
 
-  const result: MatchResult = {
-    matchId,
-    score1: Number(score1),
-    score2: Number(score2),
-    ...(advancingTeamId ? { advancingTeamId } : {}),
-  }
-
-  await updateDB(db => ({
-    ...db,
-    results: [
-      ...db.results.filter(r => r.matchId !== matchId),
-      result,
-    ],
-  }))
+  await updateDB(db => {
+    const existing = db.results.find(r => r.matchId === matchId) ?? {} as MatchResult
+    const result: MatchResult = {
+      ...existing,
+      matchId,
+      score1: Number(score1),
+      score2: Number(score2),
+      ...(advancingTeamId ? { advancingTeamId } : {}),
+    }
+    return {
+      ...db,
+      results: [...db.results.filter(r => r.matchId !== matchId), result],
+    }
+  })
 
   return NextResponse.json({ ok: true })
 }

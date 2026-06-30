@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
 
   await updateDB(db => {
     const map = Object.fromEntries(db.results.map(r => [r.matchId, r]))
-    for (const r of valid) map[r.matchId] = r
+    for (const r of valid) map[r.matchId] = { ...map[r.matchId], ...r }
     return { ...db, results: Object.values(map) }
   })
 

@@ -253,10 +253,11 @@ export async function runLiveSync(): Promise<SyncResult> {
           // Match already finished on first encounter — save result silently
           newPersistedStates[matchId] = { status: 'completed', score1, score2, sentStarted: true, sentFinal: true, sentGoals: score1 + score2 }
           const coldAdvancing = phase !== 'group' && winnerTeamId ? winnerTeamId : undefined
+          const advancing = coldAdvancing ?? dbResult?.advancingTeamId
           if (!dbResult || dbResult.score1 !== score1 || dbResult.score2 !== score2) {
-            dbResultUpdates.push({ matchId, score1, score2, advancingTeamId: coldAdvancing ?? dbResult?.advancingTeamId })
-          } else if (coldAdvancing && !dbResult.advancingTeamId) {
-            dbResultUpdates.push({ matchId, score1, score2, advancingTeamId: coldAdvancing })
+            dbResultUpdates.push({ matchId, score1, score2, ...(advancing ? { advancingTeamId: advancing } : {}) })
+          } else if (advancing && !dbResult.advancingTeamId) {
+            dbResultUpdates.push({ matchId, score1, score2, advancingTeamId: advancing })
           }
         } else if (newStatus === 'in' || newStatus === 'halftime') {
           // Match already in progress on first encounter — notify immediately.
@@ -434,16 +435,17 @@ export async function runLiveSync(): Promise<SyncResult> {
           : undefined
         const wentBeyondRegulation = regS1 !== undefined
         const advancingTeamId = phase !== 'group' ? winnerTeamId : undefined
+        const advancing = advancingTeamId ?? dbResult?.advancingTeamId
         if (!dbResult
           || dbResult.score1 !== score1
           || dbResult.score2 !== score2
-          || (advancingTeamId && dbResult.advancingTeamId !== advancingTeamId)
+          || (advancing && dbResult.advancingTeamId !== advancing)
           || (wentBeyondRegulation && (dbResult.regulationScore1 !== regS1 || dbResult.regulationScore2 !== regS2))) {
           dbResultUpdates.push({
             matchId,
             score1,
             score2,
-            advancingTeamId: advancingTeamId ?? dbResult?.advancingTeamId,
+            ...(advancing ? { advancingTeamId: advancing } : {}),
             ...(wentBeyondRegulation ? { regulationScore1: regS1!, regulationScore2: regS2! } : {}),
           })
         }
