@@ -34,9 +34,12 @@ export async function GET() {
       if (inProgressStatuses.includes(state.status) || state.status === 'completed') {
         provisionalResults.push({ matchId, score1: state.score1, score2: state.score2 })
         // Only mark as live if match isn't stale (started > 3h ago means it likely ended)
+        // No date info at all → treat as stale so ghost "ao vivo" indicators are never shown
         if (inProgressStatuses.includes(state.status)) {
           const matchDate = matchDates[matchId]?.date
-          const stale = matchDate && (now - new Date(matchDate).getTime()) > 3 * 3_600_000
+          const startedAt = (state as any).startedAt as string | undefined
+          const dateToCheck = matchDate ?? startedAt
+          const stale = !dateToCheck || (now - new Date(dateToCheck).getTime()) > 3 * 3_600_000
           if (!stale) hasLive = true
         }
       }
@@ -205,7 +208,10 @@ export async function GET() {
           const state = liveStates[pr.matchId]
           if (!state || !inProgressStatuses2.includes(state.status)) return false
           const matchDate = matchDates[pr.matchId]?.date
-          const stale = matchDate && (now - new Date(matchDate).getTime()) > 3 * 3_600_000
+          const startedAt = (state as any).startedAt as string | undefined
+          const dateToCheck = matchDate ?? startedAt
+          if (!dateToCheck) return false
+          const stale = (now - new Date(dateToCheck).getTime()) > 3 * 3_600_000
           return !stale
         })
         .map(pr => pr.matchId)

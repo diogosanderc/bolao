@@ -270,7 +270,8 @@ export async function runLiveSync(): Promise<SyncResult> {
             sentHalftime: newStatus === 'halftime',
             sentGoals: currentGoals,
             sentFinal: false,
-          }
+            startedAt: new Date().toISOString(),
+          } as MatchState & { startedAt: string }
         } else {
           // 'pre' — upcoming match seen for the first time
           newPersistedStates[matchId] = { status: 'pre', score1: 0, score2: 0 }
@@ -349,6 +350,7 @@ export async function runLiveSync(): Promise<SyncResult> {
       if (newStatus === 'in' && !sentStarted) {
         pushQueue.push({ title: '🟢 Jogo começou!', body: `${t1} x ${t2}` })
         newState.sentStarted = true
+        ;(newState as any).startedAt = (prev as any).startedAt ?? new Date().toISOString()
       }
 
       if (newStatus === 'halftime' && !sentHalftime) {
