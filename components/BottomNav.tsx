@@ -124,15 +124,15 @@ export function BottomNav() {
 
   return (
     <>
-      {/* Overlay behind drawer */}
+      {/* Overlay behind drawer (z-[45] covers the nav bar at z-40) */}
       {moreOpen && (
-        <div className="fixed inset-0 z-40" onClick={() => setMoreOpen(false)} />
+        <div className="fixed inset-0 z-[45]" onClick={() => setMoreOpen(false)} />
       )}
 
-      {/* Slide-up drawer */}
+      {/* Slide-up drawer — bottom-0 so translate-y-full hides it fully off-screen */}
       <div
-        className={`fixed inset-x-0 z-50 bg-gray-950 border-t border-gray-800 transition-transform duration-200 ease-out ${moreOpen ? 'translate-y-0' : 'translate-y-full pointer-events-none'}`}
-        style={{ bottom: 'calc(56px + env(safe-area-inset-bottom))' }}
+        className={`fixed inset-x-0 bottom-0 z-50 bg-gray-950 border-t border-gray-800 transition-transform duration-200 ease-out ${moreOpen ? 'translate-y-0' : 'translate-y-full pointer-events-none'}`}
+        style={{ paddingBottom: 'calc(56px + env(safe-area-inset-bottom))' }}
       >
         {MORE_ITEMS.map(({ href, label, Icon }) => (
           <Link
