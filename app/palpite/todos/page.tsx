@@ -232,10 +232,9 @@ export default function TodosPalpitesPage() {
           const names = matchPreds[key]
           const pct = total > 0 ? Math.round((names.length / total) * 100) : 0
           const rowH = rowHeights[i]
-          const isMostPopular = i === 0
 
           // Row background
-          ctx.fillStyle = isMostPopular ? '#052e16' : (i % 2 === 0 ? '#1f2937' : '#1a2231')
+          ctx.fillStyle = i % 2 === 0 ? '#1f2937' : '#1a2231'
           const rr = 4
           ctx.beginPath()
           ctx.moveTo(PAD + rr, y + 2)
@@ -248,13 +247,13 @@ export default function TodosPalpitesPage() {
 
           // Score
           ctx.font = 'bold 15px system-ui'
-          ctx.fillStyle = isMostPopular ? '#34d399' : '#facc15'
+          ctx.fillStyle = '#facc15'
           ctx.textAlign = 'center'
           ctx.fillText(`${s1}×${s2}`, PAD + SCORE_COL_W / 2, y + 20)
 
           // Count + pct
           ctx.font = 'bold 11px system-ui'
-          ctx.fillStyle = isMostPopular ? '#34d399' : '#9ca3af'
+          ctx.fillStyle = '#9ca3af'
           ctx.textAlign = 'left'
           const barX = PAD + SCORE_COL_W + 4
           ctx.fillText(`${names.length} (${pct}%)`, barX, y + 20)
@@ -263,7 +262,7 @@ export default function TodosPalpitesPage() {
           const barFillW = maxCount > 0 ? (names.length / maxCount) * barMaxW : 0
           ctx.fillStyle = '#374151'
           ctx.fillRect(barX, y + 26, barMaxW, 4)
-          ctx.fillStyle = isMostPopular ? '#22c55e' : '#3b82f6'
+          ctx.fillStyle = '#3b82f6'
           ctx.fillRect(barX, y + 26, barFillW, 4)
 
           // Name lines (wrapped)
