@@ -98,7 +98,7 @@ function SettingsIcon({ className }: IconProps) {
 }
 
 const MAIN_ITEMS = [
-  { href: '/', lines: ['Bolão da', 'Copa 2026'], Icon: TrophyIcon },
+  { href: '/', lines: ['Classificação'], Icon: TrophyIcon },
   { href: '/classificacao-copa', lines: ['Tabela'], Icon: TableIcon },
   { href: '/palpite', lines: ['Palpites'], Icon: TargetIcon },
   { href: '/estatisticas', lines: ['Stats'], Icon: StatsIcon },
@@ -158,19 +158,18 @@ export function BottomNav() {
         <div className="flex max-w-7xl mx-auto">
           {MAIN_ITEMS.map(({ href, lines, Icon }) => {
             const active = href === '/' ? pathname === '/' : pathname.startsWith(href)
-            const isBrand = href === '/'
             return (
               <Link
                 key={href}
                 href={href}
                 prefetch
                 onClick={() => setMoreOpen(false)}
-                className={`relative flex-1 flex flex-col items-center justify-center gap-0.5 py-2 transition-colors ${active ? 'text-[#00bf63]' : 'text-gray-400 active:text-gray-200'}`}
+                className={`relative flex-1 flex flex-col items-center justify-center gap-1 py-3 transition-colors ${active ? 'text-[#00bf63]' : 'text-gray-400 active:text-gray-200'}`}
               >
                 {active && <span className="absolute inset-x-2 inset-y-1 rounded-xl bg-[#00bf63]/15" />}
-                <Icon className={`relative w-[22px] h-[22px] transition-transform ${active ? 'scale-110' : ''}`} />
-                <span className={`relative leading-tight text-center ${isBrand ? 'text-[8px] font-semibold' : 'text-[10px] font-bold tracking-tight'}`}>
-                  {lines.length === 2 ? <>{lines[0]}<br />{lines[1]}</> : lines[0]}
+                <Icon className={`relative w-[24px] h-[24px] transition-transform ${active ? 'scale-110' : ''}`} />
+                <span className="relative text-[10px] font-bold tracking-tight leading-tight text-center">
+                  {lines[0]}
                 </span>
                 {active && <span className="absolute top-0 left-1/2 -translate-x-1/2 h-0.5 w-8 rounded-full bg-[#00bf63]" />}
               </Link>
@@ -180,7 +179,7 @@ export function BottomNav() {
           {/* Mais */}
           <button
             onClick={() => setMoreOpen(o => !o)}
-            className={`relative flex-1 flex flex-col items-center justify-center gap-0.5 py-2 transition-colors ${moreOpen || moreActive ? 'text-[#00bf63]' : 'text-gray-400 active:text-gray-200'}`}
+            className={`relative flex-1 flex flex-col items-center justify-center gap-1 py-3 transition-colors ${moreOpen || moreActive ? 'text-[#00bf63]' : 'text-gray-400 active:text-gray-200'}`}
           >
             {(moreOpen || moreActive) && <span className="absolute inset-x-2 inset-y-1 rounded-xl bg-[#00bf63]/15" />}
             {moreOpen ? (

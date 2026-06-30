@@ -783,7 +783,7 @@ export default function LeaderboardPage() {
 
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-gray-200 dark:text-yellow-400">
-          Classificação
+          BOLÃO DA COPA 2026
         </h2>
         <div className="flex items-center gap-2">
           {notifState !== 'unsupported' && (

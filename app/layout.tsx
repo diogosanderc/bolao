@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { BottomNav } from '@/components/BottomNav'
+import { PullToRefresh } from '@/components/PullToRefresh'
 import { Google_Sans } from 'next/font/google'
 
 const font = Google_Sans({ subsets: ['latin'], weight: ['400', '500', '700'] })
@@ -30,6 +31,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className={`min-h-screen antialiased ${font.className} ${googleSansVar.variable}`}>
         <script dangerouslySetInnerHTML={{ __html: `if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js')}` }} />
+        <PullToRefresh />
         <main className="max-w-7xl mx-auto px-4 pt-4 pb-28">{children}</main>
         <footer className="text-center text-xs text-gray-700 py-4 pb-28">
           Criado por Diogo Sander — 2026
