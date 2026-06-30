@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-const MAINTENANCE = true
+const MAINTENANCE = false
 const PREVIEW_SECRET = 'bolao2026preview'
 
 export function middleware(req: NextRequest) {
