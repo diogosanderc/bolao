@@ -86,6 +86,7 @@ export default function LeaderboardPage() {
   const [myId, setMyId] = useState<string | null>(null)
   const rowRefs = useRef<Map<string, HTMLTableRowElement>>(new Map())
   const prevRects = useRef<Map<string, DOMRect>>(new Map())
+  const prevMyLiveRef = useRef(0)
   const prevMyRankRef = useRef<number | null>(null)
   type ImageColumn = 'uj' | 'u2' | 'u2grupos' | 'jmata'
   const [imageColumn, setImageColumn] = useState<ImageColumn>('uj')
@@ -333,27 +334,39 @@ export default function LeaderboardPage() {
     if (anyChange) haptic(15)
   }, [data])
 
+  // Buzz + highlight when a live goal changes MY points (original behaviour)
+  useEffect(() => {
+    if (!myId) return
+    const me = data.find(e => e.participant.id === myId) as any
+    const lp = me?.livePoints ?? 0
+    if (leaderboardHasLive && lp > prevMyLiveRef.current && prevMyLiveRef.current >= 0) {
+      const gain = lp - prevMyLiveRef.current
+      haptic(40)
+      showToast(`⚽ Você ganhou +${gain} ao vivo!`)
+      setFlashMap(m => ({ ...m, [myId]: 'up' }))
+      const t = setTimeout(() => setFlashMap(m => { const n = { ...m }; delete n[myId]; return n }), 2200)
+      prevMyLiveRef.current = lp
+      return () => clearTimeout(t)
+    }
+    prevMyLiveRef.current = lp
+  }, [data, myId, leaderboardHasLive])
+
   const prevAllLiveRef = useRef<Map<string, number>>(new Map())
 
-  // Flash all participants whose live points change; buzz + toast for "me"
+  // Flash all OTHER participants when their live points change
   useEffect(() => {
     if (!leaderboardHasLive) return
     const newFlash: Record<string, 'up' | 'down'> = {}
-    let myGain = 0
     for (const entry of data) {
+      if (entry.participant.id === myId) continue  // "me" is handled above
       const lp = (entry as any).livePoints ?? 0
       const prev = prevAllLiveRef.current.get(entry.participant.id) ?? 0
-      if (lp !== prev && prev >= 0 && prevAllLiveRef.current.size > 0) {
+      if (lp !== prev && prevAllLiveRef.current.size > 0) {
         newFlash[entry.participant.id] = lp > prev ? 'up' : 'down'
-        if (myId && entry.participant.id === myId && lp > prev) myGain = lp - prev
       }
       prevAllLiveRef.current.set(entry.participant.id, lp)
     }
     if (Object.keys(newFlash).length > 0) {
-      if (myGain > 0) {
-        haptic(40)
-        showToast(`⚽ Você ganhou +${myGain} ao vivo!`)
-      }
       setFlashMap(m => ({ ...m, ...newFlash }))
       const t = setTimeout(() => setFlashMap(m => {
         const n = { ...m }
