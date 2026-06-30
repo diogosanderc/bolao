@@ -836,7 +836,7 @@ export default function LeaderboardPage() {
                 onClick={() => setImagePicker(p => !p)}
                 disabled={sharingImage}
                 title="Compartilhar tabela como imagem"
-                className="flex items-center justify-center w-10 h-10 rounded-full bg-[#00bf63] hover:bg-[#00a854] disabled:opacity-50 text-white transition-colors shrink-0"
+                className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-800 disabled:opacity-50 text-[#00bf63] transition-colors shrink-0"
               >
                 {sharingImage ? (
                   <svg className="w-5 h-5 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
