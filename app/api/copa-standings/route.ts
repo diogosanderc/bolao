@@ -46,7 +46,15 @@ function buildMatchInfo(
   const official = officialMap.get(m.id)
   const live = liveStates[m.id]
   const inProgressStatuses = ['in', 'halftime', 'extratime', 'et_halftime', 'penalties']
-  const isLive = !official && live && inProgressStatuses.includes(live.status)
+  const inProgress = !official && live && inProgressStatuses.includes(live.status)
+
+  // Stale: no date info → never treat as live (avoids ghost indicators after game ends)
+  const now = Date.now()
+  const matchDate = matchDates[m.id]?.date
+  const startedAt = live?.startedAt as string | undefined
+  const dateToCheck = matchDate ?? startedAt
+  const stale = !dateToCheck || (now - new Date(dateToCheck).getTime()) > 3 * 3_600_000
+  const isLive = inProgress && !stale
   if (isLive) hasLiveRef.value = true
 
   let status: MatchInfo['status'] = 'upcoming'
@@ -61,7 +69,8 @@ function buildMatchInfo(
     score2 = official.score2
     advancingTeamId = official.advancingTeamId
   } else if (live && (inProgressStatuses.includes(live.status) || live.status === 'completed')) {
-    status = live.status === 'completed' ? 'played' : 'live'
+    // Stale in-progress → show as played (game has ended, just not committed to db yet)
+    status = (live.status === 'completed' || (inProgress && stale)) ? 'played' : 'live'
     score1 = live.score1
     score2 = live.score2
     clock = live.status === 'halftime' || live.status === 'et_halftime' ? 'Intervalo' : null
