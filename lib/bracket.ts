@@ -181,12 +181,14 @@ export function computeBracketFromResults(
   }
 
   const winner = (matchId: string, teams: { team1Id: string; team2Id: string }): string => {
-    if (teams.team1Id === 'TBD' || teams.team2Id === 'TBD') return 'TBD'
     const res = rMap[matchId]
     if (!res) return 'TBD'
+    // Trust advancingTeamId even when one bracket slot is still TBD (e.g. best-3rd pending)
+    if (res.advancingTeamId) return res.advancingTeamId
+    if (teams.team1Id === 'TBD' || teams.team2Id === 'TBD') return 'TBD'
     if (res.score1 > res.score2) return teams.team1Id
     if (res.score2 > res.score1) return teams.team2Id
-    return res.advancingTeamId ?? 'TBD'
+    return 'TBD'
   }
 
   const loser = (matchId: string, teams: { team1Id: string; team2Id: string }): string => {

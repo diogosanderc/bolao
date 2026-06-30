@@ -112,12 +112,26 @@ export async function runLiveSync(): Promise<SyncResult> {
     const id2 = resolveTeam(c2.team?.abbreviation ?? '', c2.team?.displayName ?? '')
     if (!id1 || !id2) continue
 
-    const match = ALL_MATCHES.find(m => {
+    let match = ALL_MATCHES.find(m => {
       const t1 = m.team1Id !== 'TBD' ? m.team1Id : resolvedKnockout[m.id]?.team1Id
       const t2 = m.team2Id !== 'TBD' ? m.team2Id : resolvedKnockout[m.id]?.team2Id
       if (!t1 || !t2 || t1 === 'TBD' || t2 === 'TBD') return false
       return (t1 === id1 && t2 === id2) || (t1 === id2 && t2 === id1)
     })
+    // Fallback: for knockout matches where one slot is still TBD (best-3rd not yet resolved),
+    // match using the single confirmed team — it uniquely identifies the match.
+    if (!match) {
+      match = ALL_MATCHES.find(m => {
+        if (m.phase === 'group') return false
+        const t1 = m.team1Id !== 'TBD' ? m.team1Id : resolvedKnockout[m.id]?.team1Id
+        const t2 = m.team2Id !== 'TBD' ? m.team2Id : resolvedKnockout[m.id]?.team2Id
+        const t1Known = t1 && t1 !== 'TBD'
+        const t2Known = t2 && t2 !== 'TBD'
+        if (t1Known && !t2Known) return t1 === id1 || t1 === id2
+        if (t2Known && !t1Known) return t2 === id1 || t2 === id2
+        return false
+      })
+    }
     if (!match) continue
 
     const resolvedM = resolvedKnockout[match.id]

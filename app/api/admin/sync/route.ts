@@ -160,7 +160,10 @@ export async function POST(req: NextRequest) {
   await updateDB(db => {
     const resultMap = Object.fromEntries(db.results.map(r => [r.matchId, r]))
     for (const u of updates) {
-      resultMap[u.matchId] = { matchId: u.matchId, score1: u.score1, score2: u.score2 }
+      resultMap[u.matchId] = {
+        matchId: u.matchId, score1: u.score1, score2: u.score2,
+        ...(u.advancingTeamId ? { advancingTeamId: u.advancingTeamId } : {}),
+      }
     }
     const existingDates = db.matchDates ?? {}
     return {
