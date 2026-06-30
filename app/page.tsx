@@ -67,6 +67,12 @@ export default function LeaderboardPage() {
   const [activeUsers, setActiveUsers] = useState<number | null>(null)
   const [selectedParticipant, setSelectedParticipant] = useState<{ id: string; name: string } | null>(null)
   const [matchModal, setMatchModal] = useState<{ matchId: string; label: string } | null>(null)
+  // Tracks whether any modal/overlay is open, so background polling can pause
+  // (avoids reflowing the leaderboard — and the scroll-restore jump that follows — behind a locked modal)
+  const overlayOpenRef = useRef(false)
+  useEffect(() => {
+    overlayOpenRef.current = selectedParticipant !== null || matchModal !== null
+  }, [selectedParticipant, matchModal])
   const [matchPredictions, setMatchPredictions] = useState<{ name: string; score1: number; score2: number }[]>([])
   const [matchResult, setMatchResult] = useState<{ score1: number; score2: number } | null>(null)
   const [matchPredLoading, setMatchPredLoading] = useState(false)
@@ -235,7 +241,7 @@ export default function LeaderboardPage() {
     const presenceInterval = setInterval(pingPresence, 30_000)
 
     fetchSchedule()
-    const interval = setInterval(fetchSchedule, 10_000)
+    const interval = setInterval(() => { if (!overlayOpenRef.current) fetchSchedule() }, 10_000)
     return () => {
       clearInterval(presenceInterval)
       clearInterval(interval)
@@ -247,7 +253,7 @@ export default function LeaderboardPage() {
   const isLiveNow = liveMatches.length > 0 || leaderboardHasLive
   useEffect(() => {
     if (!isLiveNow) return
-    const leaderboardInterval = setInterval(fetchLeaderboard, 10_000)
+    const leaderboardInterval = setInterval(() => { if (!overlayOpenRef.current) fetchLeaderboard() }, 10_000)
     const syncInterval = setInterval(() => {
       fetch('/api/sync/live', { method: 'POST' }).catch(() => {})
     }, 30_000) // background poller handles real-time; this is a fallback only
@@ -447,12 +453,6 @@ export default function LeaderboardPage() {
     try { localStorage.setItem('bolao_round_dismissed', matchId) } catch {}
     setRoundDismissed(matchId)
   }
-
-  // Track when any overlay (modal) is open, so pull-to-refresh stays disabled
-  const overlayOpenRef = useRef(false)
-  useEffect(() => {
-    overlayOpenRef.current = selectedParticipant !== null || matchModal !== null
-  }, [selectedParticipant, matchModal])
 
   // Pull-to-refresh (mobile): pull down from the top to refresh
   useEffect(() => {
