@@ -1305,17 +1305,9 @@ export default function LeaderboardPage() {
                     })()}
                   </td>
                   <td className="pl-1 pr-2 py-3 text-right">
-                    <div className="flex flex-col items-end leading-none">
-                      <span className={`font-bold text-lg font-score ${isRelated(entry.totalPoints) ? 'text-red-600 dark:text-red-400' : isWarning(entry.totalPoints) ? 'text-gray-200 dark:text-yellow-500' : 'text-gray-200 dark:text-yellow-400'}`}>
-                        <AnimatedNumber value={entry.totalPoints} />
-                      </span>
-                      {(() => {
-                        if (idx === 0) return null
-                        const gap = data[idx - 1].totalPoints - entry.totalPoints
-                        if (gap <= 0) return <span className="text-[9px] text-gray-500 mt-0.5">=</span>
-                        return <span className="text-[9px] text-gray-500 dark:text-gray-500 mt-0.5 tabular-nums">-{gap}</span>
-                      })()}
-                    </div>
+                    <span className={`font-bold text-lg font-score ${isRelated(entry.totalPoints) ? 'text-red-600 dark:text-red-400' : isWarning(entry.totalPoints) ? 'text-gray-200 dark:text-yellow-500' : 'text-gray-200 dark:text-yellow-400'}`}>
+                      <AnimatedNumber value={entry.totalPoints} />
+                    </span>
                   </td>
                 </tr>
               )}
