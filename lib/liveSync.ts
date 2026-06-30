@@ -43,6 +43,7 @@ type ESPNProcessed = {
   varKeys: string[]
   redCardKeys: string[]
   espnStatusName: string
+  phase: string
   winnerTeamId?: string
   penaltyScore1?: number
   penaltyScore2?: number
@@ -186,8 +187,10 @@ export async function runLiveSync(): Promise<SyncResult> {
       if (flipped) { const tmp = penaltyScore1; penaltyScore1 = penaltyScore2; penaltyScore2 = tmp }
     }
 
-    // Determine advancing team: ESPN's explicit winner flag first, then derived from
-    // penalty goal count (for completed matches where the flag may not be set).
+    // Determine advancing team: try multiple sources in priority order.
+    // 1) ESPN's explicit competitor.winner flag
+    // 2) Penalty goal count from details (works even when status is already 'completed')
+    // 3) Score-based derivation for non-draw knockout results
     const espnWinnerId = c1.winner === true ? id1 : c2.winner === true ? id2 : undefined
     const effT1 = resolvedM?.team1Id ?? match.team1Id
     const effT2 = resolvedM?.team2Id ?? match.team2Id
@@ -196,14 +199,17 @@ export async function runLiveSync(): Promise<SyncResult> {
       && penaltyScore1 !== penaltyScore2
       ? (penaltyScore1 > penaltyScore2 ? effT1 : effT2)
       : undefined
-    const winnerTeamId = espnWinnerId ?? penWinnerId
+    const scoreWinnerId = !espnWinnerId && !penWinnerId && match.phase !== 'group' && score1 !== score2
+      ? (score1 > score2 ? effT1 : effT2)
+      : undefined
+    const winnerTeamId = espnWinnerId ?? penWinnerId ?? scoreWinnerId
 
     espnProcessed.push({
-      matchId: match.id, newStatus, score1, score2,
-      team1Id: resolvedM?.team1Id ?? match.team1Id,
-      team2Id: resolvedM?.team2Id ?? match.team2Id,
-      t1: teamById[resolvedM?.team1Id ?? match.team1Id]?.name ?? (resolvedM?.team1Id ?? match.team1Id),
-      t2: teamById[resolvedM?.team2Id ?? match.team2Id]?.name ?? (resolvedM?.team2Id ?? match.team2Id),
+      matchId: match.id, newStatus, score1, score2, phase: match.phase,
+      team1Id: effT1,
+      team2Id: effT2,
+      t1: teamById[effT1]?.name ?? effT1,
+      t2: teamById[effT2]?.name ?? effT2,
       clock, varKeys, redCardKeys, espnStatusName: typeName, winnerTeamId, penaltyScore1, penaltyScore2,
     })
   }
@@ -219,7 +225,7 @@ export async function runLiveSync(): Promise<SyncResult> {
 
     pushQueue.length = 0
 
-    for (const { matchId, newStatus, score1, score2, team1Id, team2Id, t1, t2, clock, varKeys, redCardKeys, espnStatusName, winnerTeamId, penaltyScore1, penaltyScore2 } of espnProcessed) {
+    for (const { matchId, newStatus, score1, score2, phase, team1Id, team2Id, t1, t2, clock, varKeys, redCardKeys, espnStatusName, winnerTeamId, penaltyScore1, penaltyScore2 } of espnProcessed) {
       const prev = persistedStates[matchId]
 
       if (prev?.status === 'completed') continue
@@ -235,8 +241,8 @@ export async function runLiveSync(): Promise<SyncResult> {
 
       if (newStatus === 'completed' && dbResult && dbResult.score1 === score1 && dbResult.score2 === score2) {
         newPersistedStates[matchId] = { ...prev, status: 'completed', score1, score2, sentStarted: true, sentFinal: true, sentGoals: score1 + score2 }
-        // Patch advancingTeamId if ESPN now knows who won (e.g. after a penalty)
-        if (score1 === score2 && winnerTeamId && !dbResult.advancingTeamId) {
+        // Back-fill advancingTeamId for all knockout matches, not just draws
+        if (phase !== 'group' && winnerTeamId && !dbResult.advancingTeamId) {
           dbResultUpdates.push({ matchId, score1, score2, advancingTeamId: winnerTeamId })
         }
         continue
@@ -246,7 +252,7 @@ export async function runLiveSync(): Promise<SyncResult> {
         if (newStatus === 'completed') {
           // Match already finished on first encounter — save result silently
           newPersistedStates[matchId] = { status: 'completed', score1, score2, sentStarted: true, sentFinal: true, sentGoals: score1 + score2 }
-          const coldAdvancing = score1 === score2 && winnerTeamId ? winnerTeamId : undefined
+          const coldAdvancing = phase !== 'group' && winnerTeamId ? winnerTeamId : undefined
           if (!dbResult || dbResult.score1 !== score1 || dbResult.score2 !== score2) {
             dbResultUpdates.push({ matchId, score1, score2, advancingTeamId: coldAdvancing ?? dbResult?.advancingTeamId })
           } else if (coldAdvancing && !dbResult.advancingTeamId) {
@@ -427,7 +433,7 @@ export async function runLiveSync(): Promise<SyncResult> {
           : sentPenalties && regScore2 !== undefined ? regScore2
           : undefined
         const wentBeyondRegulation = regS1 !== undefined
-        const advancingTeamId = winnerTeamId
+        const advancingTeamId = phase !== 'group' ? winnerTeamId : undefined
         if (!dbResult
           || dbResult.score1 !== score1
           || dbResult.score2 !== score2
