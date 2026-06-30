@@ -53,8 +53,11 @@ export interface Match {
 
 export interface MatchResult {
   matchId: string
-  score1: number
+  score1: number   // full final score (regulation + ET goals) — used for display
   score2: number
+  // For knockout matches that went to ET/penalties: regulation-time score for points calculation
+  regulationScore1?: number
+  regulationScore2?: number
   // For knockout draws: id of team that advances (via pen/et)
   advancingTeamId?: string
 }

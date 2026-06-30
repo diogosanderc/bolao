@@ -31,20 +31,23 @@ export function scoreMatch(
   correctAdvancing: boolean
 } {
   let total = 0
+  // Use regulation-time score for all prediction scoring (ET/penalty goals don't count)
+  const s1 = result.regulationScore1 ?? result.score1
+  const s2 = result.regulationScore2 ?? result.score2
   const correctResult =
     getResult(prediction.score1, prediction.score2) ===
-    getResult(result.score1, result.score2)
+    getResult(s1, s2)
   const correctScore =
-    prediction.score1 === result.score1 && prediction.score2 === result.score2
-  const correctGoal1 = prediction.score1 === result.score1
-  const correctGoal2 = prediction.score2 === result.score2
+    prediction.score1 === s1 && prediction.score2 === s2
+  const correctGoal1 = prediction.score1 === s1
+  const correctGoal2 = prediction.score2 === s2
   // +2 bonus for correctly predicting a team's goal tally when they scored 4+
-  const highScoreBonus1 = result.score1 >= 4 && correctGoal1
-  const highScoreBonus2 = result.score2 >= 4 && correctGoal2
+  const highScoreBonus1 = s1 >= 4 && correctGoal1
+  const highScoreBonus2 = s2 >= 4 && correctGoal2
   const highScoreBonus = highScoreBonus1 || highScoreBonus2
 
   const isKnockout = match.phase !== 'group'
-  const isDraw = result.score1 === result.score2
+  const isDraw = s1 === s2
   const correctAdvancing =
     isKnockout &&
     isDraw &&

@@ -161,8 +161,11 @@ export async function POST(req: NextRequest) {
     const resultMap = Object.fromEntries(db.results.map(r => [r.matchId, r]))
     for (const u of updates) {
       resultMap[u.matchId] = {
+        ...resultMap[u.matchId],
         matchId: u.matchId, score1: u.score1, score2: u.score2,
         ...(u.advancingTeamId ? { advancingTeamId: u.advancingTeamId } : {}),
+        ...(u.regulationScore1 !== undefined ? { regulationScore1: u.regulationScore1 } : {}),
+        ...(u.regulationScore2 !== undefined ? { regulationScore2: u.regulationScore2 } : {}),
       }
     }
     const existingDates = db.matchDates ?? {}

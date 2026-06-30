@@ -205,7 +205,7 @@ export async function runLiveSync(): Promise<SyncResult> {
     const resultMap = Object.fromEntries(db.results.map(r => [r.matchId, r]))
     const persistedStates: Record<string, MatchState> = (db as any).liveMatchStates ?? {}
     const newPersistedStates: Record<string, MatchState> = { ...persistedStates }
-    const dbResultUpdates: { matchId: string; score1: number; score2: number; advancingTeamId?: string }[] = []
+    const dbResultUpdates: { matchId: string; score1: number; score2: number; advancingTeamId?: string; regulationScore1?: number; regulationScore2?: number }[] = []
 
     pushQueue.length = 0
 
@@ -408,20 +408,28 @@ export async function runLiveSync(): Promise<SyncResult> {
           pushQueue.push({ title: `🏁 Resultado final${suffix}`, body: scoreStr })
           newState.sentFinal = true
         }
-        // Only 90-min goals count for prediction scoring.
-        // If ET was played, use the score locked at ET start (regulation score).
-        // If the match went straight to penalties (no ET), fall back to regScore.
-        // advancingTeamId is from ESPN's competitor.winner flag.
-        const finalScore1 = sentExtraTime && regulationScore1 !== undefined ? regulationScore1
+        // score1/score2 = full final score for display (includes ET goals).
+        // regulationScore1/2 = 90-min score only, used for prediction points.
+        const regS1 = sentExtraTime && regulationScore1 !== undefined ? regulationScore1
           : sentPenalties && regScore1 !== undefined ? regScore1
-          : score1
-        const finalScore2 = sentExtraTime && regulationScore2 !== undefined ? regulationScore2
+          : undefined
+        const regS2 = sentExtraTime && regulationScore2 !== undefined ? regulationScore2
           : sentPenalties && regScore2 !== undefined ? regScore2
-          : score2
-        const isDraw = finalScore1 === finalScore2
+          : undefined
+        const wentBeyondRegulation = regS1 !== undefined
         const advancingTeamId = winnerTeamId
-        if (!dbResult || dbResult.score1 !== finalScore1 || dbResult.score2 !== finalScore2 || (advancingTeamId && dbResult.advancingTeamId !== advancingTeamId)) {
-          dbResultUpdates.push({ matchId, score1: finalScore1, score2: finalScore2, advancingTeamId: advancingTeamId ?? dbResult?.advancingTeamId })
+        if (!dbResult
+          || dbResult.score1 !== score1
+          || dbResult.score2 !== score2
+          || (advancingTeamId && dbResult.advancingTeamId !== advancingTeamId)
+          || (wentBeyondRegulation && (dbResult.regulationScore1 !== regS1 || dbResult.regulationScore2 !== regS2))) {
+          dbResultUpdates.push({
+            matchId,
+            score1,
+            score2,
+            advancingTeamId: advancingTeamId ?? dbResult?.advancingTeamId,
+            ...(wentBeyondRegulation ? { regulationScore1: regS1!, regulationScore2: regS2! } : {}),
+          })
         }
       }
 
@@ -457,7 +465,7 @@ export async function runLiveSync(): Promise<SyncResult> {
     }
 
     const map = Object.fromEntries(db.results.map(r => [r.matchId, r]))
-    for (const u of dbResultUpdates) map[u.matchId] = u
+    for (const u of dbResultUpdates) map[u.matchId] = { ...map[u.matchId], ...u }
     return { ...db, results: Object.values(map), liveMatchStates: newPersistedStates, lastPollerRun: new Date().toISOString() } as any
   })
 
