@@ -28,7 +28,12 @@ async function autoSaveNewResults(events: Awaited<ReturnType<typeof fetchESPNEve
   if (newResults.length > 0 || Object.keys(newDates).length > 0) {
     await updateDB(db => {
       const map = Object.fromEntries(db.results.map(r => [r.matchId, r]))
-      for (const r of newResults) map[r.matchId] = r
+      for (const r of newResults) {
+        // Re-check inside lock: another writer (admin save, liveSync) may have
+        // already committed this result between the outer readDB and now.
+        // Use merge semantics so we never clobber advancingTeamId or other fields.
+        map[r.matchId] = { ...map[r.matchId], ...r }
+      }
       return {
         ...db,
         results: Object.values(map),
