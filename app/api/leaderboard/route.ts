@@ -198,7 +198,15 @@ export async function GET() {
       }
     })
     // Position change + livePoints (points gained exclusively from current live matches)
-    const baseForComparison = hasLive ? sortedResults : sortedResults.slice(0, -1)
+    // Completed-but-not-yet-saved provisional results must be included in the base so that
+    // livePoints only reflects the match(es) that are actually in progress right now.
+    const completedProvisional = provisionalResults.filter(pr => {
+      const s = liveStates[pr.matchId]?.status
+      return s === 'completed'
+    })
+    const baseForComparison = hasLive
+      ? [...sortedResults, ...completedProvisional]
+      : sortedResults.slice(0, -1)
     if (hasLive || sortedResults.length > 1) {
       const prevLeaderboard = computeLeaderboard(
         validParticipants,
