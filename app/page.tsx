@@ -1100,17 +1100,28 @@ export default function LeaderboardPage() {
           <div className="divide-y divide-red-100 dark:divide-red-900/20">
             {data.map((entry, idx) => {
               const rank = ranks[idx]
+              const tier = tierOf(entry.totalPoints)
               const p = entry as any
               const change: number | undefined = p.positionChange
               const liveGain: number = p.livePoints ?? 0
               const isMe = myId === entry.participant.id
+              const first = isFirstOfRank[idx]
               return (
                 <div
                   key={entry.participant.id}
                   className={`flex items-center gap-2 px-4 py-2 cursor-pointer hover:bg-red-100 dark:hover:bg-red-950/40 transition-colors ${isMe ? 'shadow-[inset_3px_0_0_0_#00bf63] bg-[#00bf63]/5' : ''}`}
                   onClick={() => openParticipant(entry.participant.id, entry.participant.name)}
                 >
-                  <span className="text-gray-500 text-xs w-5 text-right shrink-0 font-semibold">{rank}</span>
+                  <span className="w-5 text-right shrink-0 font-bold text-sm">
+                    {isRelated(entry.totalPoints)
+                      ? (first ? <span className="text-red-500">{rank}</span> : null)
+                      : isWarning(entry.totalPoints)
+                      ? (first ? <span className="text-yellow-500">{rank}</span> : null)
+                      : trophies[tier]
+                      ?? (rank >= 4 && rank <= 7
+                          ? (first ? <span className="text-green-600 dark:text-green-400">{rank}</span> : null)
+                          : (first ? <span className="text-gray-500">{rank}</span> : null))}
+                  </span>
                   {isMe && <Icon name="star" size={13} className="shrink-0 text-[#00bf63]" />}
                   <span className="text-gray-200 text-sm font-semibold flex-1 min-w-0 truncate">{entry.participant.name}</span>
                   {liveGain > 0
