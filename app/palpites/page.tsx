@@ -18,12 +18,23 @@ const PHASE_ORDER: Phase[] = [
   'group', 'round_of_32', 'round_of_16', 'quarterfinal', 'semifinal', 'third_place', 'final',
 ]
 
+const PHASE_FILTER_LABELS: { value: Phase | 'all'; label: string }[] = [
+  { value: 'all',         label: 'Todos' },
+  { value: 'group',       label: 'Grupos' },
+  { value: 'round_of_32', label: '16 avos' },
+  { value: 'round_of_16', label: 'Oitavas' },
+  { value: 'quarterfinal',label: 'Quartas' },
+  { value: 'semifinal',   label: 'Semi' },
+  { value: 'final',       label: 'Final' },
+]
+
 export default function PalpitesDeTodosPage() {
   const [data, setData] = useState<AllData | null>(null)
   const [results, setResults] = useState<MatchResult[]>([])
   const [loading, setLoading] = useState(true)
   const [matchSearch, setMatchSearch] = useState('')
   const [nameFilter, setNameFilter] = useState('')
+  const [phaseFilter, setPhaseFilter] = useState<Phase | 'all'>('all')
   const [expandedMatches, setExpandedMatches] = useState<Set<string>>(new Set())
 
   useEffect(() => {
@@ -72,8 +83,9 @@ export default function PalpitesDeTodosPage() {
 
   const filteredMatches = useMemo(() => {
     const q = matchSearch.trim().toUpperCase()
-    if (!q) return ALL_MATCHES
     return ALL_MATCHES.filter(m => {
+      if (phaseFilter !== 'all' && m.phase !== phaseFilter) return false
+      if (!q) return true
       const [t1, t2] = teamsOf(m)
       const team1 = teamById[t1]
       const team2 = teamById[t2]
@@ -85,7 +97,7 @@ export default function PalpitesDeTodosPage() {
       )
     })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [matchSearch, resolvedKnockout])
+  }, [matchSearch, phaseFilter, resolvedKnockout])
 
   const matchesByPhase = useMemo(() => {
     const result: { phase: Phase; label: string; groups: { groupLabel: string; matches: typeof ALL_MATCHES }[] }[] = []
@@ -139,6 +151,23 @@ export default function PalpitesDeTodosPage() {
         <div className="flex justify-center"><Icon name="ball" size={28} className="text-[#00bf63]" strokeWidth={1.4} /></div>
         <h2 className="text-2xl font-bold text-gray-200">Palpites de Todos</h2>
         <span className="text-xs text-gray-500 ml-1">({totalParticipants} participantes)</span>
+      </div>
+
+      {/* Phase filter pills */}
+      <div className="flex flex-wrap gap-1.5">
+        {PHASE_FILTER_LABELS.map(({ value, label }) => (
+          <button
+            key={value}
+            onClick={() => { setPhaseFilter(value); setExpandedMatches(new Set()) }}
+            className={`text-xs px-3 py-1.5 rounded-full border transition-colors whitespace-nowrap ${
+              phaseFilter === value
+                ? 'bg-green-600 border-green-500 text-white font-semibold'
+                : 'border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-200'
+            }`}
+          >
+            {label}
+          </button>
+        ))}
       </div>
 
       <div className="flex flex-col sm:flex-row gap-2">
