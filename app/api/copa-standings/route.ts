@@ -131,8 +131,8 @@ export async function GET() {
       return { id: group.id, name: group.name, standings, matches }
     })
 
-    // Resolve knockout bracket from official results
-    const bracket = computeBracketFromResults(db.results)
+    // Resolve knockout bracket from official + completed live results
+    const bracket = computeBracketFromResults(merged)
 
     const PHASE_LABELS_PT: Record<string, string> = {
       round_of_32: '16 avos de Final',
