@@ -258,7 +258,9 @@ export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClos
       })
       // Footer
       ctx.textAlign = 'center'; ctx.fillStyle = '#4b5563'; ctx.font = '500 11px system-ui'
-      ctx.fillText('Classificação do Bolão da Copa do Mundo 2026', W / 2, H - 18)
+      ctx.fillText('Classificação do Bolão da Copa do Mundo 2026', W / 2, H - 28)
+      ctx.fillStyle = '#374151'; ctx.font = '500 10px system-ui'
+      ctx.fillText('bolao-production-cf4b.up.railway.app', W / 2, H - 12)
 
       const blob: Blob | null = await new Promise(res => canvas.toBlob(res, 'image/png'))
       if (!blob) throw new Error('falha')
