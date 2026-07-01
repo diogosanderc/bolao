@@ -1390,12 +1390,14 @@ export default function LeaderboardPage() {
 
       {/* Resumo da rodada — popup, uma vez por rodada */}
       {!loading && !leaderboardHasLive && lastMatch && data.length > 0 && roundDismissed !== lastMatch.matchId && !selectedParticipant && !matchModal && (() => {
-        // Round points = result of the last match + the mata-mata advancement it generated
-        const roundPts = (e: any) => (e.lastMatchPoints ?? 0) + (e.lastKoRulePts ?? 0)
-        const top = [...data].map(e => e as any).filter(e => roundPts(e) > 0).sort((a, b) => roundPts(b) - roundPts(a))[0]
+        // Who predicted the exact score of the last match
+        const exactScorers = (data as any[]).filter(e => {
+          const pred = e.lastMatchPred
+          return pred && pred.score1 === lastMatch.score1 && pred.score2 === lastMatch.score2
+        })
         const climber = [...data].map(e => e as any).filter(e => (e.positionChange ?? 0) > 0).sort((a, b) => b.positionChange - a.positionChange)[0]
         const faller = [...data].map(e => e as any).filter(e => (e.positionChange ?? 0) < 0).sort((a, b) => a.positionChange - b.positionChange)[0]
-        if (!top && !climber) return null
+        if (!climber && exactScorers.length === 0) return null
         return (
           <div className="fixed inset-0 z-[55] flex items-center justify-center p-5" onClick={() => dismissRound(lastMatch.matchId)}>
             <div className="absolute inset-0 bg-black/70 backdrop-blur-sm animate-fade-in" />
@@ -1408,17 +1410,27 @@ export default function LeaderboardPage() {
                 <Flag teamId={lastMatch.team1.id} size={16} /> {lastMatch.team1.name} <span className="font-score text-gray-300">{lastMatch.score1}×{lastMatch.score2}</span> <Flag teamId={lastMatch.team2.id} size={16} /> {lastMatch.team2.name}
               </p>
               <div className="space-y-2">
-                {top && (
-                  <div className="flex items-center gap-3 bg-gray-900 border border-gray-800 rounded-xl px-3 py-2.5">
-                    <Icon name="zap" size={22} className="text-yellow-400 shrink-0" />
-                    <div className="min-w-0 flex-1">
-                      <p className="text-[10px] uppercase tracking-wide text-gray-500">Mais pontuou</p>
-                      <p className="text-sm text-gray-200 font-bold truncate">{top.participant.name}</p>
-                      {top.lastKoRulePts > 0 && <p className="text-[10px] text-gray-500">{top.lastMatchPoints} resultado + {top.lastKoRulePts} mata-mata</p>}
-                    </div>
-                    <span className="text-green-400 font-score font-bold text-lg shrink-0">+{roundPts(top)}</span>
+                <div className="flex items-center gap-3 bg-gray-900 border border-gray-800 rounded-xl px-3 py-2.5">
+                  <Icon name="target" size={22} className={exactScorers.length > 0 ? 'text-green-400 shrink-0' : 'text-gray-600 shrink-0'} />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[10px] uppercase tracking-wide text-gray-500">Placar exato</p>
+                    {exactScorers.length === 0 && (
+                      <p className="text-sm text-gray-500 italic">Ninguém acertou</p>
+                    )}
+                    {exactScorers.length === 1 && (
+                      <p className="text-sm text-gray-200 font-bold truncate">{exactScorers[0].participant.name}</p>
+                    )}
+                    {exactScorers.length > 1 && (
+                      <>
+                        <p className="text-sm text-gray-200 font-bold">{exactScorers.length} participantes</p>
+                        <p className="text-[10px] text-gray-500 truncate">{exactScorers.map((e: any) => e.participant.name).join(', ')}</p>
+                      </>
+                    )}
                   </div>
-                )}
+                  {exactScorers.length > 0 && (
+                    <span className="text-green-400 font-score font-bold text-sm shrink-0">{lastMatch.score1}–{lastMatch.score2}</span>
+                  )}
+                </div>
                 {climber && (
                   <div className="flex items-center gap-3 bg-gray-900 border border-gray-800 rounded-xl px-3 py-2.5">
                     <Icon name="arrow-up" size={22} className="text-blue-400 shrink-0" />
