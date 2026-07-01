@@ -93,7 +93,8 @@ export function computeLeaderboard(
   groupPredictions: GroupPrediction[],
   results: MatchResult[],
   r32TeamPicks?: R32TeamPick[],
-  knockoutPhasePicks?: KnockoutPhasePick[]
+  knockoutPhasePicks?: KnockoutPhasePick[],
+  confirmedResults?: MatchResult[]
 ): LeaderboardEntry[] {
   const resultMap = Object.fromEntries(results.map(r => [r.matchId, r]))
   const lastResult = results.length > 0 ? results[results.length - 1] : null
@@ -115,8 +116,10 @@ export function computeLeaderboard(
   const completedGroupIds = new Set(Object.keys(groupStandings))
 
   // Resolve actual teams for all knockout slots (needed for advancement scoring).
-  // Internal knockout fixtures are TBD, so we must resolve them from the bracket.
-  const resolvedKnockoutTeams = computeBracketFromResults(results)
+  // Use only confirmed results here — provisional live scores must not give
+  // advancement bonuses (R16/QF/…) since a flip bug could show the wrong team
+  // advancing and give false points to whoever predicted that team.
+  const resolvedKnockoutTeams = computeBracketFromResults(confirmedResults ?? results)
 
   // A team "reaches" a knockout phase by appearing in that phase's resolved match
   // (e.g. winning a round_of_32 game puts you in the round_of_16). round_of_32 is
