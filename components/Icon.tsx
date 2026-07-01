@@ -37,7 +37,7 @@ const P: Record<IconName, React.ReactNode> = {
   flag: <><path d="M5 21V4M5 4h12l-2 4 2 4H5" /></>,
   medal: <><circle cx="12" cy="15" r="5.5" /><path d="M8.5 9.5 6 3h4l2 4M15.5 9.5 18 3h-4l-2 4" /></>,
   zap: <path d="M13 2 4 14h7l-1 8 9-12h-7l1-8Z" />,
-  ball: <><circle cx="12" cy="12" r="9" /><path d="M12 7.5l3.5 2.6-1.3 4.2h-4.4L8.5 10.1 12 7.5Z" /></>,
+  ball: <><circle cx="12" cy="12" r="9" /><path d="M12 7.5l3.5 2.6-1.3 4.2h-4.4L8.5 10.1 12 7.5Z" fill="currentColor" stroke="none" /><path d="M12 7.5V3M15.5 10.1 19.9 7.7M14.2 14.3 18.2 18.5M9.8 14.3 5.8 18.5M8.5 10.1 4.1 7.7" /></>,
   refresh: <><path d="M23 4v6h-6" /><path d="M20.5 15a9 9 0 1 1-2.1-9.4L23 10" /></>,
   sparkles: <path d="M12 3l1.6 5.4L19 10l-5.4 1.6L12 17l-1.6-5.4L5 10l5.4-1.6L12 3ZM18 14l.7 2.3L21 17l-2.3.7L18 20l-.7-2.3L15 17l2.3-.7L18 14Z" />,
   pointer: <path d="M9 11V4.5a1.5 1.5 0 0 1 3 0V11m0-1.5a1.5 1.5 0 0 1 3 0V12m0-1a1.5 1.5 0 0 1 3 0v4a5 5 0 0 1-5 5h-2.2a4 4 0 0 1-3.1-1.5L4 17s-1-1.3 0-2.2 2.2 0 2.2 0L8 16V7.5a1.5 1.5 0 0 1 3 0" />,
