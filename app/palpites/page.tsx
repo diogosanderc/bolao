@@ -70,6 +70,26 @@ export default function PalpitesDeTodosPage() {
     return Object.fromEntries(data.participants.map(p => [p.id, p]))
   }, [data])
 
+  // Manual overrides for ambiguous abbreviations
+  const CHIP_OVERRIDES: Record<string, string> = {
+    'MORELLI': 'MRLI',
+    'LUCILIO': 'LCLI',
+  }
+
+  // Shortest unique prefix per participant (min 4 chars, grows until no collision)
+  const chipLabel = useMemo(() => {
+    if (!data) return (name: string) => name.slice(0, 4).toUpperCase()
+    const names = data.participants.map(p => p.name.toUpperCase())
+    const labels = new Map<string, string>()
+    for (const name of names) {
+      if (CHIP_OVERRIDES[name]) { labels.set(name, CHIP_OVERRIDES[name]); continue }
+      let len = 4
+      while (len < name.length && names.some(n => n !== name && !CHIP_OVERRIDES[n] && n.slice(0, len) === name.slice(0, len))) len++
+      labels.set(name, name.slice(0, len))
+    }
+    return (name: string) => labels.get(name.toUpperCase()) ?? name.slice(0, 4).toUpperCase()
+  }, [data])
+
   // matchId → participantId → prediction
   const predsByMatch = useMemo(() => {
     if (!data) return {}
@@ -280,7 +300,7 @@ export default function PalpitesDeTodosPage() {
                                 <div className="flex flex-wrap gap-1">
                                   {participants.map(p => (
                                     <span key={p.id} className="text-[11px] font-mono bg-gray-800 text-gray-300 px-1.5 py-0.5 rounded">
-                                      {p.name.slice(0, 4).toUpperCase()}
+                                      {chipLabel(p.name)}
                                     </span>
                                   ))}
                                 </div>
