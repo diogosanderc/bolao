@@ -43,7 +43,13 @@ export async function GET() {
 
       // Only trust in-progress scores when not stale; always trust completed scores.
       if (isCompleted || (isInProgress && !stale)) {
-        provisionalResults.push({ matchId, score1: state.score1, score2: state.score2 })
+        provisionalResults.push({
+          matchId,
+          score1: state.score1,
+          score2: state.score2,
+          ...(state.regulationScore1 !== undefined ? { regulationScore1: state.regulationScore1 } : {}),
+          ...(state.regulationScore2 !== undefined ? { regulationScore2: state.regulationScore2 } : {}),
+        })
         if (isInProgress) hasLive = true
       }
     }
