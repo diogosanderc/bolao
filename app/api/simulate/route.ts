@@ -19,12 +19,17 @@ export async function POST(req: NextRequest) {
     const now = Date.now()
     const liveCompleted: MatchResult[] = []
     for (const [matchId, st] of Object.entries(liveStates)) {
-      if (officialIds.has(matchId) || !st || st.status !== 'completed') continue
-      const dateToCheck = matchDates[matchId]?.date ?? st.startedAt
-      const stale = !dateToCheck || (now - new Date(dateToCheck).getTime()) > 3 * 3_600_000
-      if (!stale) {
-        liveCompleted.push({ matchId, score1: st.score1, score2: st.score2, ...(st.advancingTeamId ? { advancingTeamId: st.advancingTeamId } : {}) })
+      if (officialIds.has(matchId) || !st) continue
+      const isCompleted = st.status === 'completed'
+      const inProgressStatuses = ['in', 'halftime', 'extratime', 'et_halftime', 'penalties']
+      const isInProgress = inProgressStatuses.includes(st.status)
+      if (!isCompleted && !isInProgress) continue
+      if (isInProgress) {
+        const dateToCheck = matchDates[matchId]?.date ?? st.startedAt
+        const stale = !dateToCheck || (now - new Date(dateToCheck).getTime()) > 3 * 3_600_000
+        if (stale) continue
       }
+      liveCompleted.push({ matchId, score1: st.score1, score2: st.score2, ...(st.advancingTeamId ? { advancingTeamId: st.advancingTeamId } : {}) })
     }
 
     const baseResults = [...db.results, ...liveCompleted.filter(r => !officialIds.has(r.matchId))]
