@@ -215,36 +215,52 @@ export default function PalpitesDeTodosPage() {
                       </div>
                     </button>
 
-                    {isExpanded && (
-                      <div className="divide-y divide-gray-800/60 bg-gray-950">
-                        {rows.length === 0 && (
-                          <p className="text-center py-6 text-gray-600 text-sm">Nenhum participante encontrado.</p>
-                        )}
-                        {rows.map(({ participant, pred }) => {
-                          let colorClass = 'text-gray-400 bg-gray-800'
-                          if (isPlayed && pred) {
-                            const exact = pred.score1 === result!.score1 && pred.score2 === result!.score2
-                            const sameResult = !exact && Math.sign(pred.score1 - pred.score2) === Math.sign(result!.score1 - result!.score2)
-                            if (exact) colorClass = 'text-green-800 bg-green-200 dark:text-green-300 dark:bg-green-950'
-                            else if (sameResult) colorClass = 'text-blue-800 bg-blue-200 dark:text-blue-300 dark:bg-blue-950/50'
-                            else colorClass = 'text-red-800 bg-red-200 dark:text-red-400 dark:bg-red-950/40'
-                          }
-                          return (
-                            <div key={participant.id} className="flex items-center justify-between gap-2 px-4 py-2 text-sm">
-                              <span className="text-gray-300 truncate">{participant.name}</span>
-                              <div className="flex items-center gap-1.5 shrink-0">
-                                {pred?.advancingTeamId && pred.score1 === pred.score2 && (
-                                  <span className="text-[10px] text-gray-500">classifica {pred.advancingTeamId}</span>
-                                )}
-                                <span className={`font-bold px-2 py-0.5 rounded font-score ${colorClass}`}>
+                    {isExpanded && (() => {
+                      // Group participants by their predicted score
+                      const groups: Map<string, { pred: MatchPrediction | undefined; participants: ParticipantInfo[] }> = new Map()
+                      for (const { participant, pred } of rows) {
+                        const key = pred ? `${pred.score1}-${pred.score2}${pred.advancingTeamId ? `|${pred.advancingTeamId}` : ''}` : '__none__'
+                        if (!groups.has(key)) groups.set(key, { pred, participants: [] })
+                        groups.get(key)!.participants.push(participant)
+                      }
+                      const sorted = [...groups.values()].sort((a, b) => b.participants.length - a.participants.length)
+
+                      return (
+                        <div className="divide-y divide-gray-800/60 bg-gray-950">
+                          {rows.length === 0 && (
+                            <p className="text-center py-6 text-gray-600 text-sm">Nenhum participante encontrado.</p>
+                          )}
+                          {sorted.map(({ pred, participants }, i) => {
+                            let colorClass = 'text-gray-500 bg-gray-800'
+                            if (isPlayed && pred) {
+                              const exact = pred.score1 === result!.score1 && pred.score2 === result!.score2
+                              const sameResult = !exact && Math.sign(pred.score1 - pred.score2) === Math.sign(result!.score1 - result!.score2)
+                              if (exact) colorClass = 'text-green-300 bg-green-950'
+                              else if (sameResult) colorClass = 'text-blue-300 bg-blue-950/50'
+                              else colorClass = 'text-red-400 bg-red-950/40'
+                            }
+                            return (
+                              <div key={i} className="flex items-center gap-3 px-4 py-2">
+                                <span className={`font-bold px-2 py-0.5 rounded font-score shrink-0 text-sm ${colorClass}`}>
                                   {pred ? `${pred.score1}–${pred.score2}` : '—'}
                                 </span>
+                                {pred?.advancingTeamId && pred.score1 === pred.score2 && (
+                                  <span className="text-[10px] text-gray-600 shrink-0">{pred.advancingTeamId}</span>
+                                )}
+                                <span className="text-xs text-gray-600 shrink-0">×{participants.length}</span>
+                                <div className="flex flex-wrap gap-1">
+                                  {participants.map(p => (
+                                    <span key={p.id} className="text-[11px] font-mono bg-gray-800 text-gray-300 px-1.5 py-0.5 rounded">
+                                      {p.name.slice(0, 4).toUpperCase()}
+                                    </span>
+                                  ))}
+                                </div>
                               </div>
-                            </div>
-                          )
-                        })}
-                      </div>
-                    )}
+                            )
+                          })}
+                        </div>
+                      )
+                    })()}
                   </div>
                 )
               })}
