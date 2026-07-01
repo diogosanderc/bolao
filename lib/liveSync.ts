@@ -243,8 +243,6 @@ export async function runLiveSync(): Promise<SyncResult> {
     for (const { matchId, newStatus, score1, score2, phase, team1Id, team2Id, t1, t2, clock, varKeys, redCardKeys, espnStatusName, winnerTeamId, penaltyScore1, penaltyScore2 } of espnProcessed) {
       const prev = persistedStates[matchId]
 
-      if (prev?.status === 'completed') continue
-
       const matchDate = db.matchDates?.[matchId]?.date
       if (matchDate) {
         const hoursSince = (Date.now() - new Date(matchDate).getTime()) / 3_600_000
@@ -253,6 +251,16 @@ export async function runLiveSync(): Promise<SyncResult> {
 
       const scoreStr = `${t1} ${score1}×${score2} ${t2}`
       const dbResult = resultMap[matchId]
+
+      if (prev?.status === 'completed') {
+        // Silently correct a flip-bug score stored before the orientation fix,
+        // but only when there is still no confirmed dbResult (admin hasn't entered
+        // the real result yet, so the leaderboard still depends on our stored score).
+        if (!dbResult && (score1 !== prev.score1 || score2 !== prev.score2)) {
+          newPersistedStates[matchId] = { ...prev, score1, score2 }
+        }
+        continue
+      }
 
       if (newStatus === 'completed' && dbResult && dbResult.score1 === score1 && dbResult.score2 === score2) {
         newPersistedStates[matchId] = { ...prev, status: 'completed', score1, score2, sentStarted: true, sentFinal: true, sentGoals: score1 + score2 }
