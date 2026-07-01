@@ -729,7 +729,7 @@ export default function LeaderboardPage() {
       if (!blob) throw new Error('Falha ao gerar imagem')
       const file = new File([blob], 'classificacao-bolao.png', { type: 'image/png' })
       if (navigator.canShare?.({ files: [file] })) {
-        await navigator.share({ files: [file], title: 'Classificação Bolão Copa 2026' })
+        await navigator.share({ files: [file], title: 'Classificação Bolão Copa 2026', text: 'https://bolao-production-cf4b.up.railway.app' })
       } else {
         const url = URL.createObjectURL(blob)
         const a = document.createElement('a')
