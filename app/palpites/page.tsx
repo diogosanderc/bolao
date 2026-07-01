@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Flag } from '@/components/Flag'
 import { Icon } from '@/components/Icon'
-import { ALL_MATCHES, teamById, GROUPS } from '@/lib/copa2026'
+import { ALL_MATCHES, teamById, GROUPS, matchById } from '@/lib/copa2026'
 import { computeBracketFromResults } from '@/lib/bracket'
 import { PHASE_LABELS, MatchPrediction, MatchResult, Phase } from '@/lib/types'
 
@@ -44,7 +44,15 @@ export default function PalpitesDeTodosPage() {
     ])
       .then(([d, res]) => {
         setData(d)
-        setResults(Array.isArray(res) ? res : [])
+        const resultList: MatchResult[] = Array.isArray(res) ? res : []
+        setResults(resultList)
+        // Auto-select the phase of the most recently played match
+        const lastResult = [...resultList].sort((a, b) => {
+          const ma = matchById[a.matchId], mb = matchById[b.matchId]
+          return (mb?.matchNumber ?? 0) - (ma?.matchNumber ?? 0)
+        })[0]
+        const activePhase = lastResult ? matchById[lastResult.matchId]?.phase : undefined
+        if (activePhase && activePhase !== 'group') setPhaseFilter(activePhase)
         setLoading(false)
       })
       .catch(() => setLoading(false))
