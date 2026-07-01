@@ -34,7 +34,7 @@ export function Scoreboard({ score1, score2, pending, size = 'md' }: Props) {
   return (
     <span className={`inline-flex items-center ${s.gap} align-middle`}>
       <span className={panel}>{score1}</span>
-      <span className={`font-score font-bold text-gray-500 ${s.sep}`}>:</span>
+      <span className={`${s.sep} select-none leading-none`}>⚽</span>
       <span className={panel}>{score2}</span>
     </span>
   )
