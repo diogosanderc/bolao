@@ -579,7 +579,7 @@ export default function LeaderboardPage() {
       const half = Math.ceil(data.length / 2)
       const colH = half * ROW_H
       const headerH = (lastMatch ? 56 : 40) + 18
-      const H = headerH + colH + 28
+      const H = headerH + colH + 40
       const canvas = document.createElement('canvas')
       canvas.width = W * DPR
       canvas.height = H * DPR
@@ -718,11 +718,12 @@ export default function LeaderboardPage() {
       }
 
       // Footer
-      ctx.fillStyle = '#4b5563'
-      ctx.font = '10px system-ui'
       ctx.textAlign = 'center'
       const stamp = new Date().toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
-      ctx.fillText(`Bolão Copa 2026 · ${stamp}`, W / 2, H - 8)
+      ctx.fillStyle = '#4b5563'; ctx.font = '10px system-ui'
+      ctx.fillText(`Bolão Copa 2026 · ${stamp}`, W / 2, H - 22)
+      ctx.fillStyle = '#374151'; ctx.font = '10px system-ui'
+      ctx.fillText('bolao-production-cf4b.up.railway.app', W / 2, H - 8)
 
       const blob: Blob | null = await new Promise(res => canvas.toBlob(res, 'image/png'))
       if (!blob) throw new Error('Falha ao gerar imagem')
