@@ -74,6 +74,8 @@ export default function PalpitesDeTodosPage() {
   const CHIP_OVERRIDES: Record<string, string> = {
     'MORELLI': 'MRLI',
     'LUCILIO': 'LCLI',
+    'MOREATICO': 'MORE',
+    'LUCIO VENTURIM': 'LUCI',
   }
 
   // Shortest unique prefix per participant (min 4 chars, grows until no collision)
