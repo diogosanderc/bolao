@@ -107,10 +107,16 @@ export async function GET() {
 
     // Merge official results with live scores for group table computation
     const inProgressStatuses = ['in', 'halftime', 'extratime', 'et_halftime', 'penalties']
+    const now = Date.now()
     const merged: { matchId: string; score1: number; score2: number }[] = [...db.results]
     for (const [matchId, st] of Object.entries(liveStates)) {
       if (officialMap.has(matchId)) continue
-      if (st && (inProgressStatuses.includes(st.status) || st.status === 'completed')) {
+      if (!st) continue
+      const isInProgress = inProgressStatuses.includes(st.status)
+      const isCompleted = st.status === 'completed'
+      const dateToCheck = matchDates[matchId]?.date ?? st.startedAt
+      const stale = !dateToCheck || (now - new Date(dateToCheck).getTime()) > 3 * 3_600_000
+      if (isCompleted || (isInProgress && !stale)) {
         merged.push({ matchId, score1: st.score1, score2: st.score2 })
       }
     }

@@ -31,17 +31,20 @@ export async function GET() {
     for (const [matchId, state] of Object.entries(liveStates)) {
       if (playedMatchIds.has(matchId)) continue
       const inProgressStatuses = ['in', 'halftime', 'extratime', 'et_halftime', 'penalties']
-      if (inProgressStatuses.includes(state.status) || state.status === 'completed') {
+      const isInProgress = inProgressStatuses.includes(state.status)
+      const isCompleted = state.status === 'completed'
+
+      // Stale check: in-progress matches without date info or older than 3h are ignored entirely.
+      // This prevents stuck/future ESPN entries from polluting scores or showing "ao vivo".
+      const matchDate = matchDates[matchId]?.date
+      const startedAt = (state as any).startedAt as string | undefined
+      const dateToCheck = matchDate ?? startedAt
+      const stale = !dateToCheck || (now - new Date(dateToCheck).getTime()) > 3 * 3_600_000
+
+      // Only trust in-progress scores when not stale; always trust completed scores.
+      if (isCompleted || (isInProgress && !stale)) {
         provisionalResults.push({ matchId, score1: state.score1, score2: state.score2 })
-        // Only mark as live if match isn't stale (started > 3h ago means it likely ended)
-        // No date info at all → treat as stale so ghost "ao vivo" indicators are never shown
-        if (inProgressStatuses.includes(state.status)) {
-          const matchDate = matchDates[matchId]?.date
-          const startedAt = (state as any).startedAt as string | undefined
-          const dateToCheck = matchDate ?? startedAt
-          const stale = !dateToCheck || (now - new Date(dateToCheck).getTime()) > 3 * 3_600_000
-          if (!stale) hasLive = true
-        }
+        if (isInProgress) hasLive = true
       }
     }
     const allResults = [...sortedResults, ...provisionalResults]
