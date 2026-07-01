@@ -136,8 +136,23 @@ export async function runLiveSync(): Promise<SyncResult> {
     if (!match) continue
 
     const resolvedM = resolvedKnockout[match.id]
-    const effectiveTeam1 = match.team1Id !== 'TBD' ? match.team1Id : resolvedM?.team1Id ?? match.team1Id
-    const flipped = effectiveTeam1 === id2
+    const effT1 = match.team1Id !== 'TBD' ? match.team1Id : resolvedM?.team1Id
+    const effT2 = match.team2Id !== 'TBD' ? match.team2Id : resolvedM?.team2Id
+    const effT1ok = effT1 !== undefined && effT1 !== 'TBD'
+    const effT2ok = effT2 !== undefined && effT2 !== 'TBD'
+
+    let flipped: boolean
+    if (effT1ok && (effT1 === id1 || effT1 === id2)) {
+      // Normal: use team1 to orient the match
+      flipped = effT1 === id2
+    } else if (effT2ok && (effT2 === id1 || effT2 === id2)) {
+      // Fallback: team1 is TBD or doesn't appear in ESPN data — use team2
+      flipped = effT2 === id1
+    } else {
+      // Neither resolved team matches ESPN's pair — skip to avoid wrong scoring
+      continue
+    }
+
     const rawS1 = parseInt(c1.score ?? '0', 10)
     const rawS2 = parseInt(c2.score ?? '0', 10)
     const score1 = flipped ? rawS2 : rawS1
@@ -192,24 +207,24 @@ export async function runLiveSync(): Promise<SyncResult> {
     // 2) Penalty goal count from details (works even when status is already 'completed')
     // 3) Score-based derivation for non-draw knockout results
     const espnWinnerId = c1.winner === true ? id1 : c2.winner === true ? id2 : undefined
-    const effT1 = resolvedM?.team1Id ?? match.team1Id
-    const effT2 = resolvedM?.team2Id ?? match.team2Id
+    const resolvedT1 = resolvedM?.team1Id ?? match.team1Id
+    const resolvedT2 = resolvedM?.team2Id ?? match.team2Id
     const penWinnerId = !espnWinnerId
       && penaltyScore1 !== undefined && penaltyScore2 !== undefined
       && penaltyScore1 !== penaltyScore2
-      ? (penaltyScore1 > penaltyScore2 ? effT1 : effT2)
+      ? (penaltyScore1 > penaltyScore2 ? resolvedT1 : resolvedT2)
       : undefined
     const scoreWinnerId = !espnWinnerId && !penWinnerId && match.phase !== 'group' && score1 !== score2
-      ? (score1 > score2 ? effT1 : effT2)
+      ? (score1 > score2 ? resolvedT1 : resolvedT2)
       : undefined
     const winnerTeamId = espnWinnerId ?? penWinnerId ?? scoreWinnerId
 
     espnProcessed.push({
       matchId: match.id, newStatus, score1, score2, phase: match.phase,
-      team1Id: effT1,
-      team2Id: effT2,
-      t1: teamById[effT1]?.name ?? effT1,
-      t2: teamById[effT2]?.name ?? effT2,
+      team1Id: resolvedT1,
+      team2Id: resolvedT2,
+      t1: teamById[resolvedT1]?.name ?? resolvedT1,
+      t2: teamById[resolvedT2]?.name ?? resolvedT2,
       clock, varKeys, redCardKeys, espnStatusName: typeName, winnerTeamId, penaltyScore1, penaltyScore2,
     })
   }
