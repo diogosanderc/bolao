@@ -75,7 +75,6 @@ type ParticipantData = {
   groupPredictions: GroupPredRow[]
 }
 
-// Top predictions for a match, sorted by count desc, max 4 shown
 function PredDistribution({ matchId, dist, myScore }: {
   matchId: string
   dist: Record<string, Record<string, number>>
@@ -83,7 +82,7 @@ function PredDistribution({ matchId, dist, myScore }: {
 }) {
   const matchDist = dist[matchId]
   if (!matchDist) return null
-  const sorted = Object.entries(matchDist).sort((a, b) => b[1] - a[1]).slice(0, 4)
+  const sorted = Object.entries(matchDist).sort((a, b) => b[1] - a[1])
   const total = Object.values(matchDist).reduce((s, n) => s + n, 0)
   return (
     <div className="flex flex-wrap gap-1 mt-1.5">
