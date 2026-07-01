@@ -263,7 +263,7 @@ export async function runLiveSync(): Promise<SyncResult> {
       }
 
       if (newStatus === 'completed' && dbResult && dbResult.score1 === score1 && dbResult.score2 === score2) {
-        newPersistedStates[matchId] = { ...prev, status: 'completed', score1, score2, sentStarted: true, sentFinal: true, sentGoals: score1 + score2 }
+        newPersistedStates[matchId] = { ...prev, status: 'completed', score1, score2, sentStarted: true, sentFinal: true, sentGoals: score1 + score2, ...(phase !== 'group' && winnerTeamId ? { winnerTeamId } : {}) }
         // Back-fill advancingTeamId for all knockout matches, not just draws
         if (phase !== 'group' && winnerTeamId && !dbResult.advancingTeamId) {
           dbResultUpdates.push({ matchId, score1, score2, advancingTeamId: winnerTeamId })
@@ -274,7 +274,7 @@ export async function runLiveSync(): Promise<SyncResult> {
       if (!prev) {
         if (newStatus === 'completed') {
           // Match already finished on first encounter — save result silently
-          newPersistedStates[matchId] = { status: 'completed', score1, score2, sentStarted: true, sentFinal: true, sentGoals: score1 + score2 }
+          newPersistedStates[matchId] = { status: 'completed', score1, score2, sentStarted: true, sentFinal: true, sentGoals: score1 + score2, ...(phase !== 'group' && winnerTeamId ? { winnerTeamId } : {}) }
           const coldAdvancing = phase !== 'group' && winnerTeamId ? winnerTeamId : undefined
           const advancing = coldAdvancing ?? dbResult?.advancingTeamId
           if (!dbResult || dbResult.score1 !== score1 || dbResult.score2 !== score2) {
@@ -461,6 +461,7 @@ export async function runLiveSync(): Promise<SyncResult> {
         const wentBeyondRegulation = regS1 !== undefined
         const advancingTeamId = phase !== 'group' ? winnerTeamId : undefined
         const advancing = advancingTeamId ?? dbResult?.advancingTeamId
+        if (phase !== 'group' && winnerTeamId) newState.winnerTeamId = winnerTeamId
         if (!dbResult
           || dbResult.score1 !== score1
           || dbResult.score2 !== score2

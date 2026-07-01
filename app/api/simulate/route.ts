@@ -29,7 +29,8 @@ export async function POST(req: NextRequest) {
         const stale = !dateToCheck || (now - new Date(dateToCheck).getTime()) > 3 * 3_600_000
         if (stale) continue
       }
-      liveCompleted.push({ matchId, score1: st.score1, score2: st.score2, ...(st.advancingTeamId ? { advancingTeamId: st.advancingTeamId } : {}) })
+      const advancing = st.advancingTeamId ?? st.winnerTeamId
+      liveCompleted.push({ matchId, score1: st.score1, score2: st.score2, ...(advancing ? { advancingTeamId: advancing } : {}) })
     }
 
     const baseResults = [...db.results, ...liveCompleted.filter(r => !officialIds.has(r.matchId))]
