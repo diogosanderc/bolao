@@ -131,7 +131,7 @@ export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClos
   const [loading, setLoading] = useState(true)
   // matchId → score "1-0" → count
   const [predDist, setPredDist] = useState<Record<string, Record<string, number>>>({})
-  const [tab, setTab] = useState<'played' | 'selecoes' | 'upcoming'>('played')
+  const [tab, setTab] = useState<'played' | 'upcoming'>('played')
   const [sharingCard, setSharingCard] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
   const sheetRef = useRef<HTMLDivElement>(null)
@@ -184,7 +184,7 @@ export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClos
     return () => window.removeEventListener('keydown', handler)
   }, [onClose])
 
-  const TAB_ORDER = ['played', 'selecoes', 'upcoming'] as const
+  const TAB_ORDER = ['played', 'upcoming'] as const
   function switchTab(t: typeof TAB_ORDER[number]) {
     if (t === tabRef.current) return
     setSlideDir(TAB_ORDER.indexOf(t) > TAB_ORDER.indexOf(tabRef.current) ? 'r' : 'l')
@@ -477,19 +477,13 @@ export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClos
             onClick={() => switchTab('played')}
             className={`flex-1 py-2.5 text-xs font-medium transition-colors ${tab === 'played' ? 'text-yellow-600 dark:text-yellow-400 border-b-2 border-yellow-600 dark:border-yellow-400' : 'text-gray-500 hover:text-gray-300'}`}
           >
-            Jogados ({played.length})
-          </button>
-          <button
-            onClick={() => switchTab('selecoes')}
-            className={`flex-1 py-2.5 text-xs font-medium transition-colors ${tab === 'selecoes' ? 'text-yellow-600 dark:text-yellow-400 border-b-2 border-yellow-600 dark:border-yellow-400' : 'text-gray-500 hover:text-gray-300'}`}
-          >
-            Seleções
+            Histórico ({played.length})
           </button>
           <button
             onClick={() => switchTab('upcoming')}
             className={`flex-1 py-2.5 text-xs font-medium transition-colors ${tab === 'upcoming' ? 'text-yellow-600 dark:text-yellow-400 border-b-2 border-yellow-600 dark:border-yellow-400' : 'text-gray-500 hover:text-gray-300'}`}
           >
-            Próximos ({upcoming.length})
+            Próximas partidas ({upcoming.length})
           </button>
         </div>
 
@@ -654,54 +648,6 @@ export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClos
                   </div>
                 </div>
               )}
-            </div>
-          )}
-
-          {!loading && tab === 'selecoes' && (
-            <div key={`selecoes-${slideDir}`} className={`p-3 space-y-3 ${slideDir === 'r' ? 'animate-tab-in-right' : 'animate-tab-in-left'}`}>
-              {(!data?.groupPredictions?.length) && (
-                <p className="text-center py-10 text-gray-600">Sem palpites de classificação registrados.</p>
-              )}
-              {/* Summary */}
-              {data && (
-                <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-gray-900 border border-gray-800">
-                  <span className="text-xs text-gray-400">Bônus classificação 16-avos</span>
-                  <span className="text-sm font-bold text-yellow-400">+{data.summary.r32Points} pts</span>
-                </div>
-              )}
-              {data?.groupPredictions?.map(g => {
-                const picks = g.predicted.slice(0, 3)
-                if (picks.length === 0) return null
-                return (
-                  <div key={g.groupId} className="rounded-lg border border-gray-800 bg-gray-900 overflow-hidden">
-                    <div className="flex items-center justify-between px-3 py-1.5 bg-gray-800/50">
-                      <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Grupo {g.groupId}</span>
-                      {!g.complete && <span className="text-[9px] font-semibold uppercase text-amber-700 bg-amber-200 dark:text-amber-400 dark:bg-amber-500/10 px-1.5 py-0.5 rounded">em jogo</span>}
-                    </div>
-                    <div className="flex flex-col divide-y divide-gray-800/40">
-                      {picks.map((team, i) => {
-                        const qualified = g.r32Qualified[i]
-                        const posLabel = ['1º', '2º', '3º'][i]
-                        const posColor = i === 0 ? 'text-yellow-500' : i === 1 ? 'text-gray-400' : 'text-amber-600'
-                        return (
-                          <div key={team.id} className={`flex items-center gap-2.5 px-3 py-2 ${qualified ? 'bg-green-50 dark:bg-green-950/20' : ''}`}>
-                            <span className={`text-[11px] font-bold w-5 shrink-0 ${posColor}`}>{posLabel}</span>
-                            <Flag teamId={team.id} size={22} />
-                            <span className={`text-sm font-semibold flex-1 ${qualified ? 'text-green-700 dark:text-green-300' : g.complete ? 'text-gray-500' : 'text-gray-300'}`}>
-                              {team.name}
-                            </span>
-                            {qualified
-                              ? <span className="text-xs font-bold text-green-800 bg-green-200 dark:text-green-400 dark:bg-green-900/40 px-2 py-0.5 rounded font-score">+3 pts</span>
-                              : g.complete
-                              ? <span className="text-gray-600"><Icon name="x" size={12} /></span>
-                              : null}
-                          </div>
-                        )
-                      })}
-                    </div>
-                  </div>
-                )
-              })}
             </div>
           )}
 

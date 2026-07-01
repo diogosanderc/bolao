@@ -164,13 +164,10 @@ export function BottomNav() {
                 href={href}
                 prefetch
                 onClick={() => setMoreOpen(false)}
-                className={`relative flex-1 flex flex-col items-center justify-center gap-1 py-3 transition-colors ${active ? 'text-[#00bf63]' : 'text-gray-400 active:text-gray-200'}`}
+                className={`relative flex-1 flex flex-col items-center justify-center py-3 transition-colors ${active ? 'text-[#00bf63]' : 'text-gray-400 active:text-gray-200'}`}
               >
                 {active && <span className="absolute inset-x-2 inset-y-1 rounded-xl bg-[#00bf63]/15" />}
                 <Icon className={`relative w-[24px] h-[24px] transition-transform ${active ? 'scale-110' : ''}`} />
-                <span className="relative text-[10px] font-bold tracking-tight leading-tight text-center">
-                  {lines[0]}
-                </span>
                 {active && <span className="absolute top-0 left-1/2 -translate-x-1/2 h-0.5 w-8 rounded-full bg-[#00bf63]" />}
               </Link>
             )

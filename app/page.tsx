@@ -944,7 +944,7 @@ export default function LeaderboardPage() {
         <div>
           <div className="flex items-center justify-between mb-1.5">
             <span className="text-xs text-gray-500 uppercase tracking-wider">{recentMatches.length > 1 ? 'Últimos jogos' : 'Último jogo'}</span>
-            {recentMatches.length > 1 && <span className="text-[10px] text-gray-600">deslize para o lado →</span>}
+            <span className="text-[10px] text-gray-600 sm:hidden">{recentMatches.length > 1 ? 'deslize para o lado →' : ''}</span>
           </div>
           <div
             ref={recentRef}
@@ -955,13 +955,13 @@ export default function LeaderboardPage() {
               const w = (card?.getBoundingClientRect().width ?? 1) + 12
               setRecentIdx(Math.round(el.scrollLeft / w))
             }}
-            className="flex gap-3 overflow-x-auto snap-x snap-mandatory no-scrollbar -mx-4 px-4 pb-1"
+            className="flex gap-3 overflow-x-auto snap-x snap-mandatory no-scrollbar -mx-4 px-4 pb-1 sm:flex-wrap sm:overflow-visible sm:mx-0 sm:px-0 sm:snap-none"
           >
             {recentMatches.map(rm => (
               <button
                 key={rm.matchId}
                 onClick={() => openMatchPredictions(rm.matchId, `${rm.team1.name} vs ${rm.team2.name}`, { score1: rm.score1, score2: rm.score2 })}
-                className="snap-center shrink-0 w-[86%] sm:w-[360px] text-left bg-gradient-to-br from-gray-900 to-gray-950 border border-gray-800 hover:border-gray-600 rounded-lg px-4 py-2.5 transition-colors"
+                className="snap-center shrink-0 w-[86%] sm:w-auto sm:flex-1 sm:min-w-[280px] sm:snap-none text-left bg-gradient-to-br from-gray-900 to-gray-950 border border-gray-800 hover:border-gray-600 rounded-lg px-4 py-2.5 transition-colors"
               >
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-xs text-gray-500 uppercase tracking-wider">Último jogo</span>
@@ -976,7 +976,7 @@ export default function LeaderboardPage() {
             ))}
           </div>
           {recentMatches.length > 1 && (
-            <div className="flex justify-center gap-1.5 mt-2">
+            <div className="flex justify-center gap-1.5 mt-2 sm:hidden">
               {recentMatches.map((_, i) => (
                 <span key={i} className={`h-1.5 rounded-full transition-all ${i === recentIdx ? 'w-4 bg-gray-400' : 'w-1.5 bg-gray-700'}`} />
               ))}
@@ -1002,7 +1002,7 @@ export default function LeaderboardPage() {
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <span className="text-xs text-gray-500 uppercase tracking-wider">{heading}</span>
-              {items.length > 1 && <span className="text-[10px] text-gray-600">deslize para o lado →</span>}
+              <span className="text-[10px] text-gray-600 sm:hidden">{items.length > 1 ? 'deslize para o lado →' : ''}</span>
             </div>
             <div
               ref={carouselRef}
@@ -1013,13 +1013,13 @@ export default function LeaderboardPage() {
                 const w = (card?.getBoundingClientRect().width ?? 1) + 12
                 setCarouselIdx(Math.round(el.scrollLeft / w))
               }}
-              className="flex gap-3 overflow-x-auto snap-x snap-mandatory no-scrollbar -mx-4 px-4 pb-1"
+              className="flex gap-3 overflow-x-auto snap-x snap-mandatory no-scrollbar -mx-4 px-4 pb-1 sm:flex-wrap sm:overflow-visible sm:mx-0 sm:px-0 sm:snap-none"
             >
               {items.map(m => (
                 <button
                   key={m.matchId}
                   onClick={() => openMatchPredictions(m.matchId, `${m.team1.name} vs ${m.team2.name}`)}
-                  className="snap-center shrink-0 w-[86%] sm:w-[360px] bg-gradient-to-br from-gray-900 to-gray-950 border border-gray-800 hover:border-gray-600 rounded-lg px-4 py-2.5 text-left transition-colors"
+                  className="snap-center shrink-0 w-[86%] sm:w-auto sm:flex-1 sm:min-w-[280px] sm:snap-none bg-gradient-to-br from-gray-900 to-gray-950 border border-gray-800 hover:border-gray-600 rounded-lg px-4 py-2.5 text-left transition-colors"
                 >
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-xs text-gray-500 uppercase tracking-wider">Próximo jogo</span>
@@ -1040,7 +1040,7 @@ export default function LeaderboardPage() {
               ))}
             </div>
             {items.length > 1 && (
-              <div className="flex justify-center gap-1.5 mt-2">
+              <div className="flex justify-center gap-1.5 mt-2 sm:hidden">
                 {items.map((_, i) => (
                   <span key={i} className={`h-1.5 rounded-full transition-all ${i === carouselIdx ? 'w-4 bg-gray-400' : 'w-1.5 bg-gray-700'}`} />
                 ))}
@@ -1187,7 +1187,8 @@ export default function LeaderboardPage() {
 
       {!loading && data.length > 0 && !leaderboardHasLive && (
         <div className="space-y-2">
-          <div className="flex gap-1.5">
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs text-gray-500 shrink-0">Filtre por:</span>
             {([['all', 'Todos', ''], ['top7', 'Top 7', 'bg-[#00bf63]'], ['red', 'Pagões', 'bg-red-500']] as const).map(([val, label, dot]) => (
               <button
                 key={val}
@@ -1324,7 +1325,6 @@ export default function LeaderboardPage() {
               <span><span className="font-bold text-gray-300">UJ</span> — pontos do último jogo</span>
               <span><span className="font-bold text-gray-300">MM</span> — avanço no mata-mata (+4/+6/+8/+10/+12)</span>
               <span><span className="font-bold text-gray-300">PTS</span> — total acumulado</span>
-              <span><span className="font-bold text-gray-300">-N</span> — pontos atrás do colocado acima</span>
             </div>
             <div className="flex flex-wrap gap-x-4 gap-y-1 pt-1 border-t border-gray-800/60">
               <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-sm bg-yellow-500 inline-block" /> Líder</span>
