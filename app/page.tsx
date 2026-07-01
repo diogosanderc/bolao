@@ -904,7 +904,7 @@ export default function LeaderboardPage() {
                           <Flag teamId={team.id} size={14} />
                           {goals.map((g, i) => (
                             <span key={i} className="text-xs text-red-800 dark:text-red-200 inline-flex items-center gap-0.5">
-                              <Icon name="ball" size={12} className="shrink-0" />{g.minute && <span className="text-red-700 dark:text-red-400"> {g.minute}</span>} {g.playerName}
+                              <span className="shrink-0 leading-none">⚽</span>{g.minute && <span className="text-red-700 dark:text-red-400"> {g.minute}'</span>} {g.playerName}
                             </span>
                           ))}
                         </div>
