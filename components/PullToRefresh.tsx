@@ -13,6 +13,7 @@ export function PullToRefresh() {
     let pulling = false
 
     const onStart = (e: TouchEvent) => {
+      if (document.body.hasAttribute('data-modal-open')) return
       if (window.scrollY <= 0 && !refreshing) {
         startY = e.touches[0].clientY
         pulling = true

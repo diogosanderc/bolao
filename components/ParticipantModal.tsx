@@ -144,6 +144,11 @@ export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClos
   useEffect(() => { tabRef.current = tab }, [tab])
 
   useEffect(() => {
+    document.body.setAttribute('data-modal-open', 'true')
+    return () => document.body.removeAttribute('data-modal-open')
+  }, [])
+
+  useEffect(() => {
     Promise.all([
       fetch(`/api/participante/${participantId}`).then(r => r.json()),
       fetch('/api/match-predictions').then(r => r.json()),
