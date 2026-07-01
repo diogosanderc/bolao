@@ -342,7 +342,6 @@ export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClos
   return (
     <div
       className="fixed inset-0 z-50 flex items-end justify-center"
-      onClick={closeSheet}
       style={{ touchAction: 'none' }}
     >
       {/* Backdrop — fades as the sheet is dragged down */}
