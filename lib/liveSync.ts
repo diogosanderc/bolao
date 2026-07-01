@@ -484,6 +484,30 @@ export async function runLiveSync(): Promise<SyncResult> {
       newPersistedStates[matchId] = newState
     }
 
+    // ── Cleanup: remove stuck 'in' entries ESPN no longer reports ─────────────
+    // If a match is stored as in-progress but ESPN didn't mention it in this poll
+    // AND there is no official result, it's likely false/stale ESPN data.
+    // Only clean entries with no matchDate (unknown schedule) or matchDate in the
+    // future — we never want to silently drop a match that just ended.
+    const espnReportedIds = new Set(espnProcessed.map(p => p.matchId))
+    const inProgressSet = new Set(['in', 'halftime', 'extratime', 'et_halftime', 'penalties'])
+    for (const [matchId, state] of Object.entries(newPersistedStates)) {
+      if (!inProgressSet.has(state.status)) continue
+      if (resultMap[matchId]) continue           // has official result — leave it
+      if (espnReportedIds.has(matchId)) continue // ESPN is actively reporting — leave it
+      // Not in this ESPN poll: delete if no date info, or if scheduled in the future
+      const mDate = db.matchDates?.[matchId]?.date
+      const startedAt = (state as any).startedAt as string | undefined
+      const dateToCheck = mDate ?? startedAt
+      if (!dateToCheck) {
+        delete newPersistedStates[matchId]
+        continue
+      }
+      const msAgo = Date.now() - new Date(dateToCheck).getTime()
+      // Future match (or started < 5 min ago) → false ESPN data, clean up
+      if (msAgo < 5 * 60_000) delete newPersistedStates[matchId]
+    }
+
     const map = Object.fromEntries(db.results.map(r => [r.matchId, r]))
     for (const u of dbResultUpdates) map[u.matchId] = { ...map[u.matchId], ...u }
     return { ...db, results: Object.values(map), liveMatchStates: newPersistedStates, lastPollerRun: new Date().toISOString() } as any
