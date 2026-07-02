@@ -142,7 +142,8 @@ export default function SimuladorPage() {
     const locked = tbd || isLive
     const isKnockout = !matchId.startsWith('G')
     const isDraw = !tbd && s.score1 !== '' && s.score2 !== '' && +s.score1 === +s.score2
-    const needsAdvance = isKnockout && isDraw
+    // 3rd-place match: only the score counts — a draw needs no advancing pick
+    const needsAdvance = isKnockout && isDraw && matchId !== 'TP_1'
     const pick = advancing[matchId]
     return (
       <div key={matchId} className={`rounded-lg bg-gray-900 border ${isLive ? 'border-green-800' : 'border-gray-800'} ${tbd ? 'opacity-40' : ''}`}>

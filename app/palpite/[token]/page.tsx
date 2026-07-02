@@ -47,6 +47,8 @@ function MatchCard({
   const team1 = teamById[t1Id]
   const team2 = teamById[t2Id]
   const isDraw = s1 !== '' && s2 !== '' && Number(s1) === Number(s2)
+  // 3rd-place match: only the score counts for points — a draw needs no advancing pick
+  const needsAdvancing = isKnockout && isDraw && match.id !== 'TP_1'
   const officialResult = result?.score1 !== undefined
   // Admin mode: always unlocked. Participant: locked once prediction exists
   const locked = adminMode ? false : (officialResult || prediction !== undefined)
@@ -62,7 +64,7 @@ function MatchCard({
 
   async function save() {
     if (s1 === '' || s2 === '') return
-    const advance = isKnockout && isDraw ? adv || undefined : undefined
+    const advance = needsAdvancing ? adv || undefined : undefined
     await onSave(match.id, Number(s1), Number(s2), advance)
     setDirty(false)
     setSaved(true)
@@ -110,7 +112,7 @@ function MatchCard({
         </div>
       </div>
 
-      {isKnockout && isDraw && !locked && (
+      {needsAdvancing && !locked && (
         <div className="mx-4 mb-3 flex items-center gap-2 bg-blue-50 dark:bg-blue-950/40 border border-blue-300 dark:border-blue-800 rounded-lg px-3 py-2 text-sm">
           <span className="text-blue-700 dark:text-blue-300 text-xs whitespace-nowrap">Quem avança?</span>
           <select value={adv} onChange={e => { setAdv(e.target.value); setDirty(true) }}
@@ -136,7 +138,7 @@ function MatchCard({
         )}
 
         {!locked && (dirty || adminMode) && (
-          <button onClick={save} disabled={saving || s1 === '' || s2 === '' || (isKnockout && isDraw && !adv)}
+          <button onClick={save} disabled={saving || s1 === '' || s2 === '' || (needsAdvancing && !adv)}
             className="text-xs bg-yellow-600 hover:bg-yellow-500 disabled:bg-gray-800 disabled:text-gray-600 text-[white] rounded-lg px-3 py-1.5 font-semibold transition-colors">
             {adminMode && prediction !== undefined ? 'Atualizar' : 'Salvar'}
           </button>
