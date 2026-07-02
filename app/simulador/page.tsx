@@ -215,6 +215,68 @@ export default function SimuladorPage() {
         </div>
       </div>
 
+      {/* Manual: how to fill in the simulator */}
+      <details className="rounded-xl border border-gray-800 bg-gray-900 overflow-hidden group">
+        <summary className="px-4 py-3 cursor-pointer select-none text-sm font-semibold text-gray-200 flex items-center gap-2 hover:bg-gray-800/50 transition-colors">
+          <Icon name="bulb" size={15} className="text-yellow-500 shrink-0" />
+          Como preencher o simulador — leia antes de simular
+          <span className="ml-auto text-gray-500 text-xs group-open:hidden">mostrar</span>
+          <span className="ml-auto text-gray-500 text-xs hidden group-open:inline">ocultar</span>
+        </summary>
+        <div className="px-4 pb-4 pt-1 space-y-4 text-sm text-gray-400 border-t border-gray-800">
+          <div className="space-y-1.5">
+            <h4 className="font-semibold text-yellow-500 text-xs uppercase tracking-wide pt-2">⏱ Tempo regulamentar (90 minutos)</h4>
+            <p>
+              Preencha sempre o placar do <strong className="text-gray-200">tempo regulamentar (90 min)</strong>.
+              Gols de prorrogação e pênaltis <strong className="text-gray-200">não contam</strong> para a pontuação dos palpites.
+            </p>
+            <p className="text-xs bg-gray-950/60 border border-gray-800 rounded-lg px-3 py-2">
+              <strong className="text-gray-300">Exemplo:</strong> Bélgica 3×2 Senegal, com gol decisivo na prorrogação.
+              O placar que vale pontos é <strong className="text-gray-200">2×2</strong> (fim dos 90 min) — preencha 2×2 e
+              marque a <strong className="text-gray-200">Bélgica</strong> em &quot;Avança para próxima fase&quot;.
+            </p>
+          </div>
+          <div className="space-y-1.5">
+            <h4 className="font-semibold text-yellow-500 text-xs uppercase tracking-wide">🎯 Como preencher</h4>
+            <ul className="space-y-1 list-disc list-inside">
+              <li>Os jogos já finalizados vêm preenchidos com o placar oficial dos 90 minutos — pode alterá-los para simular cenários alternativos</li>
+              <li>No mata-mata, se você colocar <strong className="text-gray-200">empate</strong>, aparece a opção &quot;Avança para próxima fase&quot; — escolha o time classificado</li>
+              <li>Times marcados como <strong className="text-gray-200">TBD</strong> são preenchidos automaticamente conforme os resultados das fases anteriores são simulados</li>
+              <li>Jogos <strong className="text-green-500">ao vivo</strong> ficam bloqueados até o fim da partida</li>
+              <li>Nada é salvo — use &quot;Limpar simulação&quot; para voltar aos resultados reais</li>
+            </ul>
+          </div>
+          <div className="space-y-1.5">
+            <h4 className="font-semibold text-yellow-500 text-xs uppercase tracking-wide">⚽ Pontuação por jogo</h4>
+            <ul className="space-y-0.5">
+              <li className="flex justify-between gap-2"><span>Resultado certo (vitória/empate/derrota)</span><strong className="text-green-500 shrink-0">4 pts</strong></li>
+              <li className="flex justify-between gap-2"><span>Gols exatos do time mandante</span><strong className="text-green-500 shrink-0">+1 pt</strong></li>
+              <li className="flex justify-between gap-2"><span>Gols exatos do time visitante</span><strong className="text-green-500 shrink-0">+1 pt</strong></li>
+              <li className="flex justify-between gap-2"><span>Placar exato completo</span><strong className="text-green-500 shrink-0">+2 pts</strong></li>
+              <li className="flex justify-between gap-2"><span>Time fez ≥4 gols e você acertou quantos</span><strong className="text-green-500 shrink-0">+2 pts/time</strong></li>
+              <li className="flex justify-between gap-2"><span>Classificação completa do grupo (1º ao 4º)</span><strong className="text-green-500 shrink-0">+2 pts/grupo</strong></li>
+            </ul>
+            <p className="text-xs text-gray-500">Máximo por jogo: 4 + 1 + 1 + 2 = 8 pontos (+ até 4 de bônus se algum time fizer ≥4 gols)</p>
+          </div>
+          <div className="space-y-1.5">
+            <h4 className="font-semibold text-yellow-500 text-xs uppercase tracking-wide">🏆 Classificação no mata-mata</h4>
+            <p className="text-xs">Pontos por cada time que você previu avançar em cada fase:</p>
+            <ul className="space-y-0.5">
+              <li className="flex justify-between gap-2"><span>16 avos (classificados dos grupos)</span><strong className="text-yellow-500 shrink-0">3 pts/time</strong></li>
+              <li className="flex justify-between gap-2"><span>Oitavas de Final</span><strong className="text-yellow-500 shrink-0">4 pts/time</strong></li>
+              <li className="flex justify-between gap-2"><span>Quartas de Final</span><strong className="text-yellow-500 shrink-0">6 pts/time</strong></li>
+              <li className="flex justify-between gap-2"><span>Semifinal</span><strong className="text-yellow-500 shrink-0">8 pts/time</strong></li>
+              <li className="flex justify-between gap-2"><span>Final</span><strong className="text-yellow-500 shrink-0">10 pts/time</strong></li>
+              <li className="flex justify-between gap-2"><span>Campeão</span><strong className="text-yellow-500 shrink-0">+12 pts</strong></li>
+            </ul>
+            <p className="text-xs text-gray-500">
+              Indicar quem avança num empate não soma pontos extras — serve como critério de desempate
+              e para definir quem segue no chaveamento.
+            </p>
+          </div>
+        </div>
+      </details>
+
       <div className="flex gap-5 flex-col lg:flex-row">
         {/* LEFT: Match inputs */}
         <div className="flex-1 min-w-0 space-y-3">
