@@ -23,6 +23,7 @@ const PHASE_TABS: { key: PhaseKey; label: string }[] = [
 export default function SimuladorPage() {
   const [inputs, setInputs]       = useState<Record<string, SimScore>>({})
   const [bracket, setBracket]     = useState<Bracket>({})
+  const [realTeams, setRealTeams] = useState<Bracket>({})
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
   const [simulating, setSimulating]   = useState(false)
   const [phase, setPhase]         = useState<PhaseKey>('group')
@@ -47,7 +48,7 @@ export default function SimuladorPage() {
     setSimulating(false)
   }, [])
 
-  useEffect(() => {
+  const loadFromServer = useCallback(() => {
     Promise.all([
       fetch('/api/results').then(r => r.json()).catch(() => []),
       fetch('/api/copa-standings').then(r => r.json()).catch(() => ({})),
@@ -56,18 +57,24 @@ export default function SimuladorPage() {
       for (const r of (results as MatchResult[])) {
         init[r.matchId] = { score1: String(r.score1), score2: String(r.score2) }
       }
-      // Seed knockout played matches from copa-standings (includes liveMatchStates completed)
+      // Seed knockout matches from copa-standings (includes liveMatchStates completed)
+      // and capture the real resolved teams — same source the /tabela renders.
+      const teams: Bracket = {}
       for (const phase of (standings.knockout ?? [])) {
         for (const m of (phase.matches ?? [])) {
+          teams[m.matchId] = { team1Id: m.team1Id ?? 'TBD', team2Id: m.team2Id ?? 'TBD' }
           if (m.status === 'played' && m.score1 != null && m.score2 != null) {
             init[m.matchId] = { score1: String(m.score1), score2: String(m.score2) }
           }
         }
       }
+      setRealTeams(teams)
       setInputs(init)
       runSimulate(init)
     })
   }, [runSimulate])
+
+  useEffect(() => { loadFromServer() }, [loadFromServer])
 
   const handleInput = (matchId: string, field: 'score1' | 'score2', value: string) => {
     const prev = inputs[matchId] ?? { score1: '', score2: '' }
@@ -77,26 +84,7 @@ export default function SimuladorPage() {
     debounceRef.current = setTimeout(() => runSimulate(next), 400)
   }
 
-  const clearSim = () => {
-    Promise.all([
-      fetch('/api/results').then(r => r.json()).catch(() => []),
-      fetch('/api/copa-standings').then(r => r.json()).catch(() => ({})),
-    ]).then(([results, standings]) => {
-      const init: Record<string, SimScore> = {}
-      for (const r of (results as MatchResult[])) {
-        init[r.matchId] = { score1: String(r.score1), score2: String(r.score2) }
-      }
-      for (const phase of (standings.knockout ?? [])) {
-        for (const m of (phase.matches ?? [])) {
-          if (m.status === 'played' && m.score1 != null && m.score2 != null) {
-            init[m.matchId] = { score1: String(m.score1), score2: String(m.score2) }
-          }
-        }
-      }
-      setInputs(init)
-      runSimulate(init)
-    })
-  }
+  const clearSim = () => loadFromServer()
 
   const uniquePoints = [...new Set(leaderboard.map(e => e.totalPoints))].sort((a, b) => b - a)
   const tierOf = (pts: number) => uniquePoints.indexOf(pts) + 1
@@ -107,11 +95,14 @@ export default function SimuladorPage() {
   }
 
   const knockoutMatches = (phaseKey: PhaseKey) =>
-    KNOCKOUT_MATCHES.filter(m => m.phase === phaseKey).map(m => ({
-      ...m,
-      team1Id: bracket[m.id]?.team1Id ?? 'TBD',
-      team2Id: bracket[m.id]?.team2Id ?? 'TBD',
-    }))
+    KNOCKOUT_MATCHES.filter(m => m.phase === phaseKey).map(m => {
+      // Prefer the simulated bracket; fall back to the real teams from /tabela
+      const sim = bracket[m.id]
+      const real = realTeams[m.id]
+      const t1 = sim?.team1Id && sim.team1Id !== 'TBD' ? sim.team1Id : (real?.team1Id ?? 'TBD')
+      const t2 = sim?.team2Id && sim.team2Id !== 'TBD' ? sim.team2Id : (real?.team2Id ?? 'TBD')
+      return { ...m, team1Id: t1, team2Id: t2 }
+    })
 
   const renderMatchRow = (matchId: string, team1Id: string, team2Id: string) => {
     const s = inputs[matchId] ?? { score1: '', score2: '' }
