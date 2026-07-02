@@ -165,12 +165,23 @@ export default function LeaderboardPage() {
     try { navigator.vibrate?.(ms) } catch {}
   }
 
+  // Lightweight refresh (pull-to-refresh, polling): refetch data without reloading
+  async function doSoftRefresh() {
+    if (reloading) return
+    setReloading(true)
+    haptic(8)
+    await fetch('/api/sync/live', { method: 'POST' }).catch(() => {})
+    await Promise.all([fetchLeaderboard(), fetchSchedule()])
+    setReloading(false)
+    showToast('✓ Atualizado')
+  }
+
+  // Header refresh button: full page reload so every section comes back fresh
   async function doRefresh() {
     if (reloading) return
     setReloading(true)
     haptic(8)
     await fetch('/api/sync/live', { method: 'POST' }).catch(() => {})
-    // Full page reload so every section (cards, projections, schedule, bundle) refreshes
     window.location.reload()
   }
 
@@ -476,7 +487,7 @@ export default function LeaderboardPage() {
       if (!pulling) return
       pulling = false
       setPullDist(d => {
-        if (d >= THRESHOLD * 0.5) doRefresh()
+        if (d >= THRESHOLD * 0.5) doSoftRefresh()
         return 0
       })
     }
