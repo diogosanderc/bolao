@@ -25,7 +25,15 @@ function buildRealMerged(db: any): MatchResult[] {
       if (stale) continue
     }
     const advancing = (st as any).advancingTeamId ?? (st as any).winnerTeamId
-    real.push({ matchId, score1: (st as any).score1, score2: (st as any).score2, ...(advancing ? { advancingTeamId: advancing } : {}) })
+    real.push({
+      matchId,
+      score1: (st as any).score1,
+      score2: (st as any).score2,
+      ...(advancing ? { advancingTeamId: advancing } : {}),
+      // 90-min score — prediction points are computed on this, not the ET-inclusive score
+      ...((st as any).regulationScore1 !== undefined ? { regulationScore1: (st as any).regulationScore1 } : {}),
+      ...((st as any).regulationScore2 !== undefined ? { regulationScore2: (st as any).regulationScore2 } : {}),
+    })
   }
   return real
 }
@@ -40,15 +48,17 @@ export async function POST(req: NextRequest) {
     const realBracket = computeBracketFromResults(realMerged)
 
     const overrideMap = Object.fromEntries(overrides.map(r => [r.matchId, r]))
-    const officialMap = Object.fromEntries((db.results as MatchResult[]).map(r => [r.matchId, r]))
+    const realMap = Object.fromEntries(realMerged.map(r => [r.matchId, r]))
 
-    // Simulated merged = real base + user overrides (preserve advancingTeamId when score unchanged)
+    // Simulated merged = real base + user overrides. When the override score equals the
+    // real final score, keep the real result's extra fields (regulationScore1/2 for
+    // 90-min scoring, advancingTeamId) — the user hasn't changed anything for that match.
     const simMerged: MatchResult[] = [
       ...realMerged.filter(r => !overrideMap[r.matchId]),
       ...overrides.map(o => {
-        const official = officialMap[o.matchId] as MatchResult | undefined
-        if (official && official.score1 === o.score1 && official.score2 === o.score2) {
-          return { ...official, ...o }
+        const real = realMap[o.matchId] as MatchResult | undefined
+        if (real && real.score1 === o.score1 && real.score2 === o.score2) {
+          return { ...real, ...o }
         }
         return o
       }),
@@ -68,11 +78,20 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Same participant filter and bonus picks as the main leaderboard route
+    const predCount = new Map<string, number>()
+    for (const p of db.matchPredictions) {
+      predCount.set(p.participantId, (predCount.get(p.participantId) ?? 0) + 1)
+    }
+    const validParticipants = db.participants.filter(p => (predCount.get(p.id) ?? 0) > 0)
+
     const leaderboard = computeLeaderboard(
-      db.participants,
+      validParticipants,
       db.matchPredictions,
       db.groupPredictions,
-      simMerged
+      simMerged,
+      db.r32TeamPicks,
+      db.knockoutPhasePicks
     )
 
     return NextResponse.json({ leaderboard, bracket })
