@@ -170,9 +170,8 @@ export default function LeaderboardPage() {
     setReloading(true)
     haptic(8)
     await fetch('/api/sync/live', { method: 'POST' }).catch(() => {})
-    await Promise.all([fetchLeaderboard(), fetchSchedule()])
-    setReloading(false)
-    showToast('✓ Atualizado')
+    // Full page reload so every section (cards, projections, schedule, bundle) refreshes
+    window.location.reload()
   }
 
   function openParticipant(id: string, name: string) {
