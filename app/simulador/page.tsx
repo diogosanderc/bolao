@@ -24,17 +24,23 @@ export default function SimuladorPage() {
   const [inputs, setInputs]       = useState<Record<string, SimScore>>({})
   const [bracket, setBracket]     = useState<Bracket>({})
   const [realTeams, setRealTeams] = useState<Bracket>({})
+  const [advancing, setAdvancing] = useState<Record<string, string>>({})
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
   const [simulating, setSimulating]   = useState(false)
   const [phase, setPhase]         = useState<PhaseKey>('group')
   const [openGroup, setOpenGroup] = useState('A')
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const runSimulate = useCallback(async (current: Record<string, SimScore>) => {
+  const runSimulate = useCallback(async (current: Record<string, SimScore>, adv: Record<string, string> = {}) => {
     setSimulating(true)
     const overrides: MatchResult[] = Object.entries(current)
       .filter(([, s]) => s.score1 !== '' && s.score2 !== '' && !isNaN(+s.score1) && !isNaN(+s.score2))
-      .map(([matchId, s]) => ({ matchId, score1: +s.score1, score2: +s.score2 }))
+      .map(([matchId, s]) => {
+        const isDraw = +s.score1 === +s.score2
+        const isKnockout = !matchId.startsWith('G')
+        const pick = isKnockout && isDraw ? adv[matchId] : undefined
+        return { matchId, score1: +s.score1, score2: +s.score2, ...(pick ? { advancingTeamId: pick } : {}) }
+      })
     try {
       const res = await fetch('/api/simulate', {
         method: 'POST',
@@ -60,17 +66,20 @@ export default function SimuladorPage() {
       // Seed knockout matches from copa-standings (includes liveMatchStates completed)
       // and capture the real resolved teams — same source the /tabela renders.
       const teams: Bracket = {}
+      const adv: Record<string, string> = {}
       for (const phase of (standings.knockout ?? [])) {
         for (const m of (phase.matches ?? [])) {
           teams[m.matchId] = { team1Id: m.team1Id ?? 'TBD', team2Id: m.team2Id ?? 'TBD' }
           if (m.status === 'played' && m.score1 != null && m.score2 != null) {
             init[m.matchId] = { score1: String(m.score1), score2: String(m.score2) }
           }
+          if (m.advancingTeamId) adv[m.matchId] = m.advancingTeamId
         }
       }
       setRealTeams(teams)
+      setAdvancing(adv)
       setInputs(init)
-      runSimulate(init)
+      runSimulate(init, adv)
     })
   }, [runSimulate])
 
@@ -81,7 +90,14 @@ export default function SimuladorPage() {
     const next = { ...inputs, [matchId]: { ...prev, [field]: value } }
     setInputs(next)
     if (debounceRef.current) clearTimeout(debounceRef.current)
-    debounceRef.current = setTimeout(() => runSimulate(next), 400)
+    debounceRef.current = setTimeout(() => runSimulate(next, advancing), 400)
+  }
+
+  const handleAdvance = (matchId: string, teamId: string) => {
+    const next = { ...advancing, [matchId]: teamId }
+    setAdvancing(next)
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    runSimulate(inputs, next)
   }
 
   const clearSim = () => loadFromServer()
@@ -109,27 +125,52 @@ export default function SimuladorPage() {
     const t1 = teamById[team1Id]
     const t2 = teamById[team2Id]
     const tbd = team1Id === 'TBD' || team2Id === 'TBD'
+    const isKnockout = !matchId.startsWith('G')
+    const isDraw = !tbd && s.score1 !== '' && s.score2 !== '' && +s.score1 === +s.score2
+    const needsAdvance = isKnockout && isDraw
+    const pick = advancing[matchId]
     return (
-      <div key={matchId} className={`flex items-center gap-1.5 py-1.5 px-2 rounded-lg bg-gray-900 border border-gray-800 ${tbd ? 'opacity-40' : ''}`}>
-        <span className="text-xs text-gray-300 flex-1 text-right truncate min-w-0">{t1?.name ?? team1Id}</span>
-        <span className="shrink-0">{team1Id !== 'TBD' ? <Flag teamId={team1Id} size={18} /> : <Icon name="flag" size={16} className="text-gray-600" />}</span>
-        <input
-          type="number" min="0" max="20"
-          value={s.score1}
-          onChange={e => handleInput(matchId, 'score1', e.target.value)}
-          disabled={tbd}
-          className="w-9 text-center bg-gray-800 border border-gray-700 rounded text-gray-200 text-sm py-0.5 focus:outline-none focus:border-yellow-500 disabled:opacity-40 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-        />
-        <span className="text-gray-600 text-xs shrink-0">×</span>
-        <input
-          type="number" min="0" max="20"
-          value={s.score2}
-          onChange={e => handleInput(matchId, 'score2', e.target.value)}
-          disabled={tbd}
-          className="w-9 text-center bg-gray-800 border border-gray-700 rounded text-gray-200 text-sm py-0.5 focus:outline-none focus:border-yellow-500 disabled:opacity-40 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-        />
-        <span className="shrink-0">{team2Id !== 'TBD' ? <Flag teamId={team2Id} size={18} /> : <Icon name="flag" size={16} className="text-gray-600" />}</span>
-        <span className="text-xs text-gray-300 flex-1 truncate min-w-0">{t2?.name ?? team2Id}</span>
+      <div key={matchId} className={`rounded-lg bg-gray-900 border border-gray-800 ${tbd ? 'opacity-40' : ''}`}>
+        <div className="flex items-center gap-1.5 py-1.5 px-2">
+          <span className="text-xs text-gray-300 flex-1 text-right truncate min-w-0">{t1?.name ?? team1Id}</span>
+          <span className="shrink-0">{team1Id !== 'TBD' ? <Flag teamId={team1Id} size={18} /> : <Icon name="flag" size={16} className="text-gray-600" />}</span>
+          <input
+            type="number" min="0" max="20"
+            value={s.score1}
+            onChange={e => handleInput(matchId, 'score1', e.target.value)}
+            disabled={tbd}
+            className="w-9 text-center bg-gray-800 border border-gray-700 rounded text-gray-200 text-sm py-0.5 focus:outline-none focus:border-yellow-500 disabled:opacity-40 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          />
+          <span className="text-gray-600 text-xs shrink-0">×</span>
+          <input
+            type="number" min="0" max="20"
+            value={s.score2}
+            onChange={e => handleInput(matchId, 'score2', e.target.value)}
+            disabled={tbd}
+            className="w-9 text-center bg-gray-800 border border-gray-700 rounded text-gray-200 text-sm py-0.5 focus:outline-none focus:border-yellow-500 disabled:opacity-40 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          />
+          <span className="shrink-0">{team2Id !== 'TBD' ? <Flag teamId={team2Id} size={18} /> : <Icon name="flag" size={16} className="text-gray-600" />}</span>
+          <span className="text-xs text-gray-300 flex-1 truncate min-w-0">{t2?.name ?? team2Id}</span>
+        </div>
+        {needsAdvance && (
+          <div className="flex items-center gap-1.5 pb-1.5 px-2">
+            <span className="text-[10px] text-gray-500 shrink-0">Avança nos pênaltis:</span>
+            {[team1Id, team2Id].map(teamId => (
+              <button
+                key={teamId}
+                onClick={() => handleAdvance(matchId, teamId)}
+                className={`flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full border transition-colors ${
+                  pick === teamId
+                    ? 'bg-yellow-500 text-black border-yellow-500 font-bold'
+                    : 'border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-200'
+                }`}
+              >
+                <Flag teamId={teamId} size={13} />
+                {teamById[teamId]?.name ?? teamId}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     )
   }
