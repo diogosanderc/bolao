@@ -880,6 +880,7 @@ export default function LeaderboardPage() {
 
       {liveMatches.length > 0 && (
         <div className="space-y-3">
+          <div className={`grid gap-3 ${liveMatches.length > 1 ? 'sm:grid-cols-2' : ''}`}>
           {liveMatches.map(m => (
             <div
               key={m.matchId}
@@ -927,6 +928,7 @@ export default function LeaderboardPage() {
               <p className="flex items-center justify-end gap-1 text-[10px] text-gray-500 dark:text-gray-400 mt-1.5"><Icon name="eye" size={12} /> toque para ver os palpites</p>
             </div>
           ))}
+          </div>
           {lastRefresh && (
             <p className="text-right text-xs text-gray-600 pr-1">
               atualizado {lastRefresh.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
@@ -935,20 +937,28 @@ export default function LeaderboardPage() {
         </div>
       )}
 
-      {liveMatches.length > 0 && nextMatches.filter(m => !liveMatches.some(l => l.matchId === m.matchId)).map(m => (
-        <div key={m.matchId} className="bg-gray-900 border border-gray-800 rounded-lg px-4 py-2.5">
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-xs text-gray-500 uppercase tracking-wider">Próximo jogo</span>
-            <span className="text-xs text-green-700 dark:text-yellow-500 font-semibold">{m.dateBRT}</span>
+      {liveMatches.length > 0 && (() => {
+        const next = nextMatches.filter(m => !liveMatches.some(l => l.matchId === m.matchId))
+        if (next.length === 0) return null
+        return (
+          <div className={`grid gap-3 ${next.length > 1 ? 'sm:grid-cols-2' : 'sm:grid-cols-2 xl:grid-cols-3'}`}>
+            {next.map(m => (
+              <div key={m.matchId} className="bg-gray-900 border border-gray-800 rounded-lg px-4 py-2.5">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs text-gray-500 uppercase tracking-wider">Próximo jogo</span>
+                  <span className="text-xs text-green-700 dark:text-yellow-500 font-semibold">{m.dateBRT}</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-gray-300">
+                  <span className="flex items-center gap-1.5"><Flag teamId={m.team1.id} size={18} />{m.team1.name}</span>
+                  <span className="text-gray-600">vs</span>
+                  <span className="flex items-center gap-1.5"><Flag teamId={m.team2.id} size={18} />{m.team2.name}</span>
+                </div>
+                <BroadcastBadges channels={broadcastersForMatchId(m.matchId, m.team1.id, m.team2.id, matchById[m.matchId]?.phase)} />
+              </div>
+            ))}
           </div>
-          <div className="flex items-center gap-2 text-sm text-gray-300">
-            <span className="flex items-center gap-1.5"><Flag teamId={m.team1.id} size={18} />{m.team1.name}</span>
-            <span className="text-gray-600">vs</span>
-            <span className="flex items-center gap-1.5"><Flag teamId={m.team2.id} size={18} />{m.team2.name}</span>
-          </div>
-          <BroadcastBadges channels={broadcastersForMatchId(m.matchId, m.team1.id, m.team2.id, matchById[m.matchId]?.phase)} />
-        </div>
-      ))}
+        )
+      })()}
 
       {recentMatches.length > 0 && (
         <div>
@@ -965,13 +975,13 @@ export default function LeaderboardPage() {
               const w = (card?.getBoundingClientRect().width ?? 1) + 12
               setRecentIdx(Math.round(el.scrollLeft / w))
             }}
-            className="flex gap-3 overflow-x-auto snap-x snap-mandatory no-scrollbar -mx-4 px-4 pb-1 sm:flex-wrap sm:overflow-visible sm:mx-0 sm:px-0 sm:snap-none"
+            className="flex gap-3 overflow-x-auto snap-x snap-mandatory no-scrollbar -mx-4 px-4 pb-1 sm:grid sm:grid-cols-2 xl:grid-cols-4 sm:overflow-visible sm:mx-0 sm:px-0 sm:snap-none"
           >
             {recentMatches.map(rm => (
               <button
                 key={rm.matchId}
                 onClick={() => openMatchPredictions(rm.matchId, `${rm.team1.name} vs ${rm.team2.name}`, { score1: rm.score1, score2: rm.score2 })}
-                className="snap-center shrink-0 w-[86%] sm:w-auto sm:flex-1 sm:min-w-[280px] sm:snap-none text-left bg-gradient-to-br from-gray-900 to-gray-950 border border-gray-800 hover:border-gray-600 rounded-lg px-4 py-2.5 transition-colors"
+                className="snap-center shrink-0 w-[86%] sm:w-auto sm:snap-none text-left bg-gradient-to-br from-gray-900 to-gray-950 border border-gray-800 hover:border-gray-600 rounded-lg px-4 py-2.5 transition-colors"
               >
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-xs text-gray-500 uppercase tracking-wider">Último jogo</span>
@@ -1023,13 +1033,13 @@ export default function LeaderboardPage() {
                 const w = (card?.getBoundingClientRect().width ?? 1) + 12
                 setCarouselIdx(Math.round(el.scrollLeft / w))
               }}
-              className="flex gap-3 overflow-x-auto snap-x snap-mandatory no-scrollbar -mx-4 px-4 pb-1 sm:flex-wrap sm:overflow-visible sm:mx-0 sm:px-0 sm:snap-none"
+              className="flex gap-3 overflow-x-auto snap-x snap-mandatory no-scrollbar -mx-4 px-4 pb-1 sm:grid sm:grid-cols-2 xl:grid-cols-3 sm:overflow-visible sm:mx-0 sm:px-0 sm:snap-none"
             >
               {items.map(m => (
                 <button
                   key={m.matchId}
                   onClick={() => openMatchPredictions(m.matchId, `${m.team1.name} vs ${m.team2.name}`)}
-                  className="snap-center shrink-0 w-[86%] sm:w-auto sm:flex-1 sm:min-w-[280px] sm:snap-none bg-gradient-to-br from-gray-900 to-gray-950 border border-gray-800 hover:border-gray-600 rounded-lg px-4 py-2.5 text-left transition-colors"
+                  className="snap-center shrink-0 w-[86%] sm:w-auto sm:snap-none bg-gradient-to-br from-gray-900 to-gray-950 border border-gray-800 hover:border-gray-600 rounded-lg px-4 py-2.5 text-left transition-colors"
                 >
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-xs text-gray-500 uppercase tracking-wider">Próximo jogo</span>
