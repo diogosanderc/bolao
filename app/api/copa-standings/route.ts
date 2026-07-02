@@ -16,6 +16,8 @@ type MatchInfo = {
   score1: number | null
   score2: number | null
   advancingTeamId?: string
+  regulationScore1?: number
+  regulationScore2?: number
   status: 'played' | 'live' | 'upcoming'
   clock: string | null
   isPenalties?: boolean
@@ -62,17 +64,24 @@ function buildMatchInfo(
   let score2: number | null = null
   let clock: string | null = null
   let advancingTeamId: string | undefined = undefined
+  let regulationScore1: number | undefined = undefined
+  let regulationScore2: number | undefined = undefined
 
   if (official) {
     status = 'played'
     score1 = official.score1
     score2 = official.score2
     advancingTeamId = official.advancingTeamId
+    regulationScore1 = official.regulationScore1
+    regulationScore2 = official.regulationScore2
   } else if (live && (inProgressStatuses.includes(live.status) || live.status === 'completed')) {
     // Stale in-progress → show as played (game has ended, just not committed to db yet)
     status = (live.status === 'completed' || (inProgress && stale)) ? 'played' : 'live'
     score1 = live.score1
     score2 = live.score2
+    advancingTeamId = live.advancingTeamId ?? live.winnerTeamId
+    regulationScore1 = live.regulationScore1
+    regulationScore2 = live.regulationScore2
     clock = live.status === 'halftime' || live.status === 'et_halftime' ? 'Intervalo' : null
   }
 
@@ -89,6 +98,8 @@ function buildMatchInfo(
     score1,
     score2,
     advancingTeamId,
+    regulationScore1,
+    regulationScore2,
     status,
     clock,
     isPenalties,

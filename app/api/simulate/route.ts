@@ -8,12 +8,15 @@ const IN_PROGRESS = ['in', 'halftime', 'extratime', 'et_halftime', 'penalties']
 
 // Build the same merged results array that /api/copa-standings uses for its bracket.
 // This is the source of truth: db.results + liveMatchStates completed/in-progress (non-stale).
-function buildRealMerged(db: any): MatchResult[] {
+// Also returns which matches are live in-progress right now — those score match points
+// but must not grant advancement bonuses (same rule as the main leaderboard).
+function buildRealMerged(db: any): { real: MatchResult[]; liveInProgressIds: Set<string> } {
   const liveStates: Record<string, any> = db.liveMatchStates ?? {}
   const matchDates: Record<string, any> = db.matchDates ?? {}
   const officialIds = new Set((db.results as MatchResult[]).map(r => r.matchId))
   const now = Date.now()
   const real: MatchResult[] = [...db.results]
+  const liveInProgressIds = new Set<string>()
   for (const [matchId, st] of Object.entries(liveStates)) {
     if (officialIds.has(matchId) || !st) continue
     const isCompleted = (st as any).status === 'completed'
@@ -23,6 +26,7 @@ function buildRealMerged(db: any): MatchResult[] {
       const dateToCheck = matchDates[matchId]?.date ?? (st as any).startedAt
       const stale = !dateToCheck || (now - new Date(dateToCheck).getTime()) > 3 * 3_600_000
       if (stale) continue
+      liveInProgressIds.add(matchId)
     }
     const advancing = (st as any).advancingTeamId ?? (st as any).winnerTeamId
     real.push({
@@ -35,7 +39,7 @@ function buildRealMerged(db: any): MatchResult[] {
       ...((st as any).regulationScore2 !== undefined ? { regulationScore2: (st as any).regulationScore2 } : {}),
     })
   }
-  return real
+  return { real, liveInProgressIds }
 }
 
 export async function POST(req: NextRequest) {
@@ -44,7 +48,7 @@ export async function POST(req: NextRequest) {
     const db = await readDB()
 
     // Real merged = same as copa-standings; gives correct bracket for played matches
-    const realMerged = buildRealMerged(db)
+    const { real: realMerged, liveInProgressIds } = buildRealMerged(db)
     const realBracket = computeBracketFromResults(realMerged)
 
     const overrideMap = Object.fromEntries(overrides.map(r => [r.matchId, r]))
@@ -85,13 +89,18 @@ export async function POST(req: NextRequest) {
     }
     const validParticipants = db.participants.filter(p => (predCount.get(p.id) ?? 0) > 0)
 
+    // Live in-progress matches score match points but don't grant advancement
+    // bonuses until confirmed — same rule as the main leaderboard.
+    const confirmedForAdvancement = simMerged.filter(r => !liveInProgressIds.has(r.matchId))
+
     const leaderboard = computeLeaderboard(
       validParticipants,
       db.matchPredictions,
       db.groupPredictions,
       simMerged,
       db.r32TeamPicks,
-      db.knockoutPhasePicks
+      db.knockoutPhasePicks,
+      confirmedForAdvancement
     )
 
     return NextResponse.json({ leaderboard, bracket })

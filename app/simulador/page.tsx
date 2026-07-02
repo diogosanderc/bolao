@@ -25,6 +25,7 @@ export default function SimuladorPage() {
   const [bracket, setBracket]     = useState<Bracket>({})
   const [realTeams, setRealTeams] = useState<Bracket>({})
   const [advancing, setAdvancing] = useState<Record<string, string>>({})
+  const [liveIds, setLiveIds]     = useState<Record<string, boolean>>({})
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
   const [simulating, setSimulating]   = useState(false)
   const [phase, setPhase]         = useState<PhaseKey>('group')
@@ -61,23 +62,35 @@ export default function SimuladorPage() {
     ]).then(([results, standings]) => {
       const init: Record<string, SimScore> = {}
       for (const r of (results as MatchResult[])) {
-        init[r.matchId] = { score1: String(r.score1), score2: String(r.score2) }
+        // Knockout matches that went to ET: seed with the 90-min score — that's what counts
+        const s1 = r.regulationScore1 ?? r.score1
+        const s2 = r.regulationScore2 ?? r.score2
+        init[r.matchId] = { score1: String(s1), score2: String(s2) }
       }
       // Seed knockout matches from copa-standings (includes liveMatchStates completed)
       // and capture the real resolved teams — same source the /tabela renders.
       const teams: Bracket = {}
       const adv: Record<string, string> = {}
+      const live: Record<string, boolean> = {}
+      const collectLive = (m: any) => { if (m.status === 'live') live[m.matchId] = true }
+      for (const g of (standings.groups ?? [])) {
+        for (const m of (g.matches ?? [])) collectLive(m)
+      }
       for (const phase of (standings.knockout ?? [])) {
         for (const m of (phase.matches ?? [])) {
+          collectLive(m)
           teams[m.matchId] = { team1Id: m.team1Id ?? 'TBD', team2Id: m.team2Id ?? 'TBD' }
-          if (m.status === 'played' && m.score1 != null && m.score2 != null) {
-            init[m.matchId] = { score1: String(m.score1), score2: String(m.score2) }
+          if ((m.status === 'played' || m.status === 'live') && m.score1 != null && m.score2 != null) {
+            const s1 = m.regulationScore1 ?? m.score1
+            const s2 = m.regulationScore2 ?? m.score2
+            init[m.matchId] = { score1: String(s1), score2: String(s2) }
           }
           if (m.advancingTeamId) adv[m.matchId] = m.advancingTeamId
         }
       }
       setRealTeams(teams)
       setAdvancing(adv)
+      setLiveIds(live)
       setInputs(init)
       runSimulate(init, adv)
     })
@@ -125,12 +138,14 @@ export default function SimuladorPage() {
     const t1 = teamById[team1Id]
     const t2 = teamById[team2Id]
     const tbd = team1Id === 'TBD' || team2Id === 'TBD'
+    const isLive = Boolean(liveIds[matchId])
+    const locked = tbd || isLive
     const isKnockout = !matchId.startsWith('G')
     const isDraw = !tbd && s.score1 !== '' && s.score2 !== '' && +s.score1 === +s.score2
     const needsAdvance = isKnockout && isDraw
     const pick = advancing[matchId]
     return (
-      <div key={matchId} className={`rounded-lg bg-gray-900 border border-gray-800 ${tbd ? 'opacity-40' : ''}`}>
+      <div key={matchId} className={`rounded-lg bg-gray-900 border ${isLive ? 'border-green-800' : 'border-gray-800'} ${tbd ? 'opacity-40' : ''}`}>
         <div className="flex items-center gap-1.5 py-1.5 px-2">
           <span className="text-xs text-gray-300 flex-1 text-right truncate min-w-0">{t1?.name ?? team1Id}</span>
           <span className="shrink-0">{team1Id !== 'TBD' ? <Flag teamId={team1Id} size={18} /> : <Icon name="flag" size={16} className="text-gray-600" />}</span>
@@ -138,7 +153,7 @@ export default function SimuladorPage() {
             type="number" min="0" max="20"
             value={s.score1}
             onChange={e => handleInput(matchId, 'score1', e.target.value)}
-            disabled={tbd}
+            disabled={locked}
             className="w-9 text-center bg-gray-800 border border-gray-700 rounded text-gray-200 text-sm py-0.5 focus:outline-none focus:border-yellow-500 disabled:opacity-40 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           />
           <span className="text-gray-600 text-xs shrink-0">×</span>
@@ -146,15 +161,21 @@ export default function SimuladorPage() {
             type="number" min="0" max="20"
             value={s.score2}
             onChange={e => handleInput(matchId, 'score2', e.target.value)}
-            disabled={tbd}
+            disabled={locked}
             className="w-9 text-center bg-gray-800 border border-gray-700 rounded text-gray-200 text-sm py-0.5 focus:outline-none focus:border-yellow-500 disabled:opacity-40 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           />
           <span className="shrink-0">{team2Id !== 'TBD' ? <Flag teamId={team2Id} size={18} /> : <Icon name="flag" size={16} className="text-gray-600" />}</span>
           <span className="text-xs text-gray-300 flex-1 truncate min-w-0">{t2?.name ?? team2Id}</span>
         </div>
-        {needsAdvance && (
+        {isLive && (
           <div className="flex items-center gap-1.5 pb-1.5 px-2">
-            <span className="text-[10px] text-gray-500 shrink-0">Avança nos pênaltis:</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse inline-block shrink-0" />
+            <span className="text-[10px] text-green-500">Ao vivo — placar bloqueado durante o jogo</span>
+          </div>
+        )}
+        {needsAdvance && !isLive && (
+          <div className="flex items-center gap-1.5 pb-1.5 px-2">
+            <span className="text-[10px] text-gray-500 shrink-0">Avança para próxima fase:</span>
             {[team1Id, team2Id].map(teamId => (
               <button
                 key={teamId}
