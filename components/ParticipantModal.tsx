@@ -156,8 +156,19 @@ export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClos
         setData(d)
         setPredDist(dist)
         setLoading(false)
+        // Keep pinned to the bottom (latest info: knockout points) while async
+        // content (flags, sections) grows the list — until the user scrolls.
         requestAnimationFrame(() => {
-          if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+          const el = scrollRef.current
+          if (!el) return
+          const toBottom = () => { el.scrollTop = el.scrollHeight }
+          toBottom()
+          const ro = new ResizeObserver(toBottom)
+          for (const child of Array.from(el.children)) ro.observe(child)
+          const stop = () => { ro.disconnect(); el.removeEventListener('touchstart', stop); el.removeEventListener('wheel', stop) }
+          el.addEventListener('touchstart', stop, { passive: true })
+          el.addEventListener('wheel', stop, { passive: true })
+          setTimeout(stop, 2500)
         })
       })
       .catch(() => setLoading(false))
