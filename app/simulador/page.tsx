@@ -48,17 +48,25 @@ export default function SimuladorPage() {
   }, [])
 
   useEffect(() => {
-    fetch('/api/results')
-      .then(r => r.json())
-      .then((results: MatchResult[]) => {
-        const init: Record<string, SimScore> = {}
-        for (const r of results) {
-          init[r.matchId] = { score1: String(r.score1), score2: String(r.score2) }
+    Promise.all([
+      fetch('/api/results').then(r => r.json()).catch(() => []),
+      fetch('/api/copa-standings').then(r => r.json()).catch(() => ({})),
+    ]).then(([results, standings]) => {
+      const init: Record<string, SimScore> = {}
+      for (const r of (results as MatchResult[])) {
+        init[r.matchId] = { score1: String(r.score1), score2: String(r.score2) }
+      }
+      // Seed knockout played matches from copa-standings (includes liveMatchStates completed)
+      for (const phase of (standings.knockout ?? [])) {
+        for (const m of (phase.matches ?? [])) {
+          if (m.status === 'played' && m.score1 != null && m.score2 != null) {
+            init[m.matchId] = { score1: String(m.score1), score2: String(m.score2) }
+          }
         }
-        setInputs(init)
-        runSimulate(init)
-      })
-      .catch(() => runSimulate({}))
+      }
+      setInputs(init)
+      runSimulate(init)
+    })
   }, [runSimulate])
 
   const handleInput = (matchId: string, field: 'score1' | 'score2', value: string) => {
@@ -70,16 +78,24 @@ export default function SimuladorPage() {
   }
 
   const clearSim = () => {
-    fetch('/api/results')
-      .then(r => r.json())
-      .then((results: MatchResult[]) => {
-        const init: Record<string, SimScore> = {}
-        for (const r of results) {
-          init[r.matchId] = { score1: String(r.score1), score2: String(r.score2) }
+    Promise.all([
+      fetch('/api/results').then(r => r.json()).catch(() => []),
+      fetch('/api/copa-standings').then(r => r.json()).catch(() => ({})),
+    ]).then(([results, standings]) => {
+      const init: Record<string, SimScore> = {}
+      for (const r of (results as MatchResult[])) {
+        init[r.matchId] = { score1: String(r.score1), score2: String(r.score2) }
+      }
+      for (const phase of (standings.knockout ?? [])) {
+        for (const m of (phase.matches ?? [])) {
+          if (m.status === 'played' && m.score1 != null && m.score2 != null) {
+            init[m.matchId] = { score1: String(m.score1), score2: String(m.score2) }
+          }
         }
-        setInputs(init)
-        runSimulate(init)
-      })
+      }
+      setInputs(init)
+      runSimulate(init)
+    })
   }
 
   const uniquePoints = [...new Set(leaderboard.map(e => e.totalPoints))].sort((a, b) => b - a)
