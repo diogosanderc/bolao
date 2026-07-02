@@ -14,8 +14,9 @@ export async function GET(req: NextRequest) {
 
   const matchPredictions = db.matchPredictions.filter(p => p.participantId === participant.id)
   const groupPredictions = db.groupPredictions.filter(p => p.participantId === participant.id)
+  const knockoutPhasePicks = db.knockoutPhasePicks?.find(p => p.participantId === participant.id) ?? null
 
-  return NextResponse.json({ participant, matchPredictions, groupPredictions })
+  return NextResponse.json({ participant, matchPredictions, groupPredictions, knockoutPhasePicks })
 }
 
 // POST /api/predictions — upsert match prediction

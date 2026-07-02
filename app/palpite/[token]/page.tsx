@@ -12,6 +12,9 @@ interface PredictionsData {
   participant: Participant
   matchPredictions: MatchPrediction[]
   groupPredictions: GroupPrediction[]
+  knockoutPhasePicks?: {
+    r16: string[]; qf: string[]; sf: string[]; finalists: string[]; champion: string
+  } | null
 }
 
 
@@ -251,7 +254,38 @@ export default function PalpitePage() {
   }, {} as Record<string, Match[]>)
 
   const standings = computeGroupStandings(activeGroup, predMap)
-  const knockoutBracket = computeFullBracket(predMap)
+
+  // Resolve the participant's predicted bracket. For knockout draws without a saved
+  // advancingTeamId, infer the winner from his knockoutPhasePicks lists (display only)
+  // so the bracket resolves all the way to the final.
+  const kp = data.knockoutPhasePicks
+  const effPredMap: typeof predMap = Object.fromEntries(
+    Object.entries(predMap).map(([id, p]) => [id, { ...p }])
+  )
+  if (kp) {
+    const listFor: Record<string, Set<string> | null> = {
+      R32: new Set(kp.r16 ?? []),
+      R16: new Set(kp.qf ?? []),
+      QF: new Set(kp.sf ?? []),
+      SF: new Set(kp.finalists ?? []),
+      F_: kp.champion ? new Set([kp.champion]) : null,
+    }
+    for (const phase of ['R32', 'R16', 'QF', 'SF', 'F_']) {
+      const bracket = computeFullBracket(effPredMap)
+      for (const [id, p] of Object.entries(effPredMap)) {
+        if (!id.startsWith(phase) || id === 'TP_1') continue
+        if (p.score1 !== p.score2 || p.advancingTeamId) continue
+        const t1 = bracket[id]?.team1Id ?? 'TBD'
+        const t2 = bracket[id]?.team2Id ?? 'TBD'
+        if (t1 === 'TBD' || t2 === 'TBD') continue
+        const list = listFor[phase]
+        if (!list) continue
+        const in1 = list.has(t1), in2 = list.has(t2)
+        if (in1 !== in2) p.advancingTeamId = in1 ? t1 : t2
+      }
+    }
+  }
+  const knockoutBracket = computeFullBracket(effPredMap)
 
   return (
     <div className="space-y-5">
@@ -406,7 +440,7 @@ export default function PalpitePage() {
                     {phaseMatches.map(m => {
                       const computed = knockoutBracket[m.id]
                       return (
-                        <MatchCard key={m.id} match={m} prediction={predMap[m.id]} result={results[m.id]}
+                        <MatchCard key={m.id} match={m} prediction={effPredMap[m.id]} result={results[m.id]}
                           isKnockout={true} onSave={savePrediction} saving={saving}
                           team1IdOverride={computed?.team1Id}
                           team2IdOverride={computed?.team2Id}
