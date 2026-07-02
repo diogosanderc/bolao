@@ -185,9 +185,11 @@ export function computeBracketFromResults(
     if (!res) return 'TBD'
     // Trust advancingTeamId even when one bracket slot is still TBD (e.g. best-3rd pending)
     if (res.advancingTeamId) return res.advancingTeamId
+    // If score is decisive and the winning slot is a known team, resolve it even if the
+    // opponent slot is still TBD (e.g. best-3rd table not yet resolvable mid-tournament)
+    if (res.score1 > res.score2 && teams.team1Id !== 'TBD') return teams.team1Id
+    if (res.score2 > res.score1 && teams.team2Id !== 'TBD') return teams.team2Id
     if (teams.team1Id === 'TBD' || teams.team2Id === 'TBD') return 'TBD'
-    if (res.score1 > res.score2) return teams.team1Id
-    if (res.score2 > res.score1) return teams.team2Id
     return 'TBD'
   }
 
