@@ -627,13 +627,16 @@ export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClos
                       <span className="text-xs font-bold text-gray-300">+{d.points} pts</span>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      {d.teams.map(t => (
-                        <div key={t.id} className="flex items-center gap-1.5 bg-gray-900 border border-gray-800 rounded-lg px-2.5 py-1.5 text-xs">
-                          <Flag teamId={t.id} size={16} />
-                          <span className="text-gray-300 font-medium">{t.id}</span>
-                          <span className="text-gray-400 font-bold ml-1">+{d.pointsEach}</span>
-                        </div>
-                      ))}
+                      {d.teams.map(t => {
+                        const teamId = (t as any).teamId ?? t.id
+                        return (
+                          <div key={teamId} className="flex items-center gap-1.5 bg-gray-900 border border-gray-800 rounded-lg px-2.5 py-1.5 text-xs">
+                            <Flag teamId={teamId} size={16} />
+                            <span className="text-gray-300 font-medium">{teamId}</span>
+                            <span className="text-gray-400 font-bold ml-1">+{d.pointsEach}</span>
+                          </div>
+                        )
+                      })}
                     </div>
                   </div>
                 )
