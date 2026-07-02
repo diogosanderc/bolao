@@ -602,7 +602,7 @@ export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClos
                     {data!.r32Detail.map(t => (
                       <div key={`${t.groupId}-${t.teamId}`} className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs border ${t.via3rd ? 'bg-amber-100 dark:bg-amber-950/30 border-amber-300 dark:border-amber-900/50' : 'bg-gray-900 border-gray-800'}`}>
                         <Flag teamId={t.teamId} size={16} />
-                        <span className={`font-medium ${t.via3rd ? 'text-amber-800 dark:text-amber-200' : 'text-gray-300'}`}>{t.name}</span>
+                        <span className={`font-medium ${t.via3rd ? 'text-amber-800 dark:text-amber-200' : 'text-gray-300'}`}>{t.teamId}</span>
                         {t.via3rd && <span className="text-[10px] text-amber-700 dark:text-amber-400 font-semibold">3º</span>}
                         <span className={`font-bold ml-1 ${t.via3rd ? 'text-amber-800 dark:text-amber-300' : 'text-gray-400'}`}>+3</span>
                       </div>
@@ -630,7 +630,7 @@ export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClos
                       {d.teams.map(t => (
                         <div key={t.id} className="flex items-center gap-1.5 bg-gray-900 border border-gray-800 rounded-lg px-2.5 py-1.5 text-xs">
                           <Flag teamId={t.id} size={16} />
-                          <span className="text-gray-300 font-medium">{t.name}</span>
+                          <span className="text-gray-300 font-medium">{t.id}</span>
                           <span className="text-gray-400 font-bold ml-1">+{d.pointsEach}</span>
                         </div>
                       ))}
@@ -643,7 +643,7 @@ export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClos
               {data && data.summary.championPoints > 0 && data.championTeam && (
                 <div className="px-3 pt-3 pb-4">
                   <div className="flex items-center justify-between rounded-lg bg-yellow-100 dark:bg-yellow-950/30 border border-yellow-300 dark:border-yellow-900/50 px-3 py-2">
-                    <span className="flex items-center gap-1.5 text-xs font-semibold text-yellow-800 dark:text-yellow-300"><Icon name="crown" size={14} /> Campeão — <Flag teamId={data.championTeam.id} size={16} /> {data.championTeam.name}</span>
+                    <span className="flex items-center gap-1.5 text-xs font-semibold text-yellow-800 dark:text-yellow-300"><Icon name="crown" size={14} /> Campeão — <Flag teamId={data.championTeam.id} size={16} /> {data.championTeam.id}</span>
                     <span className="text-xs font-bold text-yellow-800 dark:text-yellow-300">+{data.summary.championPoints} pts</span>
                   </div>
                 </div>

@@ -257,9 +257,9 @@ export default function PalpitesDeTodosPage() {
                       <div className="flex items-center gap-2 min-w-0">
                         <span className="text-xs text-gray-600 shrink-0">#{match.matchNumber}</span>
                         <span className="font-semibold text-gray-200 text-sm inline-flex items-center gap-1.5 flex-wrap">
-                          {team1 ? <><Flag teamId={t1Id} size={18} /> {team1.name}</> : <span className="text-gray-500 italic">a definir</span>}
+                          {team1 ? <><Flag teamId={t1Id} size={18} /> {t1Id}</> : <span className="text-gray-500 italic">a definir</span>}
                           <span className="text-gray-500 mx-1">vs</span>
-                          {team2 ? <><Flag teamId={t2Id} size={18} /> {team2.name}</> : <span className="text-gray-500 italic">a definir</span>}
+                          {team2 ? <><Flag teamId={t2Id} size={18} /> {t2Id}</> : <span className="text-gray-500 italic">a definir</span>}
                         </span>
                         {isPlayed && (
                           <span className="text-xs font-bold text-yellow-400 font-score shrink-0">{result!.score1}–{result!.score2}</span>

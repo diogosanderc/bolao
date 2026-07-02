@@ -89,7 +89,7 @@ function MatchCard({
       <div className="flex items-center gap-2 px-4 py-3">
         <div className="flex-1 flex items-center gap-2 min-w-0">
           <Flag teamId={t1Id} size={24} />
-          <span className="text-sm font-semibold truncate">{team1?.name}</span>
+          <span className="text-sm font-semibold truncate">{t1Id}</span>
         </div>
 
         <div className="flex items-center gap-1.5 shrink-0">
@@ -110,7 +110,7 @@ function MatchCard({
         </div>
 
         <div className="flex-1 flex items-center gap-2 justify-end min-w-0">
-          <span className="text-sm font-semibold truncate text-right">{team2?.name}</span>
+          <span className="text-sm font-semibold truncate text-right">{t2Id}</span>
           <Flag teamId={t2Id} size={24} />
         </div>
       </div>
@@ -121,8 +121,8 @@ function MatchCard({
           <select value={adv} onChange={e => { setAdv(e.target.value); setDirty(true) }}
             className="ml-auto bg-gray-800 border border-gray-700 rounded px-2 py-1 text-xs focus:outline-none focus:border-yellow-500">
             <option value="">Selecione...</option>
-            <option value={t1Id}>{team1?.name}</option>
-            <option value={t2Id}>{team2?.name}</option>
+            <option value={t1Id}>{team1?.name ?? t1Id}</option>
+            <option value={t2Id}>{team2?.name ?? t2Id}</option>
           </select>
         </div>
       )}
@@ -373,7 +373,7 @@ export default function PalpitePage() {
                         <td className="px-3 py-3">
                           <div className="flex items-center gap-2">
                             <Flag teamId={row.teamId} size={20} />
-                            <span className="font-medium text-sm">{team?.name}</span>
+                            <span className="font-medium text-sm">{row.teamId}</span>
                           </div>
                         </td>
                         <td className="px-2 py-3 text-center font-bold text-gray-900 dark:text-white">{row.p}</td>

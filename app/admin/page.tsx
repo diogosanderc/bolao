@@ -687,7 +687,7 @@ function ResultInput({
       <div className="flex items-center gap-3">
         <span className="text-sm flex-1 flex items-center gap-2 min-w-0">
           <Flag teamId={team1Id} size={20} />
-          <span className="truncate font-medium">{team1?.name}</span>
+          <span className="truncate font-medium">{team1Id}</span>
         </span>
         <div className="flex items-center gap-2 shrink-0">
           <input
@@ -703,7 +703,7 @@ function ResultInput({
           />
         </div>
         <span className="text-sm flex-1 text-right flex items-center justify-end gap-2 min-w-0">
-          <span className="truncate font-medium">{team2?.name}</span>
+          <span className="truncate font-medium">{team2Id}</span>
           <Flag teamId={team2Id} size={20} />
         </span>
         <button
@@ -743,7 +743,7 @@ function ResultInput({
       {saved && (
         <p className="text-xs text-green-500 flex items-center gap-1">
           <Icon name="check" size={12} /> {current!.score1} × {current!.score2}
-          {current?.advancingTeamId && ` — avança: ${teamById[current.advancingTeamId]?.name}`}
+          {current?.advancingTeamId && ` — avança: ${current.advancingTeamId}`}
         </p>
       )}
     </div>

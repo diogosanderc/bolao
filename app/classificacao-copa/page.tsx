@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from 'react'
 import { Flag } from '@/components/Flag'
 import { Scoreboard } from '@/components/Scoreboard'
 import { Icon, IconName } from '@/components/Icon'
-import { teamById } from '@/lib/copa2026'
 
 type GroupRow = {
   teamId: string; pos: number
@@ -55,7 +54,7 @@ function MatchRow({ m, compact = false }: { m: MatchInfo; compact?: boolean }) {
       {/* Team 1 */}
       <div className="flex items-center gap-1.5 flex-1 justify-end min-w-0">
         <span className={`truncate text-right font-semibold ${w1 ? 'text-gray-200' : played ? 'text-gray-400' : live ? 'text-gray-300' : 'text-gray-500'}`}>
-          {compact ? m.team1Id : (teamById[m.team1Id]?.name ?? m.team1Id)}
+          {m.team1Id}
         </span>
         {m.team1Id !== 'TBD' ? <Flag teamId={m.team1Id} size={16} /> : <Icon name="flag" size={14} className="text-gray-600" />}
       </div>
@@ -78,7 +77,7 @@ function MatchRow({ m, compact = false }: { m: MatchInfo; compact?: boolean }) {
       <div className="flex items-center gap-1.5 flex-1 min-w-0">
         {m.team2Id !== 'TBD' ? <Flag teamId={m.team2Id} size={16} /> : <Icon name="flag" size={14} className="text-gray-600" />}
         <span className={`truncate font-semibold ${w2 ? 'text-gray-200' : played ? 'text-gray-400' : live ? 'text-gray-300' : 'text-gray-500'}`}>
-          {compact ? m.team2Id : (teamById[m.team2Id]?.name ?? m.team2Id)}
+          {m.team2Id}
         </span>
       </div>
 
@@ -112,7 +111,6 @@ function GroupCard({ group }: { group: GroupData }) {
         </thead>
         <tbody className="divide-y divide-gray-800/60">
           {group.standings.map(row => {
-            const team = teamById[row.teamId]
             const qualified = row.pos <= 2
             const border = qualified ? 'border-l-2 border-green-500'
               : row.pos === 3 ? 'border-l-2 border-amber-500/60'
@@ -124,10 +122,7 @@ function GroupCard({ group }: { group: GroupData }) {
                 <td className="px-1 py-1.5">
                   <div className="flex items-center gap-1.5 min-w-0">
                     <Flag teamId={row.teamId} size={16} />
-                    <span className="text-gray-200 font-semibold truncate">
-                      <span className="sm:hidden">{row.teamId}</span>
-                      <span className="hidden sm:inline">{team?.name ?? row.teamId}</span>
-                    </span>
+                    <span className="text-gray-200 font-semibold truncate">{row.teamId}</span>
                     {qualified && <Icon name="check" size={12} className="shrink-0 text-green-600 dark:text-green-400" />}
                   </div>
                 </td>
@@ -168,7 +163,7 @@ function BracketCard({ m, highlight }: { m: MatchInfo; highlight?: boolean }) {
           ? <span className="w-4 h-4 rounded-sm bg-gray-800 shrink-0" />
           : <Flag teamId={teamId} size={16} />}
         <span className={`text-[11px] font-semibold flex-1 min-w-0 truncate ${isTbd ? 'text-gray-600' : isAdv && played ? 'text-gray-100' : played ? 'text-gray-500' : 'text-gray-300'}`}>
-          {isTbd ? '—' : (teamById[teamId]?.name ?? teamId)}
+          {isTbd ? '—' : teamId}
         </span>
         {(played || live) && score !== null && (
           <span className={`text-[11px] font-bold tabular-nums shrink-0 ${isAdv && played ? 'text-yellow-400' : live ? 'text-red-400' : score! > otherScore! ? 'text-gray-200' : 'text-gray-500'}`}>
@@ -461,8 +456,7 @@ function ThirdsSection({ groups }: { groups: GroupData[] }) {
           </thead>
           <tbody className="divide-y divide-gray-800/60">
             {sorted.map((row, idx) => {
-              const team = teamById[row.teamId]
-              const qualifies = idx < 8
+                const qualifies = idx < 8
               const border = qualifies ? 'border-l-2 border-amber-500' : 'border-l-2 border-transparent'
               return (
                 <tr key={row.teamId} className={`${border} ${!row.complete ? 'opacity-60' : ''}`}>
@@ -470,10 +464,7 @@ function ThirdsSection({ groups }: { groups: GroupData[] }) {
                   <td className="px-1 py-1.5">
                     <div className="flex items-center gap-1.5 min-w-0">
                       <Flag teamId={row.teamId} size={16} />
-                      <span className="text-gray-200 font-semibold truncate">
-                        <span className="sm:hidden">{row.teamId}</span>
-                        <span className="hidden sm:inline">{team?.name ?? row.teamId}</span>
-                      </span>
+                      <span className="text-gray-200 font-semibold truncate">{row.teamId}</span>
                     </div>
                   </td>
                   <td className="px-1 py-1.5 text-center text-gray-500 font-semibold">{row.groupId}</td>

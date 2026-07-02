@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, useCallback, ReactNode } from 'react'
-import { GROUPS, GROUP_MATCHES, KNOCKOUT_MATCHES, teamById } from '@/lib/copa2026'
+import { GROUPS, GROUP_MATCHES, KNOCKOUT_MATCHES } from '@/lib/copa2026'
 import { Flag } from '@/components/Flag'
 import { Icon } from '@/components/Icon'
 import { LeaderboardEntry, MatchResult } from '@/lib/types'
@@ -135,8 +135,6 @@ export default function SimuladorPage() {
 
   const renderMatchRow = (matchId: string, team1Id: string, team2Id: string) => {
     const s = inputs[matchId] ?? { score1: '', score2: '' }
-    const t1 = teamById[team1Id]
-    const t2 = teamById[team2Id]
     const tbd = team1Id === 'TBD' || team2Id === 'TBD'
     const isLive = Boolean(liveIds[matchId])
     const locked = tbd || isLive
@@ -148,7 +146,7 @@ export default function SimuladorPage() {
     return (
       <div key={matchId} className={`rounded-lg bg-gray-900 border ${isLive ? 'border-green-800' : 'border-gray-800'} ${tbd ? 'opacity-40' : ''}`}>
         <div className="flex items-center gap-1.5 py-1.5 px-2">
-          <span className="text-xs text-gray-300 flex-1 text-right truncate min-w-0">{t1?.name ?? team1Id}</span>
+          <span className="text-xs text-gray-300 flex-1 text-right truncate min-w-0">{team1Id === 'TBD' ? 'TBD' : team1Id}</span>
           <span className="shrink-0">{team1Id !== 'TBD' ? <Flag teamId={team1Id} size={18} /> : <Icon name="flag" size={16} className="text-gray-600" />}</span>
           <input
             type="number" min="0" max="20"
@@ -166,7 +164,7 @@ export default function SimuladorPage() {
             className="w-9 text-center bg-gray-800 border border-gray-700 rounded text-gray-200 text-sm py-0.5 focus:outline-none focus:border-yellow-500 disabled:opacity-40 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           />
           <span className="shrink-0">{team2Id !== 'TBD' ? <Flag teamId={team2Id} size={18} /> : <Icon name="flag" size={16} className="text-gray-600" />}</span>
-          <span className="text-xs text-gray-300 flex-1 truncate min-w-0">{t2?.name ?? team2Id}</span>
+          <span className="text-xs text-gray-300 flex-1 truncate min-w-0">{team2Id === 'TBD' ? 'TBD' : team2Id}</span>
         </div>
         {isLive && (
           <div className="flex items-center gap-1.5 pb-1.5 px-2">
@@ -188,7 +186,7 @@ export default function SimuladorPage() {
                 }`}
               >
                 <Flag teamId={teamId} size={13} />
-                {teamById[teamId]?.name ?? teamId}
+                {teamId}
               </button>
             ))}
           </div>
