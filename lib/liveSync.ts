@@ -28,6 +28,7 @@ type MatchState = {
   regScore2?: number
   regulationScore1?: number
   regulationScore2?: number
+  winnerTeamId?: string
 }
 
 type ESPNProcessed = {
