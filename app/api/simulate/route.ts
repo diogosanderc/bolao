@@ -33,10 +33,18 @@ export async function POST(req: NextRequest) {
       liveCompleted.push({ matchId, score1: st.score1, score2: st.score2, ...(advancing ? { advancingTeamId: advancing } : {}) })
     }
 
+    const officialMap = Object.fromEntries(db.results.map(r => [r.matchId, r]))
     const baseResults = [...db.results, ...liveCompleted.filter(r => !officialIds.has(r.matchId))]
     const merged: MatchResult[] = [
       ...baseResults.filter(r => !overrideMap[r.matchId]),
-      ...overrides,
+      // Preserve advancingTeamId from official result when user's score matches it
+      ...overrides.map(o => {
+        const official = officialMap[o.matchId]
+        if (official?.advancingTeamId && official.score1 === o.score1 && official.score2 === o.score2) {
+          return { ...o, advancingTeamId: official.advancingTeamId }
+        }
+        return o
+      }),
     ]
 
     const leaderboard = computeLeaderboard(
