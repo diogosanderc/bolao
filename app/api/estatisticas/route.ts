@@ -3,18 +3,27 @@ import { readDB } from '@/lib/db'
 import { computeLeaderboard } from '@/lib/scoring'
 import { matchById, teamById } from '@/lib/copa2026'
 import { scoreMatch } from '@/lib/scoring'
+import { computeBracketFromResults } from '@/lib/bracket'
+
+// Resolved knockout slots — filled in per request before labels are built
+let resolvedBracket: Record<string, { team1Id: string; team2Id: string }> = {}
 
 function matchLabel(matchId: string, score1: number, score2: number): string {
   const match = matchById[matchId]
   if (!match) return matchId
-  const t1 = teamById[match.team1Id]?.name ?? match.team1Id
-  const t2 = teamById[match.team2Id]?.name ?? match.team2Id
+  // Knockout matches have TBD slots — resolve teams from actual results
+  const rk = resolvedBracket[matchId]
+  const t1Id = match.team1Id !== 'TBD' ? match.team1Id : (rk?.team1Id ?? 'TBD')
+  const t2Id = match.team2Id !== 'TBD' ? match.team2Id : (rk?.team2Id ?? 'TBD')
+  const t1 = teamById[t1Id]?.name ?? t1Id
+  const t2 = teamById[t2Id]?.name ?? t2Id
   return `${t1} ${score1}×${score2} ${t2}`
 }
 
 export async function GET() {
   try {
     const db = await readDB()
+    resolvedBracket = computeBracketFromResults(db.results)
 
     // Only participants with predictions
     const predCount = new Map<string, number>()
