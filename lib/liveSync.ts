@@ -1,5 +1,5 @@
 import { updateDB, readDB } from './db'
-import { ALL_MATCHES, teamById } from './copa2026'
+import { ALL_MATCHES, matchById, teamById } from './copa2026'
 import { resolveTeam } from './espn'
 import { sendPushToAll } from './push'
 import { notifyPositionChanges } from './positionNotify'
@@ -86,7 +86,19 @@ export async function runLiveSync(): Promise<SyncResult> {
 
     const status = competition.status ?? event.status
     const typeName: string = status?.type?.name ?? ''
-    const completed = status?.type?.completed === true || typeName === 'STATUS_FINAL'
+    const suspendedEarly =
+      typeName === 'STATUS_RAIN_DELAY' ||
+      typeName === 'STATUS_DELAYED' ||
+      typeName === 'STATUS_SUSPENDED' ||
+      typeName === 'STATUS_POSTPONED'
+    // STATUS_FINAL_PEN / STATUS_FINAL_AET etc. mark games decided after ET/shootout;
+    // state === 'post' is ESPN's generic "game over" (guarded against postponed/suspended)
+    const completed = !suspendedEarly && (
+      status?.type?.completed === true ||
+      typeName.startsWith('STATUS_FINAL') ||
+      typeName === 'STATUS_FULL_TIME' ||
+      status?.type?.state === 'post'
+    )
     const halftime = typeName === 'STATUS_HALFTIME'
     const extratime = typeName === 'STATUS_EXTRA_TIME' || typeName === 'STATUS_OVERTIME'
     const etHalftime = typeName === 'STATUS_HALFTIME_ET' || typeName === 'STATUS_HALFTIME_EXTRATIME'
@@ -530,7 +542,30 @@ export async function runLiveSync(): Promise<SyncResult> {
       }
       const msAgo = Date.now() - new Date(dateToCheck).getTime()
       // Future match (or started < 5 min ago) → false ESPN data, clean up
-      if (msAgo < 5 * 60_000) delete newPersistedStates[matchId]
+      if (msAgo < 5 * 60_000) { delete newPersistedStates[matchId]; continue }
+      // Game started long enough ago that it must be over (90' + ET + shootout ≈ 2h40)
+      // and ESPN no longer reports it → finalize instead of showing a ghost "ao vivo".
+      if (msAgo > 2.75 * 3_600_000) {
+        const st = newPersistedStates[matchId]
+        const m = matchById[matchId]
+        const t1 = m && m.team1Id !== 'TBD' ? m.team1Id : resolvedKnockout[matchId]?.team1Id
+        const t2 = m && m.team2Id !== 'TBD' ? m.team2Id : resolvedKnockout[matchId]?.team2Id
+        // Derive the winner: shootout score if there was one, else the match score
+        let winnerTeamId = st.winnerTeamId
+        if (!winnerTeamId && t1 && t2 && t1 !== 'TBD' && t2 !== 'TBD' && m?.phase !== 'group') {
+          if (st.penaltyScore1 !== undefined && st.penaltyScore2 !== undefined && st.penaltyScore1 !== st.penaltyScore2) {
+            winnerTeamId = st.penaltyScore1 > st.penaltyScore2 ? t1 : t2
+          } else if (st.score1 !== st.score2) {
+            winnerTeamId = st.score1 > st.score2 ? t1 : t2
+          }
+        }
+        newPersistedStates[matchId] = {
+          ...st,
+          status: 'completed',
+          sentFinal: true,
+          ...(winnerTeamId ? { winnerTeamId } : {}),
+        }
+      }
     }
 
     const map = Object.fromEntries(db.results.map(r => [r.matchId, r]))
