@@ -31,6 +31,7 @@ export default function SimuladorPage() {
   const [phase, setPhase]         = useState<PhaseKey>('group')
   const [openGroup, setOpenGroup] = useState('A')
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const phaseInitRef = useRef(false)
 
   const runSimulate = useCallback(async (current: Record<string, SimScore>, adv: Record<string, string> = {}) => {
     setSimulating(true)
@@ -93,6 +94,21 @@ export default function SimuladorPage() {
       setLiveIds(live)
       setInputs(init)
       runSimulate(init, adv)
+
+      // First load: open on the phase currently in dispute (first knockout
+      // phase with unplayed games), advancing automatically as results come in
+      if (!phaseInitRef.current) {
+        phaseInitRef.current = true
+        const playedIds = new Set(Object.keys(init))
+        const groupDone = GROUP_MATCHES.every(m => playedIds.has(m.id))
+        if (groupDone) {
+          const KO_ORDER: PhaseKey[] = ['round_of_32', 'round_of_16', 'quarterfinal', 'semifinal', 'third_place', 'final']
+          const current = KO_ORDER.find(ph =>
+            KNOCKOUT_MATCHES.some(m => m.phase === ph && !playedIds.has(m.id))
+          ) ?? 'final'
+          setPhase(current)
+        }
+      }
     })
   }, [runSimulate])
 
