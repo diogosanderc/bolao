@@ -48,6 +48,17 @@ type EstatisticasData = {
   surprises: string[]
   matchesPlayed: number
   championProjection?: { participantId: string; name: string; teamId: string; alive: boolean }[]
+  extraStats?: {
+    zebra: { id: string; name: string; pts: number; games: number }[]
+    hardGames: number
+    phaseSplit: { id: string; name: string; groupPct: number; koPct: number; koGames: number }[]
+    brazil: { id: string; name: string; braAvg: number; otherAvg: number; diff: number; braGames: number }[]
+    nearMiss: { id: string; name: string; count: number; ptsLost: number }[]
+    titleRace: { id: string; name: string; points: number; gap: number; maxPossible: number; canReach: boolean }[]
+    remainingMatches: number
+    boldHits: { id: string; name: string; count: number; examples: string[] }[]
+    hotStreak: { id: string; name: string; streak: number }[]
+  }
 }
 
 const LINE_COLORS = [
@@ -401,10 +412,26 @@ export default function EstatisticasPage() {
         const c1 = LINE_COLORS[p1idx % LINE_COLORS.length]
         const c2 = LINE_COLORS[p2idx % LINE_COLORS.length]
         const leader = s1.totalPoints > s2.totalPoints ? 0 : s2.totalPoints > s1.totalPoints ? 1 : -1
+        // Head-to-head rounds won: who scored more points on each finished game
+        let w1 = 0, w2 = 0, ties = 0
+        for (let i = 0; i < snapshots.length; i++) {
+          const prevPts = i > 0 ? snapshots[i - 1].points : ({} as Record<string, number>)
+          const d1 = (snapshots[i].points[ids[0]] ?? 0) - (prevPts[ids[0]] ?? 0)
+          const d2 = (snapshots[i].points[ids[1]] ?? 0) - (prevPts[ids[1]] ?? 0)
+          if (d1 > d2) w1++
+          else if (d2 > d1) w2++
+          else ties++
+        }
         return (
           <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
-            <div className="px-4 py-3 border-b border-gray-800">
+            <div className="px-4 py-3 border-b border-gray-800 flex items-center justify-between gap-2 flex-wrap">
               <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2"><Icon name="swords" size={15} /> Comparação Direta</h3>
+              <span className="text-xs text-gray-500">
+                Rodadas vencidas: <span style={{ color: c1 }} className="font-bold">{w1}</span>
+                <span className="mx-1">×</span>
+                <span style={{ color: c2 }} className="font-bold">{w2}</span>
+                <span className="text-gray-600 ml-1.5">({ties} empates)</span>
+              </span>
             </div>
             <div className="grid grid-cols-2 divide-x divide-gray-800">
               {[{ s: s1, c: c1, win: leader === 0 }, { s: s2, c: c2, win: leader === 1 }].map(({ s, c, win }) => (
@@ -555,6 +582,124 @@ export default function EstatisticasPage() {
           )}
         </div>
       </div>
+
+      {/* Extra stats — collapsible cards */}
+      {data.extraStats && (() => {
+        const ex = data.extraStats
+        const Section = ({ title, icon, subtitle, children }: { title: string; icon: IconName; subtitle: string; children: React.ReactNode }) => (
+          <details className="group border-b border-gray-800 last:border-0">
+            <summary className="px-4 py-3 cursor-pointer select-none flex items-center justify-between gap-2 hover:bg-gray-800/50 transition-colors">
+              <span className="min-w-0">
+                <span className="text-sm font-semibold text-gray-300 flex items-center gap-2"><Icon name={icon} size={14} className="text-yellow-500 shrink-0" /> {title}</span>
+                <span className="block text-xs text-gray-600 mt-0.5">{subtitle}</span>
+              </span>
+              <Icon name="chevron-down" size={14} className="shrink-0 text-gray-500 group-open:rotate-180 transition-transform" />
+            </summary>
+            <div className="px-4 pb-4">{children}</div>
+          </details>
+        )
+        const Row = ({ pos, name, right }: { pos: number; name: string; right: React.ReactNode }) => (
+          <div className="flex items-center gap-2 py-1.5 border-b border-gray-800/50 last:border-0 text-sm">
+            <span className="text-gray-600 text-xs w-5">{pos}º</span>
+            <span className="text-gray-300 flex-1 truncate">{name}</span>
+            <span className="shrink-0">{right}</span>
+          </div>
+        )
+        const inRace = ex.titleRace.filter(t => t.canReach).length
+        return (
+          <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+            <div className="px-4 py-3 border-b border-gray-800">
+              <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Mais Estatísticas</h3>
+            </div>
+
+            {ex.titleRace.length > 0 && (
+              <Section title="Corrida pelo Título" icon="trophy" subtitle={`${inRace} de ${ex.titleRace.length} ainda alcançam o líder · ${ex.remainingMatches} jogos restantes (máx. 8 pts/jogo)`}>
+                <div className="max-h-72 overflow-y-auto">
+                  {ex.titleRace.map((t, i) => (
+                    <Row key={t.id} pos={i + 1} name={t.name} right={
+                      <span className="text-xs">
+                        <span className="text-gray-500">-{t.gap} pts · máx </span>
+                        <span className={t.canReach ? 'text-green-500 font-bold' : 'text-red-500/70 font-bold'}>{t.maxPossible}</span>
+                        {!t.canReach && <span className="text-red-500/70 ml-1">fora</span>}
+                      </span>
+                    } />
+                  ))}
+                </div>
+              </Section>
+            )}
+
+            {ex.zebra.length > 0 && (
+              <Section title="Modo Zebra" icon="zap" subtitle={`Quem mais pontuou nos ${ex.hardGames} jogos em que a maioria errou o resultado`}>
+                {ex.zebra.map((z, i) => (
+                  <Row key={z.id} pos={i + 1} name={z.name} right={<span className="text-yellow-500 font-bold text-xs">{z.pts} pts <span className="text-gray-600 font-normal">em {z.games} jogos</span></span>} />
+                ))}
+              </Section>
+            )}
+
+            {ex.phaseSplit.length > 0 && (
+              <Section title="Grupos vs Mata-Mata" icon="swords" subtitle="Aproveitamento de resultados certos em cada fase (top 10 no mata-mata)">
+                {ex.phaseSplit.map((p, i) => (
+                  <Row key={p.id} pos={i + 1} name={p.name} right={
+                    <span className="text-xs tabular-nums">
+                      <span className="text-gray-500">grupos </span><span className="text-gray-300 font-semibold">{p.groupPct}%</span>
+                      <span className="text-gray-600 mx-1">·</span>
+                      <span className="text-gray-500">mata-mata </span><span className={`font-bold ${p.koPct >= p.groupPct ? 'text-green-500' : 'text-red-500/80'}`}>{p.koPct}%</span>
+                    </span>
+                  } />
+                ))}
+              </Section>
+            )}
+
+            {ex.brazil.length > 0 && (
+              <Section title="Coração vs Razão" icon="flame" subtitle="Média de pontos nos jogos do Brasil comparada aos demais jogos">
+                {[...ex.brazil.slice(0, 5), ...ex.brazil.slice(-3)].filter((v, i, a) => a.findIndex(x => x.id === v.id) === i).map(b => (
+                  <div key={b.id} className="flex items-center gap-2 py-1.5 border-b border-gray-800/50 last:border-0 text-sm">
+                    <span className="text-gray-300 flex-1 truncate">{b.name}</span>
+                    <span className="text-xs tabular-nums shrink-0">
+                      <span className="text-green-600">BRA {b.braAvg}</span>
+                      <span className="text-gray-600 mx-1">vs</span>
+                      <span className="text-gray-400">{b.otherAvg}</span>
+                      <span className={`ml-2 font-bold ${b.diff >= 0 ? 'text-green-500' : 'text-red-500/80'}`}>{b.diff > 0 ? '+' : ''}{b.diff}</span>
+                    </span>
+                  </div>
+                ))}
+                <p className="text-[10px] text-gray-600 mt-2">Top 5 que ganham pontos com o Brasil e os 3 que mais perdem</p>
+              </Section>
+            )}
+
+            {ex.nearMiss.length > 0 && (
+              <Section title="Pontos na Mesa" icon="target" subtitle="Acertou o vencedor mas errou o placar exato por 1 gol">
+                {ex.nearMiss.map((n, i) => (
+                  <Row key={n.id} pos={i + 1} name={n.name} right={<span className="text-xs"><span className="text-gray-300 font-bold">{n.count}×</span> <span className="text-gray-500">quase · ~{n.ptsLost} pts perdidos</span></span>} />
+                ))}
+              </Section>
+            )}
+
+            {ex.boldHits.length > 0 && (
+              <Section title="Cravadas Raras" icon="medal" subtitle="Placares exatos que no máximo 3 pessoas acertaram juntas">
+                {ex.boldHits.map((b, i) => (
+                  <div key={b.id} className="py-1.5 border-b border-gray-800/50 last:border-0">
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="text-gray-600 text-xs w-5">{i + 1}º</span>
+                      <span className="text-gray-300 flex-1 truncate">{b.name}</span>
+                      <span className="text-yellow-500 font-bold text-xs shrink-0">{b.count} cravada{b.count !== 1 ? 's' : ''}</span>
+                    </div>
+                    {b.examples.length > 0 && <p className="text-[10px] text-gray-600 ml-7 mt-0.5 truncate">{b.examples.join(' · ')}</p>}
+                  </div>
+                ))}
+              </Section>
+            )}
+
+            {ex.hotStreak.length > 0 && (
+              <Section title="Quem Está Quente" icon="flame" subtitle="Sequência atual de resultados certos (em aberto)">
+                {ex.hotStreak.map((h, i) => (
+                  <Row key={h.id} pos={i + 1} name={h.name} right={<span className="text-orange-400 font-bold text-xs">🔥 {h.streak} seguidos</span>} />
+                ))}
+              </Section>
+            )}
+          </div>
+        )
+      })()}
 
       {/* Popular Predictions — grouped by phase, collapsed by default */}
       {popularPredictions.length > 0 && (() => {

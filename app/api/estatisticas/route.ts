@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { readDB } from '@/lib/db'
 import { computeLeaderboard } from '@/lib/scoring'
-import { matchById, teamById } from '@/lib/copa2026'
+import { matchById, teamById, ALL_MATCHES } from '@/lib/copa2026'
 import { scoreMatch } from '@/lib/scoring'
 import { computeBracketFromResults } from '@/lib/bracket'
 
@@ -233,6 +233,146 @@ export async function GET() {
       })
       .filter((x): x is { participantId: string; name: string; teamId: string; alive: boolean } => x !== null)
 
+    // ── Extra stats (zebra, phase split, Brazil bias, near misses, title race,
+    //    rare exact scores, current hot streak) ─────────────────────────────────
+    const predIndex = new Map<string, (typeof db.matchPredictions)[number]>()
+    for (const mp of db.matchPredictions) predIndex.set(`${mp.participantId}|${mp.matchId}`, mp)
+
+    // Per-match: correct-result rate + exact-score hitters
+    const matchInfo = new Map<string, { correctPct: number; exactPids: string[] }>()
+    for (const result of sortedResults) {
+      const match = matchById[result.matchId]
+      if (!match) continue
+      let correct = 0, n = 0
+      const exactPids: string[] = []
+      for (const p of participants) {
+        const pred = predIndex.get(`${p.id}|${result.matchId}`)
+        if (!pred) continue
+        n++
+        const sc = scoreMatch(pred, result, match)
+        if (sc.correctResult) correct++
+        if (sc.correctScore) exactPids.push(p.id)
+      }
+      if (n > 0) matchInfo.set(result.matchId, { correctPct: correct / n, exactPids })
+    }
+
+    const zebraAcc: Record<string, { pts: number; games: number }> = {}
+    const phaseAcc: Record<string, { gHit: number; gN: number; kHit: number; kN: number }> = {}
+    const braAcc: Record<string, { braPts: number; braN: number; otherPts: number; otherN: number }> = {}
+    const nearAcc: Record<string, { count: number; ptsLost: number }> = {}
+    const rareAcc: Record<string, { count: number; examples: string[] }> = {}
+    const streakAcc: Record<string, number> = {}
+
+    for (const p of participants) {
+      zebraAcc[p.id] = { pts: 0, games: 0 }
+      phaseAcc[p.id] = { gHit: 0, gN: 0, kHit: 0, kN: 0 }
+      braAcc[p.id] = { braPts: 0, braN: 0, otherPts: 0, otherN: 0 }
+      nearAcc[p.id] = { count: 0, ptsLost: 0 }
+      rareAcc[p.id] = { count: 0, examples: [] }
+      let streak = 0
+      for (let i = sortedResults.length - 1; i >= 0; i--) {
+        const result = sortedResults[i]
+        const match = matchById[result.matchId]
+        const pred = predIndex.get(`${p.id}|${result.matchId}`)
+        if (!match || !pred) break
+        if (scoreMatch(pred, result, match).correctResult) streak++
+        else break
+      }
+      streakAcc[p.id] = streak
+    }
+
+    for (const result of sortedResults) {
+      const match = matchById[result.matchId]
+      if (!match) continue
+      const info = matchInfo.get(result.matchId)
+      const rs1 = result.regulationScore1 ?? result.score1
+      const rs2 = result.regulationScore2 ?? result.score2
+      const isBra = (matchLabel(result.matchId, 0, 0).includes('Brasil'))
+      for (const p of participants) {
+        const pred = predIndex.get(`${p.id}|${result.matchId}`)
+        if (!pred) continue
+        const sc = scoreMatch(pred, result, match)
+        // 1. Zebra: points earned in games where less than half hit the result
+        if (info && info.correctPct < 0.5) {
+          zebraAcc[p.id].pts += sc.total
+          zebraAcc[p.id].games++
+        }
+        // 2. Phase split
+        if (match.phase === 'group') { phaseAcc[p.id].gN++; if (sc.correctResult) phaseAcc[p.id].gHit++ }
+        else { phaseAcc[p.id].kN++; if (sc.correctResult) phaseAcc[p.id].kHit++ }
+        // 3. Brazil bias
+        if (isBra) { braAcc[p.id].braPts += sc.total; braAcc[p.id].braN++ }
+        else { braAcc[p.id].otherPts += sc.total; braAcc[p.id].otherN++ }
+        // 4. Near miss: correct result but exact score off by a single goal
+        if (sc.correctResult && !sc.correctScore) {
+          const off = Math.abs(pred.score1 - rs1) + Math.abs(pred.score2 - rs2)
+          if (off === 1) { nearAcc[p.id].count++; nearAcc[p.id].ptsLost += 3 }
+        }
+        // 6. Rare exact scores: hit shared with at most 2 other participants
+        if (sc.correctScore && info && info.exactPids.length <= 3) {
+          rareAcc[p.id].count++
+          if (rareAcc[p.id].examples.length < 3) {
+            rareAcc[p.id].examples.push(matchLabel(result.matchId, rs1, rs2))
+          }
+        }
+      }
+    }
+
+    // 5. Title race — same formula as the home page (remaining non-TBD games × 8)
+    const playedIds = new Set(db.results.map(r => r.matchId))
+    const remainingMatches = ALL_MATCHES.filter(m => {
+      if (playedIds.has(m.id)) return false
+      const t1 = m.team1Id !== 'TBD' ? m.team1Id : resolvedBracket[m.id]?.team1Id
+      const t2 = m.team2Id !== 'TBD' ? m.team2Id : resolvedBracket[m.id]?.team2Id
+      return t1 && t2 && t1 !== 'TBD' && t2 !== 'TBD'
+    }).length
+    const leaderPts = finalLb[0]?.totalPoints ?? 0
+    const titleRace = finalLb.map(e => {
+      const maxPossible = e.totalPoints + remainingMatches * 8
+      return {
+        id: e.participant.id, name: e.participant.name,
+        points: e.totalPoints, gap: leaderPts - e.totalPoints,
+        maxPossible, canReach: maxPossible >= leaderPts,
+      }
+    })
+
+    const top = <T,>(obj: Record<string, T>, val: (v: T) => number, n = 10) =>
+      Object.entries(obj)
+        .map(([id, v]) => ({ id, name: nameById[id], v }))
+        .filter(x => val(x.v as T) > 0)
+        .sort((a, b) => val(b.v as T) - val(a.v as T))
+        .slice(0, n)
+
+    const extraStats = {
+      zebra: top(zebraAcc, v => v.pts).map(x => ({ id: x.id, name: x.name, pts: (x.v as any).pts, games: (x.v as any).games })),
+      hardGames: [...matchInfo.values()].filter(i => i.correctPct < 0.5).length,
+      phaseSplit: Object.entries(phaseAcc)
+        .filter(([, v]) => v.kN > 0)
+        .map(([id, v]) => ({
+          id, name: nameById[id],
+          groupPct: v.gN > 0 ? Math.round((v.gHit / v.gN) * 100) : 0,
+          koPct: Math.round((v.kHit / v.kN) * 100),
+          koGames: v.kN,
+        }))
+        .sort((a, b) => b.koPct - a.koPct)
+        .slice(0, 10),
+      brazil: Object.entries(braAcc)
+        .filter(([, v]) => v.braN > 0 && v.otherN > 0)
+        .map(([id, v]) => ({
+          id, name: nameById[id],
+          braAvg: Math.round((v.braPts / v.braN) * 10) / 10,
+          otherAvg: Math.round((v.otherPts / v.otherN) * 10) / 10,
+          diff: Math.round((v.braPts / v.braN - v.otherPts / v.otherN) * 10) / 10,
+          braGames: v.braN,
+        }))
+        .sort((a, b) => b.diff - a.diff),
+      nearMiss: top(nearAcc, v => v.count).map(x => ({ id: x.id, name: x.name, count: (x.v as any).count, ptsLost: (x.v as any).ptsLost })),
+      titleRace,
+      remainingMatches,
+      boldHits: top(rareAcc, v => v.count, 5).map(x => ({ id: x.id, name: x.name, count: (x.v as any).count, examples: (x.v as any).examples })),
+      hotStreak: top(streakAcc as any, (v: any) => v, 5).map(x => ({ id: x.id, name: x.name, streak: x.v as unknown as number })),
+    }
+
     // Return participants sorted by current leaderboard ranking
     const lbOrder = new Map(finalLb.map((e, i) => [e.participant.id, i]))
     const sortedParticipants = [...participants].sort(
@@ -249,6 +389,7 @@ export async function GET() {
       surprises: surprises.map(s => s.matchId),
       matchesPlayed,
       championProjection,
+      extraStats,
     })
   } catch (err) {
     console.error('[estatisticas]', err)
