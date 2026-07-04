@@ -7,6 +7,7 @@ import {
 } from 'recharts'
 import { chipCode } from '@/lib/names'
 import { Icon, IconName } from '@/components/Icon'
+import { Flag } from '@/components/Flag'
 
 type ParticipantInfo = { id: string; name: string }
 
@@ -46,6 +47,7 @@ type EstatisticasData = {
   popularPredictions: PopularPrediction[]
   surprises: string[]
   matchesPlayed: number
+  championProjection?: { participantId: string; name: string; teamId: string; alive: boolean }[]
 }
 
 const LINE_COLORS = [
@@ -187,6 +189,51 @@ export default function EstatisticasPage() {
           </div>
         </div>
       )}
+
+      {/* Champion projection — who can still hit their champion pick */}
+      {data.championProjection && data.championProjection.length > 0 && (() => {
+        const byTeam = new Map<string, { alive: boolean; names: string[] }>()
+        for (const cp of data.championProjection) {
+          if (!byTeam.has(cp.teamId)) byTeam.set(cp.teamId, { alive: cp.alive, names: [] })
+          byTeam.get(cp.teamId)!.names.push(cp.name)
+        }
+        const teams = [...byTeam.entries()]
+          .map(([teamId, v]) => ({ teamId, ...v }))
+          .sort((a, b) => (Number(b.alive) - Number(a.alive)) || (b.names.length - a.names.length))
+        const aliveCount = data.championProjection.filter(c => c.alive).length
+        return (
+          <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+            <div className="px-4 py-3 border-b border-gray-800">
+              <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2"><Icon name="crown" size={15} /> Projeção do Campeão</h3>
+              <p className="text-xs text-gray-600 mt-0.5">
+                {aliveCount} de {data.championProjection.length} participantes ainda podem acertar o campeão (+12 pts)
+              </p>
+            </div>
+            <div className="divide-y divide-gray-800">
+              {teams.map(t => (
+                <details key={t.teamId} className="group">
+                  <summary className="px-4 py-2.5 cursor-pointer select-none flex items-center gap-2 hover:bg-gray-800/50 transition-colors">
+                    <Flag teamId={t.teamId} size={18} />
+                    <span className={`text-sm font-semibold ${t.alive ? 'text-gray-200' : 'text-gray-600 line-through'}`}>{t.teamId}</span>
+                    {t.alive
+                      ? <span className="text-[10px] font-bold text-green-500 bg-green-950/50 border border-green-900 rounded-full px-2 py-0.5">vivo</span>
+                      : <span className="text-[10px] font-bold text-red-500/80 bg-red-950/40 border border-red-900/50 rounded-full px-2 py-0.5">eliminado</span>}
+                    <span className="ml-auto text-xs text-gray-500 flex items-center gap-2">
+                      {t.names.length} participante{t.names.length !== 1 ? 's' : ''}
+                      <Icon name="chevron-down" size={13} className="group-open:rotate-180 transition-transform" />
+                    </span>
+                  </summary>
+                  <div className="px-4 pb-3 flex flex-wrap gap-1.5">
+                    {t.names.map(n => (
+                      <span key={n} className={`text-xs rounded-full px-2.5 py-1 border ${t.alive ? 'bg-gray-800 border-gray-700 text-gray-300' : 'bg-gray-900 border-gray-800 text-gray-600'}`}>{n}</span>
+                    ))}
+                  </div>
+                </details>
+              ))}
+            </div>
+          </div>
+        )
+      })()}
 
       {/* Evolution / Rank chart — unified card with tabs */}
       <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">

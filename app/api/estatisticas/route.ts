@@ -178,67 +178,60 @@ export async function GET() {
       if (top && top.correctScores > 0) records.push({ icon: 'target', title: 'Rei do placar exato', value: top.name, subtitle: `${top.correctScores} placares cravados` })
     }
 
-    // Riskiest — highest average total goals predicted per played match
+    // Time in Top 3 and in the red zone (bottom 7), measured across snapshots
     {
-      let best = { id: '', avg: 0 }
-      for (const p of participants) {
-        let sum = 0, n = 0
-        for (const result of sortedResults) {
-          const pred = db.matchPredictions.find(mp => mp.participantId === p.id && mp.matchId === result.matchId)
-          if (pred) { sum += pred.score1 + pred.score2; n++ }
-        }
-        const avg = n > 0 ? sum / n : 0
-        if (avg > best.avg) best = { id: p.id, avg }
-      }
-      if (best.id) records.push({ icon: 'rocket', title: 'Mais arrojado', value: nameById[best.id], subtitle: `média de ${best.avg.toFixed(1)} gols por palpite` })
-    }
-
-    // Per-match correctness, for "zebra", "unânime" and "freguês"
-    const matchAcc: { matchId: string; correctPct: number; exactCount: number; total: number; label: string }[] = []
-    for (const result of sortedResults) {
-      const match = matchById[result.matchId]
-      if (!match) continue
-      const preds = db.matchPredictions.filter(mp => mp.matchId === result.matchId)
-      if (preds.length === 0) continue
-      let correct = 0, exact = 0
-      for (const pred of preds) {
-        const s = scoreMatch(pred, result, match)
-        if (s.correctResult) correct++
-        if (s.correctScore) exact++
-      }
-      matchAcc.push({ matchId: result.matchId, correctPct: correct / preds.length, exactCount: exact, total: preds.length, label: matchLabel(result.matchId, result.score1, result.score2) })
-    }
-
-    // Zebra — lowest correct-result rate
-    {
-      const z = [...matchAcc].sort((a, b) => a.correctPct - b.correctPct)[0]
-      if (z) records.push({ icon: 'alert', title: 'Jogo zebra', value: z.label, subtitle: `só ${Math.round(z.correctPct * 100)}% acertaram o resultado` })
-    }
-    // Unânime — most exact-score hits
-    {
-      const u = [...matchAcc].sort((a, b) => b.exactCount - a.exactCount)[0]
-      if (u && u.exactCount > 0) records.push({ icon: 'users', title: 'Palpite unânime', value: u.label, subtitle: `${u.exactCount} de ${u.total} cravaram o placar` })
-    }
-    // Freguês — team whose matches were most mispredicted (min 2 matches)
-    {
-      const teamWrong: Record<string, { wrong: number; n: number }> = {}
-      for (const result of sortedResults) {
-        const match = matchById[result.matchId]
-        if (!match) continue
-        const acc = matchAcc.find(m => m.matchId === result.matchId)
-        if (!acc) continue
-        for (const tid of [match.team1Id, match.team2Id]) {
-          if (!teamWrong[tid]) teamWrong[tid] = { wrong: 0, n: 0 }
-          teamWrong[tid].wrong += (1 - acc.correctPct)
-          teamWrong[tid].n += 1
+      const totalP = participants.length
+      const top3Count: Record<string, number> = {}
+      const redCount: Record<string, number> = {}
+      for (const snap of snapshots) {
+        const pts = participants.map(p => snap.points[p.id] ?? 0)
+        for (const p of participants) {
+          const myPts = snap.points[p.id] ?? 0
+          const rank = pts.filter(v => v > myPts).length + 1
+          if (rank <= 3) top3Count[p.id] = (top3Count[p.id] ?? 0) + 1
+          if (rank > totalP - 7) redCount[p.id] = (redCount[p.id] ?? 0) + 1
         }
       }
-      const ranked = Object.entries(teamWrong)
-        .filter(([, v]) => v.n >= 2)
-        .map(([tid, v]) => ({ tid, rate: v.wrong / v.n }))
-        .sort((a, b) => b.rate - a.rate)[0]
-      if (ranked) records.push({ icon: 'ban', title: 'Freguês da galera', value: teamById[ranked.tid]?.name ?? ranked.tid, subtitle: `${Math.round(ranked.rate * 100)}% erraram os jogos dele` })
+      const topTop3 = Object.entries(top3Count).sort((a, b) => b[1] - a[1])[0]
+      if (topTop3 && topTop3[1] > 0) {
+        records.push({ icon: 'crown', title: 'Mais tempo no Top 3', value: nameById[topTop3[0]], subtitle: `${topTop3[1]} de ${snapshots.length} rodadas entre os 3 primeiros` })
+      }
+      const topRed = Object.entries(redCount).sort((a, b) => b[1] - a[1])[0]
+      if (topRed && topRed[1] > 0) {
+        records.push({ icon: 'alert', title: 'Mais tempo na zona vermelha', value: nameById[topRed[0]], subtitle: `${topRed[1]} de ${snapshots.length} rodadas entre os 7 últimos` })
+      }
     }
+
+    // Champion projection: which participants can still hit their champion pick
+    const groupResultCount = db.results.filter(r => r.matchId.startsWith('G')).length
+    const groupsComplete = groupResultCount >= 72
+    const aliveSet = new Set<string>()
+    if (groupsComplete) {
+      for (let i = 1; i <= 16; i++) {
+        const slot = resolvedBracket[`R32_${i}`]
+        if (slot?.team1Id && slot.team1Id !== 'TBD') aliveSet.add(slot.team1Id)
+        if (slot?.team2Id && slot.team2Id !== 'TBD') aliveSet.add(slot.team2Id)
+      }
+    } else {
+      for (const tid of Object.keys(teamById)) aliveSet.add(tid)
+    }
+    for (const result of db.results) {
+      if (result.matchId.startsWith('G') || result.matchId === 'TP_1') continue
+      const slot = resolvedBracket[result.matchId]
+      const t1 = slot?.team1Id, t2 = slot?.team2Id
+      if (!t1 || !t2 || t1 === 'TBD' || t2 === 'TBD') continue
+      const winner = result.advancingTeamId
+        ?? (result.score1 > result.score2 ? t1 : result.score2 > result.score1 ? t2 : undefined)
+      if (!winner) continue
+      aliveSet.delete(winner === t1 ? t2 : t1)
+    }
+    const championProjection = participants
+      .map(p => {
+        const kp = db.knockoutPhasePicks?.find(k => k.participantId === p.id)
+        if (!kp?.champion) return null
+        return { participantId: p.id, name: p.name, teamId: kp.champion, alive: aliveSet.has(kp.champion) }
+      })
+      .filter((x): x is { participantId: string; name: string; teamId: string; alive: boolean } => x !== null)
 
     // Return participants sorted by current leaderboard ranking
     const lbOrder = new Map(finalLb.map((e, i) => [e.participant.id, i]))
@@ -255,6 +248,7 @@ export async function GET() {
       popularPredictions,
       surprises: surprises.map(s => s.matchId),
       matchesPlayed,
+      championProjection,
     })
   } catch (err) {
     console.error('[estatisticas]', err)
