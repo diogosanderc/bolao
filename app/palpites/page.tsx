@@ -46,13 +46,17 @@ export default function PalpitesDeTodosPage() {
         setData(d)
         const resultList: MatchResult[] = Array.isArray(res) ? res : []
         setResults(resultList)
-        // Auto-select the phase of the most recently played match
-        const lastResult = [...resultList].sort((a, b) => {
-          const ma = matchById[a.matchId], mb = matchById[b.matchId]
-          return (mb?.matchNumber ?? 0) - (ma?.matchNumber ?? 0)
-        })[0]
-        const activePhase = lastResult ? matchById[lastResult.matchId]?.phase : undefined
-        if (activePhase && activePhase !== 'group') setPhaseFilter(activePhase)
+        // Auto-select the phase currently being disputed: the first knockout
+        // phase with games still to play (oitavas now → quartas → semi → ...)
+        const played = new Set(resultList.map(r => r.matchId))
+        const groupDone = ALL_MATCHES.filter(m => m.phase === 'group').every(m => played.has(m.id))
+        if (groupDone) {
+          const KO_PHASES: Phase[] = ['round_of_32', 'round_of_16', 'quarterfinal', 'semifinal', 'final']
+          const current = KO_PHASES.find(ph =>
+            ALL_MATCHES.some(m => m.phase === ph && !played.has(m.id))
+          ) ?? 'final'
+          setPhaseFilter(current)
+        }
         setLoading(false)
       })
       .catch(() => setLoading(false))
