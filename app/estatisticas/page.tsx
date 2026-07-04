@@ -76,11 +76,18 @@ export default function EstatisticasPage() {
   const [scenarioRows, setScenarioRows] = useState<{ id: string; name: string; current: number; min: number; max: number }[]>([])
   const [scenarioLoading, setScenarioLoading] = useState(false)
   const [scenarioShowAll, setScenarioShowAll] = useState(false)
+  const [odds, setOdds] = useState<Map<string, { championPct: number; redZonePct: number }> | null>(null)
 
   useEffect(() => {
     fetch('/api/champion-scenario')
       .then(r => r.json())
       .then(d => setScenarioTeams(d.aliveTeams ?? []))
+      .catch(() => {})
+    fetch('/api/odds')
+      .then(r => r.json())
+      .then(d => {
+        if (d.ready && d.rows) setOdds(new Map(d.rows.map((r: any) => [r.id, { championPct: r.championPct, redZonePct: r.redZonePct }])))
+      })
       .catch(() => {})
   }, [])
 
@@ -489,11 +496,14 @@ export default function EstatisticasPage() {
             </div>
 
             {ex.titleRace.length > 0 && (
-              <Section title="Corrida pelo Título" icon="trophy" subtitle={`${inRace} de ${ex.titleRace.length} ainda alcançam o líder · ${ex.remainingMatches} jogos restantes (máx. 8 pts/jogo)`}>
+              <Section title="Corrida pelo Título" icon="trophy" subtitle={`${inRace} de ${ex.titleRace.length} ainda alcançam o líder · ${ex.remainingMatches} jogos restantes${odds ? ' · % = chance de título em 3.000 simulações' : ''}`}>
                 <div className="max-h-72 overflow-y-auto">
                   {ex.titleRace.map((t, i) => (
                     <Row key={t.id} pos={i + 1} name={t.name} right={
                       <span className="text-xs">
+                        {odds?.get(t.id) !== undefined && (
+                          <span className={`font-bold mr-2 ${(odds.get(t.id)!.championPct) >= 10 ? 'text-yellow-400' : 'text-gray-400'}`}>{odds.get(t.id)!.championPct}%</span>
+                        )}
                         <span className="text-gray-500">-{t.gap} pts · máx </span>
                         <span className={t.canReach ? 'text-green-500 font-bold' : 'text-red-500/70 font-bold'}>{t.maxPossible}</span>
                         {!t.canReach && <span className="text-red-500/70 ml-1">fora</span>}
@@ -505,11 +515,14 @@ export default function EstatisticasPage() {
             )}
 
             {ex.redZone && ex.redZone.length > 0 && (
-              <Section title="Disputa da Zona Vermelha" icon="alert" subtitle="Os 7 últimos (pagões) e os 2 em alerta logo acima">
+              <Section title="Disputa da Zona Vermelha" icon="alert" subtitle={`Os 7 últimos (pagões) e os 2 em alerta logo acima${odds ? ' · % = risco de terminar na zona (3.000 simulações)' : ''}`}>
                 {ex.redZone.map(r => (
                   <div key={r.id} className="flex items-center gap-2 py-1.5 border-b border-gray-800/50 last:border-0 text-sm">
                     <span className="text-gray-600 text-xs w-7">{r.pos}º</span>
                     <span className={`flex-1 truncate ${r.status === 'zona' ? 'text-red-400' : 'text-yellow-500'}`}>{r.name}</span>
+                    {odds?.get(r.id) !== undefined && (
+                      <span className={`text-xs font-bold shrink-0 ${odds.get(r.id)!.redZonePct >= 50 ? 'text-red-500' : 'text-gray-400'}`}>{odds.get(r.id)!.redZonePct}%</span>
+                    )}
                     <span className={`text-[10px] font-bold rounded-full px-2 py-0.5 border shrink-0 ${r.status === 'zona' ? 'text-red-500 bg-red-950/40 border-red-900/50' : 'text-yellow-500 bg-yellow-950/40 border-yellow-900/50'}`}>
                       {r.status === 'zona' ? 'na zona' : 'alerta'}
                     </span>
