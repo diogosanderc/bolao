@@ -122,6 +122,7 @@ export interface Database {
   r32TeamPicks?: R32TeamPick[]
   knockoutPhasePicks?: KnockoutPhasePick[]
   lastRanks?: Record<string, number> // last notified rank per participant (for position push)
+  souEu?: Record<string, { at: string; count: number }> // participantId → last "Sou eu" click
 }
 
 export interface LeaderboardEntry {

@@ -195,6 +195,12 @@ export default function LeaderboardPage() {
       const next = prev === id ? null : id
       if (next) localStorage.setItem('bolao_me', next)
       else localStorage.removeItem('bolao_me')
+      // Record the identification server-side for the admin overview
+      fetch('/api/identify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(next ? { participantId: next } : { prevId: prev }),
+      }).catch(() => {})
       // Associate this device's push subscription with the chosen participant
       // (or clear it), so background "you moved" pushes target the right person.
       if ('serviceWorker' in navigator) {

@@ -75,7 +75,11 @@ export default function AdminPage() {
   const [syncDiffs, setSyncDiffs] = useState<SyncDiff[] | null>(null)
   const [syncError, setSyncError] = useState('')
   const [selectedDiffs, setSelectedDiffs] = useState<Set<string>>(new Set())
-  const [visitStats, setVisitStats] = useState<{ today: number; total: number; days: { date: string; label: string; count: number }[] } | null>(null)
+  const [visitStats, setVisitStats] = useState<{
+    today: number; total: number; dailyAvg?: number
+    days: { date: string; label: string; count: number }[]
+    souEu?: { participantId: string; name: string; at: string | null; count: number; push: boolean }[]
+  } | null>(null)
   const [hoveredBar, setHoveredBar] = useState<number | null>(null)
   const [lastDateSync, setLastDateSync] = useState<string | null>(null)
 
@@ -419,8 +423,9 @@ export default function AdminPage() {
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-3">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5"><Icon name="bars" size={13} /> Visitas ao Site</h3>
-              <div className="flex gap-3 text-xs text-gray-500">
+              <div className="flex gap-3 text-xs text-gray-500 flex-wrap justify-end">
                 <span>Hoje: <span className="text-yellow-400 font-bold">{visitStats.today}</span></span>
+                <span>Média: <span className="text-green-500 font-semibold">{visitStats.dailyAvg ?? 0}/dia</span></span>
                 <span>Total: <span className="text-gray-300 font-semibold">{visitStats.total}</span></span>
               </div>
             </div>
@@ -470,6 +475,32 @@ export default function AdminPage() {
           </div>
         )
       })()}
+
+      {/* "Sou eu" identifications */}
+      {visitStats?.souEu && visitStats.souEu.length > 0 && (
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-3">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+              <Icon name="star" size={13} /> Marcaram &quot;Sou eu&quot;
+            </h3>
+            <span className="text-xs text-gray-500">{visitStats.souEu.length} participante{visitStats.souEu.length !== 1 ? 's' : ''}</span>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {visitStats.souEu.map(s => (
+              <span
+                key={s.participantId}
+                title={s.at ? `Marcou em ${new Date(s.at).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}` : 'Identificado via notificações push'}
+                className="inline-flex items-center gap-1.5 text-xs bg-gray-800 border border-gray-700 rounded-full px-2.5 py-1 text-gray-300"
+              >
+                {s.name}
+                {s.push && <Icon name="bell" size={11} className="text-yellow-500" />}
+                {s.at && <span className="text-gray-500 text-[10px]">{new Date(s.at).toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo', day: '2-digit', month: '2-digit' })}</span>}
+              </span>
+            ))}
+          </div>
+          <p className="text-[10px] text-gray-600 mt-2">🔔 = também recebe notificações push · identificações antigas via push aparecem sem data</p>
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="flex gap-2 border-b border-gray-800">
