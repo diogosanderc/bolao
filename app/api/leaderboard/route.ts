@@ -231,11 +231,25 @@ export async function GET() {
     // This ensures livePoints only reflects the match(es) genuinely in progress right now,
     // not stale/completed matches that haven't been committed to db.results yet.
     const nonLiveProvisional = provisionalResults.filter(pr => !trulyLiveIds.has(pr.matchId))
-    const baseForComparison = hasLive
-      ? [...sortedResults, ...nonLiveProvisional]
-      : sortedResults.slice(0, -1)
 
-    if (hasLive || sortedResults.length > 1) {
+    // All finished games (confirmed + livesync-completed) in chronological order —
+    // the position arrows compare against the state before the most recent one.
+    const nonLiveAll = [...sortedResults, ...nonLiveProvisional].sort((a, b) => {
+      const dateA = matchDates[a.matchId]?.date ?? ''
+      const dateB = matchDates[b.matchId]?.date ?? ''
+      return dateA.localeCompare(dateB)
+    })
+    const droppedId = !hasLive && nonLiveAll.length > 0 ? nonLiveAll[nonLiveAll.length - 1].matchId : null
+    const baseForComparison = hasLive
+      ? nonLiveAll
+      : nonLiveAll.filter(r => r.matchId !== droppedId)
+    // Advancement bonuses must also be recomputed without the dropped game,
+    // otherwise arrows miss the knockout advancement points of the last match.
+    const confirmedForPrev = droppedId
+      ? sortedResults.filter(r => r.matchId !== droppedId)
+      : sortedResults
+
+    if (hasLive || nonLiveAll.length > 1) {
       const prevLeaderboard = computeLeaderboard(
         validParticipants,
         db.matchPredictions,
@@ -243,7 +257,7 @@ export async function GET() {
         baseForComparison,
         db.r32TeamPicks,
         db.knockoutPhasePicks,
-        sortedResults
+        confirmedForPrev
       )
       const prevPointsMap = new Map<string, number>()
       const prevRankMap = new Map<string, number>()
