@@ -71,6 +71,30 @@ export default function EstatisticasPage() {
   const [statsSearch, setStatsSearch] = useState('')
   const [showAllStats, setShowAllStats] = useState(false)
   const [partSearch, setPartSearch] = useState('')
+  const [scenarioTeams, setScenarioTeams] = useState<string[]>([])
+  const [scenarioTeam, setScenarioTeam] = useState('')
+  const [scenarioRows, setScenarioRows] = useState<{ id: string; name: string; current: number; min: number; max: number }[]>([])
+  const [scenarioLoading, setScenarioLoading] = useState(false)
+  const [scenarioShowAll, setScenarioShowAll] = useState(false)
+
+  useEffect(() => {
+    fetch('/api/champion-scenario')
+      .then(r => r.json())
+      .then(d => setScenarioTeams(d.aliveTeams ?? []))
+      .catch(() => {})
+  }, [])
+
+  function loadScenario(teamId: string) {
+    setScenarioTeam(teamId)
+    setScenarioRows([])
+    if (!teamId) return
+    setScenarioLoading(true)
+    fetch(`/api/champion-scenario?teamId=${teamId}`)
+      .then(r => r.json())
+      .then(d => setScenarioRows(d.rows ?? []))
+      .catch(() => {})
+      .finally(() => setScenarioLoading(false))
+  }
 
   useEffect(() => {
     fetch('/api/estatisticas')
@@ -195,6 +219,73 @@ export default function EstatisticasPage() {
           </div>
         )
       })()}
+
+      {/* Champion scenario simulator */}
+      {scenarioTeams.length > 0 && (
+        <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+          <div className="px-4 py-3 border-b border-gray-800">
+            <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2"><Icon name="trophy" size={15} /> E se... fosse campeã?</h3>
+            <p className="text-xs text-gray-600 mt-0.5">Escolha a seleção campeã e veja a projeção de pontos de cada participante nesse cenário — com os palpites deles até a final</p>
+          </div>
+          <div className="px-4 py-3 flex flex-wrap gap-1.5">
+            {scenarioTeams.map(t => (
+              <button
+                key={t}
+                onClick={() => loadScenario(scenarioTeam === t ? '' : t)}
+                className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border font-semibold transition-colors ${
+                  scenarioTeam === t
+                    ? 'bg-yellow-500 text-black border-yellow-500'
+                    : 'border-gray-700 text-gray-300 hover:border-gray-500'
+                }`}
+              >
+                <Flag teamId={t} size={14} /> {t}
+              </button>
+            ))}
+          </div>
+          {scenarioLoading && <p className="px-4 pb-4 text-xs text-gray-500 animate-pulse">Calculando…</p>}
+          {!scenarioLoading && scenarioTeam && scenarioRows.length > 0 && (
+            <div className="border-t border-gray-800">
+              <div className="px-4 py-2.5 bg-yellow-950/20 border-b border-gray-800 text-xs text-yellow-500 flex items-center gap-1.5">
+                <Icon name="crown" size={13} />
+                Com <strong className="mx-1">{scenarioTeam}</strong> campeã, o líder projetado é <strong className="ml-1">{scenarioRows[0].name}</strong> ({scenarioRows[0].min} pts garantidos)
+              </div>
+              <table className="w-full text-sm table-fixed">
+                <thead>
+                  <tr className="text-[10px] sm:text-xs text-gray-500 tracking-wider border-b border-gray-800 bg-gray-950/50">
+                    <th className="pl-3 pr-1 py-2 text-left w-8">#</th>
+                    <th className="px-1 py-2 text-left">Participante</th>
+                    <th className="px-1 py-2 text-right w-14">Atual</th>
+                    <th className="px-1 py-2 text-right w-14" title="Atual + bônus garantidos pelo caminho do campeão">Mín.</th>
+                    <th className="pl-1 pr-3 py-2 text-right w-14" title="Máximo teórico (acertando tudo que resta)">Máx.</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-800">
+                  {(scenarioShowAll ? scenarioRows : scenarioRows.slice(0, 10)).map((r, i) => (
+                    <tr key={r.id} className={i === 0 ? 'bg-yellow-50 dark:bg-yellow-950/30' : ''}>
+                      <td className="pl-3 pr-1 py-2 text-gray-500 text-xs">{i + 1}</td>
+                      <td className="px-1 py-2 font-semibold text-gray-200 truncate">{r.name}{i === 0 && <Icon name="crown" size={12} className="inline ml-1.5 text-yellow-500" />}</td>
+                      <td className="px-1 py-2 text-right text-gray-400">{r.current}</td>
+                      <td className="px-1 py-2 text-right font-bold text-green-500">{r.min}</td>
+                      <td className="pl-1 pr-3 py-2 text-right text-gray-300">{r.max}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {scenarioRows.length > 10 && (
+                <button
+                  onClick={() => setScenarioShowAll(v => !v)}
+                  className="w-full py-2.5 text-xs font-semibold text-gray-400 hover:text-gray-200 border-t border-gray-800 hover:bg-gray-800/50 transition-colors"
+                >
+                  {scenarioShowAll ? 'Ver só o top 10' : `Ver todos (${scenarioRows.length})`}
+                </button>
+              )}
+              <p className="px-4 py-2.5 text-[10px] text-gray-600 border-t border-gray-800">
+                Mín. = pontos atuais + bônus garantidos dos palpites com esse campeão (fases + título). Máx. = teto teórico acertando todos os placares restantes e demais classificações possíveis.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Comparison panel — pick two participants to compare */}
       <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
