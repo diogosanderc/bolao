@@ -51,6 +51,7 @@ type EstatisticasData = {
     brazil: { id: string; name: string; braAvg: number; otherAvg: number; diff: number; braGames: number }[]
     nearMiss: { id: string; name: string; count: number; ptsLost: number }[]
     titleRace: { id: string; name: string; points: number; gap: number; maxPossible: number; canReach: boolean }[]
+    redZone?: { id: string; name: string; pos: number; points: number; status: string; gapToEscape: number }[]
     remainingMatches: number
     boldHits: { id: string; name: string; count: number; examples: string[] }[]
     hotStreak: { id: string; name: string; streak: number }[]
@@ -409,6 +410,24 @@ export default function EstatisticasPage() {
                     } />
                   ))}
                 </div>
+              </Section>
+            )}
+
+            {ex.redZone && ex.redZone.length > 0 && (
+              <Section title="Disputa da Zona Vermelha" icon="alert" subtitle="Os 7 últimos (pagões) e os 2 em alerta logo acima">
+                {ex.redZone.map(r => (
+                  <div key={r.id} className="flex items-center gap-2 py-1.5 border-b border-gray-800/50 last:border-0 text-sm">
+                    <span className="text-gray-600 text-xs w-7">{r.pos}º</span>
+                    <span className={`flex-1 truncate ${r.status === 'zona' ? 'text-red-400' : 'text-yellow-500'}`}>{r.name}</span>
+                    <span className={`text-[10px] font-bold rounded-full px-2 py-0.5 border shrink-0 ${r.status === 'zona' ? 'text-red-500 bg-red-950/40 border-red-900/50' : 'text-yellow-500 bg-yellow-950/40 border-yellow-900/50'}`}>
+                      {r.status === 'zona' ? 'na zona' : 'alerta'}
+                    </span>
+                    <span className="text-xs text-gray-500 shrink-0 w-24 text-right">
+                      {r.points} pts{r.status === 'zona' && r.gapToEscape > 0 ? ` · falta ${r.gapToEscape}` : ''}
+                    </span>
+                  </div>
+                ))}
+                <p className="text-[10px] text-gray-600 mt-2">&quot;falta X&quot; = pontos para sair da zona (ultrapassar o primeiro fora dela)</p>
               </Section>
             )}
 

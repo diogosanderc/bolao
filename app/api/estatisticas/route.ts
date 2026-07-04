@@ -336,6 +336,21 @@ export async function GET() {
       }
     })
 
+    // Red zone dispute: the bottom 7 (zona) plus the 2 above (alerta), with the
+    // gap each needs to close to escape (points of the first participant outside the zone)
+    const N = finalLb.length
+    const escapeTargetPts = N > 7 ? finalLb[N - 8].totalPoints : 0
+    const redZone = finalLb.slice(Math.max(0, N - 9)).map((e, i, arr) => {
+      const pos = N - arr.length + i + 1
+      const inZone = pos > N - 7
+      return {
+        id: e.participant.id, name: e.participant.name,
+        pos, points: e.totalPoints,
+        status: inZone ? 'zona' : 'alerta',
+        gapToEscape: inZone ? Math.max(0, escapeTargetPts - e.totalPoints + 1) : 0,
+      }
+    })
+
     const top = <T,>(obj: Record<string, T>, val: (v: T) => number, n = 10) =>
       Object.entries(obj)
         .map(([id, v]) => ({ id, name: nameById[id], v }))
@@ -368,6 +383,7 @@ export async function GET() {
         .sort((a, b) => b.diff - a.diff),
       nearMiss: top(nearAcc, v => v.count).map(x => ({ id: x.id, name: x.name, count: (x.v as any).count, ptsLost: (x.v as any).ptsLost })),
       titleRace,
+      redZone,
       remainingMatches,
       boldHits: top(rareAcc, v => v.count, 5).map(x => ({ id: x.id, name: x.name, count: (x.v as any).count, examples: (x.v as any).examples })),
       hotStreak: top(streakAcc as any, (v: any) => v, 5).map(x => ({ id: x.id, name: x.name, streak: x.v as unknown as number })),
