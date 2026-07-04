@@ -1,10 +1,6 @@
 'use client'
 
-import { useEffect, useState, useMemo } from 'react'
-import {
-  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer, BarChart, Bar,
-} from 'recharts'
+import { useEffect, useState } from 'react'
 import { chipCode } from '@/lib/names'
 import { Icon, IconName } from '@/components/Icon'
 import { Flag } from '@/components/Flag'
@@ -71,10 +67,8 @@ export default function EstatisticasPage() {
   const [data, setData] = useState<EstatisticasData | null>(null)
   const [loading, setLoading] = useState(true)
   const [activeIds, setActiveIds] = useState<Set<string>>(new Set())
-  const [showAllClass, setShowAllClass] = useState(false)
   const [statsSearch, setStatsSearch] = useState('')
   const [showAllStats, setShowAllStats] = useState(false)
-  const [chartTab, setChartTab] = useState<'points' | 'rank'>('points')
   const [partSearch, setPartSearch] = useState('')
 
   useEffect(() => {
@@ -82,37 +76,12 @@ export default function EstatisticasPage() {
       .then(r => r.json())
       .then(d => {
         setData(d)
-        // Pre-select top 5 participants so the chart isn't empty on first load
-        setActiveIds(new Set((d.participants as { id: string }[]).slice(0, 5).map(p => p.id)))
+        // Pre-select the top 2 so the comparison isn't empty on first load
+        setActiveIds(new Set((d.participants as { id: string }[]).slice(0, 2).map(p => p.id)))
         setLoading(false)
       })
       .catch(() => setLoading(false))
   }, [])
-
-  const chartData = useMemo(() => {
-    if (!data || data.snapshots.length === 0) return []
-    return data.snapshots.map((snap, idx) => {
-      const row: Record<string, string | number> = {
-        name: `J${idx + 1}`,
-        label: snap.label,
-        dateBRT: snap.dateBRT,
-      }
-      for (const p of data.participants) row[p.id] = snap.points[p.id] ?? 0
-      return row
-    })
-  }, [data])
-
-  const rankChartData = useMemo(() => {
-    if (!data || data.snapshots.length === 0) return []
-    return data.snapshots.map((snap, idx) => {
-      const sorted = [...data.participants].sort(
-        (a, b) => (snap.points[b.id] ?? 0) - (snap.points[a.id] ?? 0)
-      )
-      const row: Record<string, string | number> = { name: `J${idx + 1}`, label: snap.label }
-      sorted.forEach((p, rankIdx) => { row[p.id] = rankIdx + 1 })
-      return row
-    })
-  }, [data])
 
   function toggleParticipant(id: string) {
     setActiveIds(prev => {
@@ -122,8 +91,6 @@ export default function EstatisticasPage() {
       return next
     })
   }
-
-  function clearChart() { setActiveIds(new Set()) }
 
   if (loading) return (
     <div className="space-y-8">
@@ -159,24 +126,6 @@ export default function EstatisticasPage() {
     .sort((a, b) => b.totalPoints - a.totalPoints)
     .filter(s => !statsSearch || s.name.toLowerCase().includes(statsSearch.toLowerCase()))
   const surpriseSet = new Set(surprises)
-
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (!active || !payload || !payload.length) return null
-    const snap = snapshots[chartData.findIndex(d => d.name === label)]
-    const sorted = [...payload].sort((a, b) => (b.value as number) - (a.value as number))
-    return (
-      <div className="bg-white dark:bg-gray-800 border border-gray-700 rounded-lg p-3 text-xs max-w-xs shadow-lg">
-        <p className="text-gray-200 font-semibold mb-1 truncate">{snap?.label ?? label}</p>
-        {snap?.dateBRT && <p className="text-gray-400 mb-2">{snap.dateBRT}</p>}
-        {sorted.map((entry: any) => (
-          <div key={entry.dataKey} className="flex justify-between gap-4 items-center">
-            <span style={{ color: entry.color }} className="truncate">{entry.name}</span>
-            <span className="font-bold text-gray-200">{entry.value}pts</span>
-          </div>
-        ))}
-      </div>
-    )
-  }
 
   return (
     <div className="space-y-8">
@@ -246,171 +195,64 @@ export default function EstatisticasPage() {
         )
       })()}
 
-      {/* Evolution / Rank chart — unified card with tabs */}
-      <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-        <div className="flex items-center justify-between gap-2 mb-3 flex-wrap">
-          <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Evolução da Classificação</h3>
-          <div className="flex rounded-lg border border-gray-700 overflow-hidden text-xs">
-            {([['points', 'Pontos'], ['rank', 'Posição']] as const).map(([key, label]) => (
-              <button
-                key={key}
-                onClick={() => setChartTab(key)}
-                className={`px-3 py-1.5 font-semibold transition-colors ${chartTab === key ? 'bg-yellow-500 text-black' : 'text-gray-400 hover:text-gray-200'}`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
+      {/* Comparison panel — pick two participants to compare */}
+      <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+        <div className="px-4 py-3 border-b border-gray-800">
+          <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2"><Icon name="swords" size={15} /> Comparação Direta</h3>
+          <p className="text-xs text-gray-600 mt-0.5">Escolha dois participantes para comparar</p>
         </div>
-
-        {/* Selected participants as removable chips */}
-        <div className="flex flex-wrap gap-1.5 mb-2">
-          {participants.map((p, idx) => {
-            if (!activeIds.has(p.id)) return null
-            const color = LINE_COLORS[idx % LINE_COLORS.length]
-            return (
+        <div className="px-4 py-3 space-y-2">
+          <div className="flex flex-wrap gap-1.5">
+            {participants.filter(p => activeIds.has(p.id)).map((p, i) => (
               <button
                 key={p.id}
                 onClick={() => toggleParticipant(p.id)}
                 className="text-xs px-3 py-1 rounded-full border transition-all font-medium inline-flex items-center gap-1.5"
-                style={{ borderColor: color, color: color, backgroundColor: `${color}20` }}
+                style={{ borderColor: LINE_COLORS[i % LINE_COLORS.length], color: LINE_COLORS[i % LINE_COLORS.length], backgroundColor: `${LINE_COLORS[i % LINE_COLORS.length]}20` }}
                 title={`Remover ${p.name}`}
               >
                 {chipCode(p.name)} <Icon name="x" size={11} />
               </button>
-            )
-          })}
-          {activeIds.size > 0 && (
-            <button onClick={clearChart} className="text-xs px-2.5 py-1 rounded-full border border-gray-400 dark:border-gray-700 text-gray-500 hover:text-red-400 hover:border-red-500 transition-colors">
-              Limpar
-            </button>
-          )}
-        </div>
-
-        {/* Search to add participants */}
-        <div className="relative mb-3">
-          <input
-            type="text"
-            value={partSearch}
-            onChange={e => setPartSearch(e.target.value)}
-            placeholder="Buscar participante para adicionar ao gráfico..."
-            className="w-full bg-gray-800 border border-gray-700 text-gray-200 text-xs rounded-lg px-3 py-2 pl-8 focus:outline-none focus:border-gray-500 placeholder-gray-600"
-          />
-          <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-          </svg>
-          {partSearch.trim() !== '' && (
-            <div className="absolute z-10 mt-1 w-full bg-gray-900 border border-gray-700 rounded-lg shadow-xl overflow-hidden max-h-56 overflow-y-auto">
-              {participants
-                .filter(p => p.name.toLowerCase().includes(partSearch.toLowerCase()) && !activeIds.has(p.id))
-                .slice(0, 8)
-                .map(p => (
-                  <button
-                    key={p.id}
-                    onClick={() => { toggleParticipant(p.id); setPartSearch('') }}
-                    className="w-full text-left px-3 py-2 text-xs text-gray-300 hover:bg-gray-800 transition-colors"
-                  >
-                    {p.name}
-                  </button>
-                ))}
-              {participants.filter(p => p.name.toLowerCase().includes(partSearch.toLowerCase()) && !activeIds.has(p.id)).length === 0 && (
-                <p className="px-3 py-2 text-xs text-gray-600">Nenhum participante encontrado.</p>
+            ))}
+          </div>
+          {activeIds.size < 2 && (
+            <div className="relative">
+              <input
+                type="text"
+                value={partSearch}
+                onChange={e => setPartSearch(e.target.value)}
+                placeholder="Buscar participante..."
+                className="w-full bg-gray-800 border border-gray-700 text-gray-200 text-xs rounded-lg px-3 py-2 pl-8 focus:outline-none focus:border-gray-500 placeholder-gray-600"
+              />
+              <svg className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              {partSearch.trim() !== '' && (
+                <div className="absolute z-10 mt-1 w-full bg-gray-900 border border-gray-700 rounded-lg shadow-xl overflow-hidden max-h-56 overflow-y-auto">
+                  {participants
+                    .filter(p => p.name.toLowerCase().includes(partSearch.toLowerCase()) && !activeIds.has(p.id))
+                    .slice(0, 8)
+                    .map(p => (
+                      <button
+                        key={p.id}
+                        onClick={() => { toggleParticipant(p.id); setPartSearch('') }}
+                        className="w-full text-left px-3 py-2 text-xs text-gray-300 hover:bg-gray-800 transition-colors"
+                      >
+                        {p.name}
+                      </button>
+                    ))}
+                </div>
               )}
             </div>
           )}
         </div>
-
-        {activeIds.size === 0 ? (
-          <div className="flex items-center justify-center h-48 text-gray-500 text-sm">
-            Busque um participante acima para visualizar a evolução
-          </div>
-        ) : chartTab === 'points' ? (
-          <ResponsiveContainer width="100%" height={320}>
-            <LineChart data={chartData} margin={{ top: 5, right: 5, bottom: 5, left: -20 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-gray-700)" />
-              <XAxis dataKey="name" tick={{ fill: 'var(--color-gray-500)', fontSize: 11 }} />
-              <YAxis tick={{ fill: 'var(--color-gray-500)', fontSize: 11 }} />
-              <Tooltip content={<CustomTooltip />} />
-              {participants.map((p, idx) =>
-                activeIds.has(p.id) ? (
-                  <Line
-                    key={p.id}
-                    type="monotone"
-                    dataKey={p.id}
-                    name={p.name}
-                    stroke={LINE_COLORS[idx % LINE_COLORS.length]}
-                    strokeWidth={2}
-                    dot={{ r: 3, fill: LINE_COLORS[idx % LINE_COLORS.length] }}
-                    activeDot={{ r: 5 }}
-                  />
-                ) : null
-              )}
-            </LineChart>
-          </ResponsiveContainer>
-        ) : (
-          <ResponsiveContainer width="100%" height={320}>
-            <LineChart data={rankChartData} margin={{ top: 5, right: 5, bottom: 5, left: -20 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--color-gray-700)" />
-              <XAxis dataKey="name" tick={{ fill: 'var(--color-gray-500)', fontSize: 11 }} />
-              <YAxis
-                reversed
-                domain={[1, participants.length]}
-                tickCount={Math.min(participants.length, 8)}
-                allowDecimals={false}
-                tick={{ fill: 'var(--color-gray-500)', fontSize: 11 }}
-                tickFormatter={(v: number) => `#${v}`}
-              />
-              <Tooltip
-                content={({ active, payload, label }) => {
-                  if (!active || !payload || !payload.length) return null
-                  const snap = rankChartData[rankChartData.findIndex(d => d.name === label)]
-                  const sorted = [...payload].sort((a, b) => (a.value as number) - (b.value as number))
-                  return (
-                    <div className="bg-white dark:bg-gray-800 border border-gray-700 rounded-lg p-3 text-xs max-w-xs shadow-lg">
-                      <p className="text-gray-200 font-semibold mb-2 truncate">{snap?.label ?? label}</p>
-                      {sorted.map((entry: any) => (
-                        <div key={entry.dataKey} className="flex justify-between gap-4 items-center">
-                          <span style={{ color: entry.color }} className="truncate">{entry.name}</span>
-                          <span className="font-bold text-gray-200">#{entry.value}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )
-                }}
-              />
-              {participants.map((p, idx) =>
-                activeIds.has(p.id) ? (
-                  <Line
-                    key={p.id}
-                    type="monotone"
-                    dataKey={p.id}
-                    name={p.name}
-                    stroke={LINE_COLORS[idx % LINE_COLORS.length]}
-                    strokeWidth={2}
-                    dot={{ r: 3, fill: LINE_COLORS[idx % LINE_COLORS.length] }}
-                    activeDot={{ r: 5 }}
-                  />
-                ) : null
-              )}
-            </LineChart>
-          </ResponsiveContainer>
-        )}
-
-        <p className="text-xs text-gray-600 text-center mt-2">
-          {chartTab === 'points' ? 'Cada ponto representa um jogo finalizado' : 'Posição no ranking a cada jogo (1º = topo)'} · Toque para ver os detalhes
-        </p>
-      </div>
-
-      {/* Comparison panel — shown when exactly 2 participants selected */}
       {activeIds.size === 2 && (() => {
         const ids = [...activeIds]
         const s1 = participantStats.find(s => s.id === ids[0])
         const s2 = participantStats.find(s => s.id === ids[1])
         if (!s1 || !s2) return null
-        const p1idx = participants.findIndex(p => p.id === ids[0])
-        const p2idx = participants.findIndex(p => p.id === ids[1])
-        const c1 = LINE_COLORS[p1idx % LINE_COLORS.length]
-        const c2 = LINE_COLORS[p2idx % LINE_COLORS.length]
+        const c1 = LINE_COLORS[0]
+        const c2 = LINE_COLORS[1]
         const leader = s1.totalPoints > s2.totalPoints ? 0 : s2.totalPoints > s1.totalPoints ? 1 : -1
         // Head-to-head rounds won: who scored more points on each finished game
         let w1 = 0, w2 = 0, ties = 0
@@ -423,15 +265,12 @@ export default function EstatisticasPage() {
           else ties++
         }
         return (
-          <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
-            <div className="px-4 py-3 border-b border-gray-800 flex items-center justify-between gap-2 flex-wrap">
-              <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2"><Icon name="swords" size={15} /> Comparação Direta</h3>
-              <span className="text-xs text-gray-500">
-                Rodadas vencidas: <span style={{ color: c1 }} className="font-bold">{w1}</span>
-                <span className="mx-1">×</span>
-                <span style={{ color: c2 }} className="font-bold">{w2}</span>
-                <span className="text-gray-600 ml-1.5">({ties} empates)</span>
-              </span>
+          <div className="border-t border-gray-800">
+            <div className="px-4 py-2 text-center text-xs text-gray-500 border-b border-gray-800">
+              Rodadas vencidas: <span style={{ color: c1 }} className="font-bold">{w1}</span>
+              <span className="mx-1">×</span>
+              <span style={{ color: c2 }} className="font-bold">{w2}</span>
+              <span className="text-gray-600 ml-1.5">({ties} empates)</span>
             </div>
             <div className="grid grid-cols-2 divide-x divide-gray-800">
               {[{ s: s1, c: c1, win: leader === 0 }, { s: s2, c: c2, win: leader === 1 }].map(({ s, c, win }) => (
@@ -452,62 +291,7 @@ export default function EstatisticasPage() {
           </div>
         )
       })()}
-
-      {/* Classification bonus chart — group order + qualified-team points only */}
-      {classificationStats && classificationStats.some(c => c.total > 0) && (() => {
-        // Order by the bolão's overall leaderboard ranking (participants comes sorted by it)
-        const rankOrder = new Map(participants.map((p, i) => [p.id, i]))
-        const rankedAll = classificationStats
-          .filter(c => c.total > 0)
-          .sort((a, b) => (rankOrder.get(a.id) ?? 999) - (rankOrder.get(b.id) ?? 999))
-        const ranked = showAllClass ? rankedAll : rankedAll.slice(0, 15)
-        const chartHeight = Math.max(220, ranked.length * 22 + 40)
-        const ClassTooltip = ({ active, payload }: any) => {
-          if (!active || !payload || !payload.length) return null
-          const d = payload[0].payload as ClassificationStat
-          return (
-            <div className="bg-white dark:bg-gray-800 border border-gray-700 rounded-lg p-3 text-xs shadow-lg">
-              <p className="text-gray-200 font-semibold mb-2 truncate">{d.name}</p>
-              <div className="flex justify-between gap-4"><span className="text-sky-400">Ordem dos grupos</span><span className="font-bold text-gray-200">{d.groupOrderPoints}</span></div>
-              <div className="flex justify-between gap-4"><span className="text-green-500">Classificados 16-avos</span><span className="font-bold text-gray-200">{d.r32Points}</span></div>
-              {d.knockoutPoints > 0 && <div className="flex justify-between gap-4"><span className="text-violet-400">Mata-mata</span><span className="font-bold text-gray-200">{d.knockoutPoints}</span></div>}
-              <div className="flex justify-between gap-4 border-t border-gray-700 mt-1 pt-1"><span className="text-yellow-400">Total</span><span className="font-bold text-yellow-400">{d.total}</span></div>
-            </div>
-          )
-        }
-        return (
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-4">
-            <div className="flex items-start justify-between gap-2 mb-1">
-              <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Pontuação de Classificação</h3>
-              {rankedAll.length > 15 && (
-                <button
-                  onClick={() => setShowAllClass(v => !v)}
-                  className="shrink-0 text-xs px-2.5 py-1 rounded-full border border-gray-700 text-gray-400 hover:text-gray-200 hover:border-gray-500 transition-colors"
-                >
-                  {showAllClass ? 'Ver top 15' : `Ver todos (${rankedAll.length})`}
-                </button>
-              )}
-            </div>
-            <p className="text-xs text-gray-600 mb-3">Ordem dos grupos (+2/grupo) + seleções classificadas para as 16-avos (+3 cada){!showAllClass && rankedAll.length > 15 ? ' · top 15 da classificação geral' : ''}</p>
-            <div className="flex items-center gap-4 mb-3 text-xs">
-              <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm inline-block" style={{ background: '#38bdf8' }} /> Ordem dos grupos</span>
-              <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm inline-block" style={{ background: '#00bf63' }} /> Classificados</span>
-              <span className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm inline-block" style={{ background: '#a78bfa' }} /> Mata-mata</span>
-            </div>
-            <ResponsiveContainer width="100%" height={chartHeight}>
-              <BarChart data={ranked} layout="vertical" margin={{ top: 0, right: 24, bottom: 0, left: 0 }} barCategoryGap={3}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-gray-700)" horizontal={false} />
-                <XAxis type="number" tick={{ fill: 'var(--color-gray-500)', fontSize: 11 }} />
-                <YAxis type="category" dataKey="name" width={110} tick={{ fill: 'var(--color-gray-400)', fontSize: 10 }} interval={0} />
-                <Tooltip content={<ClassTooltip />} cursor={{ fill: 'rgba(255,255,255,0.04)' }} />
-                <Bar dataKey="groupOrderPoints" stackId="a" fill="#38bdf8" />
-                <Bar dataKey="r32Points" stackId="a" fill="#00bf63" />
-                <Bar dataKey="knockoutPoints" stackId="a" fill="#a78bfa" radius={[0, 3, 3, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        )
-      })()}
+      </div>
 
       {/* Participant Stats */}
       <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
