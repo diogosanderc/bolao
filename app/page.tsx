@@ -867,18 +867,26 @@ export default function LeaderboardPage() {
                 const t2Goals = m.goals.filter(g => g.teamId === m.team2.id)
                 return (
                   <div className="mt-2 space-y-0.5">
-                    {[{ team: m.team1, goals: t1Goals }, { team: m.team2, goals: t2Goals }].map(({ team, goals }) =>
-                      goals.length > 0 ? (
+                    {[{ team: m.team1, goals: t1Goals }, { team: m.team2, goals: t2Goals }].map(({ team, goals }) => {
+                      if (goals.length === 0) return null
+                      // Group goals by player: "Neymar 34', 67'" instead of repeating the name
+                      const byPlayer = new Map<string, string[]>()
+                      for (const g of goals) {
+                        const key = g.playerName || '?'
+                        if (!byPlayer.has(key)) byPlayer.set(key, [])
+                        if (g.minute) byPlayer.get(key)!.push(`${g.minute}'`)
+                      }
+                      return (
                         <div key={team.id} className="flex items-center gap-1.5 flex-wrap">
                           <Flag teamId={team.id} size={14} />
-                          {goals.map((g, i) => (
-                            <span key={i} className="text-xs text-red-800 dark:text-red-200 inline-flex items-center gap-0.5">
-                              <span className="shrink-0 leading-none">⚽</span>{g.minute && <span className="text-red-700 dark:text-red-400"> {g.minute}'</span>} {g.playerName}
+                          {[...byPlayer.entries()].map(([player, minutes]) => (
+                            <span key={player} className="text-xs text-red-800 dark:text-red-200 inline-flex items-center gap-0.5">
+                              <span className="shrink-0 leading-none">⚽</span> {player}{minutes.length > 0 && <span className="text-red-700 dark:text-red-400"> {minutes.join(', ')}</span>}
                             </span>
                           ))}
                         </div>
-                      ) : null
-                    )}
+                      )
+                    })}
                   </div>
                 )
               })()}
