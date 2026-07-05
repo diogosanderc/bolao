@@ -197,7 +197,7 @@ export default function SimuladorPage() {
                 onClick={() => handleAdvance(matchId, teamId)}
                 className={`flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full border transition-colors ${
                   pick === teamId
-                    ? 'bg-yellow-500 text-black border-yellow-500 font-bold'
+                    ? 'bg-green-700 text-white border-green-600 font-bold'
                     : 'border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-200'
                 }`}
               >
@@ -301,9 +301,9 @@ export default function SimuladorPage() {
               <button
                 key={p.key}
                 onClick={() => setPhase(p.key)}
-                className={`text-xs px-3 py-1 rounded-full border transition-colors ${
+                className={`text-xs px-3.5 py-1.5 rounded-full border transition-colors ${
                   phase === p.key
-                    ? 'bg-yellow-500 text-black border-yellow-500 font-bold'
+                    ? 'bg-green-700 text-white border-green-600 font-bold'
                     : 'border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-200'
                 }`}
               >
@@ -320,7 +320,7 @@ export default function SimuladorPage() {
                   <button
                     key={g.id}
                     onClick={() => setOpenGroup(g.id)}
-                    className={`text-xs px-2.5 py-1 rounded border transition-colors ${
+                    className={`text-xs px-3 py-1.5 rounded border transition-colors ${
                       openGroup === g.id
                         ? 'bg-green-700 text-white border-green-600 font-bold'
                         : 'border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-200'

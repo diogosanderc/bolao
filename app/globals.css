@@ -2,11 +2,56 @@
 
 @variant dark (&:where(.dark, .dark *));
 
-/* Dark mode only — the app always renders dark (html has the `dark` class). */
 html {
   background-color: #030712;
   color: #f9fafb;
   font-size: 13px;
+}
+
+/* ── Light theme ─────────────────────────────────────────────────────────────
+   The app was designed dark-first with hardcoded gray-* utilities.
+   Instead of editing hundreds of class sites, the light theme remaps the
+   gray scale (inverted, hand-tuned for AA contrast on light surfaces) and
+   darkens the accent tones that would be unreadable on white. */
+html.light {
+  background-color: #f4f4f5;
+  color: #18181b;
+
+  /* Inverted gray scale */
+  --color-gray-950: #f4f4f5;  /* page background */
+  --color-gray-900: #ffffff;  /* cards */
+  --color-gray-800: #ececee;  /* inputs, hover surfaces, strong borders */
+  --color-gray-700: #d9d9de;  /* borders */
+  --color-gray-600: #8e8e99;  /* faintest text */
+  --color-gray-500: #6d6d78;  /* muted text (~4.9:1 on white) */
+  --color-gray-400: #55555e;  /* secondary text (~7:1) */
+  --color-gray-300: #3d3d44;  /* body text */
+  --color-gray-200: #232328;  /* strong text */
+  --color-gray-100: #17171b;
+  --color-gray-50:  #101013;
+
+  /* Accents tuned for light surfaces (originals are neon-on-dark) */
+  --color-yellow-400: #a16207;
+  --color-yellow-300: #a16207;
+  --color-green-400: #15803d;
+  --color-green-500: #16803c;
+  --color-red-400: #dc2626;
+  --color-red-300: #b91c1c;
+  --color-orange-400: #c2410c;
+  --color-amber-400: #b45309;
+  --color-blue-400: #2563eb;
+  --color-blue-300: #1d4ed8;
+  --color-sky-400: #0369a1;
+  --color-violet-400: #7c3aed;
+  --color-purple-400: #7e22ce;
+}
+
+/* Brand-green icons/text (#00bf63) are too bright on white */
+html.light [class*="text-[#00bf63]"] { color: #00915b; }
+
+/* Scoreboard digits keep the dark stadium-panel look on both themes */
+html.light .scoreboard-digit {
+  background-image: linear-gradient(to bottom, #3f3f46, #18181b);
 }
 
 @keyframes slide-up {

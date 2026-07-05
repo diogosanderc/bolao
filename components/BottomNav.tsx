@@ -36,6 +36,43 @@ function FontSizeToggle() {
   )
 }
 
+function ThemeToggle() {
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark')
+
+  useEffect(() => {
+    setTheme(document.documentElement.classList.contains('light') ? 'light' : 'dark')
+  }, [])
+
+  function toggle() {
+    const next = theme === 'dark' ? 'light' : 'dark'
+    setTheme(next)
+    document.documentElement.classList.toggle('light', next === 'light')
+    document.documentElement.classList.toggle('dark', next === 'dark')
+    localStorage.setItem('bolao_theme', next)
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', next === 'light' ? '#f4f4f5' : '#00bf63')
+  }
+
+  return (
+    <button
+      onClick={toggle}
+      className="flex items-center gap-4 w-full text-left px-6 py-3.5 text-gray-200 hover:bg-gray-800/60 transition-colors"
+    >
+      <span className="w-6 flex justify-center text-gray-400">
+        {theme === 'dark' ? (
+          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+          </svg>
+        ) : (
+          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+          </svg>
+        )}
+      </span>
+      <span className="font-semibold">{theme === 'dark' ? 'Modo claro' : 'Modo escuro'}</span>
+    </button>
+  )
+}
+
 type IconProps = { className?: string }
 
 function TrophyIcon({ className }: IconProps) {
@@ -146,6 +183,7 @@ export function BottomNav() {
           </Link>
         ))}
         <div className="border-t border-gray-800/60">
+          <ThemeToggle />
           <FontSizeToggle />
         </div>
       </div>

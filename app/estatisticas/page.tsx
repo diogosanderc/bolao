@@ -239,7 +239,7 @@ export default function EstatisticasPage() {
               <button
                 key={t}
                 onClick={() => loadScenario(scenarioTeam === t ? '' : t)}
-                className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full border font-semibold transition-colors ${
+                className={`inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border font-semibold transition-colors ${
                   scenarioTeam === t
                     ? 'bg-yellow-500 text-black border-yellow-500'
                     : 'border-gray-700 text-gray-300 hover:border-gray-500'
@@ -306,7 +306,7 @@ export default function EstatisticasPage() {
               <button
                 key={p.id}
                 onClick={() => toggleParticipant(p.id)}
-                className="text-xs px-3 py-1 rounded-full border transition-all font-medium inline-flex items-center gap-1.5"
+                className="text-xs px-3.5 py-1.5 rounded-full border transition-all font-medium inline-flex items-center gap-1.5"
                 style={{ borderColor: LINE_COLORS[i % LINE_COLORS.length], color: LINE_COLORS[i % LINE_COLORS.length], backgroundColor: `${LINE_COLORS[i % LINE_COLORS.length]}20` }}
                 title={`Remover ${p.name}`}
               >
@@ -440,7 +440,7 @@ export default function EstatisticasPage() {
               {(statsSearch || showAllStats ? sortedStats : sortedStats.slice(0, 15)).map((s, idx) => {
                 const pct = matchesPlayed > 0 ? Math.round((s.correctResults / matchesPlayed) * 100) : 0
                 return (
-                  <tr key={s.id} className={idx === 0 && !statsSearch ? 'bg-yellow-50 dark:bg-yellow-950/30' : ''}>
+                  <tr key={s.id} className={idx === 0 && !statsSearch ? 'bg-yellow-50 dark:bg-yellow-950/30' : idx % 2 === 1 ? 'bg-gray-950/50' : ''}>
                     <td className="pl-2 pr-1 py-3 text-gray-500 text-xs">{idx + 1}</td>
                     <td className="px-1 py-3 font-semibold text-gray-200 truncate">{s.name}</td>
                     <td className="px-1 py-3 text-right whitespace-nowrap">

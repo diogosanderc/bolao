@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import { BottomNav } from '@/components/BottomNav'
 import { PullToRefresh } from '@/components/PullToRefresh'
@@ -21,13 +21,19 @@ export const metadata: Metadata = {
   },
 }
 
+export const viewport: Viewport = {
+  viewportFit: 'cover',
+}
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR" className="dark">
+    <html lang="pt-BR" className="dark" suppressHydrationWarning>
       <head>
         <link rel="icon" href="/icon.svg" type="image/svg+xml" />
         <link rel="apple-touch-icon" href="/icon-192.png" />
         <meta name="theme-color" content="#00bf63" />
+        {/* Apply saved theme before paint to avoid a flash of the wrong theme */}
+        <script dangerouslySetInnerHTML={{ __html: `try{if(localStorage.getItem('bolao_theme')==='light'){document.documentElement.classList.remove('dark');document.documentElement.classList.add('light')}}catch(e){}` }} />
       </head>
       <body className={`min-h-screen antialiased ${font.className} ${googleSansVar.variable}`}>
         <script dangerouslySetInnerHTML={{ __html: `if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js')}` }} />

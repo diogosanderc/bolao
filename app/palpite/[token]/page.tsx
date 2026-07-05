@@ -142,7 +142,7 @@ function MatchCard({
 
         {!locked && (dirty || adminMode) && (
           <button onClick={save} disabled={saving || s1 === '' || s2 === '' || (needsAdvancing && !adv)}
-            className="text-xs bg-yellow-600 hover:bg-yellow-500 disabled:bg-gray-800 disabled:text-gray-600 text-[white] rounded-lg px-3 py-1.5 font-semibold transition-colors">
+            className="text-xs bg-green-700 hover:bg-green-600 disabled:bg-gray-800 disabled:text-gray-600 text-white rounded-lg px-3 py-1.5 font-semibold transition-colors">
             {adminMode && prediction !== undefined ? 'Atualizar' : 'Salvar'}
           </button>
         )}
@@ -227,7 +227,20 @@ export default function PalpitePage() {
     }
   }, [token])
 
-  if (loading) return <div className="text-center py-20 text-gray-400 animate-pulse">Carregando...</div>
+  if (loading) return (
+    <div className="space-y-4">
+      <div className="skeleton h-7 w-48" />
+      <div className="flex gap-2">{Array.from({ length: 6 }).map((_, i) => <div key={i} className="skeleton h-9 w-11 rounded-lg" />)}</div>
+      {Array.from({ length: 3 }).map((_, i) => (
+        <div key={i} className="bg-gray-900 border border-gray-800 rounded-xl p-4 space-y-3">
+          <div className="skeleton h-4 w-32 mx-auto" />
+          <div className="flex items-center justify-center gap-3">
+            <div className="skeleton h-6 w-24" /><div className="skeleton h-10 w-10 rounded-lg" /><div className="skeleton h-10 w-10 rounded-lg" /><div className="skeleton h-6 w-24" />
+          </div>
+        </div>
+      ))}
+    </div>
+  )
   if (error) return <div className="text-center py-20"><p className="text-red-400 text-lg">{error}</p></div>
   if (!data) return null
 

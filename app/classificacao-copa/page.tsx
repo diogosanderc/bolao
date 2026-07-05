@@ -348,7 +348,7 @@ function KnockoutSection({ phases }: { phases: KnockoutPhase[] }) {
           <button
             key={p.phase}
             onClick={() => { setActivePhase(p.phase); setBracketView(false) }}
-            className={`text-xs px-3 py-1 rounded-full border transition-colors ${
+            className={`text-xs px-3.5 py-1.5 rounded-full border transition-colors ${
               activePhase === p.phase && !bracketView
                 ? 'bg-green-700 dark:bg-yellow-500 text-[white] dark:text-black border-green-700 dark:border-yellow-500 font-bold'
                 : 'border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-200'
@@ -360,7 +360,7 @@ function KnockoutSection({ phases }: { phases: KnockoutPhase[] }) {
         {qfResolved && (
           <button
             onClick={() => setBracketView(v => !v)}
-            className={`ml-auto text-xs px-3 py-1 rounded-full border transition-colors flex items-center gap-1 ${
+            className={`ml-auto text-xs px-3.5 py-1.5 rounded-full border transition-colors flex items-center gap-1 ${
               bracketView
                 ? 'bg-purple-700 text-white border-purple-700 font-bold'
                 : 'border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-200'

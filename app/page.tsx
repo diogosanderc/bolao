@@ -798,7 +798,7 @@ export default function LeaderboardPage() {
         </div>
       )}
 
-      <div className="flex items-center justify-between">
+      <div className="sticky top-0 z-30 -mx-4 px-4 py-1.5 -my-1.5 bg-gray-950/85 backdrop-blur-md flex items-center justify-between">
         <h2 className="text-2xl font-bold text-gray-200 dark:text-yellow-400">
           BOLÃO DA COPA 2026
         </h2>
@@ -1263,7 +1263,7 @@ export default function LeaderboardPage() {
                     tier === 2 ? 'bg-gray-800/30 hover:bg-gray-800/60' :
                     tier === 3 ? 'bg-orange-50 hover:bg-orange-100 dark:bg-orange-950/30 dark:hover:bg-orange-950/50' :
                     (rank >= 4 && rank <= 7) ? 'bg-green-50 hover:bg-green-100 dark:bg-green-950/40 dark:hover:bg-green-950/60' :
-                    'hover:bg-gray-900/50'
+                    (idx % 2 === 1 ? 'bg-gray-900/40 hover:bg-gray-900/70' : 'hover:bg-gray-900/50')
                   } ${rank === 1 ? 'shadow-[inset_3px_0_0_0_#facc15]' : ''} ${isMe ? 'shadow-[inset_3px_0_0_0_#00bf63] ring-1 ring-inset ring-[#00bf63]/40' : ''} ${flash === 'up' ? 'animate-flash-up' : flash === 'down' ? 'animate-flash-down' : ''}`}
                 >
                   <td className="pl-2 pr-1 py-3 text-center font-bold">

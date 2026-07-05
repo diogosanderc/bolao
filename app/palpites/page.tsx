@@ -173,7 +173,14 @@ export default function PalpitesDeTodosPage() {
   }
 
   if (loading) {
-    return <div className="text-center py-20 text-gray-400">Carregando palpites...</div>
+    return (
+      <div className="space-y-4">
+        <div className="skeleton h-7 w-56" />
+        <div className="flex gap-2 flex-wrap">{Array.from({ length: 7 }).map((_, i) => <div key={i} className="skeleton h-8 w-16 rounded-full" />)}</div>
+        <div className="skeleton h-10 w-full rounded-xl" />
+        {Array.from({ length: 6 }).map((_, i) => <div key={i} className="skeleton h-12 w-full rounded-xl" />)}
+      </div>
+    )
   }
 
   const totalParticipants = data?.participants.length ?? 0
