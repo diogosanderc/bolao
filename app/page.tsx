@@ -80,7 +80,6 @@ export default function LeaderboardPage() {
   const [imagePicker, setImagePicker] = useState(false)
   const [reloading, setReloading] = useState(false)
   const [scheduleLoaded, setScheduleLoaded] = useState(false)
-  const [pullDist, setPullDist] = useState(0)
   const [now, setNow] = useState(0)
   const [rowsIn, setRowsIn] = useState(false)
   const rowsStartedRef = useRef(false)
@@ -163,17 +162,6 @@ export default function LeaderboardPage() {
   // Light haptic feedback when supported (no-op on desktop/iOS Safari)
   function haptic(ms = 10) {
     try { navigator.vibrate?.(ms) } catch {}
-  }
-
-  // Lightweight refresh (pull-to-refresh, polling): refetch data without reloading
-  async function doSoftRefresh() {
-    if (reloading) return
-    setReloading(true)
-    haptic(8)
-    await fetch('/api/sync/live', { method: 'POST' }).catch(() => {})
-    await Promise.all([fetchLeaderboard(), fetchSchedule()])
-    setReloading(false)
-    showToast('✓ Atualizado')
   }
 
   // Header refresh button: full page reload so every section comes back fresh
@@ -470,43 +458,6 @@ export default function LeaderboardPage() {
     setRoundDismissed(matchId)
   }
 
-  // Pull-to-refresh (mobile): pull down from the top to refresh
-  useEffect(() => {
-    let startY = 0
-    let pulling = false
-    const THRESHOLD = 70
-    const onStart = (e: TouchEvent) => {
-      if (overlayOpenRef.current) return // don't pull-to-refresh behind a modal
-      if (window.scrollY <= 0 && !reloading) { startY = e.touches[0].clientY; pulling = true }
-    }
-    const onMove = (e: TouchEvent) => {
-      if (!pulling || overlayOpenRef.current) return
-      const dy = e.touches[0].clientY - startY
-      if (dy > 0 && window.scrollY <= 0) {
-        setPullDist(Math.min(dy * 0.5, 90))
-      } else {
-        pulling = false
-        setPullDist(0)
-      }
-    }
-    const onEnd = () => {
-      if (!pulling) return
-      pulling = false
-      setPullDist(d => {
-        if (d >= THRESHOLD * 0.5) doSoftRefresh()
-        return 0
-      })
-    }
-    window.addEventListener('touchstart', onStart, { passive: true })
-    window.addEventListener('touchmove', onMove, { passive: true })
-    window.addEventListener('touchend', onEnd, { passive: true })
-    return () => {
-      window.removeEventListener('touchstart', onStart)
-      window.removeEventListener('touchmove', onMove)
-      window.removeEventListener('touchend', onEnd)
-    }
-  }, [reloading])
-
   const [notifState, setNotifState] = useState<'default' | 'subscribed' | 'denied' | 'unsupported'>('default')
   const [notifToast, setNotifToast] = useState<string | null>(null)
 
@@ -784,14 +735,14 @@ export default function LeaderboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* Pull-to-refresh indicator */}
-      {(pullDist > 0 || reloading) && (
+      {/* Refresh indicator (header button) */}
+      {reloading && (
         <div
           className="fixed left-0 right-0 top-0 z-40 flex justify-center pointer-events-none"
-          style={{ transform: `translateY(${reloading ? 12 : Math.min(pullDist, 80) - 8}px)`, transition: pullDist === 0 ? 'transform 0.2s' : 'none' }}
+          style={{ transform: 'translateY(12px)' }}
         >
           <span className="flex items-center justify-center w-9 h-9 rounded-full bg-gray-800/90 border border-gray-700 shadow-lg">
-            <svg className={`w-5 h-5 text-gray-200 ${reloading ? 'animate-spin' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: reloading ? undefined : `rotate(${pullDist * 3}deg)` }}>
+            <svg className="w-5 h-5 text-gray-200 animate-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M23 4v6h-6" /><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
             </svg>
           </span>

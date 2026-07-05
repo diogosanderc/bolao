@@ -1,14 +1,20 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { usePathname } from 'next/navigation'
 
 const THRESHOLD = 65
 
 export function PullToRefresh() {
+  const pathname = usePathname()
   const [pullDist, setPullDist] = useState(0)
   const [refreshing, setRefreshing] = useState(false)
 
+  // Home page refreshes only via the header refresh button
+  const disabled = pathname === '/'
+
   useEffect(() => {
+    if (disabled) return
     let startY = 0
     let pulling = false
 
@@ -51,7 +57,7 @@ export function PullToRefresh() {
       window.removeEventListener('touchmove', onMove)
       window.removeEventListener('touchend', onEnd)
     }
-  }, [refreshing])
+  }, [refreshing, disabled])
 
   if (pullDist === 0 && !refreshing) return null
 
