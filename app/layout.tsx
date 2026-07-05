@@ -33,7 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="apple-touch-icon" href="/icon-192.png" />
         <meta name="theme-color" content="#00bf63" />
         {/* Apply saved theme before paint to avoid a flash of the wrong theme */}
-        <script dangerouslySetInnerHTML={{ __html: `try{if(localStorage.getItem('bolao_theme')==='light'){document.documentElement.classList.remove('dark');document.documentElement.classList.add('light');var m=document.querySelector('meta[name=\"theme-color\"]');if(m)m.setAttribute('content','#f4f4f5')}}catch(e){}` }} />
+        <script dangerouslySetInnerHTML={{ __html: `try{var t=localStorage.getItem('bolao_theme');var light=t==='light'||(t!=='dark'&&window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)').matches);if(light){document.documentElement.classList.remove('dark');document.documentElement.classList.add('light');var m=document.querySelector('meta[name=\"theme-color\"]');if(m)m.setAttribute('content','#f4f4f5')}}catch(e){}` }} />
       </head>
       <body className={`min-h-screen antialiased ${font.className} ${googleSansVar.variable}`}>
         <script dangerouslySetInnerHTML={{ __html: `if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js')}` }} />

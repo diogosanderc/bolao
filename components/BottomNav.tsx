@@ -36,29 +36,53 @@ function FontSizeToggle() {
   )
 }
 
+type ThemeMode = 'auto' | 'light' | 'dark'
+
+function applyTheme(mode: ThemeMode) {
+  const light = mode === 'light' || (mode === 'auto' && window.matchMedia('(prefers-color-scheme: light)').matches)
+  document.documentElement.classList.toggle('light', light)
+  document.documentElement.classList.toggle('dark', !light)
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', light ? '#f4f4f5' : '#00bf63')
+}
+
 function ThemeToggle() {
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark')
+  const [mode, setMode] = useState<ThemeMode>('auto')
 
   useEffect(() => {
-    setTheme(document.documentElement.classList.contains('light') ? 'light' : 'dark')
+    const saved = localStorage.getItem('bolao_theme')
+    setMode(saved === 'light' || saved === 'dark' ? saved : 'auto')
   }, [])
 
-  function toggle() {
-    const next = theme === 'dark' ? 'light' : 'dark'
-    setTheme(next)
-    document.documentElement.classList.toggle('light', next === 'light')
-    document.documentElement.classList.toggle('dark', next === 'dark')
-    localStorage.setItem('bolao_theme', next)
-    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', next === 'light' ? '#f4f4f5' : '#00bf63')
+  // While in auto mode, follow live changes of the system theme
+  useEffect(() => {
+    if (mode !== 'auto') return
+    const mq = window.matchMedia('(prefers-color-scheme: light)')
+    const onChange = () => applyTheme('auto')
+    mq.addEventListener?.('change', onChange)
+    return () => mq.removeEventListener?.('change', onChange)
+  }, [mode])
+
+  function cycle() {
+    const next: ThemeMode = mode === 'auto' ? 'light' : mode === 'light' ? 'dark' : 'auto'
+    setMode(next)
+    if (next === 'auto') localStorage.removeItem('bolao_theme')
+    else localStorage.setItem('bolao_theme', next)
+    applyTheme(next)
   }
+
+  const label = mode === 'auto' ? 'Tema: automático (sistema)' : mode === 'light' ? 'Tema: claro' : 'Tema: escuro'
 
   return (
     <button
-      onClick={toggle}
+      onClick={cycle}
       className="flex items-center gap-4 w-full text-left px-6 py-3.5 text-gray-200 hover:bg-gray-800/60 transition-colors"
     >
       <span className="w-6 flex justify-center text-gray-400">
-        {theme === 'dark' ? (
+        {mode === 'auto' ? (
+          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="9" /><path d="M12 3a9 9 0 0 0 0 18z" fill="currentColor" stroke="none" />
+          </svg>
+        ) : mode === 'light' ? (
           <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
           </svg>
@@ -68,7 +92,7 @@ function ThemeToggle() {
           </svg>
         )}
       </span>
-      <span className="font-semibold">{theme === 'dark' ? 'Modo claro' : 'Modo escuro'}</span>
+      <span className="font-semibold">{label}</span>
     </button>
   )
 }
