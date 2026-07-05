@@ -760,7 +760,7 @@ export default function LeaderboardPage() {
                 onClick={toggleNotifications}
                 title={notifState === 'subscribed' ? 'Notificações ativas — clique para desativar' : notifState === 'denied' ? 'Notificações bloqueadas no browser' : 'Ativar notificações de gol e resultado'}
                 className={`flex items-center justify-center w-10 h-10 rounded-full transition-colors ${
-                  notifState === 'subscribed' ? 'text-yellow-400 hover:bg-gray-800' :
+                  notifState === 'subscribed' ? 'text-[#00bf63] hover:bg-gray-800' :
                   notifState === 'denied' ? 'text-gray-600 cursor-not-allowed' :
                   'text-gray-500 hover:text-gray-300 hover:bg-gray-800'
                 }`}

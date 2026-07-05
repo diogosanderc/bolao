@@ -384,9 +384,9 @@ function KnockoutSection({ phases }: { phases: KnockoutPhase[] }) {
         </div>
       ) : current && (
         <div className="rounded-xl border border-gray-800 bg-gray-950 overflow-hidden animate-fade-in">
-          <div className="bg-yellow-600 px-4 py-2 flex items-center gap-2">
+          <div className="bg-gray-800 border-b border-gray-700/60 px-4 py-2 flex items-center gap-2 text-gray-200">
             {PHASE_ICON[current.phase] && <Icon name={PHASE_ICON[current.phase]} size={16} />}
-            <h3 className="font-bold text-white text-sm tracking-wide uppercase">{current.label}</h3>
+            <h3 className="font-bold text-sm tracking-wide uppercase">{current.label}</h3>
           </div>
           <div className="divide-y divide-gray-800/50">
             {current.matches.map((m, i) => (
@@ -435,8 +435,8 @@ function ThirdsSection({ groups }: { groups: GroupData[] }) {
         Os 8 melhores 3ºs lugares classificam para as 16 avos. Critérios: pontos, saldo de gols, gols marcados.
       </p>
       <div className="rounded-xl border border-gray-800 bg-gray-950 overflow-hidden">
-        <div className="bg-amber-700 px-4 py-2">
-          <h3 className="font-bold text-white text-sm tracking-wide uppercase">Classificação — Melhores 3º Lugares</h3>
+        <div className="bg-gray-800 border-b border-gray-700/60 px-4 py-2">
+          <h3 className="font-bold text-gray-200 text-sm tracking-wide uppercase">Classificação — Melhores 3º Lugares</h3>
         </div>
         <table className="w-full text-xs">
           <thead>
@@ -550,22 +550,36 @@ export default function ClassificacaoCopaPage() {
         )}
       </div>
 
-      {/* Group stage progress bar */}
+      {/* Tournament progress: group stage + every knockout phase */}
       {!loading && groups.length > 0 && (() => {
-        const total = groups.reduce((s, g) => s + g.matches.length, 0)
-        const played = groups.reduce((s, g) => s + g.matches.filter(m => m.status === 'played').length, 0)
-        if (total === 0) return null
-        const pct = Math.round((played / total) * 100)
-        const done = played === total
+        const gTotal = groups.reduce((s, g) => s + g.matches.length, 0)
+        const gPlayed = groups.reduce((s, g) => s + g.matches.filter(m => m.status === 'played').length, 0)
+        if (gTotal === 0) return null
+        const rows: { label: string; played: number; total: number }[] = [
+          { label: 'Fase de grupos', played: gPlayed, total: gTotal },
+          ...knockout.map(ph => ({
+            label: ph.label,
+            played: ph.matches.filter(m => m.status === 'played').length,
+            total: ph.matches.length,
+          })).filter(r => r.total > 0),
+        ]
         return (
-          <div className="rounded-lg bg-gray-900 border border-gray-800 px-4 py-2.5">
-            <div className="flex items-center justify-between text-xs mb-1.5">
-              <span className="text-gray-400 font-semibold uppercase tracking-wide">Fase de grupos</span>
-              <span className="text-gray-300 font-score font-bold">{played}/{total} jogos · {pct}%</span>
-            </div>
-            <div className="h-2 rounded-full bg-gray-800 overflow-hidden">
-              <div className={`h-full rounded-full transition-all duration-700 ${done ? 'bg-yellow-500' : 'bg-green-500'}`} style={{ width: `${pct}%` }} />
-            </div>
+          <div className="rounded-lg bg-gray-900 border border-gray-800 px-4 py-2.5 space-y-2">
+            {rows.map(r => {
+              const pct = Math.round((r.played / r.total) * 100)
+              const started = r.played > 0
+              return (
+                <div key={r.label}>
+                  <div className="flex items-center justify-between text-xs mb-1">
+                    <span className={`font-semibold uppercase tracking-wide ${started ? 'text-gray-400' : 'text-gray-600'}`}>{r.label}</span>
+                    <span className={`font-score font-bold ${started ? 'text-gray-300' : 'text-gray-600'}`}>{r.played}/{r.total} jogos · {pct}%</span>
+                  </div>
+                  <div className="h-1.5 rounded-full bg-gray-800 overflow-hidden">
+                    <div className="h-full rounded-full bg-green-500 transition-all duration-700" style={{ width: `${pct}%` }} />
+                  </div>
+                </div>
+              )
+            })}
           </div>
         )
       })()}
