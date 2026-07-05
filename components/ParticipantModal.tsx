@@ -402,14 +402,14 @@ export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClos
                   <span className="text-lg font-bold">{data.summary.rank}</span>
                 </span>
               )}
-              <h2 className="text-lg font-bold text-white truncate">{name}</h2>
+              <h2 className="text-lg font-bold text-gray-100 truncate">{name}</h2>
             </div>
             <div className="flex items-center gap-2 shrink-0">
               {data && (
                 <button
                   onClick={shareCard}
                   disabled={sharingCard}
-                  className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white transition-colors disabled:opacity-50"
+                  className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-gray-100 transition-colors disabled:opacity-50"
                   title="Compartilhar card"
                   aria-label="Compartilhar"
                 >
@@ -429,7 +429,7 @@ export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClos
               )}
               <button
                 onClick={closeSheet}
-                className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white text-xl font-bold transition-colors"
+                className="w-9 h-9 flex items-center justify-center rounded-full bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-gray-100 text-xl font-bold transition-colors"
                 aria-label="Fechar"
               >
                 ×
@@ -709,7 +709,7 @@ export function ParticipantModal({ participantId, name, isMe, onToggleMe, onClos
           </div>
           <button
             onClick={onClose}
-            className="w-full py-2.5 rounded-xl bg-gray-800 hover:bg-gray-700 text-white font-semibold text-sm transition-colors"
+            className="w-full py-2.5 rounded-xl bg-gray-800 hover:bg-gray-700 text-gray-100 font-semibold text-sm transition-colors"
           >
             Fechar
           </button>

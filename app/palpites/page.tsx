@@ -217,20 +217,20 @@ export default function PalpitesDeTodosPage() {
           value={matchSearch}
           onChange={e => setMatchSearch(e.target.value)}
           placeholder="Filtrar por time ou grupo..."
-          className="flex-1 bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-green-500 placeholder:text-gray-600"
+          className="flex-1 bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 focus:outline-none focus:border-green-500 placeholder:text-gray-600"
         />
         <input
           type="text"
           value={nameFilter}
           onChange={e => setNameFilter(e.target.value)}
           placeholder="Filtrar por participante..."
-          className="flex-1 bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-green-500 placeholder:text-gray-600"
+          className="flex-1 bg-gray-900 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 focus:outline-none focus:border-green-500 placeholder:text-gray-600"
         />
         <div className="flex gap-2 shrink-0">
-          <button onClick={expandAll} className="text-xs text-gray-400 hover:text-white px-2 py-2 border border-gray-800 rounded-lg whitespace-nowrap">
+          <button onClick={expandAll} className="text-xs text-gray-400 hover:text-gray-100 px-2 py-2 border border-gray-800 rounded-lg whitespace-nowrap">
             Expandir tudo
           </button>
-          <button onClick={collapseAll} className="text-xs text-gray-400 hover:text-white px-2 py-2 border border-gray-800 rounded-lg whitespace-nowrap">
+          <button onClick={collapseAll} className="text-xs text-gray-400 hover:text-gray-100 px-2 py-2 border border-gray-800 rounded-lg whitespace-nowrap">
             Recolher tudo
           </button>
         </div>

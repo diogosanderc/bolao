@@ -32,18 +32,40 @@ html.light {
 
   /* Accents tuned for light surfaces (originals are neon-on-dark) */
   --color-yellow-400: #a16207;
-  --color-yellow-300: #a16207;
+  --color-yellow-300: #854d0e;
   --color-green-400: #15803d;
   --color-green-500: #16803c;
+  --color-green-300: #166534;
+  --color-emerald-400: #047857;
   --color-red-400: #dc2626;
   --color-red-300: #b91c1c;
   --color-orange-400: #c2410c;
+  --color-orange-300: #9a3412;
   --color-amber-400: #b45309;
+  --color-amber-300: #92400e;
   --color-blue-400: #2563eb;
   --color-blue-300: #1d4ed8;
   --color-sky-400: #0369a1;
   --color-violet-400: #7c3aed;
   --color-purple-400: #7e22ce;
+
+  /* Dark accent shades used as backgrounds/borders in dark-first components
+     (badges "vivo/eliminado", pills de placar, banners) → pastels on light */
+  --color-green-950: #e3f5ea;
+  --color-green-900: #c5ead3;
+  --color-red-950: #fdeaea;
+  --color-red-900: #f9d4d4;
+  --color-yellow-950: #fbf3d5;
+  --color-yellow-900: #f6e8b5;
+  --color-amber-950: #fbf1dd;
+  --color-amber-900: #f5e3c0;
+  --color-orange-950: #fdefe0;
+  --color-orange-900: #f8ddc0;
+  --color-blue-950: #e8effc;
+  --color-blue-900: #d0e0fa;
+  --color-sky-950: #e3f1fa;
+  --color-violet-950: #f0eafc;
+  --color-purple-950: #f3e9fb;
 }
 
 /* Brand-green icons/text (#00bf63) are too bright on white */

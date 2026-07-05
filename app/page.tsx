@@ -798,7 +798,7 @@ export default function LeaderboardPage() {
         </div>
       )}
 
-      <div className="sticky top-0 z-30 -mx-4 px-4 py-1.5 -my-1.5 bg-gray-950/85 backdrop-blur-md flex items-center justify-between">
+      <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold text-gray-200 dark:text-yellow-400">
           BOLÃO DA COPA 2026
         </h2>
@@ -1544,7 +1544,7 @@ export default function LeaderboardPage() {
                             <div className="flex items-center justify-between gap-3 mb-1.5">
                               <div className="flex flex-wrap gap-1 flex-1">
                                 {names.sort().map(name => (
-                                  <span key={name} title={name} className={`text-xs rounded px-1.5 py-0.5 ${isExact ? 'bg-green-200 text-green-900 dark:bg-green-900/60 dark:text-green-200 font-semibold' : 'bg-gray-800 text-gray-300'}`}>{chipCode(name)}</span>
+                                  <span key={name} title={name} className={`text-xs rounded px-1.5 py-0.5 ${isExact ? 'bg-green-200 text-green-800 dark:bg-green-900/60 dark:text-green-200 font-semibold' : 'bg-gray-800 text-gray-300'}`}>{chipCode(name)}</span>
                                 ))}
                               </div>
                               <div className="shrink-0 text-right">

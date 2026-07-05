@@ -313,7 +313,7 @@ export default function PalpitePage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{data.participant.name}</h2>
+          <h2 className="text-2xl font-bold text-gray-100">{data.participant.name}</h2>
           <div className="flex items-center gap-3 mt-1">
             <div className="w-40 bg-gray-800 rounded-full h-1.5">
               <div className="bg-green-500 h-1.5 rounded-full transition-all"
@@ -322,7 +322,7 @@ export default function PalpitePage() {
             <span className="text-xs text-gray-500">{totalPredicted}/{totalGroupMatches} jogos</span>
           </div>
         </div>
-        <a href="/" className="text-sm text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors">← Classificação</a>
+        <a href="/" className="text-sm text-gray-500 hover:text-gray-100 transition-colors">← Classificação</a>
       </div>
 
       {/* Phase tabs */}
@@ -389,7 +389,7 @@ export default function PalpitePage() {
                             <span className="font-medium text-sm">{row.teamId}</span>
                           </div>
                         </td>
-                        <td className="px-2 py-3 text-center font-bold text-gray-900 dark:text-white">{row.p}</td>
+                        <td className="px-2 py-3 text-center font-bold text-gray-100">{row.p}</td>
                         <td className="px-2 py-3 text-center text-gray-400">{row.j}</td>
                         <td className="px-2 py-3 text-center text-gray-400">{row.v}</td>
                         <td className="px-2 py-3 text-center text-gray-400">{row.e}</td>

@@ -58,12 +58,6 @@ type EstatisticasData = {
   }
 }
 
-const LINE_COLORS = [
-  '#facc15', '#34d399', '#60a5fa', '#f87171', '#a78bfa',
-  '#fb923c', '#38bdf8', '#f472b6', '#4ade80', '#c084fc',
-  '#fbbf24', '#2dd4bf', '#818cf8', '#fb7185', '#86efac',
-]
-
 export default function EstatisticasPage() {
   const [data, setData] = useState<EstatisticasData | null>(null)
   const [loading, setLoading] = useState(true)
@@ -306,8 +300,11 @@ export default function EstatisticasPage() {
               <button
                 key={p.id}
                 onClick={() => toggleParticipant(p.id)}
-                className="text-xs px-3.5 py-1.5 rounded-full border transition-all font-medium inline-flex items-center gap-1.5"
-                style={{ borderColor: LINE_COLORS[i % LINE_COLORS.length], color: LINE_COLORS[i % LINE_COLORS.length], backgroundColor: `${LINE_COLORS[i % LINE_COLORS.length]}20` }}
+                className={`text-xs px-3.5 py-1.5 rounded-full border transition-all font-semibold inline-flex items-center gap-1.5 ${
+                  i === 0
+                    ? 'text-yellow-400 border-yellow-400/60 bg-yellow-400/10'
+                    : 'text-emerald-400 border-emerald-400/60 bg-emerald-400/10'
+                }`}
                 title={`Remover ${p.name}`}
               >
                 {chipCode(p.name)} <Icon name="x" size={11} />
@@ -350,8 +347,8 @@ export default function EstatisticasPage() {
         const s1 = participantStats.find(s => s.id === ids[0])
         const s2 = participantStats.find(s => s.id === ids[1])
         if (!s1 || !s2) return null
-        const c1 = LINE_COLORS[0]
-        const c2 = LINE_COLORS[1]
+        const c1 = 'text-yellow-400'
+        const c2 = 'text-emerald-400'
         const leader = s1.totalPoints > s2.totalPoints ? 0 : s2.totalPoints > s1.totalPoints ? 1 : -1
         // Head-to-head rounds won: who scored more points on each finished game
         let w1 = 0, w2 = 0, ties = 0
@@ -366,15 +363,15 @@ export default function EstatisticasPage() {
         return (
           <div className="border-t border-gray-800">
             <div className="px-4 py-2 text-center text-xs text-gray-500 border-b border-gray-800">
-              Rodadas vencidas: <span style={{ color: c1 }} className="font-bold">{w1}</span>
+              Rodadas vencidas: <span className={`font-bold ${c1}`}>{w1}</span>
               <span className="mx-1">×</span>
-              <span style={{ color: c2 }} className="font-bold">{w2}</span>
+              <span className={`font-bold ${c2}`}>{w2}</span>
               <span className="text-gray-600 ml-1.5">({ties} empates)</span>
             </div>
             <div className="grid grid-cols-2 divide-x divide-gray-800">
               {[{ s: s1, c: c1, win: leader === 0 }, { s: s2, c: c2, win: leader === 1 }].map(({ s, c, win }) => (
                 <div key={s.id} className={`p-4 text-center ${win ? 'bg-green-50 dark:bg-green-950/20' : ''}`}>
-                  <p className="font-bold text-sm mb-3 truncate" style={{ color: c }}>{s.name}</p>
+                  <p className={`font-bold text-sm mb-3 truncate ${c}`}>{s.name}</p>
                   <div className="space-y-2 text-sm">
                     <div className={`text-2xl font-black ${win ? 'text-yellow-600 dark:text-yellow-400' : 'text-gray-300'}`}>{s.totalPoints}<span className="text-xs font-normal text-gray-500 ml-1">pts</span></div>
                     <div className="flex justify-around text-xs text-gray-500 pt-1">
@@ -650,7 +647,7 @@ export default function EstatisticasPage() {
                     return (
                       <div key={pp.matchId} className="px-4 py-3 flex items-center justify-between gap-4">
                         <div className="min-w-0">
-                          <p className="text-sm text-white font-medium truncate">{pp.label}</p>
+                          <p className="text-sm text-gray-100 font-medium truncate">{pp.label}</p>
                           <p className="text-xs text-gray-600 mt-0.5">{pp.dateBRT}</p>
                         </div>
                         <div className="text-right shrink-0">
