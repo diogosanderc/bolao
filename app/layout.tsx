@@ -38,7 +38,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`min-h-screen antialiased ${font.className} ${googleSansVar.variable}`}>
         <script dangerouslySetInnerHTML={{ __html: `if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js')}` }} />
         <PullToRefresh />
-        <main className="max-w-7xl mx-auto px-4 pt-4 pb-28">{children}</main>
+        {/* safe-area top: with viewport-fit=cover the page extends under the iOS status bar */}
+        <main className="max-w-7xl mx-auto px-4 pb-28" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 1rem)' }}>{children}</main>
         <footer className="text-center text-xs text-gray-700 py-4 pb-28">
           Criado por Diogo Sander — 2026
         </footer>
