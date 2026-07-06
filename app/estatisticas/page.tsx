@@ -51,6 +51,7 @@ type EstatisticasData = {
     brazil: { id: string; name: string; braAvg: number; otherAvg: number; diff: number; braGames: number }[]
     nearMiss: { id: string; name: string; count: number; ptsLost: number }[]
     titleRace: { id: string; name: string; points: number; gap: number; maxPossible: number; canReach: boolean }[]
+    g7Race?: { id: string; name: string; points: number; inG7: boolean; gap: number; maxPossible: number; canReach: boolean }[]
     redZone?: { id: string; name: string; pos: number; points: number; status: string; gapToEscape: number }[]
     remainingMatches: number
     boldHits: { id: string; name: string; count: number; examples: string[] }[]
@@ -70,7 +71,7 @@ export default function EstatisticasPage() {
   const [scenarioRows, setScenarioRows] = useState<{ id: string; name: string; current: number; min: number; max: number }[]>([])
   const [scenarioLoading, setScenarioLoading] = useState(false)
   const [scenarioShowAll, setScenarioShowAll] = useState(false)
-  const [odds, setOdds] = useState<Map<string, { championPct: number; redZonePct: number }> | null>(null)
+  const [odds, setOdds] = useState<Map<string, { championPct: number; redZonePct: number; top7Pct?: number }> | null>(null)
 
   useEffect(() => {
     fetch('/api/champion-scenario')
@@ -80,7 +81,7 @@ export default function EstatisticasPage() {
     fetch('/api/odds')
       .then(r => r.json())
       .then(d => {
-        if (d.ready && d.rows) setOdds(new Map(d.rows.map((r: any) => [r.id, { championPct: r.championPct, redZonePct: r.redZonePct }])))
+        if (d.ready && d.rows) setOdds(new Map(d.rows.map((r: any) => [r.id, { championPct: r.championPct, redZonePct: r.redZonePct, top7Pct: r.top7Pct }])))
       })
       .catch(() => {})
   }, [])
@@ -510,6 +511,31 @@ export default function EstatisticasPage() {
                 </div>
               </Section>
             )}
+
+            {ex.g7Race && ex.g7Race.length > 0 && (() => {
+              const inCount = ex.g7Race!.filter(g => g.inG7).length
+              const stillCan = ex.g7Race!.filter(g => g.canReach).length
+              return (
+                <Section title="Corrida pelo G7" icon="medal" subtitle={`${inCount} no G7 agora · ${stillCan} de ${ex.g7Race!.length} ainda alcançam os 7 primeiros${odds ? ' · % = chance de terminar no G7' : ''}`}>
+                  <div className="max-h-72 overflow-y-auto">
+                    {ex.g7Race!.map((g, i) => (
+                      <Row key={g.id} pos={i + 1} name={g.name} right={
+                        <span className="text-xs">
+                          {odds?.get(g.id)?.top7Pct !== undefined && (
+                            <span className={`font-bold mr-2 ${(odds.get(g.id)!.top7Pct!) >= 50 ? 'text-green-500' : 'text-gray-400'}`}>{odds.get(g.id)!.top7Pct}%</span>
+                          )}
+                          {g.inG7
+                            ? <span className="text-[10px] font-bold text-green-500 bg-green-950/50 border border-green-900 rounded-full px-2 py-0.5">no G7</span>
+                            : g.canReach
+                              ? <span className="text-gray-500">-{g.gap} pts · máx <span className="text-green-500 font-bold">{g.maxPossible}</span></span>
+                              : <span className="text-red-500/70 font-bold">fora</span>}
+                        </span>
+                      } />
+                    ))}
+                  </div>
+                </Section>
+              )
+            })()}
 
             {ex.redZone && ex.redZone.length > 0 && (
               <Section title="Disputa da Zona Vermelha" icon="alert" subtitle={`Os 7 últimos (pagões) e os 2 em alerta logo acima${odds ? ' · % = risco de terminar na zona (3.000 simulações)' : ''}`}>

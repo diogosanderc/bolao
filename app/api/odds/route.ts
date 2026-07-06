@@ -112,6 +112,7 @@ export async function GET() {
 
     const champCount = new Array(P).fill(0)
     const redCount = new Array(P).fill(0)
+    const top7Count = new Array(P).fill(0)
 
     for (let sim = 0; sim < N_SIMS; sim++) {
       const pts = participants.map(p => basePts.get(p.id) ?? 0)
@@ -168,6 +169,7 @@ export async function GET() {
 
       const order = pts.map((v, i) => [v, i] as const).sort((a, b) => a[0] - b[0])
       for (let k = 0; k < Math.min(7, P); k++) redCount[order[k][1]]++
+      for (let k = P - 1; k >= Math.max(0, P - 7); k--) top7Count[order[k][1]]++
     }
 
     const rows = participants.map((p, i) => ({
@@ -175,6 +177,7 @@ export async function GET() {
       name: p.name,
       championPct: Math.round((champCount[i] / N_SIMS) * 1000) / 10,
       redZonePct: Math.round((redCount[i] / N_SIMS) * 1000) / 10,
+      top7Pct: Math.round((top7Count[i] / N_SIMS) * 1000) / 10,
     }))
 
     const data = { ready: true, sims: N_SIMS, remaining: remaining.length, rows }

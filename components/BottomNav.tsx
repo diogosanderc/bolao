@@ -187,7 +187,12 @@ export function BottomNav() {
     <>
       {/* Overlay behind drawer (z-[45] covers the nav bar at z-40) */}
       {moreOpen && (
-        <div className="fixed inset-0 z-[45]" onClick={() => setMoreOpen(false)} />
+        <div
+          className="fixed inset-0 z-[45] bg-black/30 cursor-pointer animate-fade-in"
+          onClick={() => setMoreOpen(false)}
+          onTouchStart={() => setMoreOpen(false)}
+          aria-hidden="true"
+        />
       )}
 
       {/* Slide-up drawer — bottom-0 so translate-y-full hides it fully off-screen */}

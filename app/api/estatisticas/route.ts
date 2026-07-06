@@ -336,6 +336,21 @@ export async function GET() {
       }
     })
 
+    // G7 race: gap to the 7th place and whether each participant can still reach the top 7
+    const seventhPts = finalLb.length >= 7 ? finalLb[6].totalPoints : 0
+    const g7Race = finalLb.map(e => {
+      const rank = finalLb.filter(x => x.totalPoints > e.totalPoints).length + 1
+      const maxPossible = e.totalPoints + remainingMatches * 8
+      return {
+        id: e.participant.id, name: e.participant.name,
+        points: e.totalPoints,
+        inG7: rank <= 7,
+        gap: Math.max(0, seventhPts - e.totalPoints),
+        maxPossible,
+        canReach: rank <= 7 || maxPossible >= seventhPts,
+      }
+    })
+
     // Red zone dispute: the bottom 7 (zona) plus the 2 above (alerta), with the
     // gap each needs to close to escape (points of the first participant outside the zone)
     const N = finalLb.length
@@ -383,6 +398,7 @@ export async function GET() {
         .sort((a, b) => b.diff - a.diff),
       nearMiss: top(nearAcc, v => v.count).map(x => ({ id: x.id, name: x.name, count: (x.v as any).count, ptsLost: (x.v as any).ptsLost })),
       titleRace,
+      g7Race,
       redZone,
       remainingMatches,
       boldHits: top(rareAcc, v => v.count, 5).map(x => ({ id: x.id, name: x.name, count: (x.v as any).count, examples: (x.v as any).examples })),
