@@ -134,9 +134,9 @@ export default function SimuladorPage() {
   const uniquePoints = [...new Set(leaderboard.map(e => e.totalPoints))].sort((a, b) => b - a)
   const tierOf = (pts: number) => uniquePoints.indexOf(pts) + 1
   const trophies: Record<number, ReactNode> = {
-    1: <Icon name="medal" size={15} className="text-yellow-500 inline" />,
-    2: <Icon name="medal" size={15} className="text-gray-400 inline" />,
-    3: <Icon name="medal" size={15} className="text-amber-600 inline" />,
+    1: <Icon name="medal" size={15} className="text-green-600 dark:text-yellow-500 inline" />,
+    2: <Icon name="medal" size={15} className="text-green-600 dark:text-gray-400 inline" />,
+    3: <Icon name="medal" size={15} className="text-green-600 dark:text-amber-600 inline" />,
   }
 
   const knockoutMatches = (phaseKey: PhaseKey) =>
@@ -388,9 +388,9 @@ export default function SimuladorPage() {
                       <tr
                         key={entry.participant.id}
                         className={`text-xs transition-colors ${
-                          tier === 1 ? 'bg-yellow-100 dark:bg-yellow-950/40' :
-                          tier === 2 ? 'bg-gray-800/30' :
-                          tier === 3 ? 'bg-orange-50 dark:bg-orange-950/30' : ''
+                          tier === 1 ? 'bg-green-50 dark:bg-yellow-950/40' :
+                          tier === 2 ? 'bg-green-50 dark:bg-gray-800/30' :
+                          tier === 3 ? 'bg-green-50 dark:bg-orange-950/30' : ''
                         }`}
                       >
                         <td className="px-3 py-1.5 text-center font-bold">

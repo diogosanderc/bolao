@@ -282,9 +282,9 @@ export default function LeaderboardPage() {
   }
 
   const trophies: Record<number, ReactNode> = {
-    1: <Icon name="medal" size={16} className="inline text-yellow-500" />,
-    2: <Icon name="medal" size={16} className="inline text-gray-400" />,
-    3: <Icon name="medal" size={16} className="inline text-amber-600" />,
+    1: <Icon name="medal" size={16} className="inline text-green-600 dark:text-yellow-500" />,
+    2: <Icon name="medal" size={16} className="inline text-green-600 dark:text-gray-400" />,
+    3: <Icon name="medal" size={16} className="inline text-green-600 dark:text-amber-600" />,
   }
 
   const uniquePoints = [...new Set(data.map(e => e.totalPoints))].sort((a, b) => b - a)
@@ -1218,12 +1218,12 @@ export default function LeaderboardPage() {
                   className={`cursor-pointer transition-colors ${rowsIn ? 'animate-row-in' : ''} ${
                     isRelated(entry.totalPoints) ? 'bg-red-50 hover:bg-red-100 dark:bg-red-950/50 dark:hover:bg-red-950/70' :
                     isWarning(entry.totalPoints) ? 'bg-yellow-50 hover:bg-yellow-100 dark:bg-yellow-950/20 dark:hover:bg-yellow-950/30' :
-                    tier === 1 ? 'bg-yellow-100 hover:bg-yellow-200 dark:bg-yellow-950/40 dark:hover:bg-yellow-950/60' :
-                    tier === 2 ? 'bg-gray-800/30 hover:bg-gray-800/60' :
-                    tier === 3 ? 'bg-orange-50 hover:bg-orange-100 dark:bg-orange-950/30 dark:hover:bg-orange-950/50' :
+                    tier === 1 ? 'bg-green-50 hover:bg-green-100 dark:bg-yellow-950/40 dark:hover:bg-yellow-950/60' :
+                    tier === 2 ? 'bg-green-50 hover:bg-green-100 dark:bg-gray-800/30 dark:hover:bg-gray-800/60' :
+                    tier === 3 ? 'bg-green-50 hover:bg-green-100 dark:bg-orange-950/30 dark:hover:bg-orange-950/50' :
                     (rank >= 4 && rank <= 7) ? 'bg-green-50 hover:bg-green-100 dark:bg-green-950/40 dark:hover:bg-green-950/60' :
                     (idx % 2 === 1 ? 'bg-gray-900/40 hover:bg-gray-900/70' : 'hover:bg-gray-900/50')
-                  } ${rank === 1 ? 'shadow-[inset_3px_0_0_0_#facc15]' : ''} ${isMe ? 'shadow-[inset_3px_0_0_0_#00bf63] ring-1 ring-inset ring-[#00bf63]/40' : ''} ${flash === 'up' ? 'animate-flash-up' : flash === 'down' ? 'animate-flash-down' : ''}`}
+                  } ${rank === 1 ? 'shadow-[inset_3px_0_0_0_#16a34a] dark:shadow-[inset_3px_0_0_0_#facc15]' : ''} ${isMe ? 'shadow-[inset_3px_0_0_0_#00bf63] ring-1 ring-inset ring-[#00bf63]/40' : ''} ${flash === 'up' ? 'animate-flash-up' : flash === 'down' ? 'animate-flash-down' : ''}`}
                 >
                   <td className="pl-2 pr-1 py-3 text-center font-bold">
                     {isRelated(entry.totalPoints)
@@ -1238,9 +1238,9 @@ export default function LeaderboardPage() {
                   <td className={`px-1 py-3 font-semibold ${
                     isRelated(entry.totalPoints) ? 'text-red-700 dark:text-red-300' :
                     isWarning(entry.totalPoints) ? 'text-yellow-600 dark:text-yellow-400' :
-                    tier === 1 ? 'text-yellow-700 dark:text-yellow-300' :
-                    tier === 2 ? 'text-gray-300' :
-                    tier === 3 ? 'text-amber-600' :
+                    tier === 1 ? 'text-green-700 dark:text-yellow-300' :
+                    tier === 2 ? 'text-green-700 dark:text-gray-300' :
+                    tier === 3 ? 'text-green-700 dark:text-amber-600' :
                     (rank >= 4 && rank <= 7) ? 'text-green-600 dark:text-green-400' :
                     ''
                   }`}>
